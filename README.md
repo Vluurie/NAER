@@ -56,4 +56,4 @@ I would like to extend my sincere thanks to Arthur Heitmann for developing the N
 
 ---
 
-
+![grafik](https://github.com/Vluurie/NAER/assets/145698737/8e90f6fd-0672-41dd-9337-6930e623b40f)
