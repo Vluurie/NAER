@@ -27,7 +27,7 @@ The NAER is a tool designed to randomize enemy placements in NieR:Automata, offe
 
 ### Preparing the Tool
 1. **Input Folder**: Select a folder containing NieR:Automata `.cpk` files (e.g., `data002.cpk`, `data012.cpk`, and `data100.cpk`).
-2. **### Output Directory
+2. **Output Directory**:
 Select the `data` folder within your NieR:Automata installation as the output directory. This tool is adept at managing existing `.dat` mods in this directory. Any detected mods will be automatically excluded from the randomization process to prevent conflicts. Additionally, the tool generates `.json` files, capturing pre-randomization and most recent usage timestamps. This feature helps track when the last randomization occurred, ensuring a smoother user experience.
 
 
