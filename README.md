@@ -4,10 +4,6 @@
 
 The NAER is a tool designed to randomize enemy placements in NieR:Automata, offering a fresh and unpredictable gameplay experience. It is developed using Dart and Python and utilizes the [NieR CLI](https://github.com/ArthurHeitmann/nier_cli) by Arthur Heitmann, which has been instrumental in the development of this tool.
 
-## Special Thanks
-
-I would like to extend my sincere thanks to Arthur Heitmann for developing the NieR CLI, and for his valuable assistance in resolving some of the issues I faced during the development of NAER. His contributions have been greatly appreciated.
-
 
 ## Installation and Setup
 
@@ -48,6 +44,10 @@ I would like to extend my sincere thanks to Arthur Heitmann for developing the N
 ## Note
 
 - **Testing**: This tool has been primarily tested in early game scenarios. For any issues, report them in the NieR:Automata Modding Discord.
+
+## Special Thanks
+
+I would like to extend my sincere thanks to Arthur Heitmann for developing the NieR CLI, and for his valuable assistance in resolving some of the issues I faced during the development of NAER. His contributions have been greatly appreciated.
 
 ---
 
