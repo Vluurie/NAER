@@ -1,37 +1,49 @@
-# NAER
-NieR:Automata Enemy Randomizer Tool
+# NAER - NieR:Automata Enemy Randomizer Tool
 
-This Tool randomizes the Enemys in NieR:Automata.
+## Overview
 
-How to install/use?
+The NAER is a tool designed to randomize enemy placements in NieR:Automata, offering a fresh and unpredictable gameplay experience. It is developed using Dart and Python.
 
-1. Download the repository.
-2. Download the Dart SDK or Flutter https://docs.flutter.dev/get-started/install , since this tool was writen in Dart and uses the NieR CLI: https://github.com/ArthurHeitmann/nier_cli
-3. Download and Install Python since the GUI was writen in Python: https://www.python.org/downloads/
-4. Now u need to update the dependencies for the Dart files, open a Terminal in the repository Folder and use: flutter pub get
-5. If u got an issue that a python dependency is outdated or missing, open Windows Powershell and use: pip freeze | %{$_.split('==')[0]} | %{pip install --upgrade $_}
-6. Start the NierAutomataEnemyRandomizer.py in  the lib folder.
-7. Done
+## Installation and Setup
 
-How to use?
+### Prerequisites
+1. **Dart SDK or Flutter**: Required for Dart-based operations. Install from [Flutter Installation Guide](https://docs.flutter.dev/get-started/install).
+2. **Python**: Necessary for the GUI component. Download and install from [Python Official Downloads](https://www.python.org/downloads/).
 
-1. Choose ur Input Folder, this Folder needs to have .cpk files from NieR:Automata (best practice is to copy the 3 .cpk's needed data002.cpk, data012.cpk and data100.cpk into a single Folder.
-2. Choose ur Output Directory, this Folder needs to be the data folder of NieR:Automata.
+### Steps
+1. **Clone the Repository**: Download the NAER tool repository.
+2. **Dart Dependencies**: In the repository directory, open a terminal and execute:
+   
+   flutter pub get
+   
+4. **Python Dependencies**: If any Python dependencies are outdated or missing, run the following in Windows Powershell:
+   
+   pip freeze | %{$.split('==')[0]} | %{pip install --upgrade $}
 
-   Selecting an Enemy means that all enemies in NieR:Automata will be changed to this selected Enemy.
-   If u select more than one Enemy, this Enemys will be used to change all Enemies randomly to the selected Enemies.
-   The Tool knows what are Fly and what are Ground Enemies. It will only change Fly enemies with Fly enemies, same with Ground Enemies.
+4. **Launch the Tool**: Start `NierAutomataEnemyRandomizer.py` located in the lib folder.
 
-   If u select nothing and directly click on "Start Randomizing", the tool uses every Enemy in the List for Randomizing.
+## Usage Instructions
 
-   U can also say to only randomize Quests, Maps or the Game Phases.
+### Preparing the Tool
+1. **Input Folder**: Select a folder containing NieR:Automata `.cpk` files (e.g., `data002.cpk`, `data012.cpk`, and `data100.cpk`).
+2. **Output Directory**: Choose the `data` folder of NieR:Automata for output.
+
+### Randomization Options
+- **Single Enemy Selection**: Replaces all enemies with the selected one.
+- **Multiple Enemies Selection**: Randomly swaps enemies using the selected types.
+- **Enemy Types**: The tool distinguishes between flying and ground enemies for appropriate replacements.
+- **Full Randomization**: With no specific selections, the tool randomizes using all available enemies.
+- **Selective Randomization**: Options to randomize specific aspects such as quests, maps, or game phases.
+
+## Limitations
+
+- **Alias-Tagged Enemies**: The tool doesn't change enemies with alias tags having specific values, as it might break the script logic.
+- **Bosses**: Boss enemies are not altered, allowing normal game progression. These are listed under the "Delete" group in `sorted_enemy.dart` and are excluded from randomization.
+
+## Note
+
+- **Testing**: This tool has been primarily tested in early game scenarios. For any issues, report them in the NieR:Automata Modding Discord.
+
+---
 
 
-What the Tool not does.
-
-The Tool does not change enemies that have an alias with value. Alias tags can have hardcoded scripting specified for the Enemy. Changing the Enemy breaks the Script Logic of some that got Alias Values.
-The Tool does not change Bosses so u can completly normally play the Game but still having different Enemies. It uses a Group Called "Delete" in sorted_enemy.dart. This Enemies will be ignored during Randomization.
-
-Note:
-
-This Tool with the Enemies was tested mostly on start of the Game and not on every scenario, of there are issues feel free to report in the NieR:automata Modding Discord.
