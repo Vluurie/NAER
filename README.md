@@ -14,11 +14,11 @@ The NAER is a tool designed to randomize enemy placements in NieR:Automata, offe
 1. **Clone the Repository**: Download the NAER tool repository.
 2. **Dart Dependencies**: In the repository directory, open a terminal and execute:
    
-   flutter pub get
+   ```flutter pub get```
    
 4. **Python Dependencies**: If any Python dependencies are outdated or missing, run the following in Windows Powershell:
    
-   pip freeze | %{$.split('==')[0]} | %{pip install --upgrade $}
+   ```pip freeze | %{$.split('==')[0]} | %{pip install --upgrade $}```
 
 4. **Launch the Tool**: Start `NierAutomataEnemyRandomizer.py` located in the lib folder.
 
