@@ -85,8 +85,8 @@ const Map<String, List<String>> enemyData = {
     "em4010",
     "em0115",
     "em5200",
-    "em7001"
-        "em8001",
+    "em7001",
+    "em8001",
     "em2000",
     "em0074",
     "emb090",
