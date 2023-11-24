@@ -1,97 +1,37 @@
-# Nier CLI (for MGRR)
+# NAER
+NieR:Automata Enemy Randomizer Tool
 
-An all in one tool for converting all sorts of files from MGRR. Originally made for Nier Automata.
+This Tool randomizes the Enemys in NieR:Automata.
 
-## Supported files
+How to install/use?
 
-|            | Extracting | Repacking |
-|------------|------------|-----------|
-| CPK        | ✅          | ❌         |
-| DAT        | ✅          | ✅         |
-| BXM        | ✅          | ✅         |
-| WTA        | ✅          | ✅         |
-| WTB        | ✅          | ✅         |
-| WTP        | ✅          | ❌         |
-| BNK        | ✅          | ✅         |
-| WEM/WAV    | ✅          | ✅         |
+1. Download the repository.
+2. Download the Dart SDK or Flutter https://docs.flutter.dev/get-started/install , since this tool was writen in Dart and uses the NieR CLI: https://github.com/ArthurHeitmann/nier_cli
+3. Download and Install Python since the GUI was writen in Python: https://www.python.org/downloads/
+4. Now u need to update the dependencies for the Dart files, open a Terminal in the repository Folder and use: flutter pub get
+5. If u got an issue that a python dependency is outdated or missing, open Windows Powershell and use: pip freeze | %{$_.split('==')[0]} | %{pip install --upgrade $_}
+6. Start the NierAutomataEnemyRandomizer.py in  the lib folder.
+7. Done
 
-## Download
+How to use?
 
-Download the latest version from the [releases section](https://github.com/ArthurHeitmann/nier_cli/releases)
+1. Choose ur Input Folder, this Folder needs to have .cpk files from NieR:Automata (best practice is to copy the 3 .cpk's needed data002.cpk, data012.cpk and data100.cpk into a single Folder.
+2. Choose ur Output Directory, this Folder needs to be the data folder of NieR:Automata.
 
-## Usage
+   Selecting an Enemy means that all enemies in NieR:Automata will be changed to this selected Enemy.
+   If u select more than one Enemy, this Enemys will be used to change all Enemies randomly to the selected Enemies.
+   The Tool knows what are Fly and what are Ground Enemies. It will only change Fly enemies with Fly enemies, same with Ground Enemies.
 
-### Drag & Drop
+   If u select nothing and directly click on "Start Randomizing", the tool uses every Enemy in the List for Randomizing.
 
-https://user-images.githubusercontent.com/37270165/218335861-c6fd2c0c-9b28-49dc-a124-1919314af7a8.mp4
+   U can also say to only randomize Quests, Maps or the Game Phases.
 
-### Command line
 
-#### Examples
+What the Tool not does.
 
-Unpack CPK file to specific destination
-```bat
-nier_cli "G:\Games\steamapps\common\NieRAutomata\data\data100.cpk" -o "D:\modding\na\data100.cpk_unpacked"
-```
+The Tool does not change enemies that have an alias with value. Alias tags can have hardcoded scripting specified for the Enemy. Changing the Enemy breaks the Script Logic of some that got Alias Values.
+The Tool does not change Bosses so u can completly normally play the Game but still having different Enemies. It uses a Group Called "Delete" in sorted_enemy.dart. This Enemies will be ignored during Randomization.
 
-Unpack several CPK files and also unpack all DAT files and all their children
-```bat
-nier_cli "G:\Games\steamapps\common\NieRAutomata\data\data015.cpk" "G:\Games\steamapps\common\NieRAutomata\data\data100.cpk" --autoExtractChildren
-```
+Note:
 
-#### Full explanation
-
-```
-nier_cli <input1> [input2] [input...] [options]
-  or
-nier_cli <input> -o <output> [options]
-
-Options:
--o, --output                 Output file or folder
-
-Extraction Options:
-    --folder                 Extract all files in a folder
--r, --recursive              Extract all files in a folder and all subfolders
-    --autoExtractChildren    When unpacking DAT, CPK, PAK, etc. files automatically process all extracted files
-
-WAV to WEM Conversion Options:
-    --wwiseCli               Path to WwiseCLI.exe
-    --wemBGM                 Use music/BGM settings
-    --wemVolNorm             Enable volume normalization
-
-Extraction filters:
-    --CPK                    Only extract CPK files
-    --DAT                    Only extract DAT files
-    --PAK                    Only extract PAK files
-    --BXM                    Only extract BXM files
-    --YAX                    Only extract YAX files
-    --RUBY                   Only extract RUBY files
-    --WTA                    Only extract WTA files
-    --WTP                    Only extract WTP files
-    --BNK                    Only extract BNK files
-    --WEM                    Only extract WEM files
--h, --help                   Print this help message
-```
-
-### Config files
-
-You can also save your most used parameters in the `config.txt` file. Each line is one parameter. You can find examples and presets in the `configExamples\config_XYZ.txt` files.
-
-## Building (for developers)
-
-0. Install the Dart SDK (it's already included in the Flutter SDK)
-
-1. Download git submodules with
-	```bat
-	git submodule update --init
-	```
-
-3. Update dependencies with
-   ```bat
-   flutter pub get
-   ```
-
-4. Build with
-	```bat
-	dart compile exe bin\nier_cli.dart 
-	```
+This Tool with the Enemies was tested mostly on start of the Game and not on every scenario, of there are issues feel free to report in the NieR:automata Modding Discord.
