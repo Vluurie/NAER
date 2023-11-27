@@ -233,6 +233,11 @@ Future<void> main(List<String> arguments) async {
       }
     }
   }
+  await deleteFolders(output, [
+    'data002.cpk_extracted',
+    'data012.cpk_extracted',
+    'data100.cpk_extracted'
+  ]);
   print("Randomizing complete");
 }
 
@@ -270,4 +275,19 @@ Future<List<String>> readConfig() async {
       .where((e) => e.isNotEmpty && !e.startsWith("#"))
       .toList();
   return args;
+}
+
+Future<void> deleteFolders(
+    String directoryPath, List<String> folderNames) async {
+  for (var folderName in folderNames) {
+    var folderPath = Directory(join(directoryPath, folderName));
+    if (await folderPath.exists()) {
+      try {
+        await folderPath.delete(recursive: true);
+        print('Deleted folder: $folderName');
+      } catch (e) {
+        print('Error deleting folder $folderName: $e');
+      }
+    }
+  }
 }
