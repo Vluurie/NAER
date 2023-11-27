@@ -6,8 +6,9 @@ The NAER is a tool designed to randomize enemy placements in NieR:Automata, offe
 
 ![grafik](https://github.com/Vluurie/NAER/assets/145698737/6ab29fec-4f7c-47e9-a766-e64d061d0c11)
 
+You can use the executable, if not, here is the Guide to use it not compiled.
 
-## Installation and Setup
+## Installation and Setup for Developer
 
 ### Prerequisites
 1. **Dart SDK or Flutter**: Required for Dart-based operations. Install from [Flutter Installation Guide](https://docs.flutter.dev/get-started/install).
