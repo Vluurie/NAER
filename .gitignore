@@ -70,5 +70,6 @@ bin/*.exe
 
 bin/*.7z
 bin/*.zip
-
 lib/tmp*
+dist
+NierAutomataEnemyRandomizer.spec

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import json
 import os
 import re
+import shutil
 import sys
 import subprocess
 import tempfile
@@ -35,6 +36,7 @@ class EnemyRandomizerApp(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.createdFolders = []
         self.selectedImages = []
         self.initUI()
 
@@ -63,6 +65,16 @@ class EnemyRandomizerApp(QWidget):
             QPushButton:hover {
                 background-color: #0056b3;
             }
+            QPushButton#undoButton {
+                background-color: #ff6347; /* Tomato color */
+                color: white;
+                border-radius: 4px;
+                padding: 6px;
+                font-weight: bold;
+            }
+            QPushButton#undoButton:hover {
+                background-color: #ff4500; /* OrangeRed color */
+            }
             QLabel, QLineEdit, QTextEdit {
                 border: 1px solid #ddd;
                 padding: 4px;
@@ -87,13 +99,52 @@ class EnemyRandomizerApp(QWidget):
         self.setupDirectorySelection(mainLayout)
         self.setupImageGrid(mainLayout)
         self.setupLogOutput(mainLayout)
-        self.setupStartButton(mainLayout)
+        self.setupButtons(mainLayout)
+        self.setupCategorySelection(mainLayout)
+
+    def setupButtons(self, layout):
+        # Horizontal layout for buttons
+        buttonLayout = QHBoxLayout()
+
+        # Unselect All Button
         self.unselectAllButton = QPushButton('Unselect All Enemies', self)
         self.unselectAllButton.clicked.connect(self.unselectAllImages)
-        mainLayout.addWidget(self.unselectAllButton)
-        self.setupCategorySelection(mainLayout)
+        buttonLayout.addWidget(self.unselectAllButton)
+
+        # Start Button
+        self.startButton = QPushButton('Start Randomizing', self)
+        self.startButton.clicked.connect(self.startRandomizing)
+        buttonLayout.addWidget(self.startButton)
+
+        # Undo Button
+        self.undoButton = QPushButton('Undo Last Randomization', self)
+        self.undoButton.setObjectName("undoButton")
+        self.undoButton.clicked.connect(self.undoLastRandomization)
+        buttonLayout.addWidget(self.undoButton)
+
+        layout.addLayout(buttonLayout)
         
 
+    def undoLastRandomization(self):
+        reply = QMessageBox.question(self, 'Confirm Undo', 
+                                     "Are you sure you want to undo the last randomization?",
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            try:
+                for folder in self.createdFolders:
+                    full_path = os.path.normpath(os.path.join(self.specialDatOutputPath, folder))
+
+                    if os.path.isdir(full_path):
+                        shutil.rmtree(full_path)  # Removes directory and all its contents
+                    elif os.path.isfile(full_path):
+                        os.remove(full_path)  # Removes a single file
+
+                QMessageBox.information(self, "Undo Successful", "Last randomization has been undone.", QMessageBox.Ok)
+                self.createdFolders.clear()  # Clear the list after undoing
+            except Exception as e:
+                QMessageBox.warning(self, "Undo Failed", str(e), QMessageBox.Ok)
+        else:
+            print("Undo cancelled.")
 
     def unselectAllImages(self):
         self.selectedImages.clear()
@@ -284,10 +335,14 @@ class EnemyRandomizerApp(QWidget):
 
     def updateLog(self, log):
         self.logOutput.append(log)
-        if "Randomizing complete" in log:
+        if "Folder created:" in log:
+            folder_name = log.split("Folder created:")[-1].strip()
+            self.createdFolders.append(folder_name)
+        elif "Randomizing complete" in log:
             self.startButton.setEnabled(True)
             self.startButton.setText("Start Randomizing")
             self.showCompletionMessage()
+
 
     def showCompletionMessage(self):
         msgBox = QMessageBox()

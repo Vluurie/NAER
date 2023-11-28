@@ -227,6 +227,7 @@ Future<void> main(List<String> arguments) async {
         var datSubFolder = getDatFolder(baseName);
         var datOutput = join(output, datSubFolder, baseName);
         await handleInput(datFolder, datOutput, options, [], processedFiles);
+        print("Folder created: ${datOutput}");
       } catch (e) {
         print("Failed to process DAT folder");
         print(e);

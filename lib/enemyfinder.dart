@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'dart:math';
 import 'package:xml/xml.dart' as xml;
 
@@ -67,25 +66,17 @@ void find(String directoryPath, Map<String, List<String>> sortedEnemyData) {
     print('Directory exists. Starting to process...');
   }
 
-  final File outputFile = File('output.json');
   List<Map<String, dynamic>> findings = [];
   int fileCount = 0;
   final stopwatch = Stopwatch()..start();
 
   print('Starting directory traversal...');
   fileCount = traverseDirectory(directory, findings, sortedEnemyData);
-  findings.sort((a, b) => a['objId'].compareTo(b['objId']));
-  findings.sort((a, b) => compareFilePaths(a['file'], b['file']));
 
   stopwatch.stop();
   print('Traversal complete. Processed $fileCount files.');
   print('Time taken: ${stopwatch.elapsed}');
   print('Total number of enemies found: $enemyCount');
-
-  print('Writing data to JSON file...');
-  const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-  outputFile.writeAsStringSync(encoder.convert(findings));
-  print('Analysis complete. Data written to ${outputFile.path}');
 }
 
 int traverseDirectory(Directory directory, List<Map<String, dynamic>> findings,
