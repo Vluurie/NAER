@@ -9,12 +9,16 @@ NAER, the ultimate enemy randomization tool designed to enhance your gaming expe
 
 ## Features
 
-- **Enemy Randomization**: Shake things up by randomizing enemies across different maps, phases, and quests.
+- **Enemy Randomization**: Shake things up by randomizing enemies.
 - **Level Modification**: Tailor the game's difficulty by adjusting the levels of bosses, selected enemies, or all enemies.
 - **Selective Randomization**: Have full control with the ability to choose specific categories for randomization, including all maps, all phases, all quests, and an option to exclude DLC content.
-- **Custom Enemy Selection**: Craft a personalized experience by handpicking the enemies you wish to encounter.
-- **Undo Functionality**: Effortlessly revert back to the previous randomization setting whenever you desire.
+- **Custom Enemy Selection**: Craft a personalized experience by handpicking the enemies you wish to encounter. You can even select just one enemy that replaces all other enemies in the game to this selected one.
+- **Undo Functionality**: Revert back to the default setting when the Tool is still open.
 - **User-Interface**: Enjoy a straightforward and intuitive user interface for a hassle-free configuration process.
+
+  Note: Bosses and Alias Tagged Enemies who are needed for the Game Logic are not altered. So u can play normally the story.
+  For now it was tested mostly for the complete prolouge.
+  Big enemies in small places can bug, this is totally normal.
 
 ## Installation for Users
 
