@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:nier_cli/CliOptions.dart';
-import 'package:nier_cli/exception.dart';
-import 'package:nier_cli/fileTypeHandler.dart';
-import 'package:nier_cli/utils.dart';
+import '../lib/utils/CliOptions.dart';
+import '../lib/utils/exception.dart';
+import '../lib/utils/fileTypeHandler.dart';
+import '../lib/utils/utils.dart';
 import 'package:path/path.dart';
-import '../lib/enemyfinder.dart';
+import '../lib/naerServices/enemyfinder.dart';
 
 Future<void> main(List<String> arguments) async {
   var t1 = DateTime.now();
@@ -43,6 +43,8 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag("allmaps",
       help: "Randomize all maps", negatable: false, defaultsTo: false);
   argParser.addFlag("allphases",
+      help: "Randomize the DLC", negatable: false, defaultsTo: false);
+  argParser.addFlag("ignoredlc",
       help: "Randomize all phases", negatable: false, defaultsTo: false);
   argParser.addOption("ignore",
       help: "List of files to ignore during repacking");
@@ -55,13 +57,14 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag("WTA", help: "Only extract WTA files", negatable: false);
   argParser.addFlag("WTP", help: "Only extract WTP files", negatable: false);
   argParser.addFlag("BNK", help: "Only extract BNK files", negatable: false);
+  argParser.addOption("level", help: "Specify the enemy level");
+  argParser.addOption("category", help: "Specify the enemy category");
   argParser.addOption("specialDatOutput",
       help: "Special output directory for DAT files");
   argParser.addFlag("WEM", help: "Only extract WEM files", negatable: false);
   argParser.addFlag("help",
       abbr: "h", help: "Print this help message", negatable: false);
   var args = argParser.parse(arguments);
-  print("Parsed args: $args");
 
   if (arguments.length < 1 || args["help"] == true) {
     printHelp(argParser);
@@ -115,6 +118,9 @@ Future<void> main(List<String> arguments) async {
   bool randomizeAllMaps = args["allmaps"];
   bool randomizeAllPhases = args["allphases"];
   List<String> ignoreList = args["ignore"]?.split(',') ?? [];
+  String enemyLevel = args["level"];
+  String enemyCategory = args["category"];
+  bool ignoredlc = args["ignoredlc"];
 
 //-------------------------------------------------------------------
 
@@ -180,7 +186,8 @@ Future<void> main(List<String> arguments) async {
       "in ${timeStr(tD)} "
       ":D");
   print("Calling enemy find script...");
-  findEnemiesInDirectory(currentDir, sortedEnemiesPath);
+  findEnemiesInDirectory(
+      currentDir, sortedEnemiesPath, enemyLevel, enemyCategory);
   // Process YAX and PAK files
   var xmlFiles = yaxFiles.map((e) => e.replaceAll('.yax', '.xml'));
   var entitiesToProcess = xmlFiles.followedBy(pakFolders);
@@ -198,26 +205,40 @@ Future<void> main(List<String> arguments) async {
     var baseName = basename(datFolder); // This is the file name
     bool processFile = false;
 
+    // Check if the file should be ignored due to 'ignoredlc'
+    if (ignoredlc &&
+        (baseName.startsWith('q085') ||
+            baseName.startsWith('q086') ||
+            baseName.startsWith('q090') ||
+            baseName.startsWith('q091') ||
+            baseName.startsWith('q092') ||
+            baseName.startsWith('q095') ||
+            baseName.startsWith('q060') ||
+            baseName.startsWith('qa60') ||
+            baseName.startsWith('qa61') ||
+            baseName.startsWith('qa62') ||
+            baseName.startsWith('qa63') ||
+            baseName.startsWith('qa64') ||
+            baseName.startsWith('qc50') ||
+            baseName.startsWith('r5a8') ||
+            baseName.startsWith('r5a9') ||
+            baseName.startsWith('r5aa') ||
+            baseName.startsWith('r5ac') ||
+            baseName.startsWith('p400'))) {
+      continue; // Skip the file
+    }
+
+    // Check if the file is in the ignoreList
+    if (ignoreList.contains(baseName)) {
+      continue;
+    }
+
     // Check if the file matches the selected categories
     if (randomizeAllQuests && baseName.startsWith('q')) {
-      if (ignoreList.contains(baseName)) {
-        continue;
-      }
       processFile = true;
-    }
-
-    if (randomizeAllMaps && baseName.startsWith('r')) {
-      if (ignoreList.contains(baseName)) {
-        continue;
-      }
+    } else if (randomizeAllMaps && baseName.startsWith('r')) {
       processFile = true;
-    }
-
-    if (randomizeAllPhases &&
-        (baseName.startsWith('p') || baseName.contains('core'))) {
-      if (ignoreList.contains(baseName)) {
-        continue;
-      }
+    } else if (randomizeAllPhases && baseName.startsWith('p')) {
       processFile = true;
     }
 

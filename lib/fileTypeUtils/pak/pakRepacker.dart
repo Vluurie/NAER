@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
+import 'package:xml/xml.dart';
 import 'dart:io';
 
-import '../../utils.dart';
+import '../../utils/utils.dart';
 import '../utils/ByteDataWrapper.dart';
 
 const ZLibEncoder _zLibEncoder = ZLibEncoder();
@@ -73,6 +74,26 @@ class _FileEntry {
   }
 }
 
+// Function to guess the type of a yax file, similar to the extractor
+Future<int> guessType(String yaxPath, String xmlPath) async {
+  var fileSize = await File(yaxPath).length();
+  int value = (fileSize <= 1024) ? 1 : 4;
+
+  if (path.basename(yaxPath) != "0.yax") {
+    var xmlFile = File(xmlPath);
+    var xmlContent = await xmlFile.readAsString();
+    var document = XmlDocument.parse(xmlContent);
+
+    if (document.findAllElements("node").isNotEmpty ||
+        document.findAllElements("text").isNotEmpty) {
+      value += 1;
+    } else {
+      value += 2;
+    }
+  }
+  return value;
+}
+
 Future<void> repackPak(String pakDir, String? pakFilePath) async {
   var infoJsonFile = File(path.join(pakDir, "pakInfo.json"));
   var pakInfo = jsonDecode(await infoJsonFile.readAsString());
@@ -80,10 +101,15 @@ Future<void> repackPak(String pakDir, String? pakFilePath) async {
   var filesOffset = (pakInfo["files"] as List).length * 12 + 0x4;
   var lastFileOffset = filesOffset;
   var fileEntries = <_FileEntry>[];
+
   for (var yaxFile in pakInfo["files"]) {
-    var yaxF = File(path.join(pakDir, yaxFile["name"]));
-    var fileEntry = _FileEntry(lastFileOffset, yaxFile["type"]);
-    await fileEntry.init(yaxF);
+    var yaxPath = path.join(pakDir, yaxFile["name"]);
+    var xmlPath = path.setExtension(yaxPath, ".xml");
+
+    // Re-evaluate the type based on the current state of the yax file
+    int newType = await guessType(yaxPath, xmlPath);
+    var fileEntry = _FileEntry(lastFileOffset, newType);
+    await fileEntry.init(File(yaxPath));
     fileEntries.add(fileEntry);
 
     lastFileOffset += fileEntry.pakSize;
@@ -101,5 +127,5 @@ Future<void> repackPak(String pakDir, String? pakFilePath) async {
   var pakFile = File(pakFilePath);
   await pakFile.writeAsBytes(bytes.buffer.asUint8List());
 
-  //print("Repacked ${pakInfo["files"].length}.");
+  // print("Repacked ${pakInfo["files"].length} files.");
 }

@@ -1,7 +1,6 @@
-
 import 'dart:math';
 
-import '../../utils.dart';
+import '../../utils/utils.dart';
 import '../utils/ByteDataWrapper.dart';
 
 abstract class RiffChunk {
@@ -10,10 +9,10 @@ abstract class RiffChunk {
 
   RiffChunk(this.chunkId, this.size);
 
-  RiffChunk.read(ByteDataWrapper bytes) :
-    chunkId = bytes.readString(4),
-    size = bytes.readUint32();
-  
+  RiffChunk.read(ByteDataWrapper bytes)
+      : chunkId = bytes.readString(4),
+        size = bytes.readUint32();
+
   void write(ByteDataWrapper bytes) {
     bytes.writeString(chunkId);
     bytes.writeUint32(size);
@@ -84,8 +83,7 @@ class FormatChunkGeneric extends RiffChunk with FormatChunk {
       bytes.writeUint16(samplesPerBlock!);
     }
     if (unknown != null) {
-      for (int i = 0; i < unknown!.length; i++)
-        bytes.writeUint8(unknown![i]);
+      for (int i = 0; i < unknown!.length; i++) bytes.writeUint8(unknown![i]);
     }
     if (size & 1 == 1) {
       bytes.writeUint8(0);
@@ -175,6 +173,7 @@ class AkdChunk extends RiffChunk {
 }
 
 typedef Sample = List<int>;
+
 class DataChunk extends RiffChunk {
   late List<int> samples;
   FormatChunk format;
@@ -190,13 +189,13 @@ class DataChunk extends RiffChunk {
         if (bytes.position % 2 == 0)
           samples = bytes.asInt16List(size ~/ 2);
         else
-          samples = List.generate(size ~/ 2, (i) => bytes.readInt16()); 
+          samples = List.generate(size ~/ 2, (i) => bytes.readInt16());
         break;
       case 32:
         if (bytes.position % 4 == 0)
-            samples = bytes.asInt32List(size ~/ 4);
+          samples = bytes.asInt32List(size ~/ 4);
         else
-          samples = List.generate(size ~/ 4, (i) => bytes.readInt32()); 
+          samples = List.generate(size ~/ 4, (i) => bytes.readInt32());
         break;
       default:
         samples = bytes.asInt8List(size);
@@ -211,27 +210,23 @@ class DataChunk extends RiffChunk {
     super.write(bytes);
     switch (format.bitsPerSample) {
       case 8:
-        for (int i = 0; i < samples.length; i++)
-          bytes.writeInt8(samples[i]);
+        for (int i = 0; i < samples.length; i++) bytes.writeInt8(samples[i]);
         break;
       case 16:
-        for (int i = 0; i < samples.length; i++)
-          bytes.writeInt16(samples[i]);
+        for (int i = 0; i < samples.length; i++) bytes.writeInt16(samples[i]);
         break;
       case 32:
-        for (int i = 0; i < samples.length; i++)
-          bytes.writeInt32(samples[i]);
+        for (int i = 0; i < samples.length; i++) bytes.writeInt32(samples[i]);
         break;
       default:
-        for (int i = 0; i < samples.length; i++)
-          bytes.writeInt8(samples[i]);
+        for (int i = 0; i < samples.length; i++) bytes.writeInt8(samples[i]);
     }
     if (size & 1 == 1 && bytes.position < bytes.length) {
       bytes.writeUint8(0);
     }
   }
 
-  List<Sample> asSamples(FormatChunk format)  {
+  List<Sample> asSamples(FormatChunk format) {
     final bitsPerSample = format.bitsPerSample;
     final channels = format.channels;
     final blockAlign = format.blockAlign;
@@ -241,7 +236,8 @@ class DataChunk extends RiffChunk {
     } else if (channels == 1) {
       return samples.map((e) => [e]).toList();
     } else {
-      var subSamples = List.generate(size ~/ blockAlign, (i) => samples.sublist(i, i + channels));
+      var subSamples = List.generate(
+          size ~/ blockAlign, (i) => samples.sublist(i, i + channels));
       return subSamples;
     }
   }
@@ -283,7 +279,7 @@ class CueChunk extends RiffChunk {
   List<int>? extra;
 
   CueChunk(this.cuePoints, this.points, [this.extra])
-    : super("cue ", 4 + 24 * points.length + (extra?.length ?? 0));
+      : super("cue ", 4 + 24 * points.length + (extra?.length ?? 0));
 
   CueChunk.read(ByteDataWrapper bytes) : super.read(bytes) {
     int pos = bytes.position;
@@ -298,11 +294,9 @@ class CueChunk extends RiffChunk {
   void write(ByteDataWrapper bytes) {
     super.write(bytes);
     bytes.writeUint32(cuePoints);
-    for (int i = 0; i < points.length; i++)
-      points[i].write(bytes);
+    for (int i = 0; i < points.length; i++) points[i].write(bytes);
     if (extra != null) {
-      for (int i = 0; i < extra!.length; i++)
-        bytes.writeUint8(extra![i]);
+      for (int i = 0; i < extra!.length; i++) bytes.writeUint8(extra![i]);
     }
   }
 }
@@ -328,8 +322,7 @@ class RiffListGenericSubChunk extends RiffListSubChunk {
   @override
   void write(ByteDataWrapper bytes) {
     super.write(bytes);
-    for (int i = 0; i < data.length; i++)
-      bytes.writeUint8(data[i]);
+    for (int i = 0; i < data.length; i++) bytes.writeUint8(data[i]);
     if (size & 1 == 1) {
       bytes.writeUint8(0);
     }
@@ -340,11 +333,11 @@ class RiffListLabelSubChunk extends RiffListSubChunk {
   late int cuePointIndex;
   late String label;
 
-  RiffListLabelSubChunk(super.chunkID, super.size, this.cuePointIndex,
-      this.label);
-    
+  RiffListLabelSubChunk(
+      super.chunkID, super.size, this.cuePointIndex, this.label);
+
   RiffListLabelSubChunk.read(ByteDataWrapper bytes)
-    : super(bytes.readString(4), bytes.readUint32()) {
+      : super(bytes.readString(4), bytes.readUint32()) {
     cuePointIndex = bytes.readUint32();
     label = bytes.readString(size - 4).trimNull();
     if (size & 1 == 1 && bytes.position < bytes.length) {
@@ -367,8 +360,7 @@ class RiffListChunk extends RiffChunk {
   late String chunkType;
   late List<RiffListSubChunk> subChunks;
 
-  RiffListChunk(this.chunkType, this.subChunks, int size)
-    : super("LIST", size);
+  RiffListChunk(this.chunkType, this.subChunks, int size) : super("LIST", size);
 
   RiffListChunk.read(ByteDataWrapper bytes) : super.read(bytes) {
     int pos = bytes.position;
@@ -396,8 +388,7 @@ class RiffListChunk extends RiffChunk {
   void write(ByteDataWrapper bytes) {
     super.write(bytes);
     bytes.writeString(chunkType);
-    for (int i = 0; i < subChunks.length; i++)
-      subChunks[i].write(bytes);
+    for (int i = 0; i < subChunks.length; i++) subChunks[i].write(bytes);
     if (size & 1 == 1) {
       bytes.writeUint8(0);
     }
@@ -435,9 +426,11 @@ class RiffFile {
     var cueChunks = chunks.whereType<CueChunk>();
     return cueChunks.isEmpty ? null : cueChunks.first;
   }
+
   RiffListChunk? get labelsList {
-    var labelChunks = chunks.whereType<RiffListChunk>()
-      .where((chunk) => chunk.chunkType == "adtl");
+    var labelChunks = chunks
+        .whereType<RiffListChunk>()
+        .where((chunk) => chunk.chunkType == "adtl");
     return labelChunks.isEmpty ? null : labelChunks.first;
   }
 
@@ -488,8 +481,7 @@ class RiffFile {
   }
 
   void write(ByteDataWrapper bytes) {
-    for (int i = 0; i < chunks.length; i++)
-      chunks[i].write(bytes);
+    for (int i = 0; i < chunks.length; i++) chunks[i].write(bytes);
   }
 
   static Future<RiffFile> fromFile(String path) async {

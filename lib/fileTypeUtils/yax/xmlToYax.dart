@@ -1,8 +1,7 @@
-
 import 'dart:io';
 import 'package:xml/xml.dart';
 
-import '../../utils.dart';
+import '../../utils/utils.dart';
 import '../utils/ByteDataWrapper.dart';
 
 int _getTagId(XmlElement tag) {
@@ -32,10 +31,8 @@ ByteDataWrapper xmlToYax(XmlElement root) {
   Map<String, int> stringOffsets = {};
   int lastOffset = 0;
   int putStringGetOffset(String string) {
-    if (string.isEmpty)
-      return 0;
-    if (stringSet.contains(string))
-      return stringOffsets[string]!;
+    if (string.isEmpty) return 0;
+    if (stringSet.contains(string)) return stringOffsets[string]!;
 
     stringSet.add(string);
     stringOffsets[string] = lastOffset;
@@ -50,12 +47,14 @@ ByteDataWrapper xmlToYax(XmlElement root) {
   List<_XmlNode> nodes = [];
   void addNodeToList(XmlElement node, int indentation) {
     int tagId = _getTagId(node);
-    String nodeText = node.children.whereType<XmlText>().map((e) => e.text).join().trim();
+    String nodeText =
+        node.children.whereType<XmlText>().map((e) => e.text).join().trim();
     nodes.add(_XmlNode(indentation, tagId, 0, nodeText));
     for (var child in node.childElements) {
       addNodeToList(child, indentation + 1);
     }
   }
+
   for (var child in root.childElements) {
     addNodeToList(child, 0);
   }
@@ -69,8 +68,7 @@ ByteDataWrapper xmlToYax(XmlElement root) {
   int byteLength = lastOffset;
   ByteDataWrapper bytes = ByteDataWrapper.allocate(byteLength);
   bytes.writeUint32(nodes.length);
-  for (var node in nodes)
-    node.write(bytes);
+  for (var node in nodes) node.write(bytes);
   for (var string in stringSet)
     bytes.writeString0P(string, StringEncoding.shiftJis);
 

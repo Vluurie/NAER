@@ -1,7 +1,6 @@
-
 import 'dart:io';
 
-import '../../utils.dart';
+import '../../utils/utils.dart';
 import '../utils/ByteDataWrapper.dart';
 
 class McdFileHeader {
@@ -16,22 +15,30 @@ class McdFileHeader {
   final int eventsOffset;
   final int eventsCount;
 
-  McdFileHeader(this.messagesOffset, this.messagesCount, this.symbolsOffset,
-      this.symbolsCount, this.glyphsOffset, this.glyphsCount, this.fontsOffset,
-      this.fontsCount, this.eventsOffset, this.eventsCount);
-  
-  McdFileHeader.read(ByteDataWrapper bytes) :
-    messagesOffset = bytes.readUint32(),
-    messagesCount = bytes.readUint32(),
-    symbolsOffset = bytes.readUint32(),
-    symbolsCount = bytes.readUint32(),
-    glyphsOffset = bytes.readUint32(),
-    glyphsCount = bytes.readUint32(),
-    fontsOffset = bytes.readUint32(),
-    fontsCount = bytes.readUint32(),
-    eventsOffset = bytes.readUint32(),
-    eventsCount = bytes.readUint32();
-  
+  McdFileHeader(
+      this.messagesOffset,
+      this.messagesCount,
+      this.symbolsOffset,
+      this.symbolsCount,
+      this.glyphsOffset,
+      this.glyphsCount,
+      this.fontsOffset,
+      this.fontsCount,
+      this.eventsOffset,
+      this.eventsCount);
+
+  McdFileHeader.read(ByteDataWrapper bytes)
+      : messagesOffset = bytes.readUint32(),
+        messagesCount = bytes.readUint32(),
+        symbolsOffset = bytes.readUint32(),
+        symbolsCount = bytes.readUint32(),
+        glyphsOffset = bytes.readUint32(),
+        glyphsCount = bytes.readUint32(),
+        fontsOffset = bytes.readUint32(),
+        fontsCount = bytes.readUint32(),
+        eventsOffset = bytes.readUint32(),
+        eventsCount = bytes.readUint32();
+
   void write(ByteDataWrapper bytes) {
     bytes.writeUint32(messagesOffset);
     bytes.writeUint32(messagesCount);
@@ -52,13 +59,14 @@ class McdFileSymbol {
   late final String char;
   final int glyphId;
 
-  McdFileSymbol(this.fontId, this.charCode, this.glyphId) :
-    char = String.fromCharCode(charCode);
-  
-  McdFileSymbol.read(ByteDataWrapper bytes, List<McdFileFont> fonts, List<McdFileGlyph> glyphs) :
-    fontId = bytes.readUint16(),
-    charCode = bytes.readUint16(),
-    glyphId = bytes.readUint32() {
+  McdFileSymbol(this.fontId, this.charCode, this.glyphId)
+      : char = String.fromCharCode(charCode);
+
+  McdFileSymbol.read(
+      ByteDataWrapper bytes, List<McdFileFont> fonts, List<McdFileGlyph> glyphs)
+      : fontId = bytes.readUint16(),
+        charCode = bytes.readUint16(),
+        glyphId = bytes.readUint32() {
     char = String.fromCharCode(charCode);
     // if (_glyph.height != _font.height) {
     //   print("Warning: Glyph height (${_glyph.height}) does not match font height (${_font.height})");
@@ -89,19 +97,19 @@ class McdFileGlyph {
 
   McdFileGlyph(this.textureId, this.u1, this.v1, this.u2, this.v2, this.width,
       this.height, this.above, this.below, this.horizontal);
-  
-  McdFileGlyph.read(ByteDataWrapper bytes) :
-    textureId = bytes.readUint32(),
-    u1 = bytes.readFloat32(),
-    v1 = bytes.readFloat32(),
-    u2 = bytes.readFloat32(),
-    v2 = bytes.readFloat32(),
-    width = bytes.readFloat32(),
-    height = bytes.readFloat32(),
-    above = bytes.readFloat32(),
-    below = bytes.readFloat32(),
-    horizontal = bytes.readFloat32();
-  
+
+  McdFileGlyph.read(ByteDataWrapper bytes)
+      : textureId = bytes.readUint32(),
+        u1 = bytes.readFloat32(),
+        v1 = bytes.readFloat32(),
+        u2 = bytes.readFloat32(),
+        v2 = bytes.readFloat32(),
+        width = bytes.readFloat32(),
+        height = bytes.readFloat32(),
+        above = bytes.readFloat32(),
+        below = bytes.readFloat32(),
+        horizontal = bytes.readFloat32();
+
   void write(ByteDataWrapper bytes) {
     bytes.writeUint32(textureId);
     bytes.writeFloat32(u1);
@@ -124,14 +132,14 @@ class McdFileFont {
   final double horizontal;
 
   McdFileFont(this.id, this.width, this.height, this.below, this.horizontal);
-  
-  McdFileFont.read(ByteDataWrapper bytes) :
-    id = bytes.readUint32(),
-    width = bytes.readFloat32(),
-    height = bytes.readFloat32(),
-    below = bytes.readFloat32(),
-    horizontal = bytes.readFloat32();
-  
+
+  McdFileFont.read(ByteDataWrapper bytes)
+      : id = bytes.readUint32(),
+        width = bytes.readFloat32(),
+        height = bytes.readFloat32(),
+        below = bytes.readFloat32(),
+        horizontal = bytes.readFloat32();
+
   void write(ByteDataWrapper bytes) {
     bytes.writeUint32(id);
     bytes.writeFloat32(width);
@@ -146,6 +154,7 @@ class McdFileLetterBase {
 
   int get byteSize => 2;
 }
+
 class McdFileLetter extends McdFileLetterBase {
   late final int idx;
 
@@ -154,7 +163,7 @@ class McdFileLetter extends McdFileLetterBase {
   McdFileLetter(int code, this.idx, this._symbols) {
     super.code = code;
   }
-  
+
   McdFileLetter.read(ByteDataWrapper bytes, this._symbols) {
     code = bytes.readUint16();
     idx = bytes.readInt16();
@@ -162,17 +171,14 @@ class McdFileLetter extends McdFileLetterBase {
 
   @override
   String toString() {
-    if(code < 0x8000) {
-      if (_symbols[code].charCode == 0x80)
-        return "…";
+    if (code < 0x8000) {
+      if (_symbols[code].charCode == 0x80) return "…";
       return _symbols[code].char;
     } else if (code == 0x8001)
       return " ";
     else if (code == 0x8020) {
-      if (idx == 9)
-        return "≡";  // controller menu button
-      if (idx == 121)
-        return "<Alt>";
+      if (idx == 9) return "≡"; // controller menu button
+      if (idx == 121) return "<Alt>";
     }
 
     print("<Special_0x${(code).toRadixString(16)}_$idx>");
@@ -187,6 +193,7 @@ class McdFileLetter extends McdFileLetterBase {
     bytes.writeInt16(idx);
   }
 }
+
 class McdFileLetterTerminator extends McdFileLetterBase {
   McdFileLetterTerminator() {
     super.code = 0x8000;
@@ -205,15 +212,15 @@ class McdFileLine {
 
   McdFileLine(this.lettersOffset, this.padding, this.lettersCount, this.length2,
       this.below, this.horizontal, this.letters, this.terminator);
-  
-  McdFileLine.read(ByteDataWrapper bytes, List<McdFileSymbol> symbols) :
-    lettersOffset = bytes.readUint32(),
-    padding = bytes.readUint32(),
-    lettersCount = bytes.readUint32(),
-    length2 = bytes.readUint32(),
-    below = bytes.readFloat32(),
-    horizontal = bytes.readFloat32(),
-    letters = [] {
+
+  McdFileLine.read(ByteDataWrapper bytes, List<McdFileSymbol> symbols)
+      : lettersOffset = bytes.readUint32(),
+        padding = bytes.readUint32(),
+        lettersCount = bytes.readUint32(),
+        length2 = bytes.readUint32(),
+        below = bytes.readFloat32(),
+        horizontal = bytes.readFloat32(),
+        letters = [] {
     int pos = bytes.position;
     bytes.position = lettersOffset;
     var actualLettersCount = (lettersCount - 1) ~/ 2;
@@ -239,8 +246,7 @@ class McdFileLine {
 
     var pos = bytes.position;
     bytes.position = lettersOffset;
-    for (var letter in letters)
-      letter.write(bytes);
+    for (var letter in letters) letter.write(bytes);
     bytes.writeUint16(terminator);
     bytes.position = pos;
   }
@@ -254,24 +260,24 @@ class McdFileParagraph {
   final int fontId;
   final List<McdFileLine> lines;
 
-  McdFileParagraph(this.linesOffset, this.linesCount, this.vPos, this.hPos, this.fontId,
-      this.lines);
-  
-  McdFileParagraph.read(ByteDataWrapper bytes, List<McdFileSymbol> symbols) :
-    linesOffset = bytes.readUint32(),
-    linesCount = bytes.readUint32(),
-    vPos = bytes.readUint32(),
-    hPos = bytes.readUint32(),
-    fontId = bytes.readUint32(),
-    lines = [] {
-      int pos = bytes.position;
-      bytes.position = linesOffset;
-      for (int i = 0; i < linesCount; i++) {
-        lines.add(McdFileLine.read(bytes, symbols));
-      }
-      bytes.position = pos;
+  McdFileParagraph(this.linesOffset, this.linesCount, this.vPos, this.hPos,
+      this.fontId, this.lines);
+
+  McdFileParagraph.read(ByteDataWrapper bytes, List<McdFileSymbol> symbols)
+      : linesOffset = bytes.readUint32(),
+        linesCount = bytes.readUint32(),
+        vPos = bytes.readUint32(),
+        hPos = bytes.readUint32(),
+        fontId = bytes.readUint32(),
+        lines = [] {
+    int pos = bytes.position;
+    bytes.position = linesOffset;
+    for (int i = 0; i < linesCount; i++) {
+      lines.add(McdFileLine.read(bytes, symbols));
     }
-  
+    bytes.position = pos;
+  }
+
   @override
   String toString() {
     return lines.join("\n");
@@ -286,8 +292,7 @@ class McdFileParagraph {
 
     var pos = bytes.position;
     bytes.position = linesOffset;
-    for (var line in lines)
-      line.write(bytes);
+    for (var line in lines) line.write(bytes);
     bytes.position = pos;
   }
 }
@@ -301,13 +306,13 @@ class McdFileMessage {
 
   McdFileMessage(this.paragraphsOffset, this.paragraphsCount, this.seqNumber,
       this.eventId, this.paragraphs);
-  
-  McdFileMessage.read(ByteDataWrapper bytes, List<McdFileSymbol> symbols) :
-    paragraphsOffset = bytes.readUint32(),
-    paragraphsCount = bytes.readUint32(),
-    seqNumber = bytes.readUint32(),
-    eventId = bytes.readUint32(),
-    paragraphs = [] {
+
+  McdFileMessage.read(ByteDataWrapper bytes, List<McdFileSymbol> symbols)
+      : paragraphsOffset = bytes.readUint32(),
+        paragraphsCount = bytes.readUint32(),
+        seqNumber = bytes.readUint32(),
+        eventId = bytes.readUint32(),
+        paragraphs = [] {
     int pos = bytes.position;
     bytes.position = paragraphsOffset;
     for (int i = 0; i < paragraphsCount; i++) {
@@ -329,8 +334,7 @@ class McdFileMessage {
 
     var pos = bytes.position;
     bytes.position = paragraphsOffset;
-    for (var paragraph in paragraphs)
-      paragraph.write(bytes);
+    for (var paragraph in paragraphs) paragraph.write(bytes);
     bytes.position = pos;
   }
 }
@@ -342,24 +346,21 @@ class McdFileEvent {
   late final McdFileMessage message;
 
   McdFileEvent(this.id, this.msgId, this.name, this.message);
-  
-  McdFileEvent.read(ByteDataWrapper bytes, Map<int, McdFileMessage> messages) :
-    id = bytes.readUint32(),
-    msgId = bytes.readUint32(),
-    name = bytes.readString(32).trimNull() {
+
+  McdFileEvent.read(ByteDataWrapper bytes, Map<int, McdFileMessage> messages)
+      : id = bytes.readUint32(),
+        msgId = bytes.readUint32(),
+        name = bytes.readString(32).trimNull() {
     message = messages[msgId]!;
   }
 
   @override
   String toString() {
-    var msgLines = message.toString()
-      .split("\n")
-      .map((line) => "  $line")
-      .join("\n");
-    return
-      "Event $name {\n"
-      "$msgLines\n"
-      "}";
+    var msgLines =
+        message.toString().split("\n").map((line) => "  $line").join("\n");
+    return "Event $name {\n"
+        "$msgLines\n"
+        "}";
   }
 
   void write(ByteDataWrapper bytes) {
@@ -412,15 +413,14 @@ class McdFile {
     // events
     bytes.position = header.eventsOffset;
     Map<int, McdFileMessage> messagesMap = {};
-    for (int i = 0; i < messages.length; i++)
-      messagesMap[i] = messages[i];
+    for (int i = 0; i < messages.length; i++) messagesMap[i] = messages[i];
     for (int i = 0; i < header.eventsCount; i++) {
       events.add(McdFileEvent.read(bytes, messagesMap));
     }
   }
 
-  McdFile.fromParts(this.header, this.messages, this.symbols, this.glyphs, this.fonts,
-      this.events);
+  McdFile.fromParts(this.header, this.messages, this.symbols, this.glyphs,
+      this.fonts, this.events);
 
   static Future<McdFile> fromFile(String path) async {
     final bytes = await ByteDataWrapper.fromFile(path);
@@ -433,25 +433,20 @@ class McdFile {
 
     header.write(bytes);
     bytes.position = header.messagesOffset;
-    for (var message in messages)
-      message.write(bytes);
-    
+    for (var message in messages) message.write(bytes);
+
     bytes.position = header.symbolsOffset;
-    for (var symbol in symbols)
-      symbol.write(bytes);
-    
+    for (var symbol in symbols) symbol.write(bytes);
+
     bytes.position = header.glyphsOffset;
-    for (var glyph in glyphs)
-      glyph.write(bytes);
-    
+    for (var glyph in glyphs) glyph.write(bytes);
+
     bytes.position = header.fontsOffset;
-    for (var font in fonts)
-      font.write(bytes);
-    
+    for (var font in fonts) font.write(bytes);
+
     bytes.position = header.eventsOffset;
-    for (var event in events)
-      event.write(bytes);
-    
+    for (var event in events) event.write(bytes);
+
     await File(path).writeAsBytes(bytes.buffer.asUint8List());
   }
 

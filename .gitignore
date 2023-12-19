@@ -1,75 +1,43 @@
-testFiles
-bin/*.exe
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
 
-# Created by https://www.gitignore.io/api/dart,flutter,intellij+all,visualstudiocode
-
-### Dart ###
-# See https://www.dartlang.org/tools/pub/glossary#cache
-
-# Packages
-**/.packages
-**/.pub-cache/
-
-# IDEs
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
 .idea/
 
-# IDE - VSCode
-.vscode/
-
-# IDE - VSCode
-.vscode/
-
-# IDE - VSCode Dart Debug
-.vscode/*.code-workspace
-.vscode/.dart_tool/
-.vscode/launch.json
-.vscode/settings.json
-.vscode/tasks.json
-.vscode/uri-handler.code-workspace
-
-# IDE - VSCode Dart Pub
-.vscode/pubspec.lock
-
-# IDE - VSCode Dart Pub
-.vscode/pubspec.yaml
-
-# IDE - VSCode Dart Pub
-.vscode/packages
-
-# IDE - VSCode Dart Pub
-.vscode/snapshots
-
-# IDE - VSCode Dart Pub
-.vscode/snapshots
-
-### Flutter ###
-# See https://flutter.dev/docs/development/tools/pub/glossary#the-flutter-tool-cache
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
 
 # Flutter/Dart/Pub related
-**/.dart_tool/
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
-**/.packages
-**/.pub-cache/
-**/.pub-cache/
-**/.pub-cache/
-**/build/
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/App.framework
-**/ios/Flutter/App.framework.dSYM
-**/ios/Flutter/Flutter.framework.dSYM
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/GeneratedPluginRegistrant.*
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutte
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
 
-bin/*.7z
-bin/*.zip
-lib/tmp*
-dist
-NierAutomataEnemyRandomizer.spec
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release

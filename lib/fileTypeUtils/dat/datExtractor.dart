@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-import '../../utils.dart';
+import '../../utils/utils.dart';
 import '../pak/pakExtractor.dart';
 import '../utils/ByteDataWrapper.dart';
 

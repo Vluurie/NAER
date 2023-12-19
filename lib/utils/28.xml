@@ -1,0 +1,4721 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<name eng="Rank EX">ランクEX</name>
+	<id>0x8a0bb3c6</id>
+	<group>0x9571ac8c</group>
+	<attribute>0x2</attribute>
+	<priority>7</priority>
+	<size>62</size>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0xe9d5a420</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x4886f419</id>
+					</puid>
+					<command>
+						<command>
+							<label>ENABLE</label>
+						</command>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="UITimerAction">0xecfcefb4</code>
+		<name eng="timer">タイマー</name>
+		<id>0x4886f419</id>
+		<attribute>0x2</attribute>
+		<timeLimit>3600</timeLimit>
+		<timeWarn>10</timeWarn>
+		<countDown>1</countDown>
+		<setStart>1</setStart>
+		<uiType>0x4</uiType>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0xef55f61d</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::StateObject">0xcecad9ce</code>
+						<id str="@MISC">0xf6a78746</id>
+					</puid>
+					<command>
+						<command>
+							<label>MiscState.callBgm</label>
+						</command>
+						<args>BGM_CR_Battle_Start_Ex_Normal</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x957592af</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x561146b</id>
+					</puid>
+					<command>
+						<command>
+							<label>Action.signal</label>
+						</command>
+						<args>"trialEX_emset1_start 0"</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>3</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="enemy set">敵セット</name>
+		<id>0xc4d97f58</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xd768c44b</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>6</size>
+					<value>
+						<id>0xf95024f4</id>
+						<location>
+							<position>433.682709 -92.220276 847.588379</position>
+							<rotation>0 -0.515 0</rotation>
+						</location>
+						<objId>em1060</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xaabcc1ec</id>
+						<location>
+							<position>439.432953 -92.220276 848.597107</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em0106</objId>
+						<setType>17</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x88d65dbc</id>
+						<location>
+							<position>442.393311 -92.220276 858.999512</position>
+							<rotation>0 -1.475003 0</rotation>
+						</location>
+						<objId>em0112</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x18acc50a</id>
+						<location>
+							<position>442.529297 -92.220276 852.514832</position>
+							<rotation>0 -0.980003 0</rotation>
+						</location>
+						<objId>em0068</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x459a0b28</id>
+						<location>
+							<position>436.352875 -92.220276 857.973267</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em001c</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xedc9fb3f</id>
+						<location>
+							<position>432.321045 -92.220276 853.596924</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em200d</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xda6d22f8</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xb08851a7</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>6</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="enemy set">敵セット</name>
+		<id>0x15d906b4</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x77533547</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>6</size>
+					<value>
+						<id>0xe622774d</id>
+						<location>
+							<position>416.602539 -92.220276 864.027954</position>
+							<rotation>0 2.235002 0</rotation>
+						</location>
+						<objId>em0100</objId>
+						<setType>10</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x35ca3bb2</id>
+						<location>
+							<position>422.296906 -92.220276 871.108948</position>
+							<rotation>0 2.235002 0</rotation>
+						</location>
+						<objId>em1070</objId>
+						<setType>5</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+					<value>
+						<id>0xf7cc94d2</id>
+						<location>
+							<position>419.513123 -92.220276 867.720154</position>
+							<rotation>0 2.235002 0</rotation>
+						</location>
+						<objId>emb05d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.8</delay>
+					</value>
+					<value>
+						<id>0x5c5fe913</id>
+						<location>
+							<position>421.769318 -92.220276 843.127075</position>
+							<rotation>0 0.66499 0</rotation>
+						</location>
+						<objId>em0090</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.6</delay>
+					</value>
+					<value>
+						<id>0xa5c58ce7</id>
+						<location>
+							<position>418.382874 -92.220276 845.913147</position>
+							<rotation>0 0.66499 0</rotation>
+						</location>
+						<objId>em0068</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0x1fa81624</id>
+						<location>
+							<position>425.459534 -92.220276 840.21344</position>
+							<rotation>0 0.66499 0</rotation>
+						</location>
+						<objId>em0112</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x2e2dd98e</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xb1bea457</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>6</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="enemy set">敵セット</name>
+		<id>0x3d4c519e</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xa85a0b96</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>6</size>
+					<value>
+						<id>0xcf808f73</id>
+						<location>
+							<position>445.401215 -92.220276 846.03479</position>
+							<rotation>0 -0.901824 0</rotation>
+						</location>
+						<objId>em0106</objId>
+						<setType>17</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0x8b4d6461</id>
+						<location>
+							<position>442.602264 -92.220276 842.659302</position>
+							<rotation>0 -0.901824 0</rotation>
+						</location>
+						<objId>em0069</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.6</delay>
+					</value>
+					<value>
+						<id>0xf2129901</id>
+						<location>
+							<position>448.330017 -92.220276 849.713501</position>
+							<rotation>0 -0.901824 0</rotation>
+						</location>
+						<objId>em0007</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0xd9c9f0be</id>
+						<location>
+							<position>443.268982 -92.220276 870.05896</position>
+							<rotation>0 3.848169 0</rotation>
+						</location>
+						<objId>em0020</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xfaaf1fa7</id>
+						<location>
+							<position>446.536682 -92.220276 867.135071</position>
+							<rotation>0 3.848169 0</rotation>
+						</location>
+						<objId>em3010</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+					<value>
+						<id>0x172706ec</id>
+						<location>
+							<position>439.703522 -92.220276 873.124634</position>
+							<rotation>0 3.848169 0</rotation>
+						</location>
+						<objId>em5600</objId>
+						<setRtn>2</setRtn>
+						<setType>17</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.8</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x5746bce9</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xe0c51068</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>6</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="enemy set">敵セット</name>
+		<id>0xf86a4106</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xf80fca8e</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>10</size>
+					<value>
+						<id>0x6d82ce43</id>
+						<location>
+							<position>427.521759 -89.759659 850.854248</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0035</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x746c288c</id>
+						<location>
+							<position>437.077271 -89.759659 862.568115</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0033</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x9b1e9292</id>
+						<location>
+							<position>422.176453 -89.759659 844.048279</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0034</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x62eb1fb7</id>
+						<location>
+							<position>442.659363 -89.759659 869.48175</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0035</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.4</delay>
+					</value>
+					<value>
+						<id>0x8aa1686e</id>
+						<location>
+							<position>445.12561 -89.759659 846.513855</position>
+							<rotation>0 3.808192 0</rotation>
+						</location>
+						<objId>em0035</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.8</delay>
+					</value>
+					<value>
+						<id>0x4acc4d83</id>
+						<location>
+							<position>419.708557 -89.759659 867.016968</position>
+							<rotation>0 3.808192 0</rotation>
+						</location>
+						<objId>em0033</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.2</delay>
+					</value>
+					<value>
+						<id>0x82f452df</id>
+						<location>
+							<position>448.652954 -89.759659 858.496216</position>
+							<rotation>0 3.023196 0</rotation>
+						</location>
+						<objId>em0030</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.6</delay>
+					</value>
+					<value>
+						<id>0x7129f8ce</id>
+						<location>
+							<position>416.180939 -89.759659 855.034424</position>
+							<rotation>0 3.023196 0</rotation>
+						</location>
+						<objId>em0030</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.6</delay>
+					</value>
+					<value>
+						<id>0xca056788</id>
+						<location>
+							<position>434.161194 -89.759659 840.531006</position>
+							<rotation>0 4.593083 0</rotation>
+						</location>
+						<objId>em0034</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.4</delay>
+					</value>
+					<value>
+						<id>0x6c8fce85</id>
+						<location>
+							<position>430.673492 -89.759659 873.000305</position>
+							<rotation>0 4.593083 0</rotation>
+						</location>
+						<objId>em0032</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.8</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xfa5b4276</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xc38e49d5</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x3226861b</id>
+		<attribute>0x8</attribute>
+		<delay>2</delay>
+	</action>
+	<action>
+		<code str="CameraTargetAction">0x4f925d24</code>
+		<name eng="camera gaze">カメラ注視</name>
+		<id>0x288fab9b</id>
+		<attribute>0x400</attribute>
+		<location>
+			<position>433.144379 -91.15535 855.843262</position>
+		</location>
+		<area>
+			<size>0</size>
+		</area>
+		<time_>2</time_>
+		<rate_>0.05</rate_>
+		<playerForceIn_>0</playerForceIn_>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x205fe83a</id>
+		<attribute>0x8</attribute>
+		<delay>1</delay>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0xdaecd27d</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::StateObject">0xcecad9ce</code>
+						<id str="@MISC">0xf6a78746</id>
+					</puid>
+					<command>
+						<command>
+							<label>MiscState.callBgm</label>
+						</command>
+						<args>BGM_CR_Battle_Start_Ex_Tank</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set _ tank">敵セット_戦車</name>
+		<id>0x2bcf79d4</id>
+		<attribute>0x800</attribute>
+		<layouts>
+			<normal>
+				<id>0xa3d1a524</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>1</size>
+					<value>
+						<id>0xe40d3644</id>
+						<location>
+							<position>433.144379 -48.376022 855.843262</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em000e</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>95</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x3b43ac68</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x8bbc47f2</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy Set_Tank Palico">敵セット_戦車のオトモ</name>
+		<id>0x30fad6b4</id>
+		<attribute>0x800</attribute>
+		<layouts>
+			<normal>
+				<id>0xe6da39e8</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>4</size>
+					<value>
+						<id>0x38fdf403</id>
+						<location>
+							<position>422.270142 -92.220276 866.391785</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1070</objId>
+						<setType>5</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x6eb19dae</id>
+						<location>
+							<position>442.124573 -92.220276 866.391785</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0096</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+					<value>
+						<id>0x5c2b7668</id>
+						<location>
+							<position>442.124573 -92.220276 847.178894</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1050</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0x7980bd31</id>
+						<location>
+							<position>422.270142 -92.220276 847.178894</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0065</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.6</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x4ad37568</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x6b3c5d14</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<type>2</type>
+			<puid>
+				<code str="app::EntityLayout">0xd8efbb45</code>
+				<id>0xe40d3644</id>
+			</puid>
+			<condition>
+				<state>
+					<label>BehaviorAppBase.getHpRate100</label>
+					<value>50</value>
+				</state>
+				<pred>5</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy Set_Tank Palico">敵セット_戦車のオトモ</name>
+		<id>0xcab96495</id>
+		<attribute>0x800</attribute>
+		<layouts>
+			<normal>
+				<id>0x3adeac94</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>4</size>
+					<value>
+						<id>0x370631c7</id>
+						<location>
+							<position>422.270142 -92.220276 866.391785</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0050</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xa09522e3</id>
+						<location>
+							<position>442.124573 -92.220276 866.391785</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0056</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+					<value>
+						<id>0xb68a940a</id>
+						<location>
+							<position>442.124573 -92.220276 847.178894</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0096</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0xb3b4afa5</id>
+						<location>
+							<position>422.270142 -92.220276 847.178894</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>emb05a</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.6</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xa56ac9f6</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xa63e7f8d</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<type>2</type>
+			<puid>
+				<code str="app::EntityLayout">0xd8efbb45</code>
+				<id>0xe40d3644</id>
+			</puid>
+			<condition>
+				<state>
+					<label>BehaviorAppBase.getHpRate100</label>
+					<value>25</value>
+				</state>
+				<pred>5</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="MultiConditionBlock">0xe58b4e99</code>
+		<name eng="conditional block list">条件ブロックリスト</name>
+		<id>0x707581ab</id>
+		<attribute>0x8</attribute>
+		<condition>
+			<conditions>
+				<size>3</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x2bcf79d4</id>
+					</puid>
+					<condition>
+						<state>
+							<label>DONE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x30fad6b4</id>
+					</puid>
+					<condition>
+						<state>
+							<label>DONE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xcab96495</id>
+					</puid>
+					<condition>
+						<state>
+							<label>DONE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0xbacf54c6</id>
+		<attribute>0x8</attribute>
+		<delay>3</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (2)">敵セット(2)</name>
+		<id>0x18336b03</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x7233eda9</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>4</size>
+					<value>
+						<id>0xc1efc2b8</id>
+						<location>
+							<position>435.05127 -92.230103 840.652405</position>
+							<rotation>0 4.538172 0</rotation>
+						</location>
+						<objId>em1040</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x5d0ee7b8</id>
+						<location>
+							<position>448.53302 -92.230103 859.387634</position>
+							<rotation>0 2.968206 0</rotation>
+						</location>
+						<objId>emb080</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+					<value>
+						<id>0x187a4e0d</id>
+						<location>
+							<position>441.965027 -92.230103 870.012024</position>
+							<rotation>0 2.183205 0</rotation>
+						</location>
+						<objId>em0040</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0x72f8c702</id>
+						<location>
+							<position>445.669983 -92.230103 847.229004</position>
+							<rotation>0 3.753105 0</rotation>
+						</location>
+						<objId>em1050</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.6</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x3957a9f5</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xa679c896</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (2)">敵セット(2)</name>
+		<id>0xb5ed21f9</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x64e3b0cc</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>8</size>
+					<value>
+						<id>0xf320d7b4</id>
+						<location>
+							<position>428.78952 -61.62957 840.966553</position>
+							<rotation>0 -1.329989 0</rotation>
+						</location>
+						<objId>em005c</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>2</delay>
+					</value>
+					<value>
+						<id>0x7bcbd23b</id>
+						<location>
+							<position>436.964691 -61.62957 872.585388</position>
+							<rotation>0 -1.329989 0</rotation>
+						</location>
+						<objId>em0090</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0x30adf413</id>
+						<location>
+							<position>448.680176 -61.62957 852.675964</position>
+							<rotation>0 3.383274 0</rotation>
+						</location>
+						<objId>em0040</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>3</delay>
+					</value>
+					<value>
+						<id>0x9c25d005</id>
+						<location>
+							<position>417.071167 -61.62957 860.876465</position>
+							<rotation>0 3.383274 0</rotation>
+						</location>
+						<objId>em0050</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0xe3c4df72</id>
+						<location>
+							<position>446.953918 -61.62957 865.048279</position>
+							<rotation>0 2.598276 0</rotation>
+						</location>
+						<objId>em0040</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x4b0ef478</id>
+						<location>
+							<position>418.797028 -61.62957 848.504333</position>
+							<rotation>0 2.598276 0</rotation>
+						</location>
+						<objId>em1030</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>3.5</delay>
+					</value>
+					<value>
+						<id>0x4b7ea54c</id>
+						<location>
+							<position>441.158691 -61.62957 842.704224</position>
+							<rotation>0 4.168199 0</rotation>
+						</location>
+						<objId>em0020</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.5</delay>
+					</value>
+					<value>
+						<id>0x75b9623f</id>
+						<location>
+							<position>424.592621 -61.62957 870.848572</position>
+							<rotation>0 4.168199 0</rotation>
+						</location>
+						<objId>em0004</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>2.5</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xe8efa49c</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x4b58893b</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x7dc0c878</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x561146b</id>
+					</puid>
+					<command>
+						<command>
+							<label>Action.signal</label>
+						</command>
+						<args>"trialEX_emset2_start 0"</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>8</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (2)">敵セット(2)</name>
+		<id>0xf8e478d2</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xa70d45a8</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>6</size>
+					<value>
+						<id>0x76b213fd</id>
+						<location>
+							<position>427.061035 -92.230103 873.305237</position>
+							<rotation>0 1.39821 0</rotation>
+						</location>
+						<objId>em0016</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0xa2a965f6</id>
+						<location>
+							<position>420.10025 -92.230103 843.956909</position>
+							<rotation>0 -0.9568 0</rotation>
+						</location>
+						<objId>em2006</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0x29011aa7</id>
+						<location>
+							<position>421.585358 -90.751701 851.255737</position>
+							<rotation>0 -0.171791 0</rotation>
+						</location>
+						<objId>em0012</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xf4c95e19</id>
+						<location>
+							<position>417.260345 -90.751701 855.889648</position>
+							<rotation>0 -0.171791 0</rotation>
+						</location>
+						<objId>em000e</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0xfcb4d90f</id>
+						<location>
+							<position>418.767242 -90.751701 863.611633</position>
+							<rotation>0 0.613098 0</rotation>
+						</location>
+						<objId>em0052</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0x15665cb</id>
+						<location>
+							<position>424.993073 -90.751701 866.344116</position>
+							<rotation>0 -0.171791 0</rotation>
+						</location>
+						<objId>em005c</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xc3e70c37</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x73afaa45</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (2)">敵セット(2)</name>
+		<id>0xe9bf24a2</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xf7610572</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>6</size>
+					<value>
+						<id>0xcb412b45</id>
+						<location>
+							<position>431.046539 -92.220276 852.716431</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em3010</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x88a8a73f</id>
+						<location>
+							<position>436.331085 -92.220276 859.280273</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em2002</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xd29dc5b7</id>
+						<location>
+							<position>433.392517 -92.220276 837.13269</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em000d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0xb580e9a7</id>
+						<location>
+							<position>433.392517 -92.220276 876.199646</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em1090</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0xdce68f78</id>
+						<location>
+							<position>452.924072 -92.220276 856.651367</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em1050</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0x426562fd</id>
+						<location>
+							<position>413.857208 -92.220276 856.681885</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em6400</objId>
+						<setType>17</setType>
+						<setRtn>2</setRtn>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x3dd68e33</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xce3bbdf5</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x6db2774e</id>
+		<attribute>0x8</attribute>
+		<delay>2</delay>
+	</action>
+	<action>
+		<code str="CameraTargetAction">0x4f925d24</code>
+		<name eng="camera gaze">カメラ注視</name>
+		<id>0xc1fbb2af</id>
+		<attribute>0x400</attribute>
+		<location>
+			<position>444.312805 -90.835213 847.792419</position>
+		</location>
+		<area>
+			<size>0</size>
+		</area>
+		<time_>2</time_>
+		<rate_>0.05</rate_>
+		<playerForceIn_>0</playerForceIn_>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x13f9a208</id>
+		<attribute>0x8</attribute>
+		<delay>1</delay>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x2517e5f</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::StateObject">0xcecad9ce</code>
+						<id str="@MISC">0xf6a78746</id>
+					</puid>
+					<command>
+						<command>
+							<label>MiscState.callBgm</label>
+						</command>
+						<args>BGM_CR_Battle_Start_Ex_Opera</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy Set_Opera Boss">敵セット_オペラボス</name>
+		<id>0x98a276ac</id>
+		<attribute>0x800</attribute>
+		<layouts>
+			<normal>
+				<id>0xa8e9bbc3</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>1</size>
+					<value>
+						<id>0x15550528</id>
+						<location>
+							<position>444.312805 -92.220276 847.792419</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0016</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>95</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x9f13ad25</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xe77afc16</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy Set_Opera Boss Palico">敵セット_オペラボスのオトモ</name>
+		<id>0x1bd9248a</id>
+		<attribute>0x800</attribute>
+		<layouts>
+			<normal>
+				<id>0x27f1a0e1</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>1</size>
+					<value>
+						<id>0xf444c37c</id>
+						<location>
+							<position>432.500244 -92.220276 856.576843</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1070</objId>
+						<setType>5</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x40aa35d7</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xe56cdda6</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<type>2</type>
+			<puid>
+				<code str="app::EntityLayout">0xd8efbb45</code>
+				<id>0x15550528</id>
+			</puid>
+			<condition>
+				<state>
+					<label>BehaviorAppBase.getHpRate100</label>
+					<value>75</value>
+				</state>
+				<pred>5</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="MultiConditionBlock">0xe58b4e99</code>
+		<name eng="conditional block list">条件ブロックリスト</name>
+		<id>0x8643eab8</id>
+		<attribute>0x8</attribute>
+		<condition>
+			<conditions>
+				<size>2</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x98a276ac</id>
+					</puid>
+					<condition>
+						<state>
+							<label>DONE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x1bd9248a</id>
+					</puid>
+					<condition>
+						<state>
+							<label>DONE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x125a708d</id>
+		<attribute>0x8</attribute>
+		<delay>3</delay>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x131dbe0f</id>
+		<attribute>0x3</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::StateObject">0xcecad9ce</code>
+						<id str="@MISC">0xf6a78746</id>
+					</puid>
+					<command>
+						<command>
+							<label>MiscState.callBgm</label>
+						</command>
+						<args>BGM_CR_Battle_Start_B</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0xe2533a2e</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x561146b</id>
+					</puid>
+					<command>
+						<command>
+							<label>Action.signal</label>
+						</command>
+						<args>"trialEX_emset3_start 0"</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>8</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (3)">敵セット(3)</name>
+		<id>0x855a6f92</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x33303b4b</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>18</size>
+					<value>
+						<id>0x8631ff7f</id>
+						<location>
+							<position>433.392517 -92.220276 837.13269</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em0064</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x8c8a8d13</id>
+						<location>
+							<position>450.557068 -92.220276 862.636597</position>
+							<rotation>0 4.408179 0</rotation>
+						</location>
+						<objId>emb015</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xda39dd06</id>
+						<location>
+							<position>419.561951 -92.220276 842.871216</position>
+							<rotation>0 3.0182 0</rotation>
+						</location>
+						<objId>em0052</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0x4e8ff99e</id>
+						<location>
+							<position>413.857208 -92.220276 856.681885</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em0014</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x5a973d5e</id>
+						<location>
+							<position>419.5849 -92.220276 870.484985</position>
+							<rotation>0 4.588193 0</rotation>
+						</location>
+						<objId>em0056</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1.5</delay>
+					</value>
+					<value>
+						<id>0xee11e609</id>
+						<location>
+							<position>433.392517 -92.220276 876.199646</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em0106</objId>
+						<setType>17</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>2</delay>
+					</value>
+					<value>
+						<id>0x75d70a8b</id>
+						<location>
+							<position>447.219452 -92.220276 870.463257</position>
+							<rotation>0 3.0182 0</rotation>
+						</location>
+						<objId>em0090</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>2.5</delay>
+					</value>
+					<value>
+						<id>0x8b77b296</id>
+						<location>
+							<position>452.924072 -92.220276 856.651367</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em0080</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>3</delay>
+					</value>
+					<value>
+						<id>0xf081d2d4</id>
+						<location>
+							<position>447.198547 -92.220276 842.849487</position>
+							<rotation>0 4.588193 0</rotation>
+						</location>
+						<objId>em2001</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>3.5</delay>
+					</value>
+					<value>
+						<id>0xb30f83bd</id>
+						<location>
+							<position>433.392517 -92.220276 837.13269</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em000e</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>4.5</delay>
+					</value>
+					<value>
+						<id>0x3fcd12ca</id>
+						<location>
+							<position>433.392517 -92.220276 876.199646</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em005d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>5.5</delay>
+					</value>
+					<value>
+						<id>0xabb9a9f7</id>
+						<location>
+							<position>447.198547 -92.220276 842.849487</position>
+							<rotation>0 4.588193 0</rotation>
+						</location>
+						<objId>em5600</objId>
+						<setType>17</setType>
+						<setRtn>2</setRtn>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x84b3f64</id>
+						<location>
+							<position>419.561951 -92.220276 842.871216</position>
+							<rotation>0 3.0182 0</rotation>
+						</location>
+						<objId>em0020</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x523ac81f</id>
+						<location>
+							<position>413.857208 -92.220276 856.681885</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>emb080</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xa42a619c</id>
+						<location>
+							<position>419.5849 -92.220276 870.484985</position>
+							<rotation>0 4.588193 0</rotation>
+						</location>
+						<objId>em1074</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x85c79930</id>
+						<location>
+							<position>452.924072 -92.220276 856.651367</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em002d</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x1029c380</id>
+						<location>
+							<position>447.219452 -92.220276 870.463257</position>
+							<rotation>0 3.0182 0</rotation>
+						</location>
+						<objId>em0003</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x38583572</id>
+						<location>
+							<position>416.878326 -92.220276 862.988586</position>
+							<rotation>0 1.90318 0</rotation>
+						</location>
+						<objId>em1074</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x1ef7cdc3</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xa778f0a4</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>6</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (3)">敵セット(3)</name>
+		<id>0xf3f629ed</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x9cbfbd38</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>3</size>
+					<value>
+						<id>0xb1d9b3c6</id>
+						<location>
+							<position>434.71756 -92.230103 855.044312</position>
+							<rotation>0 1.39821 0</rotation>
+						</location>
+						<objId>em0066</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x77b01ac8</id>
+						<location>
+							<position>432.159668 -89.545662 835.199585</position>
+							<rotation>0 -0.171791 0</rotation>
+						</location>
+						<objId>em0035</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+					<value>
+						<id>0x87e75cd5</id>
+						<location>
+							<position>440.783356 -89.545662 874.286194</position>
+							<rotation>0 -0.171791 0</rotation>
+						</location>
+						<objId>em0030</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x2fc4185a</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x4c56bad</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x9870dfff</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x561146b</id>
+					</puid>
+					<command>
+						<command>
+							<label>Action.signal</label>
+						</command>
+						<args>"trialEX_emset4_start 0"</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>8</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (3)">敵セット(3)</name>
+		<id>0x675dc16d</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x1bb95e9b</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>5</size>
+					<value>
+						<id>0x53febb64</id>
+						<location>
+							<position>433.546936 -92.220276 855.342957</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0040</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x2ad516f3</id>
+						<location>
+							<position>433.392517 -92.220276 837.13269</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>em000d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.6</delay>
+					</value>
+					<value>
+						<id>0x3b2c3a3e</id>
+						<location>
+							<position>433.392517 -92.220276 876.199646</position>
+							<rotation>0 -0.910001 0</rotation>
+						</location>
+						<objId>emb015</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.2</delay>
+					</value>
+					<value>
+						<id>0x973c4d44</id>
+						<location>
+							<position>452.924072 -92.220276 856.651367</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em0013</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x1f890c9c</id>
+						<location>
+							<position>413.857208 -92.220276 856.681885</position>
+							<rotation>0 3.803201 0</rotation>
+						</location>
+						<objId>em200d</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.4</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x89e6facf</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x8f2d0993</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (3)">敵セット(3)</name>
+		<id>0xa16c0554</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x35f5a70b</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>7</size>
+					<value>
+						<id>0xfe19f649</id>
+						<location>
+							<position>432.698212 -92.230103 864.566772</position>
+						</location>
+						<objId>emb016</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x17540b5d</id>
+						<location>
+							<position>441.442383 -92.230103 853.495422</position>
+						</location>
+						<objId>emb016</objId>
+						<setType>2</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x706724b6</id>
+						<location>
+							<position>423.651581 -92.230103 853.401001</position>
+						</location>
+						<objId>em0090</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x5364710f</id>
+						<location>
+							<position>419.053497 -90.751701 871.276245</position>
+							<rotation>0 3.928171 0</rotation>
+						</location>
+						<objId>emb060</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xf41aeaa2</id>
+						<location>
+							<position>447.208099 -90.751701 871.253784</position>
+							<rotation>0 -0.785002 0</rotation>
+						</location>
+						<objId>em0094</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x778706a1</id>
+						<location>
+							<position>447.184692 -90.751701 843.078247</position>
+							<rotation>0 3.928171 0</rotation>
+						</location>
+						<objId>em0040</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x7dbcfaec</id>
+						<location>
+							<position>419.032349 -90.751701 843.101318</position>
+							<rotation>0 -0.785002 0</rotation>
+						</location>
+						<objId>emb05a</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x7d8818bf</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x1c5ff57c</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0xc44498d0</id>
+		<attribute>0x8</attribute>
+		<delay>2</delay>
+	</action>
+	<action>
+		<code str="CameraTargetAction">0x4f925d24</code>
+		<name eng="camera gaze">カメラ注視</name>
+		<id>0x2d1a8983</id>
+		<attribute>0x400</attribute>
+		<location>
+			<position>433.144379 -91.15535 855.843262</position>
+		</location>
+		<area>
+			<size>0</size>
+		</area>
+		<time_>2</time_>
+		<rate_>0.05</rate_>
+		<playerForceIn_>0</playerForceIn_>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0xdb82c442</id>
+		<attribute>0x8</attribute>
+		<delay>1</delay>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x518de2fb</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::StateObject">0xcecad9ce</code>
+						<id str="@MISC">0xf6a78746</id>
+					</puid>
+					<command>
+						<command>
+							<label>MiscState.callBgm</label>
+						</command>
+						<args>BGM_CR_Battle_Start_Ex_Polypodia</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set_Large multi-legged">敵セット_大型多脚</name>
+		<id>0x3ed9570c</id>
+		<attribute>0x800</attribute>
+		<layouts>
+			<normal>
+				<id>0x4550e2f2</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>1</size>
+					<value>
+						<id>0x2eb380d7</id>
+						<location>
+							<position>433.144379 -48.376022 855.843262</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1070</objId>
+						<setType>5</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>95</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x5d3c34a</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xd42c852f</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="Conditional Command_Many -legged Palico Appears">条件コマンド_多脚のオトモ出現</name>
+		<id>0x3f186582</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<type>2</type>
+					<puid>
+						<code str="app::EntityLayout">0xd8efbb45</code>
+						<id>0x2eb380d7</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BehaviorAppBase.getHpRate100</label>
+							<value>70</value>
+						</state>
+						<pred>5</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xfead280a</id>
+					</puid>
+					<command>
+						<command>
+							<label>ENABLE</label>
+						</command>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="EnemyGenerator">0x6f0fb5bd</code>
+		<name eng="Enemy generator_Large multi-legged Palico">敵発生機_大型多脚のオトモ</name>
+		<id>0xfead280a</id>
+		<attribute>0x2</attribute>
+		<points>
+			<attribute>0x5e0f360</attribute>
+			<nodes>
+				<size>8</size>
+				<value>
+					<point>428.48938 -62.435654 837.100403</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>416.600189 -62.435654 846.712769</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>414.467896 -62.435654 861.688843</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>422.81781 -62.435654 873.28125</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>438.727295 -62.435654 874.6026</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>450.648163 -62.435654 864.789734</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>452.747009 -62.435654 850.459045</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+				<value>
+					<point>443.653931 -62.435654 838.991272</point>
+					<radius>4</radius>
+					<rate>1</rate>
+					<minDistance>0</minDistance>
+					<initDir>-0.155</initDir>
+				</value>
+			</nodes>
+		</points>
+		<items>
+			<size>3</size>
+			<value>
+				<objId>em1030</objId>
+				<rate>1</rate>
+				<setType>6</setType>
+			</value>
+			<value>
+				<objId>em005a</objId>
+				<rate>1</rate>
+			</value>
+			<value>
+				<objId>em1090</objId>
+				<rate>2</rate>
+				<setType>1</setType>
+			</value>
+		</items>
+		<spawnRange>
+			<min>200</min>
+			<max>200</max>
+		</spawnRange>
+		<createRange>
+			<min>6</min>
+			<max>6</max>
+		</createRange>
+		<levelRange>
+			<min>90</min>
+			<max>90</max>
+		</levelRange>
+		<spawnInterval>
+			<min>20</min>
+			<max>20</max>
+		</spawnInterval>
+		<amountEachSpawn>
+			<min>1</min>
+			<max>4</max>
+		</amountEachSpawn>
+		<relativeLevel>0</relativeLevel>
+		<area>
+			<size>0</size>
+		</area>
+		<resetArea>
+			<size>0</size>
+		</resetArea>
+		<resetType>3</resetType>
+		<searchArea>
+			<size>0</size>
+		</searchArea>
+		<escapeArea>
+			<size>0</size>
+		</escapeArea>
+		<dist>
+			<position>434.141479 -90.907318 856.901672</position>
+			<areaDist>50</areaDist>
+			<resetDist>60</resetDist>
+			<searchDist>50</searchDist>
+			<guardSDist>60</guardSDist>
+			<guardLDist>70</guardLDist>
+		</dist>
+		<fitGround>0</fitGround>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="Condition command_stop multi-leg Palico increase">条件コマンド_多脚のオトモ増加停止</name>
+		<id>0xcce6fd09</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<type>2</type>
+					<puid>
+						<code str="app::EntityLayout">0xd8efbb45</code>
+						<id>0x2eb380d7</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BehaviorAppBase.getHpRate100</label>
+							<value>3</value>
+						</state>
+						<pred>5</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xfead280a</id>
+					</puid>
+					<command>
+						<command>
+							<label>EnemyGenerator.stopSpawn</label>
+						</command>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="ConditionBlock">0x606fe5c4</code>
+		<name eng="Condition block _ Multi-legged defeat">条件ブロック_多脚撃破</name>
+		<id>0xbeaa3d82</id>
+		<attribute>0x8</attribute>
+		<condition>
+			<puid>
+				<code str="hap::Action">0xa6aaf7a4</code>
+				<id>0x3ed9570c</id>
+			</puid>
+			<condition>
+				<state>
+					<label>DONE</label>
+				</state>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<bDisable>0</bDisable>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x2bcbad16</id>
+		<attribute>0x8</attribute>
+		<delay>1</delay>
+	</action>
+	<action>
+		<code str="SendCommand">0xa10e3dbc</code>
+		<name eng="Send Command_Many Legged Palico Suicide">コマンド送信_多脚のオトモ自殺</name>
+		<id>0xdba5e024</id>
+		<attribute>0x0</attribute>
+		<puid>
+			<code str="hap::Action">0xa6aaf7a4</code>
+			<id>0xfead280a</id>
+		</puid>
+		<command>
+			<label>EnemyGenerator.setDieRtn</label>
+		</command>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x22b861e0</id>
+		<attribute>0x8</attribute>
+		<delay>2</delay>
+	</action>
+	<action>
+		<code str="SendCommand">0xa10e3dbc</code>
+		<name eng="Send Command_Erase Palico of Many Legs">コマンド送信_多脚のオトモ消去</name>
+		<id>0xd6773ace</id>
+		<attribute>0x0</attribute>
+		<puid>
+			<code str="hap::Action">0xa6aaf7a4</code>
+			<id>0xfead280a</id>
+		</puid>
+		<command>
+			<label>DISABLE</label>
+		</command>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x5bed0885</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x561146b</id>
+					</puid>
+					<command>
+						<command>
+							<label>Action.signal</label>
+						</command>
+						<args>"trialEX_emset5_start 0"</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>8</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (4)">敵セット(4)</name>
+		<id>0x88f7b501</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0x31d8984</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>4</size>
+					<value>
+						<id>0x31844d3a</id>
+						<location>
+							<position>431.046539 -89.958817 852.716431</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0034</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xde37e1dc</id>
+						<location>
+							<position>436.331085 -89.958817 859.280273</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0030</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xcb1a98bf</id>
+						<location>
+							<position>423.874603 -92.220276 845.823242</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0005</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x4d4e4558</id>
+						<location>
+							<position>440.965179 -92.220276 867.338989</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em004d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xd40b45ed</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xa0b9bd41</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (4)">敵セット(4)</name>
+		<id>0x33d53227</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xbcd80131</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>12</size>
+					<value>
+						<id>0x5a093b9d</id>
+						<location>
+							<position>436.836884 -92.220276 853.866638</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1030</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x657e53cb</id>
+						<location>
+							<position>440.180695 -92.220276 854.432434</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0005</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0xde0b8528</id>
+						<location>
+							<position>437.257813 -92.220276 850.788208</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em000e</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0xbd793cb8</id>
+						<location>
+							<position>438.616516 -92.220276 852.560059</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em000e</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x3575ebb3</id>
+						<location>
+							<position>440.028595 -92.220276 851.294495</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em001c</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0xca496435</id>
+						<location>
+							<position>438.669891 -92.220276 849.522644</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em001c</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x50440940</id>
+						<location>
+							<position>441.592773 -92.220276 853.16687</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0112</objId>
+						<setType>6</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x823e0d7b</id>
+						<location>
+							<position>437.940308 -92.220276 841.11322</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1050</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0x80aacb90</id>
+						<location>
+							<position>440.932892 -92.220276 844.840088</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0005</objId>
+						<setType>3</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.33</delay>
+					</value>
+					<value>
+						<id>0xc7eb3da3</id>
+						<location>
+							<position>443.809174 -92.220276 848.546936</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1070</objId>
+						<setType>5</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.66</delay>
+					</value>
+					<value>
+						<id>0xad01c961</id>
+						<location>
+							<position>446.801758 -92.220276 852.273804</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em8030</objId>
+						<setType>9</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.33</delay>
+					</value>
+					<value>
+						<id>0x4379d0b8</id>
+						<location>
+							<position>449.900909 -92.220276 856.074219</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em1061</objId>
+						<setType>8</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x37c50b35</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x77a36438</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0x1eb937c0</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0x561146b</id>
+					</puid>
+					<command>
+						<command>
+							<label>Action.signal</label>
+						</command>
+						<args>"trialEX_emset6_start 0"</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>8</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (4)">敵セット(4)</name>
+		<id>0x5e43004e</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xe1671257</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>4</size>
+					<value>
+						<id>0xc897806c</id>
+						<location>
+							<position>423.957306 -92.220276 846.077881</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em001c</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xf4f3205f</id>
+						<location>
+							<position>440.900726 -92.220276 867.149902</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0050</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0x327b2753</id>
+						<location>
+							<position>442.957703 -92.220276 848.133728</position>
+							<rotation>0 3.80819 0</rotation>
+						</location>
+						<objId>em002d</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0xb8ae35d8</id>
+						<location>
+							<position>421.899139 -92.220276 865.094116</position>
+							<rotation>0 3.80819 0</rotation>
+						</location>
+						<objId>em0003</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0x458e570a</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0xfcddcf0c</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy set (4)">敵セット(4)</name>
+		<id>0x30f7a236</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xe30dbbfe</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>5</size>
+					<value>
+						<id>0x8877f78c</id>
+						<location>
+							<position>432.10611 -92.220276 853.946228</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>emb015</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xb2f1f9f0</id>
+						<location>
+							<position>435.578522 -92.220276 858.307678</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em000d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>0.5</delay>
+					</value>
+					<value>
+						<id>0x88afded2</id>
+						<location>
+							<position>430.960236 -92.220276 858.444763</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0055</objId>
+						<setType>4</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xe2e9a0c6</id>
+						<location>
+							<position>423.933044 -92.220276 845.989197</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em0080</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+					<value>
+						<id>0x6360613b</id>
+						<location>
+							<position>441.000366 -92.220276 867.16333</position>
+							<rotation>0 -0.905 0</rotation>
+						</location>
+						<objId>em005d</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>90</body>
+							</value>
+						</param>
+						<delay>1</delay>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xf0a187ea</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x7091b6d7</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="ConditionCommands">0x7d30118c</code>
+		<name eng="conditional command">条件コマンド</name>
+		<id>0xc065a00f</id>
+		<attribute>0x0</attribute>
+		<condition>
+			<conditions>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::Action">0xa6aaf7a4</code>
+						<id>0xb878db19</id>
+					</puid>
+					<condition>
+						<state>
+							<label>BATTLE</label>
+						</state>
+						<pred>0</pred>
+					</condition>
+				</value>
+			</conditions>
+			<type>0</type>
+		</condition>
+		<commands>
+			<items>
+				<size>1</size>
+				<value>
+					<puid>
+						<code str="hap::StateObject">0xcecad9ce</code>
+						<id str="@MISC">0xf6a78746</id>
+					</puid>
+					<command>
+						<command>
+							<label>MiscState.callBgm</label>
+						</command>
+						<args>BGM_CR_Battle_Start_Ex_Adam_Eve</args>
+					</command>
+				</value>
+			</items>
+		</commands>
+		<type_>2</type_>
+		<delay>0</delay>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x262da986</id>
+		<attribute>0x8</attribute>
+		<delay>2</delay>
+	</action>
+	<action>
+		<code str="CameraTargetAction">0x4f925d24</code>
+		<name eng="camera gaze">カメラ注視</name>
+		<id>0x76fb8485</id>
+		<attribute>0x400</attribute>
+		<location>
+			<position>433.144379 -91.15535 855.843262</position>
+		</location>
+		<area>
+			<size>0</size>
+		</area>
+		<time_>2</time_>
+		<rate_>0.05</rate_>
+		<playerForceIn_>0</playerForceIn_>
+	</action>
+	<action>
+		<code str="DelayAction">0x149c7bdf</code>
+		<name eng="delay block">遅延ブロック</name>
+		<id>0x65b179aa</id>
+		<attribute>0x8</attribute>
+		<delay>1</delay>
+	</action>
+	<action>
+		<code str="EnemySetAction">0xfb085793</code>
+		<name eng="Enemy Set_Adam Eve">敵セット_アダムイヴ</name>
+		<id>0xc22a1de3</id>
+		<attribute>0x808</attribute>
+		<layouts>
+			<normal>
+				<id>0xf055f124</id>
+				<flags>0x0</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>2</size>
+					<value>
+						<id>0x7013a10d</id>
+						<location>
+							<position>433.144379 -48.376022 858.43689</position>
+							<rotation>0 -1.52 0</rotation>
+						</location>
+						<objId>em0096</objId>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>99</body>
+							</value>
+						</param>
+					</value>
+					<value>
+						<id>0xc32f4c19</id>
+						<location>
+							<position>433.144379 -48.376022 853.405579</position>
+							<rotation>0 -1.52 0</rotation>
+						</location>
+						<objId>em2050</objId>
+						<setType>1</setType>
+						<param>
+							<count>0x1</count>
+							<value>
+								<name>Lv</name>
+								<code str="int">0x1451dab1</code>
+								<body>99</body>
+							</value>
+						</param>
+					</value>
+				</layouts>
+			</normal>
+			<hard>
+				<id>0xb9676979</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</hard>
+			<extream>
+				<id>0x36e3b702</id>
+				<flags>0x1</flags>
+				<parent>
+					<id>
+						<id>
+							<code>0x0</code>
+							<id>0x0</id>
+						</id>
+					</id>
+				</parent>
+				<layouts>
+					<size>0</size>
+				</layouts>
+			</extream>
+		</layouts>
+		<condition>
+			<puid>
+				<code>0x0</code>
+				<id>0x0</id>
+			</puid>
+			<condition>
+				<state/>
+				<pred>0</pred>
+			</condition>
+		</condition>
+		<delay>0</delay>
+		<max>0</max>
+	</action>
+	<action>
+		<code str="SendCommand">0xa10e3dbc</code>
+		<name eng="Send command">コマンド送信</name>
+		<id>0xe1c3b732</id>
+		<attribute>0x0</attribute>
+		<puid>
+			<code str="hap::Action">0xa6aaf7a4</code>
+			<id>0x4886f419</id>
+		</puid>
+		<command>
+			<label>UITimerAction.stop</label>
+		</command>
+	</action>
+</root>
