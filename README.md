@@ -40,3 +40,6 @@ To install and build the NAER tool, follow these steps:
 5. **Build Executable**: Execute `flutter build windows` to create the Windows executable for the tool.
 
 After successfully installing NAER, simply run the executable
+
+## Special thanks to Arthur Heitmann (RaiderB) and all the other Modders who made this possible.
+Nier CLI: https://github.com/ArthurHeitmann/nier_cli
