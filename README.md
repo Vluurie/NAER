@@ -17,8 +17,10 @@ NAER, the ultimate enemy randomization tool designed to enhance your gaming expe
 - **User-Interface**: Enjoy a straightforward and intuitive user interface for a hassle-free configuration process.
 
   Note: Bosses and Alias Tagged Enemies who are needed for the Game Logic are not altered. So u can play normally the story.
-  For now it was tested mostly for the complete prolouge.
+  For now it was tested mostly for the complete prologue.
   Big enemies in small places can bug, this is totally normal.
+  Sometimes some enemies that spawn from the top are staying on the top, simply shoot them down.
+  If u found anything really annoying or u cannot continue the game because of some issue that is from an enemy. Feel free to join the Modding Discord and try to ask for help.
 
 ## Installation for Users
 
