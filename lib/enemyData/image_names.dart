@@ -64,7 +64,6 @@ List<String> imageNames = [
   'em1061.png',
   'em1070.png',
   'em1074.png',
-  'em1090.png',
   'em2001.png',
   'em2002.png',
   'em2006.png',

@@ -11,7 +11,6 @@ const Map<String, List<String>> enemyData = {
     "em005d",
     "em1050",
     "em1060",
-    "em1090",
     "em1070",
     "em1061",
     "em0065",
@@ -79,6 +78,7 @@ const Map<String, List<String>> enemyData = {
   "Delete": [
     "emf000",
     "em9002",
+    "em1090",
     "em4120",
     "em2004",
     "em4010",

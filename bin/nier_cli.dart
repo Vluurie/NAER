@@ -229,7 +229,7 @@ Future<void> main(List<String> arguments) async {
     }
 
     // Check if the file is in the ignoreList
-    if (ignoreList.contains(baseName)) {
+    if (ignoreList.contains(baseName) || baseName.startsWith('r5a5')) {
       continue;
     }
 
@@ -238,7 +238,8 @@ Future<void> main(List<String> arguments) async {
       processFile = true;
     } else if (randomizeAllMaps && baseName.startsWith('r')) {
       processFile = true;
-    } else if (randomizeAllPhases && baseName.startsWith('p')) {
+    } else if (randomizeAllPhases && baseName.startsWith('p') ||
+        baseName.startsWith('corehap')) {
       processFile = true;
     }
 

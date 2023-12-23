@@ -11,7 +11,6 @@ class EnemyImageGrid extends StatefulWidget {
 }
 
 class EnemyImageGridState extends State<EnemyImageGrid> {
-  // Member variable to store selected image names
   List<String> selectedImages = [];
   String clickedImage = '';
   bool isImageClicked = false;
@@ -28,7 +27,6 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     double gridHeight;
     int crossAxisCount;
 
-    // Determine the crossAxisCount and gridHeight based on UI screen size
     if (MediaQuery.of(context).size.width < 600) {
       crossAxisCount = 3; // On smaller UI screens
       gridHeight = 350.0;
@@ -70,12 +68,9 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     Widget gridSection = Container(
       height: gridHeight,
       decoration: BoxDecoration(
-        color: Color.fromARGB(
-            255, 26, 25, 25), // Add your desired background color here
-        border: Border.all(
-            color: Color.fromARGB(255, 255, 255, 255),
-            width: 1), // Customizable border
-        borderRadius: BorderRadius.circular(10), // Optional border radius
+        color: Color.fromARGB(255, 26, 25, 25),
+        border: Border.all(color: Color.fromARGB(255, 255, 255, 255), width: 1),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -134,10 +129,35 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
   }
 
   Widget createClickableImage(String imagePath) {
-    final baseName =
-        Uri.parse(imagePath).pathSegments.last; // Extract the image file name
+    final baseName = Uri.parse(imagePath).pathSegments.last;
     bool isSelected = selectedImages.contains(baseName);
     final ValueNotifier<bool> isHovered = ValueNotifier(false);
+
+    const buggyEnemies = {
+      'em2006.png',
+      'em200d.png',
+      'em2001.png',
+      'em2002.png',
+      'em2007.png',
+      'em8030.png',
+      'em3010.png',
+      'em0112.png'
+    };
+
+    const specialEnemies = {
+      'emb05d.png',
+      'em6400.png',
+      'em5600.png',
+      'emb016.png',
+      'emb060.png',
+      'emb080.png',
+      'em1030.png',
+      'em1040.png',
+      'em1074.png'
+    };
+
+    bool isBuggyEnemy = buggyEnemies.contains(baseName);
+    bool isSpecialEnemy = specialEnemies.contains(baseName);
 
     return ValueListenableBuilder(
       valueListenable: isHovered,
@@ -160,26 +180,39 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                     transform: Matrix4.identity()
                       ..scale(isHovered.value ? 1.05 : 1.0),
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 31, 30,
-                          30), // Background color for each image container
+                      color: isBuggyEnemy
+                          ? Color.fromARGB(255, 50, 50, 50)
+                          : isSpecialEnemy
+                              ? Color.fromARGB(255, 40, 40, 40)
+                              : Color.fromARGB(255, 31, 30, 30),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: isHovered.value
-                          ? [
-                              BoxShadow(
-                                color: Color.fromARGB(255, 241, 241, 241)
-                                    .withOpacity(0.3),
-                                spreadRadius: 2,
-                                blurRadius: 100,
-                                offset:
-                                    Offset(0, 10), // Changes position of shadow
-                              ),
-                            ]
-                          : [],
+                      boxShadow:
+                          isHovered.value || isBuggyEnemy || isSpecialEnemy
+                              ? [
+                                  BoxShadow(
+                                    color: isBuggyEnemy
+                                        ? Colors.red.withOpacity(0.5)
+                                        : isSpecialEnemy
+                                            ? const Color.fromARGB(
+                                                    255, 54, 164, 255)
+                                                .withOpacity(0.5)
+                                            : Color.fromARGB(255, 241, 241, 241)
+                                                .withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 50,
+                                    offset: Offset(0, 10),
+                                  ),
+                                ]
+                              : [],
                       border: Border.all(
                         color: isSelected || isHovered.value
                             ? Color.fromARGB(255, 255, 255, 255)
-                            : Colors.transparent,
-                        width: 3,
+                            : isBuggyEnemy
+                                ? Colors.red
+                                : isSpecialEnemy
+                                    ? Colors.blue
+                                    : Colors.transparent,
+                        width: isBuggyEnemy || isSpecialEnemy ? 3 : 3,
                       ),
                     ),
                     child: Opacity(

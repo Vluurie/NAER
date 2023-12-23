@@ -53,11 +53,11 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.title, style: Theme.of(context).textTheme.headline6),
+            Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 5),
             Text(
               isSelected ? widget.path : 'No directory selected',
-              style: Theme.of(context).textTheme.bodyText2,
+              style: Theme.of(context).textTheme.bodyMedium,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 5),

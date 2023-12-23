@@ -40,7 +40,7 @@ class EnemyRandomizerApp extends StatelessWidget {
           textTheme: ButtonTextTheme.primary,
         ),
       ),
-      home: EnemyRandomizerAppState(), // Reference the StatefulWidget here
+      home: EnemyRandomizerAppState(),
     );
   }
 }
@@ -61,7 +61,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   int _selectedIndex = 0;
   List<String> createdFiles = [];
-  final List<String> selectedImages = [];
   bool isLoading = false;
   bool isButtonEnabled = true;
   bool isLogIconBlinking = false;
@@ -71,7 +70,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   int enemyLevel = 1;
   String specialDatOutputPath = '';
   List<String> ignoredModFiles = [];
-  List<String> logMessages = []; // List to store log messages
+  List<String> logMessages = [];
   Map<String, bool> categories = {
     "All Quests": true,
     "All Maps": true,
@@ -99,8 +98,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       reverseDuration: Duration(milliseconds: 1000),
     );
 
-    // Initialize the check icon animation
-
     log('initState called');
   }
 
@@ -116,26 +113,26 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   void dispose() {
     scrollController.dispose();
     super.dispose();
-    log('dispose called'); // Debugging statement
+    log('dispose called');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(70.0), // Height of the AppBar.
+          preferredSize: Size.fromHeight(70.0),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromARGB(255, 28, 31, 32), // Dark purple
-                  Color.fromARGB(255, 45, 45, 48), // Light purple
+                  Color.fromARGB(255, 28, 31, 32),
+                  Color.fromARGB(255, 45, 45, 48),
                 ],
               ),
               borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(16), // Rounded corner radius
+                bottom: Radius.circular(16),
               ),
             ),
             child: Stack(
@@ -145,18 +142,16 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     width: 70,
                     child: ColorFiltered(
                       colorFilter: ColorFilter.mode(
-                        Color.fromARGB(0, 117, 100,
-                            100), // Adjust the opacity to control darkness
-                        BlendMode.srcOver, // Use darken blend mode
+                        Color.fromARGB(0, 117, 100, 100),
+                        BlendMode.srcOver,
                       ),
                       child: Image.asset(
-                        'assets/1234.png', // Replace with your image asset path
-                        fit: BoxFit
-                            .cover, // This ensures the image covers the whole screen
+                        'assets/1234.png',
+                        fit: BoxFit.cover,
                       ),
                     )),
                 AppBar(
-                  toolbarHeight: 100.0, // Adjusted AppBar height
+                  toolbarHeight: 100.0,
                   title: Padding(
                     padding: const EdgeInsets.only(left: 40),
                     child: const Text('NAER'),
@@ -177,17 +172,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                         ),
                       ],
                     ),
-
                     Spacer(),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
                           icon: Icon(Icons.info, size: 32.0),
-                          color: Color.fromRGBO(
-                              49, 217, 240, 1), // Normal information icon
+                          color: Color.fromRGBO(49, 217, 240, 1),
                           onPressed: () {
-                            // Display a message when the button is pressed
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -262,13 +254,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                               animation: _blinkController,
                               builder: (context, child) {
                                 final color = ColorTween(
-                                  begin: Color.fromARGB(31, 206, 198,
-                                      198), // Change this to the initial color of the icon
-                                  end: Color.fromARGB(255, 86, 244,
-                                      54), // Change this to the desired color during blinking
+                                  begin: Color.fromARGB(31, 206, 198, 198),
+                                  end: Color.fromARGB(255, 86, 244, 54),
                                 ).animate(_blinkController).value;
 
-                                // Print a message when the blinking animation is triggered
                                 if (_blinkController.status ==
                                     AnimationStatus.forward) {}
 
@@ -290,15 +279,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     ),
                     Spacer(),
                     Padding(
-                      padding: EdgeInsets.only(
-                          right: 100.0), // Adjust padding as needed
+                      padding: EdgeInsets.only(right: 100.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           _navigateButton(context),
                         ],
                       ),
-                    ), // Add Spacer to push icons to the center
+                    ),
                   ],
                 ),
               ],
@@ -311,8 +299,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color.fromARGB(255, 28, 31, 32), // Same as AppBar start color
-                Color.fromARGB(255, 45, 45, 48), // Same as AppBar end color
+                Color.fromARGB(255, 28, 31, 32),
+                Color.fromARGB(255, 45, 45, 48),
               ],
             ),
             borderRadius: BorderRadius.only(
@@ -339,25 +327,19 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white60,
             onTap: _onItemTapped,
-            backgroundColor:
-                Colors.transparent, // Set it transparent to show gradient
-            type: BottomNavigationBarType.fixed, // Avoid shifting items
-            elevation: 0, // Remove shadow
+            backgroundColor: Colors.transparent,
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
           ),
         ),
         body: Stack(children: [
           Positioned.fill(
               child: ColorFiltered(
             colorFilter: ColorFilter.mode(
-              Color.fromARGB(255, 24, 23, 23)
-                  .withOpacity(0.9), // Adjust the opacity to control darkness
-              BlendMode.srcOver, // Use darken blend mode
+              Color.fromARGB(255, 24, 23, 23).withOpacity(0.9),
+              BlendMode.srcOver,
             ),
-            child: Image.asset(
-              'assets/NaerIcon.png', // Replace with your image asset path
-              fit: BoxFit
-                  .cover, // This ensures the image covers the whole screen
-            ),
+            child: Image.asset('assets/NaerIcon.png', fit: BoxFit.cover),
           )),
           SingleChildScrollView(
             child: Column(
@@ -405,19 +387,16 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         'Go to Second Page',
         style: TextStyle(
           fontSize: 16.0,
-          color: Color.fromRGBO(0, 255, 255, 1), // Cyan color for text
-          fontWeight: FontWeight.w700,
+          color: Color.fromRGBO(0, 255, 255, 1),
         ),
       ),
       style: ElevatedButton.styleFrom(
         foregroundColor: Color.fromARGB(255, 45, 45, 48),
-        backgroundColor: Color.fromARGB(255, 28, 31, 32), // Light purple
-        elevation: 10, // This adds the shadow
+        backgroundColor: Color.fromARGB(255, 28, 31, 32),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadowColor:
-            Colors.black.withOpacity(0.5), // Shadow color with some opacity
+        shadowColor: Colors.black.withOpacity(0.5),
       ),
     );
   }
@@ -433,14 +412,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (logMessages.isNotEmpty) {
       String lastMessage = logMessages.last;
 
-      // Example conditions
       bool isProcessing = lastMessage.isNotEmpty &&
           !lastMessage.contains("Completed") &&
           !lastMessage.contains("Error") &&
           !lastMessage.contains("Randomization") &&
           !lastMessage.contains("Last");
-
-      // Additional logic can be added here as needed
 
       return isProcessing;
     }
@@ -450,29 +426,27 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Widget setupDirectorySelection() {
     return Align(
-      alignment: Alignment.topLeft, // Align to the right
+      alignment: Alignment.topLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        constraints: BoxConstraints(
-            maxWidth: 600), // Constrain the width of the whole setup
+        constraints: BoxConstraints(maxWidth: 600),
         child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Align children to the right
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DirectorySelectionCard(
               title: "Input Directory:",
               path: input,
               onBrowse: (updatePath) => openInputFileDialog(updatePath),
               icon: Icons.folder_open,
-              width: 250, // Set fixed width of the cards
+              width: 250,
             ),
-            const SizedBox(width: 10), // Space between the two cards
+            const SizedBox(width: 10),
             DirectorySelectionCard(
               title: "Output Directory:",
               path: specialDatOutputPath,
               onBrowse: (updatePath) => openOutputFileDialog(updatePath),
               icon: Icons.folder_open,
-              width: 250, // Set fixed width of the cards
+              width: 250,
             ),
           ],
         ),
@@ -490,9 +464,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         setState(() {
           input = selectedDirectory;
         });
-        updatePath(selectedDirectory); // Update with the selected directory
+        updatePath(selectedDirectory);
       } else {
-        // Show error dialog
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -511,10 +484,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             );
           },
         );
-        updatePath(''); // Do not update the path as the directory is invalid
+        updatePath('');
       }
     } else {
-      updatePath(''); // No directory selected
+      updatePath('');
     }
   }
 
@@ -536,7 +509,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (selectedDirectory != null) {
-      // Always update the state and the path with the selected directory
       setState(() {
         specialDatOutputPath = selectedDirectory;
       });
@@ -583,7 +555,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       _selectedIndex = index;
     });
 
-    // Invoke your methods based on the index:
     switch (index) {
       case 0:
         enemyImageGridKey.currentState?.unselectAllImages();
@@ -612,7 +583,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         await startRandomizing();
         await saveLastRandomizationTime(); // Save last randomization time
       } catch (e) {
-        // Handle any exceptions here
         print("Error during randomization: $e");
       } finally {
         setState(() {
@@ -630,7 +600,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<void> savePreRandomizationTime() async {
-    var bufferTime = Duration(minutes: 60); // Adjust buffer time as needed
+    var bufferTime = Duration(minutes: 60);
     var preRandomizationTime = DateTime.now().subtract(bufferTime);
     var formattedTime =
         DateFormat('yyyy-MM-dd HH:mm:ss').format(preRandomizationTime);
@@ -655,11 +625,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Future<Map<String, List<String>>> sortSelectedEnemies(
       List<String> selectedImages) async {
+    List<String>? selectedImages =
+        enemyImageGridKey.currentState?.selectedImages;
     var enemyGroups = await readEnemyData();
 
     // Remove file extensions from selected images, if they have any
     var formattedSelectedImages =
-        selectedImages.map((image) => image.split('.').first).toList();
+        selectedImages!.map((image) => image.split('.').first).toList();
 
     var sortedSelection = {
       "Ground": <String>[],
@@ -676,9 +648,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           break;
         }
       }
-      if (!found) {
-        // Optionally handle unmatched enemies here
-      }
+      if (!found) {}
     }
 
     return sortedSelection;
@@ -702,8 +672,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     }
 
     String tempFilePath;
+    List<String>? selectedImages =
+        enemyImageGridKey.currentState?.selectedImages;
+
     try {
-      if (selectedImages.isNotEmpty) {
+      if (selectedImages!.isNotEmpty) {
         updateLog("Sorting selected enemies... 💬 ", scrollController);
         var sortedEnemies = await sortSelectedEnemies(selectedImages);
         var tempFile =
@@ -775,7 +748,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     try {
       updateLog("Starting nier_cli.exe...", scrollController);
       final process = await Process.start(
-          scriptPath, processArgs); // Directly call the .exe with arguments
+          scriptPath, processArgs); // calling the .exe with arguments
 
       process.stdout.transform(utf8.decoder).listen((data) {
         // Split the data by new lines and process each line separately
@@ -983,15 +956,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             TextButton(
               child: const Text("Cancel"),
               onPressed: () {
-                Navigator.of(context)
-                    .pop(); // Close the dialog without doing anything
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text("Yes, Undo"),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                undoLastRandomization(); // Proceed with undo
+                Navigator.of(context).pop();
+                undoLastRandomization();
               },
             ),
           ],
@@ -1022,15 +994,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             TextButton(
               child: const Text("No, I still have work to do."),
               onPressed: () {
-                Navigator.of(context)
-                    .pop(); // Close the dialog without doing anything
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text("Yes, Modify"),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                handleStartRandomizing(); // Proceed with modification
+                Navigator.of(context).pop();
+                handleStartRandomizing();
               },
             ),
           ],
@@ -1064,7 +1035,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           "• Selected Enemies: No Enemy selected, will use ALL Enemies for Randomization");
     }
 
-    // Explain what each category means
+    // Explaining what each category means
     switch (categoryDetail) {
       case "All Enemies":
         details.add(
@@ -1142,7 +1113,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         } else if (message.toLowerCase().contains('warning')) {
           logIcon = '⚠️ ';
         } else {
-          logIcon = 'ℹ️ '; // Icon for informational messages
+          logIcon = 'ℹ️ ';
         }
 
         return TextSpan(
@@ -1217,10 +1188,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             child: ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(
-                        255, 25, 25, 26)), // Change the background color
+                    const Color.fromARGB(255, 25, 25, 26)),
                 foregroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 71, 192, 240)), // Change the text color
+                    Color.fromARGB(255, 71, 192, 240)),
               ),
               onPressed: clearLogMessages,
               child: Text('Clear Log'),
@@ -1300,7 +1270,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           if (!loggedStages.contains(stageIdentifier)) {
             // Start animation when a new stage begins
 
-            // Customize the message for better readability
+            // Customizing the message for better readability
             switch (stageIdentifier) {
               case 'repacking_dat':
                 log = "Repacking DAT files initiated.";
@@ -1382,7 +1352,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               child: const Text("OK"),
               onPressed: () {
                 Navigator.of(context).pop();
-                // Additional actions on completion, if necessary
               },
             ),
           ],
@@ -1408,7 +1377,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               TextButton(
                 child: const Text("Cancel"),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the confirmation dialog
+                  Navigator.of(context).pop();
                 },
               ),
               TextButton(
@@ -1420,15 +1389,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     modFiles.clear(); // Remove all files
                   }
                   onModFilesUpdated(modFiles);
-                  Navigator.of(context).pop(); // Close the confirmation dialog
+                  Navigator.of(context).pop();
                   if (modFiles.isNotEmpty) {
-                    Navigator.of(context)
-                        .pop(); // Close the mods message dialog
+                    Navigator.of(context).pop();
                     showModsMessage(modFiles,
                         onModFilesUpdated); // Reopen with updated list
                   } else {
-                    Navigator.of(context)
-                        .pop(); // Close the mods message dialog
+                    Navigator.of(context).pop();
                   }
                 },
               ),
@@ -1536,8 +1503,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               ),
             ),
             ...categories.keys.map((category) {
-              IconData icon = getIconForCategory(
-                  category); // Assuming this function returns an icon based on the category
+              IconData icon = getIconForCategory(category);
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: ListTile(
@@ -1583,8 +1549,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Widget setupBothCategorySelections() {
     return Row(
-      mainAxisAlignment:
-          MainAxisAlignment.spaceBetween, // Space out children equally
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           flex: 1, // Takes 50% of horizontal space
@@ -1702,7 +1667,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       case "Ignore DLC":
         return Icons.image_not_supported_rounded;
       default:
-        return Icons.error; // Return a valid default icon
+        return Icons.error;
     }
   }
 }
@@ -1724,7 +1689,7 @@ IconData getIconForLevel(String levelEnemy) {
 
 void onNewLogMessage(BuildContext context, String newMessage) {
   if (newMessage.toLowerCase().contains('error')) {
-    writeLog(newMessage); // Write the error to the log file
+    writeLog(newMessage); // Writing the error to the log file
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1757,5 +1722,5 @@ Future<void> logMessage(String message) async {
   final logEntry = '[$timestamp] $message\n';
 
   await file.writeAsString(logEntry, mode: FileMode.append);
-  print(logEntry); // Also print to console for debugging
+  print(logEntry);
 }

@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:NAER/enemyData/bossList.dart';
+import 'package:NAER/enemyData/importantIds.dart';
+import 'package:NAER/enemyData/setType.dart';
+import 'package:NAER/fileTypeUtils/xml/xmlExtension.dart';
+import 'package:NAER/naerServices/handleAliasLevel.dart';
 
 import 'package:NAER/naerServices/handleBossLevel.dart';
 import 'package:NAER/naerServices/level_handler.dart';
 import 'package:xml/xml.dart' as xml;
-//import '../enemyData/low_use_aliases_filtered.dart';
-import '../enemyData/setType.dart';
 import '../enemyData/sorted_enemy.dart';
 
 int fileCount = 0;
@@ -24,21 +26,21 @@ void printAndLog(String message) {
   logMessage(message);
 }
 
-void findEnemiesInDirectory(String directoryPath, String sortedEnemiesPath,
-    String enemyLevel, String enemyCategory) {
+Future<void> findEnemiesInDirectory(String directoryPath,
+    String sortedEnemiesPath, String enemyLevel, String enemyCategory) async {
   Map<String, List<String>> sortedEnemyData;
 
-  print("Start TEST: $enemyCategory and $enemyLevel");
+  print("Settings: $enemyCategory and $enemyLevel");
 
   if (sortedEnemiesPath == "ALL") {
     // If "ALL", use the entire enemyData map
     sortedEnemyData = enemyData;
   } else {
     // Otherwise, read the sorted enemy data from the file
-    sortedEnemyData = readSortedEnemyData(sortedEnemiesPath);
+    sortedEnemyData = await readSortedEnemyData(sortedEnemiesPath);
   }
 
-  find(directoryPath, sortedEnemyData, enemyLevel, enemyCategory);
+  await find(directoryPath, sortedEnemyData, enemyLevel, enemyCategory);
 }
 
 Map<String, List<String>> readSortedEnemyData(String filePath) {
@@ -70,8 +72,11 @@ Map<String, List<String>> readSortedEnemyData(String filePath) {
   }
 }
 
-void find(String directoryPath, Map<String, List<String>> sortedEnemyData,
-    String enemyLevel, String enemyCategory) {
+Future<void> find(
+    String directoryPath,
+    Map<String, List<String>> sortedEnemyData,
+    String enemyLevel,
+    String enemyCategory) async {
   print('Found enemy randomizer... starting');
 
   final Directory directory = Directory(directoryPath);
@@ -106,69 +111,93 @@ int traverseDirectory(
   int localFileCount = 0;
   try {
     for (var entity in directory.listSync()) {
-      print(
-          'Processing entity: ${entity.path}'); // Log current entity being processed
+      print('Processing entity: ${entity.path}');
       if (entity is File && entity.path.endsWith('.xml')) {
-        processXmlFile(entity, sortedEnemyData, enemyLevel,
-            enemyCategory); // Use sortedEnemyData here
+        processXmlFile(entity, sortedEnemyData, enemyLevel, enemyCategory,
+            important_ids); // Use sortedEnemyData here
         localFileCount++;
       } else if (entity is Directory) {
-        localFileCount += traverseDirectory(entity, findings, sortedEnemyData,
-            enemyLevel, enemyCategory); // And here
+        localFileCount += traverseDirectory(
+            entity, findings, sortedEnemyData, enemyLevel, enemyCategory);
       }
     }
   } catch (e) {}
   return localFileCount;
 }
 
-void processXmlFile(File file, Map<String, List<String>> sortedEnemyData,
-    String enemyLevel, String enemyCategory) {
+Future<void> processXmlFile(
+    File file,
+    Map<String, List<String>> sortedEnemyData,
+    String enemyLevel,
+    String enemyCategory,
+    Map<String, List<String>> importantIds) async {
   String content = file.readAsStringSync();
   var document = xml.XmlDocument.parse(content);
 
   var actions = document.findAllElements('action');
   for (var action in actions) {
+    var actionId = action.findElements('id').isNotEmpty
+        ? action.findElements('id').first.text
+        : null;
+
     var codeElements = action.descendants.whereType<xml.XmlElement>().where(
         (element) =>
             element.name.local == 'code' &&
-                ((element.getAttribute('str')?.startsWith('EnemyGenerator') ??
-                        false) ||
-                    (element
-                            .getAttribute('str')
-                            ?.startsWith('EnemySetAction') ??
-                        false) ||
-                    (element
-                            .getAttribute('str')
-                            ?.startsWith('EnemyLayoutAction') ??
-                        false) ||
-                    (element
-                            .getAttribute('str')
-                            ?.startsWith('EnemyLayoutArea') ??
-                        false) ||
-                    (element.getAttribute('str')?.startsWith('EnemySetArea') ??
-                        false)) ||
-            (element.getAttribute('str')?.startsWith('EntityLayoutAction') ??
-                false));
+            ((element.getAttribute('str')?.startsWith('EnemyGenerator') ??
+                    false) ||
+                (element.getAttribute('str')?.startsWith('EnemySetAction') ??
+                    false) ||
+                (element.getAttribute('str')?.startsWith('EnemyLayoutAction') ??
+                    false) ||
+                (element.getAttribute('str')?.startsWith('EnemyLayoutArea') ??
+                    false) ||
+                (element.getAttribute('str')?.startsWith('EnemySetArea') ??
+                    false) ||
+                (element
+                        .getAttribute('str')
+                        ?.startsWith('EntityLayoutAction') ??
+                    false)));
+
+    bool isActionImportant = false;
+    if (actionId != null) {
+      for (var entry in importantIds.entries) {
+        if (entry.value.contains(actionId)) {
+          isActionImportant = true;
+          break;
+        }
+      }
+    }
 
     for (var codeElement in codeElements) {
-      // Check if the parent element is an XmlElement before processing
       if (codeElement.parent is xml.XmlElement) {
         var parentElement = codeElement.parent as xml.XmlElement;
-        processParentElement(parentElement, sortedEnemyData, file.path,
-            enemyLevel, enemyCategory);
+        if (isActionImportant) {
+          parentElement.descendants
+              .whereType<xml.XmlElement>()
+              .where((element) => element.name.local == 'objId')
+              .forEach((objIdElement) {
+            processObjId(objIdElement, sortedEnemyData, file.path, enemyLevel,
+                enemyCategory,
+                isImportantId: true);
+          });
+          break;
+        } else {
+          processParentElement(parentElement, sortedEnemyData, file.path,
+              enemyLevel, enemyCategory);
+        }
       }
     }
   }
 
-  file.writeAsStringSync(document.toXmlString(pretty: true, indent: '  '));
+  file.writeAsStringSync(document.toPrettyString());
 }
 
-void processParentElement(
+Future<void> processParentElement(
     xml.XmlElement parentElement,
     Map<String, List<String>> sortedEnemyData,
     String filePath,
     String enemyLevel,
-    String enemyCategory) {
+    String enemyCategory) async {
   var relevantElements = parentElement.children.whereType<xml.XmlElement>();
   for (var element in relevantElements) {
     processElement(
@@ -180,29 +209,43 @@ bool isBoss(objId) {
   return bossData["Boss"]?.contains(objId) ?? false;
 }
 
-void processElement(
+Future<void> processElement(
     xml.XmlElement element,
     Map<String, List<String>> sortedEnemyData,
     String filePath,
     String enemyLevel,
-    String enemyCategory) {
+    String enemyCategory) async {
   if (element.name.local == 'objId') {
-    // Check if the element is a boss first
     if (isBoss(element.text)) {
       processObjId(
           element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
-    } else if (!hasAliasAncestor(element)) {
+    } else if (hasAliasAncestor(element)) {
+      if (enemyCategory == 'allenemies' ||
+          enemyCategory == 'onlyselectedenemies') {
+        await handleLeveledForAlias(element, enemyLevel, sortedEnemyData);
+        return; // Return after handling alias level
+      } else if (enemyCategory == 'onlybosses') {
+        return; // Return for onlybosses category
+      }
+    } else {
       processObjId(
           element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
     }
   } else {
-    element.descendants.whereType<xml.XmlElement>().forEach((desc) {
+    element.descendants.whereType<xml.XmlElement>().forEach((desc) async {
       if (desc.name.local == 'objId') {
-        // Apply the same logic for descendants
         if (isBoss(desc.text)) {
           processObjId(
               desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
-        } else if (!hasAliasAncestor(desc)) {
+        } else if (hasAliasAncestor(desc)) {
+          if (enemyCategory == 'allenemies' ||
+              enemyCategory == 'onlyselectedenemies') {
+            await handleLeveledForAlias(desc, enemyLevel, sortedEnemyData);
+            return; // Return after handling alias level
+          } else if (enemyCategory == 'onlybosses') {
+            return; // Return for onlybosses category
+          }
+        } else {
           processObjId(
               desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
         }
@@ -233,12 +276,12 @@ xml.XmlElement? findValueElementWithName(xml.XmlElement element, String name) {
 }
 
 Future<void> processObjId(
-  xml.XmlElement objIdElement,
-  Map<String, List<String>> userSelectedEnemyData,
-  String filePath,
-  String enemyLevel,
-  String enemyCategory,
-) async {
+    xml.XmlElement objIdElement,
+    Map<String, List<String>> userSelectedEnemyData,
+    String filePath,
+    String enemyLevel,
+    String enemyCategory,
+    {bool isImportantId = false}) async {
   final objIdValue = objIdElement.text;
 
   if (objIdValue.isEmpty) {
@@ -249,13 +292,25 @@ Future<void> processObjId(
   }
 
   bool isBossObj = isBoss(objIdValue);
-  // bool hasAliasObj = hasAliasOrAncestorAlias(objIdElement);
 
   try {
+    if (isImportantId &&
+        (enemyCategory == 'allenemies' ||
+            enemyCategory == 'onlyselectedenemies')) {
+      await handleLevel(objIdElement, enemyLevel, enemyData);
+      return; // Skip further processing for this important ID
+    }
+
+    // Standard processing for other cases
     switch (enemyCategory) {
       case 'onlybosses':
-        if (isBossObj) {
+        if (isImportantId) {
+          return;
+        } else if (isBossObj) {
           await handleBossLevel(objIdElement, enemyLevel);
+        } else {
+          await handleOtherEnemies(
+              objIdElement, userSelectedEnemyData, enemyLevel);
         }
         break;
       case 'onlyselectedenemies':
@@ -271,11 +326,33 @@ Future<void> processObjId(
         }
         break;
       default:
-        await handleDefault(objIdElement, userSelectedEnemyData);
+        if (isImportantId) {
+          return;
+        } else {
+          await handleDefault(objIdElement, userSelectedEnemyData);
+        }
         break;
     }
   } catch (e) {
     printAndLog('Error processing $objIdValue: $e');
+  }
+}
+
+Future<void> handleOtherEnemies(
+  xml.XmlElement objIdElement,
+  Map<String, List<String>> userSelectedEnemyData,
+  String enemyLevel,
+) async {
+  String? group = findGroupForEmNumber(objIdElement.text, enemyData);
+
+  if (group != null &&
+      !isExcludedGroup(group) &&
+      userSelectedEnemyData[group]?.isNotEmpty == true) {
+    String newEmNumber = userSelectedEnemyData[group]![
+        random.nextInt(userSelectedEnemyData[group]!.length)];
+    replaceTextInXmlElement(objIdElement, newEmNumber);
+    enemyCount++;
+    setSpecificValues(objIdElement, newEmNumber);
   }
 }
 
@@ -409,7 +486,7 @@ String? findGroupForEmNumber(
       return group;
     }
   }
-  return null; // Return null if not found in any group
+  return null;
 }
 
 String getRandomEmNumberFromGroup(
@@ -417,7 +494,6 @@ String getRandomEmNumberFromGroup(
   var groupList = List.from(sortedEnemyData[group]!);
   groupList.shuffle(); // Shuffle the list for better randomness
   var selected = groupList[random.nextInt(groupList.length)];
-  print('Selected random enemy $selected from group $group'); // Debugging
   return selected;
 }
 

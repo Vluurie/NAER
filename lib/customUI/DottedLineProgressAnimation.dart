@@ -26,7 +26,7 @@ class _DottedLineProgressIndicatorState
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 6),
+      duration: const Duration(seconds: 3),
     )..repeat();
   }
 

@@ -89,7 +89,6 @@ xml.XmlElement? findLevelValueElementWithName(
     return paramElement.findElements('value').firstWhere((element) =>
         element.findElements('name').firstOrNull?.text == levelName);
   } catch (e) {
-    // If no element is found, return null
     return null;
   }
 }

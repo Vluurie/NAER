@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'package:xml/xml.dart';
 
 import '../yax/yaxToXml.dart';
 import '../utils/ByteDataWrapper.dart';
@@ -24,25 +23,6 @@ class _HeaderEntry {
     uncompressedSize = bytes.readUint32();
     offset = bytes.readUint32();
   }
-}
-
-Future<int> guessType(String yaxPath, String xmlPath) async {
-  var fileSize = await File(yaxPath).length();
-  int value = (fileSize <= 1024) ? 1 : 4;
-
-  if (path.basename(yaxPath) != "0.yax") {
-    var xmlFile = File(xmlPath);
-    var xmlContent = await xmlFile.readAsString();
-    var document = XmlDocument.parse(xmlContent);
-
-    if (document.findAllElements("node").isNotEmpty ||
-        document.findAllElements("text").isNotEmpty) {
-      value += 1;
-    } else {
-      value += 2;
-    }
-  }
-  return value;
 }
 
 Future<void> _extractPakYax(_HeaderEntry meta, int size, ByteDataWrapper bytes,
@@ -96,22 +76,20 @@ Future<List<String>> extractPakFiles(String pakPath, String extractDir,
               "type": headerEntries[index].type,
             })
   };
+  var pakInfoPath = path.join(extractDir, "pakInfo.json");
+  await File(pakInfoPath)
+      .writeAsString(const JsonEncoder.withIndent("\t").convert(meta));
 
   if (yaxToXml) {
-    for (int i = 0; i < fileCount; i++) {
+    await Future.wait(
+        Iterable<int>.generate(fileCount).map<Future<void>>((i) async {
       var yaxPath = path.join(extractDir, "$i.yax");
       var xmlPath = path.setExtension(yaxPath, ".xml");
       await yaxFileToXmlFile(yaxPath, xmlPath);
-      int newType = await guessType(yaxPath, xmlPath);
-      meta["files"][i]["type"] = newType; // Update the type
-    }
+    }));
   }
-  var pakInfoPath = path.join(extractDir, "pakInfo.json");
-  await File(pakInfoPath)
-      .writeAsString(JsonEncoder.withIndent("\t").convert(meta));
 
   var extractedFiles = List<String>.generate(
       fileCount, (index) => path.join(extractDir, "$index.yax"));
-  // print("Extracted ${extractedFiles.length} files.");
   return extractedFiles;
 }
