@@ -18,21 +18,28 @@ Future<void> handleLeveledForAlias(xml.XmlElement objIdElement,
     String enemyLevel, Map<String, List<String>> enemyData) async {
   var objIdValue = objIdElement.text;
 
+  // Check if the enemy is in the "Delete" group
   if (isDeletedEnemy(objIdValue, enemyData)) {
     print('Skipping level update for deleted enemy: $objIdValue');
     return;
   }
 
-  // Process the 'param' element
-  var paramElement =
-      findParentValueElement(objIdElement)?.findElements('param').firstOrNull;
-  if (paramElement != null) {
+  // Find or create the 'param' element and update/create 'Lv' values
+  var parentValueElement = findParentValueElement(objIdElement);
+  if (parentValueElement != null) {
+    var paramElement = parentValueElement.findElements('param').firstOrNull;
+    if (paramElement == null) {
+      paramElement = createParamElement();
+      parentValueElement.children.add(paramElement);
+    }
+
     updateOrCreateLevelValue(paramElement, 'Lv', enemyLevel);
     updateLevelValueIfExists(paramElement, 'Lv_B', enemyLevel);
     updateLevelValueIfExists(paramElement, 'Lv_C', enemyLevel);
     updateOrCreateCountElement(paramElement);
   }
 
+  // Update levelRange for 'EnemyGenerator' actions
   var rootActionElement = findRootActionElement(objIdElement);
   if (rootActionElement != null && isEnemyGenerator(rootActionElement)) {
     updateGeneratorLevelRange(rootActionElement, enemyLevel);
