@@ -18,31 +18,68 @@ Future<void> handleLeveledForAlias(xml.XmlElement objIdElement,
     String enemyLevel, Map<String, List<String>> enemyData) async {
   var objIdValue = objIdElement.text;
 
-  // Check if the enemy is in the "Delete" group
   if (isDeletedEnemy(objIdValue, enemyData)) {
-    // Skip updating the level for deleted enemies
     print('Skipping level update for deleted enemy: $objIdValue');
     return;
   }
 
-  xml.XmlElement? parentValueElement = findParentValueElement(objIdElement);
-
-  if (parentValueElement != null) {
-    var paramElement = parentValueElement.findElements('param').firstOrNull;
-
-    if (paramElement == null) {
-      paramElement = createParamElement();
-      parentValueElement.children.add(paramElement);
-    }
-
-    // Update or create 'Lv'
+  // Process the 'param' element
+  var paramElement =
+      findParentValueElement(objIdElement)?.findElements('param').firstOrNull;
+  if (paramElement != null) {
     updateOrCreateLevelValue(paramElement, 'Lv', enemyLevel);
-
-    // Update 'Lv_B' and 'Lv_C' if they exist
     updateLevelValueIfExists(paramElement, 'Lv_B', enemyLevel);
     updateLevelValueIfExists(paramElement, 'Lv_C', enemyLevel);
-
     updateOrCreateCountElement(paramElement);
+  }
+
+  var rootActionElement = findRootActionElement(objIdElement);
+  if (rootActionElement != null && isEnemyGenerator(rootActionElement)) {
+    updateGeneratorLevelRange(rootActionElement, enemyLevel);
+  }
+}
+
+xml.XmlElement? findRootActionElement(xml.XmlElement element) {
+  var current = element.parent;
+  while (current != null) {
+    if (current is xml.XmlElement && current.name.local == 'action') {
+      return current;
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
+bool isEnemyGenerator(xml.XmlElement actionElement) {
+  var codeElement = actionElement.findElements('code').firstOrNull;
+  return codeElement != null &&
+      codeElement.getAttribute('str') == 'EnemyGenerator';
+}
+
+xml.XmlElement? findParentActionElement(xml.XmlElement element) {
+  var current = element.parent;
+  while (current != null) {
+    if (current is xml.XmlElement && current.name.local == 'action') {
+      return current;
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
+void updateGeneratorLevelRange(
+    xml.XmlElement actionElement, String enemyLevel) {
+  var levelRangeElement = actionElement.findElements('levelRange').firstOrNull;
+  if (levelRangeElement != null) {
+    var minElement = levelRangeElement.findElements('min').firstOrNull;
+    var maxElement = levelRangeElement.findElements('max').firstOrNull;
+
+    if (minElement != null) {
+      minElement.firstChild?.replace(xml.XmlText(enemyLevel));
+    }
+    if (maxElement != null) {
+      maxElement.firstChild?.replace(xml.XmlText(enemyLevel));
+    }
   }
 }
 
