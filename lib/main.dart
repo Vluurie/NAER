@@ -79,6 +79,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   };
   Map<String, bool> level = {
     "All Enemies": false,
+    "All Enemies without Randomization": false,
     "Only Bosses": false,
     "Only Selected Enemies": false,
     'None': true
@@ -724,6 +725,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (level["All Enemies"] == true) {
       processArgs.add("--category=allenemies");
+    }
+
+    if (level["All Enemies without Randomization"] == true) {
+      processArgs.add("--category=onlylevel");
     }
 
     if (level["None"] == true) {
@@ -1676,6 +1681,8 @@ IconData getIconForLevel(String levelEnemy) {
   switch (levelEnemy) {
     case "All Enemies":
       return Icons.emoji_events;
+    case "All Enemies without Randomization":
+      return Icons.emoji_flags_outlined;
     case "Only Bosses":
       return Icons.emoji_emotions_rounded;
     case "Only Selected Enemies":

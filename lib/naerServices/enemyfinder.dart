@@ -221,11 +221,12 @@ Future<void> processElement(
           element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
     } else if (hasAliasAncestor(element)) {
       if (enemyCategory == 'allenemies' ||
-          enemyCategory == 'onlyselectedenemies') {
+          enemyCategory == 'onlyselectedenemies' ||
+          enemyCategory == 'onlylevel') {
         await handleLeveledForAlias(element, enemyLevel, sortedEnemyData);
-        return; // Return after handling alias level
+        return;
       } else if (enemyCategory == 'onlybosses') {
-        return; // Return for onlybosses category
+        return;
       }
     } else {
       processObjId(
@@ -239,11 +240,12 @@ Future<void> processElement(
               desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
         } else if (hasAliasAncestor(desc)) {
           if (enemyCategory == 'allenemies' ||
-              enemyCategory == 'onlyselectedenemies') {
+              enemyCategory == 'onlyselectedenemies' ||
+              enemyCategory == 'onlylevel') {
             await handleLeveledForAlias(desc, enemyLevel, sortedEnemyData);
-            return; // Return after handling alias level
+            return;
           } else if (enemyCategory == 'onlybosses') {
-            return; // Return for onlybosses category
+            return;
           }
         } else {
           processObjId(
@@ -298,10 +300,9 @@ Future<void> processObjId(
         (enemyCategory == 'allenemies' ||
             enemyCategory == 'onlyselectedenemies')) {
       await handleLevel(objIdElement, enemyLevel, enemyData);
-      return; // Skip further processing for this important ID
+      return;
     }
 
-    // Standard processing for other cases
     switch (enemyCategory) {
       case 'onlybosses':
         if (isImportantId) {
@@ -325,11 +326,20 @@ Future<void> processObjId(
               objIdElement, userSelectedEnemyData, enemyLevel);
         }
         break;
+      case 'onlylevel':
+        if (isBossObj) {
+          await handleBossLevel(objIdElement, enemyLevel);
+        } else {
+          await handleOnlyLevel(
+              objIdElement, userSelectedEnemyData, enemyLevel);
+        }
+        break;
       default:
         if (isImportantId) {
           return;
         } else {
-          await handleDefault(objIdElement, userSelectedEnemyData);
+          if (enemyCategory != 'onlylevel')
+            await handleDefault(objIdElement, userSelectedEnemyData);
         }
         break;
     }
@@ -371,6 +381,20 @@ Future<void> handleSelectedEnemies(
     replaceTextInXmlElement(objIdElement, newEmNumber);
     enemyCount++;
     setSpecificValues(objIdElement, newEmNumber);
+    await handleLevel(objIdElement, enemyLevel, enemyData);
+  }
+}
+
+Future<void> handleOnlyLevel(
+  xml.XmlElement objIdElement,
+  Map<String, List<String>> userSelectedEnemyData,
+  String enemyLevel,
+) async {
+  String? group = findGroupForEmNumber(objIdElement.text, enemyData);
+
+  if (group != null &&
+      !isExcludedGroup(group) &&
+      userSelectedEnemyData[group]?.isNotEmpty == true) {
     await handleLevel(objIdElement, enemyLevel, enemyData);
   }
 }
