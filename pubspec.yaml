@@ -1,6 +1,6 @@
 name: NAER
 description: A Tool to Randomize Enemies.
-version: 1.0.0
+version: 2.0.5
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
