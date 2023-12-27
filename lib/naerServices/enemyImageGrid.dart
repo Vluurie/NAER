@@ -244,6 +244,12 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     });
   }
 
+  selectAllImages() {
+    setState(() {
+      selectedImages.addAll(imageNames);
+    });
+  }
+
   void onImageClick(String imageName) {
     setState(() {
       if (selectedImages.contains(imageName)) {

@@ -284,6 +284,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           child: BottomNavigationBar(
             items: [
               BottomNavigationBarItem(
+                icon: Icon(Icons.select_all, size: 32.0),
+                label: 'Select All',
+              ),
+              BottomNavigationBarItem(
                 icon: Icon(Icons.cancel, size: 32.0),
                 label: 'Unselect All',
               ),
@@ -530,12 +534,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     switch (index) {
       case 0:
-        enemyImageGridKey.currentState?.unselectAllImages();
+        enemyImageGridKey.currentState?.selectAllImages();
         break;
       case 1:
-        showUndoConfirmation();
+        enemyImageGridKey.currentState?.unselectAllImages();
         break;
       case 2:
+        showUndoConfirmation();
+        break;
+      case 3:
         onPressedAction();
         break;
       default:
