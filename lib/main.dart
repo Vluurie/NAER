@@ -3,24 +3,17 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/customUI/DirectorySelectionCard.dart';
 import 'package:NAER/customUI/DottedLineProgressAnimation.dart';
-import 'package:NAER/customUI/customErrorScreen.dart';
 import 'package:NAER/naerServices/enemyImageGrid.dart';
 import 'package:NAER/secondPage.dart';
-import 'package:flutter/gestures.dart';
+import 'package:NAER/utils/changeTrack.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
-import 'package:url_launcher/url_launcher.dart';
 import 'enemyData/sorted_enemy.dart' as enemy_data;
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'dart:developer';
 
 void main() {
-  ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-    return CustomErrorScreen(errorDetails: errorDetails);
-  };
   runApp(EnemyRandomizerApp());
 }
 
@@ -91,6 +84,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   @override
   void initState() {
     super.initState();
+    FileChange.loadChanges();
+    FileChange.loadIgnoredFiles();
     scrollController = ScrollController();
 
     _blinkController = AnimationController(
@@ -197,30 +192,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                                                 "Thank you for using this tool! It is provided free of charge and developed in my personal time. "),
                                         TextSpan(
                                             text:
-                                                "\n\nIf you encounter any issues or have questions, feel free to ask in the "),
-                                        TextSpan(
-                                          text: "NieR Modding Community",
-                                          style: TextStyle(
-                                              color: Colors.blue,
-                                              decoration:
-                                                  TextDecoration.underline),
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () async {
-                                              Uri url = Uri.parse(
-                                                  'https://discord.gg/VaK99wH3sg');
-                                              if (await canLaunchUrl(url)) {
-                                                await launchUrl(url);
-                                              } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                        'Could not launch the URL'),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                        ),
+                                                "\n\nIf you encounter any issues or have questions, feel free to ask in the Nier Modding community! "),
                                         TextSpan(
                                             text:
                                                 ".\n\nSpecial thanks to RaiderB with his NieR CLI and the entire mod community for making this possible."),
@@ -579,10 +551,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       });
 
       try {
-        await savePreRandomizationTime(); // Save pre-randomization time
+        await FileChange
+            .savePreRandomizationTime(); // Save pre-randomization time
         print("Ignored mod files before starting: $ignoredModFiles");
         await startRandomizing();
-        await saveLastRandomizationTime(); // Save last randomization time
+        await FileChange.saveChanges();
       } catch (e) {
         print("Error during randomization: $e");
       } finally {
@@ -598,30 +571,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (isButtonEnabled) {
       showModifyConfirmation();
     }
-  }
-
-  Future<void> savePreRandomizationTime() async {
-    var bufferTime = Duration(minutes: 60);
-    var preRandomizationTime = DateTime.now().subtract(bufferTime);
-    var formattedTime =
-        DateFormat('yyyy-MM-dd HH:mm:ss').format(preRandomizationTime);
-
-    var preRandomizationData =
-        jsonEncode({'pre_randomization_time': formattedTime});
-    var file = File('pre_randomization_time.json');
-    await file.writeAsString(preRandomizationData);
-    print("Pre-randomization time saved: $formattedTime");
-  }
-
-  Future<void> saveLastRandomizationTime() async {
-    var lastRandomizationTime = DateTime.now();
-    var formattedTime =
-        DateFormat('yyyy-MM-dd HH:mm:ss').format(lastRandomizationTime);
-
-    var lastRandomizationData =
-        jsonEncode({'last_randomization_time': formattedTime});
-    var file = File('last_randomization_time.json');
-    await file.writeAsString(lastRandomizationData);
   }
 
   Future<Map<String, List<String>>> sortSelectedEnemies(
@@ -772,6 +721,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               if (fullPath.endsWith('.dat')) {
                 setState(() {
                   createdFiles.add(fullPath);
+                  FileChange.logChange(fullPath, 'create');
                   print("Debug - Added to createdFiles: $fullPath");
                 });
               }
@@ -814,10 +764,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Future<List<String>> findModFiles(String outputDirectory) async {
     List<String> modFiles = [];
-    DateTime preRandomizationTime = await _getPreRandomizationTime();
-
-    print("Pre-randomization time: $preRandomizationTime");
-
+    DateTime preRandomizationTime = await FileChange.getPreRandomizationTime();
     try {
       var directory = Directory(outputDirectory);
       if (await directory.exists()) {
@@ -841,29 +788,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     } catch (e) {
       print('Error while finding mod files: $e');
     }
-
+    FileChange.ignoredFiles.clear();
+    FileChange.ignoredFiles.addAll(modFiles);
+    await FileChange.saveIgnoredFiles();
     print("Mod files found: $modFiles");
     return modFiles;
-  }
-
-  Future<DateTime> _getPreRandomizationTime() async {
-    var preRandomizationFile = File('pre_randomization_time.json');
-    try {
-      if (await preRandomizationFile.exists()) {
-        var content = await preRandomizationFile.readAsString();
-        var preRandomizationData = jsonDecode(content);
-        DateTime parsedTime = DateFormat('yyyy-MM-dd HH:mm:ss')
-            .parse(preRandomizationData['pre_randomization_time']);
-        print("Loaded pre-randomization time from file: $parsedTime");
-        return parsedTime;
-      } else {
-        print("Pre-randomization time file does not exist.");
-      }
-    } catch (e) {
-      print('Error reading pre-randomization time: $e');
-    }
-    print("Using current time as fallback for pre-randomization time.");
-    return DateTime.now();
   }
 
   Future<Map<String, List<String>>> readEnemyData() async {
@@ -871,17 +800,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void undoLastRandomization() async {
-    print("Files to be deleted: $createdFiles");
-
-    if (createdFiles.isEmpty) {
-      setState(() {
-        hasError = true;
-        logMessages.add("Error: No randomization to undo.");
-        startBlinkAnimation();
-      });
-      onNewLogMessage(context, "Error: No randomization to undo.");
-      return;
-    }
+    await FileChange
+        .loadChanges(); // Load the changes if they were saved previously
+    await FileChange.undoChanges(); // Undo the changes
 
     try {
       for (var filePath in createdFiles) {
@@ -1696,7 +1617,7 @@ IconData getIconForLevel(String levelEnemy) {
 
 void onNewLogMessage(BuildContext context, String newMessage) {
   if (newMessage.toLowerCase().contains('error')) {
-    writeLog(newMessage); // Writing the error to the log file
+    log(newMessage); // Writing the error to the log file
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1714,20 +1635,4 @@ void onNewLogMessage(BuildContext context, String newMessage) {
       );
     });
   }
-}
-
-Future<void> writeLog(String message) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File('${directory.path}/log.txt');
-  await file.writeAsString('$message\n', mode: FileMode.append);
-}
-
-Future<void> logMessage(String message) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final file = File('${directory.path}/log.txt');
-  final timestamp = DateTime.now().toString();
-  final logEntry = '[$timestamp] $message\n';
-
-  await file.writeAsString(logEntry, mode: FileMode.append);
-  print(logEntry);
 }
