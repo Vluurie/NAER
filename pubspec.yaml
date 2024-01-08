@@ -22,19 +22,21 @@ dependencies:
   open_file: ^3.3.2
   path: ^1.8.3
   path_provider: ^2.1.1
-
+  flutter_lints: ^3.0.1
   uuid: ^4.2.2
   xml: ^6.2.2
+  tuple: ^2.0.2
 
 
 
 flutter:
   assets:
-    - assets/images/
-    - assets/logomyy.png
-    - assets/NaerIcon.png
-    - assets/1234.png
-    - assets/enemies_ingame/
+    - assets/nier_image_folders/nier_enemy_images/
+    - assets/nier_image_folders/nier_boss_images/
+    - assets/nier_image_folders/nier_enemies_ingame_images/
+    - assets/naer_icons/icon.png
+    - assets/naer_backgrounds/error_background.png
+    - assets/naer_backgrounds/naer_background.png
   uses-material-design: true
   fonts:
     - family: MaterialIcons

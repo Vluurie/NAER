@@ -37,6 +37,14 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+bin/configExamples
+bin/config.txt
+NAER_Settings/
+bin/fork/nier_cli.exe
+
+
+
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
