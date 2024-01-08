@@ -733,7 +733,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     updateLog("Process arguments: ${processArgs.join(' ')}", scrollController);
 
     var currentDir = Directory.current.path;
-    var scriptPath = p.join(currentDir, 'bin/fork/nier_cli.exe');
+    var scriptPath = p.join(currentDir, 'nier_cli');
 
     List<String> createdDatFiles = []; // To track created .dat files
 
