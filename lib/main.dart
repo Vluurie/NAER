@@ -5,7 +5,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:path/path.dart' as p;
 import 'package:NAER/naer_pages/second_page.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart'
@@ -94,6 +93,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     super.initState();
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles();
+    initializeScriptPathmacOS();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -102,6 +102,20 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     );
 
     log('initState called');
+  }
+
+  Future<void> initializeScriptPathmacOS() async {
+    final scriptPath = await FileChange.getScriptPath();
+    print("Script path: $scriptPath");
+
+    // Check if the script exists
+    if (await File(scriptPath).exists()) {
+      print('The script exists and is ready to be executed.');
+      // Execute your script with Process.start or any other way you prefer
+    } else {
+      print('The script does not exist at the expected location.');
+      // Handle the error, maybe inform the user or download the script
+    }
   }
 
   void startBlinkAnimation() {
@@ -637,6 +651,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<void> startRandomizing() async {
+    final scriptPath = await FileChange.getScriptPath();
     hasError = true;
     setState(() {
       isLoading = true;
@@ -728,19 +743,18 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       log("Ignore arguments added: $ignoreArgs");
     }
 
-    print("Final process arguments: $processArgs");
+    updateLog("Final process arguments: $processArgs", scrollController);
 
     updateLog("Process arguments: ${processArgs.join(' ')}", scrollController);
-
-    var currentDir = Directory.current.path;
-    var scriptPath = p.join(currentDir, 'nier_cli');
 
     List<String> createdDatFiles = []; // To track created .dat files
 
     try {
-      updateLog("Starting nier_cli.exe...", scrollController);
-      final process = await Process.start(
-          scriptPath, processArgs); // calling the .exe with arguments
+      updateLog("Starting nier_cli...", scrollController);
+      final process = await Process.start(scriptPath, processArgs,
+          mode: ProcessStartMode.detachedWithStdio);
+      updateLog("nier_cli process started",
+          scrollController); // Log that the process has started
 
       process.stdout.transform(utf8.decoder).listen((data) {
         // Split the data by new lines and process each line separately

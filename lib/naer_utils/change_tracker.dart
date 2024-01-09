@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 
@@ -18,11 +20,23 @@ class FileChange {
   static List<String> ignoredFiles = [];
 
   static Future<String> ensureSettingsDirectory() async {
-    var settingsDirectory = Directory(settingsDirectoryPath);
+    // Find the application support directory
+    final directory = await getApplicationSupportDirectory();
+    // Append your app-specific settings directory name
+    final settingsDirectory =
+        Directory(p.join(directory.path, 'NAER_Settings'));
+
     if (!await settingsDirectory.exists()) {
-      await settingsDirectory.create();
+      await settingsDirectory.create(recursive: true);
     }
     return settingsDirectory.path;
+  }
+
+  static Future<String> getScriptPath() async {
+    final settingsDirectory = await ensureSettingsDirectory();
+    // Define the path for nier_cli within your settings directory
+    final scriptPath = p.join(settingsDirectory, 'nier_cli');
+    return scriptPath;
   }
 
   static void logChange(String filePath, String action,
