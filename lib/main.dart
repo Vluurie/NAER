@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
+import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path/path.dart' as p;
 import 'package:NAER/naer_pages/second_page.dart';
@@ -66,6 +68,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   bool hasError = false;
   bool isProcessing = false;
   String input = '';
+  String scriptPath = '';
   int enemyLevel = 1;
   String specialDatOutputPath = '';
   List<String> ignoredModFiles = [];
@@ -85,6 +88,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   };
   double enemyStats = 0.0;
   Map<String, bool> stats = {"None": true, "Select All": false};
+  bool savePaths = false;
 
   late ScrollController scrollController;
   late AnimationController _blinkController;
@@ -94,6 +98,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     super.initState();
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles();
+    loadPathsFromJson();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -140,135 +145,134 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             ),
             child: Stack(
               children: <Widget>[
-                Positioned(
-                    left: 110,
-                    width: 70,
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                        Color.fromARGB(0, 117, 100, 100),
-                        BlendMode.srcOver,
-                      ),
-                      child: Image.asset(
-                        'assets/naer_icons/icon.png',
-                        fit: BoxFit.cover,
-                      ),
-                    )),
                 AppBar(
                   toolbarHeight: 100.0,
-                  title: const Padding(
-                    padding: EdgeInsets.only(left: 40),
-                    child: Text('NAER'),
-                  ),
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  actions: <Widget>[
-                    const Spacer(),
-                    const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'NAER',
-                          style: TextStyle(
-                              fontSize: 36.0,
-                              color: Color.fromRGBO(0, 255, 255, 1),
-                              fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.info, size: 32.0),
-                          color: const Color.fromRGBO(49, 217, 240, 1),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("Information"),
-                                  content: RichText(
-                                    text: const TextSpan(
-                                      style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                            text:
-                                                "Thank you for using this tool! It is provided free of charge and developed in my personal time. "),
-                                        TextSpan(
-                                            text:
-                                                "\n\nIf you encounter any issues or have questions, feel free to ask in the Nier Modding community! "),
-                                        TextSpan(
-                                            text:
-                                                ".\n\nSpecial thanks to RaiderB with his NieR CLI and the entire mod community for making this possible."),
-                                      ],
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text("Close"),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        const Text(
-                          'Information',
-                          style: TextStyle(fontSize: 10.0),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                            icon: AnimatedBuilder(
-                              animation: _blinkController,
-                              builder: (context, child) {
-                                final color = ColorTween(
-                                  begin:
-                                      const Color.fromARGB(31, 206, 198, 198),
-                                  end: const Color.fromARGB(255, 86, 244, 54),
-                                ).animate(_blinkController).value;
-
-                                if (_blinkController.status ==
-                                    AnimationStatus.forward) {}
-
-                                return Icon(
-                                  Icons.terminal,
-                                  size: 32.0,
-                                  color: color,
-                                );
-                              },
-                            ),
-                            onPressed: () {
-                              scrollToSetup(setupLogOutputKey);
-                            }),
-                        const Text(
-                          'Log',
-                          style: TextStyle(fontSize: 10.0),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 100.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                  title: LayoutBuilder(
+                    builder: (context, constraints) {
+                      bool isLargeScreen = constraints.maxWidth > 600;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          _navigateButton(context),
+                          // Icon Image
+                          Padding(
+                            padding: EdgeInsets.only(
+                                right: isLargeScreen ? 20.0 : 10.0),
+                            child: Image.asset(
+                              'assets/naer_icons/icon.png',
+                              fit: BoxFit.cover,
+                              width: isLargeScreen ? 70.0 : 50.0,
+                            ),
+                          ),
+                          // Text Title
+                          Text(
+                            'NAER',
+                            style: TextStyle(
+                              fontSize: isLargeScreen ? 36.0 : 24.0,
+                              color: const Color.fromRGBO(0, 255, 255, 1),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+
+                          const Spacer(),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.info, size: 32.0),
+                                color: const Color.fromRGBO(49, 217, 240, 1),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Information"),
+                                        content: RichText(
+                                          text: const TextSpan(
+                                            style: TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 255, 255, 255)),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                  text:
+                                                      "Thank you for using this tool! It is provided free of charge and developed in my personal time. "),
+                                              TextSpan(
+                                                  text:
+                                                      "\n\nIf you encounter any issues or have questions, feel free to ask in the Nier Modding community! "),
+                                              TextSpan(
+                                                  text:
+                                                      ".\n\nSpecial thanks to RaiderB with his NieR CLI and the entire mod community for making this possible."),
+                                            ],
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text("Close"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                              const Text(
+                                'Information',
+                                style: TextStyle(fontSize: 10.0),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  icon: AnimatedBuilder(
+                                    animation: _blinkController,
+                                    builder: (context, child) {
+                                      final color = ColorTween(
+                                        begin: const Color.fromARGB(
+                                            31, 206, 198, 198),
+                                        end: const Color.fromARGB(
+                                            255, 86, 244, 54),
+                                      ).animate(_blinkController).value;
+
+                                      if (_blinkController.status ==
+                                          AnimationStatus.forward) {}
+
+                                      return Icon(
+                                        Icons.terminal,
+                                        size: 32.0,
+                                        color: color,
+                                      );
+                                    },
+                                  ),
+                                  onPressed: () {
+                                    scrollToSetup(setupLogOutputKey);
+                                  }),
+                              const Text(
+                                'Log',
+                                style: TextStyle(fontSize: 10.0),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 100.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                _navigateButton(context),
+                              ],
+                            ),
+                          ),
                         ],
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -400,6 +404,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           !lastMessage.contains("Completed") &&
           !lastMessage.contains("Error") &&
           !lastMessage.contains("Randomization") &&
+          !lastMessage.contains("NieR CLI") &&
           !lastMessage.contains("Last");
 
       return isProcessing;
@@ -413,35 +418,189 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       alignment: Alignment.topLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        constraints: const BoxConstraints(maxWidth: 600),
+        constraints: const BoxConstraints(maxWidth: 800),
         child: Column(
-          // Changed to Column for vertical layout
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Row(
-              // First row for directory selection
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              spacing: 10, // Horizontal space between items
+              runSpacing: 10, // Vertical space between items
               children: [
                 DirectorySelectionCard(
                   title: "Input Directory:",
                   path: input,
                   onBrowse: (updatePath) => openInputFileDialog(updatePath),
                   icon: Icons.folder_open,
-                  width: 250,
+                  width: 200,
                 ),
-                const SizedBox(width: 10),
                 DirectorySelectionCard(
                   title: "Output Directory:",
                   path: specialDatOutputPath,
                   onBrowse: (updatePath) => openOutputFileDialog(updatePath),
                   icon: Icons.folder_open,
-                  width: 250,
+                  width: 200,
+                ),
+                DirectorySelectionCard(
+                  title: "Select NieR CLI (macOS):",
+                  path: scriptPath,
+                  onBrowse: (updatePath) => openCliSearch(updatePath),
+                  icon: Icons.apple,
+                  width: 300,
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.open_in_full),
+                  label: const Text('Open output path'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 25, 25, 26)),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 71, 192, 240)),
+                  ),
+                  onPressed: () => getOutputPath(context),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Open NAER_settings'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 25, 25, 26)),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 71, 192, 240)),
+                  ),
+                  onPressed: getNaerSettings,
+                ),
+                SavePathsWidget(
+                  input: input,
+                  output: specialDatOutputPath,
+                  scriptPath: scriptPath,
+                  savePaths: savePaths,
+                  onCheckboxChanged: (bool value) {
+                    if (!value) {
+                      removePathsFile();
+                    }
+                    setState(() {
+                      savePaths = value;
+                    });
+                  },
                 ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void getOutputPath(BuildContext context) async {
+    if (specialDatOutputPath.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Output path is empty'),
+        ),
+      );
+      return;
+    }
+
+    if (Platform.isWindows) {
+      // Correctly format the path for Windows command line
+      String formattedPath = specialDatOutputPath.replaceAll('/', '\\');
+      // Use 'cmd' to execute the 'start' command which opens the folder
+      await Process.run('cmd', ['/c', 'start', '', formattedPath]);
+    } else if (Platform.isMacOS) {
+      // Open the directory in Finder on macOS
+      await Process.run('open', [specialDatOutputPath]);
+    } else if (Platform.isLinux) {
+      // Open the directory in the default file manager on Linux
+      await Process.run('xdg-open', [specialDatOutputPath]);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Opening output path is not supported on this platform.'),
+        ),
+      );
+    }
+  }
+
+  void getNaerSettings() async {
+    String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
+
+    if (Platform.isWindows) {
+      // Correctly format the path for Windows command line
+      String formattedPath = settingsDirectoryPath.replaceAll('/', '\\');
+
+      // Use 'cmd' to execute the 'start' command which opens the folder
+      await Process.run('cmd', ['/c', 'start', '', formattedPath]);
+    } else if (Platform.isMacOS) {
+      // Open the directory in Finder on macOS
+      await Process.run('open', [settingsDirectoryPath]);
+    } else if (Platform.isLinux) {
+      // Open the directory in the default file manager on Linux
+      await Process.run('xdg-open', [settingsDirectoryPath]);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Opening output path is not supported on this platform.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> openCliSearch(Function(String) updatePath) async {
+    String? scriptFile = await getCLIFilePath();
+
+    if (scriptFile != null && scriptFile.isNotEmpty) {
+      setState(() {
+        scriptPath = scriptFile;
+      });
+    }
+
+    updatePath(scriptFile ?? '');
+  }
+
+  Future<String?> getCLIFilePath() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null && result.files.single.path != null) {
+      String scriptFile = result.files.single.path!;
+      print(scriptFile);
+
+      bool isValidCli = await _isValidCliFile(scriptFile);
+      if (isValidCli) {
+        return scriptFile;
+      } else {
+        _showInvalidCli();
+      }
+    }
+
+    return null;
+  }
+
+  Future<bool> _isValidCliFile(String scriptPath) async {
+    return File(scriptPath).existsSync() && scriptPath.endsWith('nier_cli');
+  }
+
+  void _showInvalidCli() {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Invalid File"),
+          content: const Text(
+              "The selected file is not a valid NieR CLI executable."),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -686,8 +845,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     String bossList = getSelectedBossesArgument();
     List<String> createdDatFiles = [];
-    var currentDir = Directory.current.path;
-    var scriptPath = p.join(currentDir, 'bin/fork/nier_cli.exe');
+
+    if (scriptPath.isEmpty) {
+      print("path $scriptPath");
+      updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
+      setState(() {
+        startBlinkAnimation();
+      });
+      return;
+    }
 
 // Construct the process arguments
     List<String> processArgs = [
@@ -1167,23 +1333,145 @@ end tell
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30.0),
-          child: Center(
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(255, 25, 25, 26)),
-                foregroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(255, 71, 192, 240)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 25, 25, 26)),
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 71, 192, 240)),
+                ),
+                onPressed: clearLogMessages,
+                child: const Text('Clear Log'),
               ),
-              onPressed: clearLogMessages,
-              child: const Text('Clear Log'),
             ),
-          ),
-        ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.apple), // Apple icon
+                label: const Text('Copy CLI Argument (macOS)'),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 25, 25, 26)),
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 71, 192, 240)),
+                ),
+                onPressed:
+                    copyCLIArguments, // Function to be called on button press
+              ),
+            ),
+          ],
+        )
       ],
     );
+  }
+
+  void copyCLIArguments() async {
+    if (input.isEmpty || specialDatOutputPath.isEmpty) {
+      updateLog("Error: Please select both input and output directories. 💋 ",
+          scrollController);
+      return;
+    }
+
+    if (scriptPath.isEmpty) {
+      updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
+      setState(() {
+        startBlinkAnimation();
+      });
+      return;
+    }
+
+    String tempFilePath;
+    List<String>? selectedImages =
+        enemyImageGridKey.currentState?.selectedImages;
+
+    try {
+      if (selectedImages!.isNotEmpty) {
+        updateLog("Sorting selected enemies... 💬 ", scrollController);
+        var sortedEnemies = await sortSelectedEnemies(selectedImages);
+        var tempFile =
+            await File('${Directory.systemTemp.path}/temp_sorted_enemies.dart')
+                .create();
+        var buffer = StringBuffer();
+        buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
+        sortedEnemies.forEach((group, enemies) {
+          var enemiesFormatted = enemies.map((e) => '"$e"').join(', ');
+          buffer.writeln('  "$group": [$enemiesFormatted],');
+        });
+        buffer.writeln("};");
+        await tempFile.writeAsString(buffer.toString());
+        tempFilePath = tempFile.path;
+      } else {
+        tempFilePath = "ALL";
+      }
+    } catch (e) {
+      return;
+    }
+
+    String bossList = getSelectedBossesArgument();
+    List<String> processArgs = [
+      input,
+      '--output',
+      specialDatOutputPath,
+      tempFilePath,
+      '--bosses',
+      bossList.isNotEmpty ? bossList : 'None',
+      '--bossStats',
+      enemyStats.toString(),
+      '--level=$enemyLevel',
+      ...categories.entries
+          .where((entry) => entry.value)
+          .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
+    ];
+
+    if (level["Only Selected Enemies"] == true) {
+      processArgs.add("--category=onlyselectedenemies");
+    }
+
+    if (level["Only Bosses"] == true) {
+      processArgs.add("--category=onlybosses");
+    }
+
+    if (level["All Enemies"] == true) {
+      processArgs.add("--category=allenemies");
+    }
+
+    if (level["All Enemies without Randomization"] == true) {
+      processArgs.add("--category=onlylevel");
+    }
+
+    if (level["None"] == true) {
+      processArgs.add("--category=default");
+    }
+
+    if (ignoredModFiles.isNotEmpty) {
+      String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
+      processArgs.add(ignoreArgs);
+      log("Ignore arguments added: $ignoreArgs");
+    }
+
+    updateLog("NieR CLI Arguments: ${processArgs.join(' ')}", scrollController);
+
+    String command = "sudo $scriptPath ${processArgs.join(' ')}";
+
+    // Copy the command to clipboard
+    Clipboard.setData(ClipboardData(text: command)).then(
+      (result) {
+        const snackBar = SnackBar(content: Text('Command copied to clipboard'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      },
+    ).catchError((e) {
+      print('Error copying to clipboard: $e');
+    });
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Set<String> loggedStages = {};
@@ -1844,6 +2132,43 @@ end tell
         ],
       ),
     );
+  }
+
+  Future<void> loadPathsFromJson() async {
+    String directoryPath = await FileChange.ensureSettingsDirectory();
+    File settingsFile = File(p.join(directoryPath, 'paths.json'));
+
+    if (await settingsFile.exists()) {
+      String contents = await settingsFile.readAsString();
+      Map<String, dynamic> paths = jsonDecode(contents);
+      setState(() {
+        input = paths['input'] ?? '';
+        specialDatOutputPath = paths['output'] ?? '';
+        scriptPath = paths['scriptPath'] ?? '';
+
+        // Set savePaths to true if the paths.json file exists and paths are not empty
+        savePaths = input.isNotEmpty ||
+            specialDatOutputPath.isNotEmpty ||
+            scriptPath.isNotEmpty;
+      });
+    }
+  }
+
+  // In your main widget class
+  Future<void> removePathsFile() async {
+    String directoryPath = await FileChange.ensureSettingsDirectory();
+    File settingsFile = File(p.join(directoryPath, 'paths.json'));
+
+    if (await settingsFile.exists()) {
+      await settingsFile.delete();
+    }
+
+    setState(() {
+      input = '';
+      specialDatOutputPath = '';
+      scriptPath = '';
+      savePaths = false;
+    });
   }
 
   IconData getIconForCategory(String category) {

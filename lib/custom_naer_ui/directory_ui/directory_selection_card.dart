@@ -29,6 +29,16 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
     isSelected = widget.path.isNotEmpty;
   }
 
+  @override
+  void didUpdateWidget(covariant DirectorySelectionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.path != widget.path) {
+      setState(() {
+        isSelected = widget.path.isNotEmpty;
+      });
+    }
+  }
+
   void handleBrowse() async {
     await widget.onBrowse((selectedPath) {
       setState(() {
