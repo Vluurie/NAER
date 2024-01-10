@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 import 'package:NAER/naer_pages/second_page.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart'
@@ -93,7 +94,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     super.initState();
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles();
-    initializeScriptPathmacOS();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -102,20 +102,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     );
 
     log('initState called');
-  }
-
-  Future<void> initializeScriptPathmacOS() async {
-    final scriptPath = await FileChange.getScriptPath();
-    print("Script path: $scriptPath");
-
-    // Check if the script exists
-    if (await File(scriptPath).exists()) {
-      print('The script exists and is ready to be executed.');
-      // Execute your script with Process.start or any other way you prefer
-    } else {
-      print('The script does not exist at the expected location.');
-      // Handle the error, maybe inform the user or download the script
-    }
   }
 
   void startBlinkAnimation() {
@@ -651,7 +637,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<void> startRandomizing() async {
-    final scriptPath = await FileChange.getScriptPath();
     hasError = true;
     setState(() {
       isLoading = true;
@@ -700,6 +685,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     }
 
     String bossList = getSelectedBossesArgument();
+    List<String> createdDatFiles = [];
+    var currentDir = Directory.current.path;
+    var scriptPath = p.join(currentDir, 'bin/fork/nier_cli.exe');
 
 // Construct the process arguments
     List<String> processArgs = [
@@ -743,18 +731,37 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       log("Ignore arguments added: $ignoreArgs");
     }
 
-    updateLog("Final process arguments: $processArgs", scrollController);
+    updateLog(
+        "Final process arguments: ${processArgs.join(' ')}", scrollController);
 
-    updateLog("Process arguments: ${processArgs.join(' ')}", scrollController);
+// Prepare the command for execution
+    String command = "sudo $scriptPath ${processArgs.join(' ')}";
 
-    List<String> createdDatFiles = []; // To track created .dat files
+// Create an AppleScript command to open a new Terminal window, run the command, and close the window
+    String appleScriptCommand = """
+tell application "Terminal"
+    activate
+    do script "$command".replaceAll("\"", "\\\"")
+    repeat while busy of front window
+        delay 1
+    end repeat
+    close front window
+end tell
+""";
 
     try {
-      updateLog("Starting nier_cli...", scrollController);
-      final process = await Process.start(scriptPath, processArgs,
+      updateLog(
+          "Starting nier_cli with sudo. A new Terminal window will open for password input.",
+          scrollController);
+
+      // Start the process using osascript
+      final process = await Process.start(
+          'osascript', ['-e', appleScriptCommand],
           mode: ProcessStartMode.detachedWithStdio);
-      updateLog("nier_cli process started",
-          scrollController); // Log that the process has started
+
+      updateLog(
+          "nier_cli process started. Please enter your password in the Terminal window.",
+          scrollController);
 
       process.stdout.transform(utf8.decoder).listen((data) {
         // Split the data by new lines and process each line separately
