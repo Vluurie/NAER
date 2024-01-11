@@ -511,8 +511,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       // Use 'cmd' to execute the 'start' command which opens the folder
       await Process.run('cmd', ['/c', 'start', '', formattedPath]);
     } else if (Platform.isMacOS) {
-      specialDatOutputPath = escapeSpaces(specialDatOutputPath);
-
       // Open the directory in Finder on macOS
       await Process.run('open', [specialDatOutputPath]);
     } else if (Platform.isLinux) {
@@ -530,7 +528,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   void getNaerSettings() async {
     String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
-    settingsDirectoryPath = escapeSpaces(settingsDirectoryPath);
 
     if (Platform.isWindows) {
       // Correctly format the path for Windows command line
@@ -558,7 +555,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (scriptFile != null && scriptFile.isNotEmpty) {
       setState(() {
-        scriptPath = escapeSpaces(scriptFile);
+        scriptPath = scriptFile;
       });
     }
 
@@ -584,7 +581,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<bool> _isValidCliFile(String scriptPath) async {
-    return File(scriptPath).existsSync() && scriptPath.endsWith('nier_cli');
+    return File(scriptPath).existsSync() && scriptPath.endsWith('nier_cli.exe');
   }
 
   void _showInvalidCli() {
@@ -618,7 +615,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (containsValidFiles) {
         setState(() {
-          input = selectedDirectory;
+          input = escapeSpaces(selectedDirectory);
         });
         updatePath(selectedDirectory);
       } else {
@@ -674,7 +671,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (selectedDirectory != null) {
       setState(() {
-        specialDatOutputPath = selectedDirectory;
+        specialDatOutputPath = escapeSpaces(selectedDirectory);
       });
       updatePath(selectedDirectory);
 
@@ -866,12 +863,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 // Construct the process arguments
 
     List<String> processArgs = [
-      escapeSpaces(input),
+      input,
       '--output',
-      escapeSpaces(specialDatOutputPath),
-      escapeSpaces(tempFilePath),
+      specialDatOutputPath,
+      tempFilePath,
       '--bosses',
-      bossList.isNotEmpty ? escapeSpaces(bossList) : 'None',
+      bossList.isNotEmpty ? bossList : 'None',
       '--bossStats',
       enemyStats.toString(),
       '--level=$enemyLevel',
@@ -1412,16 +1409,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       return;
     }
 
-    scriptPath = escapeSpaces(scriptPath);
-
     String bossList = getSelectedBossesArgument();
     List<String> processArgs = [
-      escapeSpaces(input),
+      input,
       '--output',
-      escapeSpaces(specialDatOutputPath),
-      escapeSpaces(tempFilePath),
+      specialDatOutputPath,
+      tempFilePath,
       '--bosses',
-      bossList.isNotEmpty ? escapeSpaces(bossList) : 'None',
+      bossList.isNotEmpty ? bossList : 'None',
       '--bossStats',
       enemyStats.toString(),
       '--level=$enemyLevel',
@@ -1455,6 +1450,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       processArgs.add(ignoreArgs);
       log("Ignore arguments added: $ignoreArgs");
     }
+
+    scriptPath = escapeSpaces(scriptPath);
 
     updateLog("NieR CLI Arguments: ${processArgs.join(' ')}", scrollController);
 
