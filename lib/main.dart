@@ -845,6 +845,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     String bossList = getSelectedBossesArgument();
     List<String> createdDatFiles = [];
+    String escapeSpaces(String path) {
+      return path.replaceAll(' ', '\\ ');
+    }
 
     if (scriptPath.isEmpty) {
       print("path $scriptPath");
@@ -856,13 +859,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     }
 
 // Construct the process arguments
+
     List<String> processArgs = [
-      input,
+      escapeSpaces(input),
       '--output',
-      specialDatOutputPath,
-      tempFilePath,
+      escapeSpaces(specialDatOutputPath),
+      escapeSpaces(tempFilePath),
       '--bosses',
-      bossList.isNotEmpty ? bossList : 'None',
+      bossList.isNotEmpty ? escapeSpaces(bossList) : 'None',
       '--bossStats',
       enemyStats.toString(),
       '--level=$enemyLevel',
@@ -897,37 +901,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       log("Ignore arguments added: $ignoreArgs");
     }
 
-    updateLog(
-        "Final process arguments: ${processArgs.join(' ')}", scrollController);
+    print("Final process arguments: $processArgs");
 
-// Prepare the command for execution
-    String command = "sudo $scriptPath ${processArgs.join(' ')}";
-
-// Create an AppleScript command to open a new Terminal window, run the command, and close the window
-    String appleScriptCommand = """
-tell application "Terminal"
-    activate
-    do script "$command".replaceAll("\"", "\\\"")
-    repeat while busy of front window
-        delay 1
-    end repeat
-    close front window
-end tell
-""";
+    updateLog("Process arguments: ${processArgs.join(' ')}", scrollController);
 
     try {
-      updateLog(
-          "Starting nier_cli with sudo. A new Terminal window will open for password input.",
-          scrollController);
-
-      // Start the process using osascript
-      final process = await Process.start(
-          'osascript', ['-e', appleScriptCommand],
+      updateLog("Starting nier_cli...", scrollController);
+      final process = await Process.start(scriptPath, processArgs,
           mode: ProcessStartMode.detachedWithStdio);
-
-      updateLog(
-          "nier_cli process started. Please enter your password in the Terminal window.",
-          scrollController);
 
       process.stdout.transform(utf8.decoder).listen((data) {
         // Split the data by new lines and process each line separately
@@ -1414,14 +1395,18 @@ end tell
       return;
     }
 
+    String escapeSpaces(String path) {
+      return path.replaceAll(' ', '\\ ');
+    }
+
     String bossList = getSelectedBossesArgument();
     List<String> processArgs = [
-      input,
+      escapeSpaces(input),
       '--output',
-      specialDatOutputPath,
-      tempFilePath,
+      escapeSpaces(specialDatOutputPath),
+      escapeSpaces(tempFilePath),
       '--bosses',
-      bossList.isNotEmpty ? bossList : 'None',
+      bossList.isNotEmpty ? escapeSpaces(bossList) : 'None',
       '--bossStats',
       enemyStats.toString(),
       '--level=$enemyLevel',
