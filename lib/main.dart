@@ -70,6 +70,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String input = '';
   String scriptPath = '';
   int enemyLevel = 1;
+  String escapeSpaces(String path) {
+    return path.replaceAll(' ', '\\ ');
+  }
+
   String specialDatOutputPath = '';
   List<String> ignoredModFiles = [];
   List<String> logMessages = [];
@@ -507,6 +511,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       // Use 'cmd' to execute the 'start' command which opens the folder
       await Process.run('cmd', ['/c', 'start', '', formattedPath]);
     } else if (Platform.isMacOS) {
+      specialDatOutputPath = escapeSpaces(specialDatOutputPath);
+
       // Open the directory in Finder on macOS
       await Process.run('open', [specialDatOutputPath]);
     } else if (Platform.isLinux) {
@@ -524,13 +530,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   void getNaerSettings() async {
     String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
+    settingsDirectoryPath = escapeSpaces(settingsDirectoryPath);
 
     if (Platform.isWindows) {
       // Correctly format the path for Windows command line
-      String formattedPath = settingsDirectoryPath.replaceAll('/', '\\');
 
       // Use 'cmd' to execute the 'start' command which opens the folder
-      await Process.run('cmd', ['/c', 'start', '', formattedPath]);
+      await Process.run('cmd', ['/c', 'start', '', settingsDirectoryPath]);
     } else if (Platform.isMacOS) {
       // Open the directory in Finder on macOS
       await Process.run('open', [settingsDirectoryPath]);
@@ -552,7 +558,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (scriptFile != null && scriptFile.isNotEmpty) {
       setState(() {
-        scriptPath = scriptFile;
+        scriptPath = escapeSpaces(scriptFile);
       });
     }
 
@@ -845,9 +851,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     String bossList = getSelectedBossesArgument();
     List<String> createdDatFiles = [];
-    String escapeSpaces(String path) {
-      return path.replaceAll(' ', '\\ ');
-    }
 
     if (scriptPath.isEmpty) {
       print("path $scriptPath");
@@ -857,6 +860,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       });
       return;
     }
+
+    scriptPath = escapeSpaces(scriptPath);
 
 // Construct the process arguments
 
@@ -907,7 +912,19 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     try {
       updateLog("Starting nier_cli...", scrollController);
-      final process = await Process.start(scriptPath, processArgs,
+      // Ensure the scriptPath is not empty and exists
+      if (scriptPath.isEmpty || !File(scriptPath).existsSync()) {
+        updateLog("Error: NieR CLI path is invalid or not specified.",
+            scrollController);
+        return;
+      }
+
+      updateLog("Starting nier_cli...", scrollController);
+      updateLog("Executing command: $scriptPath ${processArgs.join(' ')}",
+          scrollController);
+
+      // Start the process
+      Process process = await Process.start(scriptPath, processArgs,
           mode: ProcessStartMode.detachedWithStdio);
 
       process.stdout.transform(utf8.decoder).listen((data) {
@@ -1395,9 +1412,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       return;
     }
 
-    String escapeSpaces(String path) {
-      return path.replaceAll(' ', '\\ ');
-    }
+    scriptPath = escapeSpaces(scriptPath);
 
     String bossList = getSelectedBossesArgument();
     List<String> processArgs = [
