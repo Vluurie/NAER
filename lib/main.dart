@@ -581,7 +581,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<bool> _isValidCliFile(String scriptPath) async {
-    return File(scriptPath).existsSync() && scriptPath.endsWith('nier_cli.exe');
+    return File(scriptPath).existsSync() && scriptPath.endsWith('nier_cli');
   }
 
   void _showInvalidCli() {
