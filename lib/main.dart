@@ -70,11 +70,28 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String input = '';
   String scriptPath = '';
   int enemyLevel = 1;
-  String escapeSpacesCli(String path) {
-    return path
-        .replaceAll(' ', '\\ ')
-        .replaceAll('(', '\\(')
-        .replaceAll(')', '\\)');
+  String convertAndEscapePath(String path) {
+    print("Path before function $path");
+
+    // For Windows: Enclose the path in double quotes if it contains spaces
+    if (Platform.isWindows) {
+      if (path.contains(' ')) {
+        return '"$path"';
+      }
+      return path;
+    }
+
+    // For macOS (or Unix-like systems): Convert backslashes to forward slashes and escape spaces and parentheses
+    if (Platform.isMacOS || Platform.isLinux) {
+      String unixPath = path.replaceAll('\\', '/');
+      unixPath = unixPath.replaceAllMapped(
+          RegExp(r'([ ()])'), (Match m) => '\\${m[1]}');
+      print("Path after function $unixPath");
+      return unixPath;
+    }
+
+    // If neither Windows nor macOS, return the original path (or handle other platforms as needed)
+    return path;
   }
 
   String specialDatOutputPath = '';
@@ -574,7 +591,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       bool isValidCli = await _isValidCliFile(scriptFile);
       if (isValidCli) {
-        return escapeSpacesCli(scriptFile);
+        return convertAndEscapePath(scriptFile);
       } else {
         _showInvalidCli();
       }
@@ -618,7 +635,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (containsValidFiles) {
         setState(() {
-          input = escapeSpacesCli(selectedDirectory);
+          input = convertAndEscapePath(selectedDirectory);
         });
         updatePath(selectedDirectory);
       } else {
@@ -674,7 +691,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (selectedDirectory != null) {
       setState(() {
-        specialDatOutputPath = escapeSpacesCli(selectedDirectory);
+        specialDatOutputPath = convertAndEscapePath(selectedDirectory);
       });
       updatePath(selectedDirectory);
 
