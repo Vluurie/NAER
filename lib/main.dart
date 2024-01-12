@@ -70,8 +70,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String input = '';
   String scriptPath = '';
   int enemyLevel = 1;
-  String escapeSpaces(String path) {
-    return path.replaceAll(' ', '\\ ');
+  String escapeSpacesCli(String path) {
+    return path
+        .replaceAll(' ', '\\ ')
+        .replaceAll('(', '\\(')
+        .replaceAll(')', '\\)');
   }
 
   String specialDatOutputPath = '';
@@ -507,7 +510,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (Platform.isWindows) {
       // Correctly format the path for Windows command line
-      String formattedPath = specialDatOutputPath.replaceAll('/', '\\');
+      String formattedPath = specialDatOutputPath;
       // Use 'cmd' to execute the 'start' command which opens the folder
       await Process.run('cmd', ['/c', 'start', '', formattedPath]);
     } else if (Platform.isMacOS) {
@@ -571,7 +574,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       bool isValidCli = await _isValidCliFile(scriptFile);
       if (isValidCli) {
-        return scriptFile;
+        return escapeSpacesCli(scriptFile);
       } else {
         _showInvalidCli();
       }
@@ -615,7 +618,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (containsValidFiles) {
         setState(() {
-          input = escapeSpaces(selectedDirectory);
+          input = escapeSpacesCli(selectedDirectory);
         });
         updatePath(selectedDirectory);
       } else {
@@ -671,7 +674,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (selectedDirectory != null) {
       setState(() {
-        specialDatOutputPath = escapeSpaces(selectedDirectory);
+        specialDatOutputPath = escapeSpacesCli(selectedDirectory);
       });
       updatePath(selectedDirectory);
 
@@ -857,8 +860,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       });
       return;
     }
-
-    scriptPath = escapeSpaces(scriptPath);
 
 // Construct the process arguments
 
@@ -1450,8 +1451,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       processArgs.add(ignoreArgs);
       log("Ignore arguments added: $ignoreArgs");
     }
-
-    scriptPath = escapeSpaces(scriptPath);
 
     updateLog("NieR CLI Arguments: ${processArgs.join(' ')}", scrollController);
 
