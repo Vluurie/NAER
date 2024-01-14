@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
 import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
+import 'package:NAER/custom_naer_ui/other/arg_descriptions.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -70,27 +71,26 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String input = '';
   String scriptPath = '';
   int enemyLevel = 1;
+  bool advancedCli = false;
+
   String convertAndEscapePath(String path) {
-    print("Path before function $path");
+    print("Path before function: $path");
 
-    // For Windows: Enclose the path in double quotes if it contains spaces
-    if (Platform.isWindows) {
-      if (path.contains(' ')) {
-        return '"$path"';
+    // Check if the path contains spaces or special characters
+    // For Windows, macOS, or Linux: Do not add quotes here, let JSON encoding handle it
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      if (path.contains(' ') ||
+          path.contains('(') ||
+          path.contains(')') ||
+          path.contains('&') ||
+          path.contains('\\')) {
+        // No need to add quotes here
+        print("Path contains special characters but not modifying it: $path");
+        return path;
       }
-      return path;
     }
 
-    // For macOS (or Unix-like systems): Convert backslashes to forward slashes and escape spaces and parentheses
-    if (Platform.isMacOS || Platform.isLinux) {
-      String unixPath = path.replaceAll('\\', '/');
-      unixPath = unixPath.replaceAllMapped(
-          RegExp(r'([ ()])'), (Match m) => '\\${m[1]}');
-      print("Path after function $unixPath");
-      return unixPath;
-    }
-
-    // If neither Windows nor macOS, return the original path (or handle other platforms as needed)
+    // Return the original path if no special characters or spaces
     return path;
   }
 
@@ -116,13 +116,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   late ScrollController scrollController;
   late AnimationController _blinkController;
+  late Future<bool> _loadPathsFuture;
 
   @override
   void initState() {
     super.initState();
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles();
-    loadPathsFromJson();
+    _loadPathsFuture = loadPathsFromJson();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -451,25 +452,33 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               runSpacing: 10, // Vertical space between items
               children: [
                 DirectorySelectionCard(
-                  title: "Input Directory:",
-                  path: input,
-                  onBrowse: (updatePath) => openInputFileDialog(updatePath),
-                  icon: Icons.folder_open,
-                  width: 200,
-                ),
+                    title: "Input Directory:",
+                    path: input,
+                    onBrowse: (updatePath) => openInputFileDialog(updatePath),
+                    icon: Icons.folder_open,
+                    width: 200,
+                    hints: "Hints: Your Game data folder."),
                 DirectorySelectionCard(
-                  title: "Output Directory:",
-                  path: specialDatOutputPath,
-                  onBrowse: (updatePath) => openOutputFileDialog(updatePath),
-                  icon: Icons.folder_open,
-                  width: 200,
-                ),
+                    title: "Output Directory:",
+                    path: specialDatOutputPath,
+                    onBrowse: (updatePath) => openOutputFileDialog(updatePath),
+                    icon: Icons.folder_open,
+                    width: 200,
+                    hints: "Hints: Also Game data folder."),
                 DirectorySelectionCard(
-                  title: "Select NieR CLI (macOS):",
+                  title: "Select NieR CLI:",
                   path: scriptPath,
-                  onBrowse: (updatePath) => openCliSearch(updatePath),
-                  icon: Icons.apple,
+                  onBrowse: Platform.isMacOS || Platform.isLinux
+                      ? (updatePath) => openCliSearch(updatePath)
+                      : (_) async {}, // No-op function for Windows
+                  icon: Platform.isWindows
+                      ? Icons.disabled_by_default
+                      : Icons.apple,
                   width: 300,
+                  enabled: Platform.isMacOS || Platform.isLinux,
+                  hint: Platform.isWindows
+                      ? "Only needed for macOS, Windows cannot select."
+                      : null, // Hint for Windows users
                 ),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.open_in_full),
@@ -480,7 +489,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     foregroundColor: MaterialStateProperty.all<Color>(
                         const Color.fromARGB(255, 71, 192, 240)),
                   ),
-                  onPressed: () => getOutputPath(context),
+                  onPressed: () => getOutputPath(context, specialDatOutputPath),
                 ),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.settings),
@@ -493,20 +502,32 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   ),
                   onPressed: getNaerSettings,
                 ),
-                SavePathsWidget(
-                  input: input,
-                  output: specialDatOutputPath,
-                  scriptPath: scriptPath,
-                  savePaths: savePaths,
-                  onCheckboxChanged: (bool value) {
-                    if (!value) {
-                      removePathsFile();
+                FutureBuilder<bool>(
+                  future: _loadPathsFuture, // This calls the load function
+                  builder:
+                      (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      // When the future is complete, build the SavePathsWidget
+                      return SavePathsWidget(
+                        input: input,
+                        output: specialDatOutputPath,
+                        scriptPath: scriptPath,
+                        savePaths: savePaths,
+                        onCheckboxChanged: (bool value) {
+                          setState(() {
+                            savePaths = value;
+                            if (!value) {
+                              removePathsFile(); // Call to remove paths when the checkbox is unchecked
+                            }
+                          });
+                        },
+                      );
+                    } else {
+                      // While waiting for the future to complete, show a loading indicator
+                      return const CircularProgressIndicator();
                     }
-                    setState(() {
-                      savePaths = value;
-                    });
                   },
-                ),
+                )
               ],
             ),
           ],
@@ -515,33 +536,39 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     );
   }
 
-  void getOutputPath(BuildContext context) async {
-    if (specialDatOutputPath.isEmpty) {
+  void getOutputPath(BuildContext context, String outputPath) async {
+    if (outputPath.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Output path is empty'),
-        ),
+        const SnackBar(content: Text('Output path is empty')),
+      );
+      return;
+    }
+
+    // Remove enclosing double quotes if they exist
+    outputPath = outputPath.replaceAll('"', '');
+
+    // Check if the path exists
+    if (!await Directory(outputPath).exists()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Path does not exist: $outputPath')),
       );
       return;
     }
 
     if (Platform.isWindows) {
-      // Correctly format the path for Windows command line
-      String formattedPath = specialDatOutputPath;
-      // Use 'cmd' to execute the 'start' command which opens the folder
-      await Process.run('cmd', ['/c', 'start', '', formattedPath]);
+      // Use 'explorer' to open the directory on Windows
+      await Process.run('explorer', [outputPath]);
     } else if (Platform.isMacOS) {
       // Open the directory in Finder on macOS
-      await Process.run('open', [specialDatOutputPath]);
+      await Process.run('open', [outputPath]);
     } else if (Platform.isLinux) {
       // Open the directory in the default file manager on Linux
-      await Process.run('xdg-open', [specialDatOutputPath]);
+      await Process.run('xdg-open', [outputPath]);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Opening output path is not supported on this platform.'),
-        ),
+            content:
+                Text('Opening output path is not supported on this platform.')),
       );
     }
   }
@@ -601,7 +628,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<bool> _isValidCliFile(String scriptPath) async {
-    return File(scriptPath).existsSync() && scriptPath.endsWith('nier_cli');
+    bool isWindows = Platform.isWindows;
+    bool isValidExtension = isWindows
+        ? scriptPath.toLowerCase().endsWith('nier_cli.exe')
+        : scriptPath.toLowerCase().endsWith('nier_cli');
+
+    return File(scriptPath).existsSync() && isValidExtension;
   }
 
   void _showInvalidCli() {
@@ -613,7 +645,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         return AlertDialog(
           title: const Text("Invalid File"),
           content: const Text(
-              "The selected file is not a valid NieR CLI executable."),
+              "The selected file is not a valid NieR CLI executable. ('nier_cli.exe') || ('nier_cli') "),
           actions: <Widget>[
             TextButton(
               child: const Text("OK"),
@@ -854,7 +886,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         });
         buffer.writeln("};");
         await tempFile.writeAsString(buffer.toString());
-        tempFilePath = tempFile.path;
+        tempFilePath = convertAndEscapePath(tempFile.path);
         updateLog("Temporary file created: $tempFilePath", scrollController);
       } else {
         tempFilePath = "ALL";
@@ -869,7 +901,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     String bossList = getSelectedBossesArgument();
     List<String> createdDatFiles = [];
 
-    if (scriptPath.isEmpty) {
+    if (!Platform.isWindows && scriptPath.isEmpty) {
       print("path $scriptPath");
       updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
       setState(() {
@@ -923,24 +955,26 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     print("Final process arguments: $processArgs");
 
-    updateLog("Process arguments: ${processArgs.join(' ')}", scrollController);
+    updateLog("Process arguments: $scriptPath ${processArgs.join(' ')}",
+        scrollController);
 
     try {
       updateLog("Starting nier_cli...", scrollController);
-      // Ensure the scriptPath is not empty and exists
-      if (scriptPath.isEmpty || !File(scriptPath).existsSync()) {
-        updateLog("Error: NieR CLI path is invalid or not specified.",
-            scrollController);
-        return;
+
+      // Construct the command with sudo for macOS or Linux
+      String command = scriptPath;
+      if (Platform.isMacOS || Platform.isLinux) {
+        processArgs.insert(0, scriptPath);
+        command = 'sudo';
+      } else if (Platform.isWindows) {
+        var currentDir = Directory.current.path;
+        command = p.join(currentDir, 'bin/fork/nier_cli.exe');
       }
 
-      updateLog("Starting nier_cli...", scrollController);
-      updateLog("Executing command: $scriptPath ${processArgs.join(' ')}",
-          scrollController);
-
-      // Start the process
-      Process process = await Process.start(scriptPath, processArgs,
-          mode: ProcessStartMode.detachedWithStdio);
+      Process process = await Process.start(
+        command,
+        processArgs,
+      );
 
       process.stdout.transform(utf8.decoder).listen((data) {
         // Split the data by new lines and process each line separately
@@ -995,6 +1029,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       loggedStages.clear();
       updateLog(
           'Thank you for using the randomization tool.', scrollController);
+      updateLog(asciiArt2B, scrollController);
+      Duration duration = const Duration(seconds: 3);
+      sleep(duration);
       updateLog("Randomization process finished.", scrollController);
       showCompletionDialog();
     }
@@ -1330,7 +1367,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             ? buildLogMessageSpans()
                             : [
                                 const TextSpan(
-                                    text: "Hey there! It's quiet for now... 🤫")
+                                    text:
+                                        "Hey there! It's quiet for now... 🤫\n\n"),
+                                TextSpan(text: asciiArt2B)
                               ],
                       ),
                     ),
@@ -1357,7 +1396,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   backgroundColor: MaterialStateProperty.all<Color>(
                       const Color.fromARGB(255, 25, 25, 26)),
                   foregroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 71, 192, 240)),
+                      Color.fromARGB(255, 240, 71, 71)),
                 ),
                 onPressed: clearLogMessages,
                 child: const Text('Clear Log'),
@@ -1367,32 +1406,155 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               padding:
                   const EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
               child: ElevatedButton.icon(
-                icon: const Icon(Icons.apple), // Apple icon
-                label: const Text('Copy CLI Argument (macOS)'),
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy CLI Arguments'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(
                       const Color.fromARGB(255, 25, 25, 26)),
                   foregroundColor: MaterialStateProperty.all<Color>(
                       const Color.fromARGB(255, 71, 192, 240)),
                 ),
-                onPressed:
-                    copyCLIArguments, // Function to be called on button press
+                onPressed: () => onnCopyArgsPressed(),
               ),
             ),
+            if (Platform.isWindows)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 30.0, horizontal: 10.0),
+                child: ElevatedButton.icon(
+                    icon: const Icon(Icons.window),
+                    label: const Text('Advanced Terminal CLI'),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 25, 25, 26)),
+                      foregroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 71, 192, 240)),
+                    ),
+                    onPressed: () => onAdvancedCliPressed()),
+              ),
           ],
         )
       ],
     );
   }
 
-  void copyCLIArguments() async {
+  void onAdvancedCliPressed() {
+    advancedCli = true;
+    copyCLIArguments(advancedCli);
+  }
+
+  void onnCopyArgsPressed() {
+    advancedCli = false;
+    copyCLIArguments(advancedCli);
+  }
+
+  Future<void> runSudoCommand(
+      String scriptPath, List<String> processArgs) async {
+    // Convert arguments to a properly escaped string
+    String arguments = processArgs.join(' ').replaceAll('"', '\\"');
+
+    // AppleScript command to prompt for the password and execute the command
+    String appleScript = '''
+tell application "Terminal"
+    activate
+    do script "echo 'Please enter your password to proceed:' && sudo -S $scriptPath $arguments"
+end tell
+''';
+
+    // Execute the AppleScript command
+    Process.run('osascript', ['-e', appleScript]).then((result) {
+      if (result.stderr.isNotEmpty) {
+        print('Error: ${result.stderr}');
+      }
+      if (result.stdout.isNotEmpty) {
+        print('Output: ${result.stdout}');
+      }
+    }).catchError((error) {
+      print('Error: $error');
+    });
+  }
+
+  Future<void> runCommandThroughBatch(String scriptPath,
+      List<String> processArgs, List<String> argDescriptions) async {
+    scriptPath = scriptPath.contains(' ') && !scriptPath.startsWith('"')
+        ? '"$scriptPath"'
+        : scriptPath;
+
+    List<String> correctedArgs = processArgs.map((arg) {
+      return arg.contains(' ') && !arg.startsWith('"') ? '"$arg"' : arg;
+    }).toList();
+
+    if (argDescriptions.length != correctedArgs.length) {
+      throw ArgumentError(
+          'The number of argument descriptions must match the number of arguments.');
+    }
+
+    File tempBatchFile = File('${Directory.systemTemp.path}\\run_command.bat');
+
+    // Humorous NieR-themed introduction
+    String batchCommand = '@echo off\n'
+        'setlocal EnableDelayedExpansion\n'
+        'set "text=Booting_Up_NieR:Automata_Enemy_Randomizer...Glory_to_Mankind!"\n'
+        'for /L %%a in (0,1,1000) do (\n'
+        '  if "!text:~%%a,1!"=="" goto :typingEnd\n'
+        '  <nul set /p "=!text:~%%a,1!"\n'
+        '  ping localhost -n 1 > nul\n'
+        ')\n'
+        ':typingEnd\n'
+        'echo.\n'
+        'echo.\n'
+        'echo === Automata Command Protocol Initiated ===\n'
+        'echo Directive: Enhance gameplay through randomized enemy encounters.\n'
+        'echo Alert: Configuration changes are irreversible (not undoable with the Tool). Proceed with caution.\n'
+        'echo Press any key to deploy the tactical argument review...\n'
+        'pause > nul\n';
+
+    // Display each argument with a NieR twist
+    for (int i = 0; i < correctedArgs.length; i++) {
+      batchCommand +=
+          'echo Tactical Argument ${i + 1} (${correctedArgs[i]}): ${argDescriptions[i]}\n';
+      if (i < correctedArgs.length - 1) {
+        batchCommand += 'echo.\n';
+        batchCommand += 'echo Press any key to analyze the next argument...\n';
+        batchCommand += 'pause > nul\n';
+        batchCommand += 'echo.\n';
+      }
+    }
+
+    // Final confirmation with thematic flavor
+    batchCommand += 'echo.\n'
+        'echo All tactical arguments analyzed. Press any key to initiate command sequence...\n'
+        'pause > nul\n'
+        '$scriptPath ${correctedArgs.join(" ")}\n'
+        'echo.\n'
+        'echo Mission accomplished. Press any key to retreat.\n'
+        'pause > nul';
+
+    await tempBatchFile.writeAsString(batchCommand);
+
+    print(
+        'Initiating NieR:Automata Enemy Randomizer Command Sequence: $scriptPath ${correctedArgs.join(" ")}');
+
+    try {
+      await Process.start(
+        'cmd',
+        ['/c', 'start', 'cmd', '/k', tempBatchFile.path],
+        runInShell: true,
+        mode: ProcessStartMode.normal,
+      );
+    } catch (e) {
+      print('Error in Enemy Randomizer Deployment: $e');
+    }
+  }
+
+  void copyCLIArguments(bool advancedCli) async {
     if (input.isEmpty || specialDatOutputPath.isEmpty) {
       updateLog("Error: Please select both input and output directories. 💋 ",
           scrollController);
       return;
     }
 
-    if (scriptPath.isEmpty) {
+    if (!Platform.isWindows && scriptPath.isEmpty) {
       updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
       setState(() {
         startBlinkAnimation();
@@ -1419,7 +1581,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         });
         buffer.writeln("};");
         await tempFile.writeAsString(buffer.toString());
-        tempFilePath = tempFile.path;
+        tempFilePath = convertAndEscapePath(tempFile.path);
       } else {
         tempFilePath = "ALL";
       }
@@ -1469,22 +1631,40 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       log("Ignore arguments added: $ignoreArgs");
     }
 
-    updateLog("NieR CLI Arguments: ${processArgs.join(' ')}", scrollController);
+    String command = scriptPath;
+    if (Platform.isMacOS || Platform.isLinux) {
+      processArgs.insert(0, scriptPath);
+      command = 'sudo';
+    } else if (Platform.isWindows) {
+      var currentDir = Directory.current.path;
+      command = p.join(currentDir, 'bin/fork/nier_cli.exe');
+    }
 
-    String command = "sudo $scriptPath ${processArgs.join(' ')}";
+    List<String> fullCommand = [scriptPath] + processArgs;
 
-    // Copy the command to clipboard
-    Clipboard.setData(ClipboardData(text: command)).then(
-      (result) {
-        const snackBar = SnackBar(content: Text('Command copied to clipboard'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      },
-    ).catchError((e) {
-      print('Error copying to clipboard: $e');
-    });
-    setState(() {
-      isLoading = false;
-    });
+    if (Platform.isMacOS || Platform.isLinux) {
+      fullCommand = [scriptPath] + processArgs;
+    } else if (Platform.isWindows) {
+      fullCommand = [command] + processArgs;
+    }
+
+    updateLog("NieR CLI Arguments: $command ${processArgs.join(' ')}",
+        scrollController);
+
+    if (Platform.isWindows && advancedCli == true) {
+      await runCommandThroughBatch(command, processArgs, argDescriptions);
+    } else {
+      if (advancedCli != true) {
+        Clipboard.setData(ClipboardData(text: fullCommand.join(' ')))
+            .then((result) {
+          const snackBar =
+              SnackBar(content: Text('Command copied to clipboard'));
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }).catchError((e) {
+          updateLog("Error copying to clipboard: $e", scrollController);
+        });
+      }
+    }
   }
 
   Set<String> loggedStages = {};
@@ -2147,7 +2327,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     );
   }
 
-  Future<void> loadPathsFromJson() async {
+  Future<bool> loadPathsFromJson() async {
     String directoryPath = await FileChange.ensureSettingsDirectory();
     File settingsFile = File(p.join(directoryPath, 'paths.json'));
 
@@ -2158,13 +2338,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         input = paths['input'] ?? '';
         specialDatOutputPath = paths['output'] ?? '';
         scriptPath = paths['scriptPath'] ?? '';
-
-        // Set savePaths to true if the paths.json file exists and paths are not empty
-        savePaths = input.isNotEmpty ||
-            specialDatOutputPath.isNotEmpty ||
-            scriptPath.isNotEmpty;
+        savePaths = paths['savePaths'] ?? false;
       });
+      return true;
     }
+    return false;
   }
 
   // In your main widget class

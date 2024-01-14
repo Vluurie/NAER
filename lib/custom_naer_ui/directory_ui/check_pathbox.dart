@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
@@ -14,59 +12,78 @@ class SavePathsWidget extends StatefulWidget {
   final Function(bool) onCheckboxChanged;
 
   const SavePathsWidget({
-    super.key,
+    Key? key,
     this.input,
     this.output,
     this.scriptPath,
-    this.savePaths = false,
+    required this.savePaths,
     required this.onCheckboxChanged,
-  });
+  }) : super(key: key);
 
   @override
   _SavePathsWidgetState createState() => _SavePathsWidgetState();
 }
 
 class _SavePathsWidgetState extends State<SavePathsWidget> {
+  late bool checkboxValue;
+
+  @override
+  void initState() {
+    super.initState();
+    checkboxValue = widget.savePaths;
+  }
+
+  Future<void> savePathsToJson() async {
+    String directoryPath = await FileChange.ensureSettingsDirectory();
+    File settingsFile = File(p.join(directoryPath, 'paths.json'));
+
+    Map<String, dynamic> paths = {
+      'input': widget.input ?? '',
+      'output': widget.output ?? '',
+      'scriptPath': widget.scriptPath ?? '',
+      'savePaths': checkboxValue,
+    };
+
+    await settingsFile.writeAsString(jsonEncode(paths));
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Determine if the checkbox should be enabled
-    bool isCheckboxEnabled = widget.input?.isNotEmpty == true &&
-        widget.output?.isNotEmpty == true &&
-        widget.scriptPath?.isNotEmpty == true;
+    bool isCheckboxEnabled =
+        widget.input?.isNotEmpty == true && widget.output?.isNotEmpty == true;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Checkbox(
-          value: widget.savePaths,
+          fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
+            if (!isCheckboxEnabled) {
+              return const Color.fromARGB(
+                  246, 78, 75, 75); // Color for disabled state
+            }
+            return checkboxValue
+                ? const Color.fromRGBO(
+                    0, 255, 0, 1.0) // Color for checked state
+                : const Color.fromARGB(
+                    246, 0, 0, 0); // Color for unchecked state
+          }),
+          value: checkboxValue,
           onChanged: isCheckboxEnabled
               ? (bool? newValue) {
-                  if (newValue == true) {
-                    savePathsToJson();
-                  }
-                  // Notify the parent widget of the change.
-                  widget.onCheckboxChanged(newValue ?? false);
+                  setState(() {
+                    checkboxValue = newValue ?? false;
+                    widget.onCheckboxChanged(checkboxValue);
+                    if (checkboxValue) {
+                      savePathsToJson();
+                    }
+                  });
                 }
               : null,
         ),
-        const Text(
-          'Save paths for future',
+        Text(
+          checkboxValue ? 'Paths currently saved' : 'Save paths for future',
         ),
       ],
     );
-  }
-
-  // Function to save paths
-  Future<void> savePathsToJson() async {
-    String directoryPath = await FileChange.ensureSettingsDirectory();
-    File settingsFile = File(p.join(directoryPath, 'paths.json'));
-
-    Map<String, String> paths = {
-      'input': widget.input ?? '',
-      'output': widget.output ?? '',
-      'scriptPath': widget.scriptPath ?? '',
-    };
-
-    await settingsFile.writeAsString(jsonEncode(paths));
   }
 }
