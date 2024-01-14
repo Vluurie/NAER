@@ -961,7 +961,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     try {
       updateLog("Starting nier_cli...", scrollController);
 
-      // Construct the command with sudo for macOS or Linux
+      // Construct the command based on the platform
       String command = scriptPath;
       if (Platform.isMacOS || Platform.isLinux) {
         processArgs.insert(0, scriptPath);
@@ -971,30 +971,24 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         command = p.join(currentDir, 'bin/fork/nier_cli.exe');
       }
 
-      Process process = await Process.start(
-        command,
-        processArgs,
-      );
+      // Start the process
+      Process process = await Process.start(command, processArgs);
 
+      // Handle standard output
       process.stdout.transform(utf8.decoder).listen((data) {
-        // Split the data by new lines and process each line separately
         var lines = data.split('\n');
         for (var line in lines) {
           updateLog(line.trim(), scrollController);
 
-          // Check if the line contains 'Folder created:'
           if (line.contains("Folder created:")) {
-            // Split the line and get the part after 'Folder created:'
             var parts = line.split("Folder created:");
             if (parts.length >= 2) {
-              var fullPath = parts[1].trim(); // Extract the path
-              log("Debug - Extracted path: $fullPath");
+              var fullPath = parts[1].trim();
 
               if (fullPath.endsWith('.dat')) {
                 setState(() {
                   createdFiles.add(fullPath);
                   FileChange.logChange(fullPath, 'create');
-                  log("Debug - Added to createdFiles: $fullPath");
                 });
               }
             }
@@ -1002,26 +996,35 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         }
       });
 
+      // Handle standard error
       process.stderr.transform(utf8.decoder).listen((data) {
         updateLog("stderr: $data", scrollController);
       });
 
+      // Handle process exit
       final exitCode = await process.exitCode;
       if (exitCode == 0) {
         updateLog(
             "Randomization process completed successfully with exit code $exitCode",
             scrollController);
         setState(() {
-          createdFiles
-              .addAll(createdDatFiles); // Update state with tracked .dat files
+          createdFiles.addAll(createdDatFiles);
         });
       } else {
         updateLog(
             "Randomization process ended with error. Exit code: $exitCode",
             scrollController);
       }
-    } catch (e) {
-      updateLog("Error during process execution: $e", scrollController);
+    } on FormatException catch (formatException) {
+      updateLog("Format error: ${formatException.message}", scrollController);
+    } on FileSystemException catch (fileSystemException) {
+      updateLog("File system error: ${fileSystemException.message}",
+          scrollController);
+    } on ProcessException catch (processException) {
+      updateLog("Process error: ${processException.message}", scrollController);
+    } catch (e, stackTrace) {
+      updateLog("Unexpected error: $e", scrollController);
+      logErrorDetails(e, stackTrace);
     } finally {
       setState(() {
         isLoading = false;
@@ -1031,10 +1034,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           'Thank you for using the randomization tool.', scrollController);
       updateLog(asciiArt2B, scrollController);
       Duration duration = const Duration(seconds: 3);
-      sleep(duration);
+      Future.delayed(duration);
       updateLog("Randomization process finished.", scrollController);
       showCompletionDialog();
     }
+  }
+
+  void logErrorDetails(dynamic e, StackTrace stackTrace) {
+    updateLog("Error: $e", scrollController);
+    updateLog("Stack Trace: $stackTrace", scrollController);
   }
 
   Future<List<String>> findModFiles(String outputDirectory) async {
@@ -1047,11 +1055,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         await for (FileSystemEntity entity in directory.list(recursive: true)) {
           if (entity is File && entity.path.endsWith('.dat')) {
             var fileModTime = await entity.lastModified();
-            var fileName =
-                path.basename(entity.path); // Extract only the file name
+            var fileName = path.basename(entity.path);
             log("Found .dat file: ${entity.path}, last modified: $fileModTime");
             if (fileModTime.isBefore(preRandomizationTime)) {
-              modFiles.add(fileName); // Add only the file name
+              modFiles.add(fileName);
               log("Adding mod file: $fileName");
             }
           }
