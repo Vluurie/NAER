@@ -2,6 +2,8 @@
 
 ## Overview
 
+Note: This is my first somewhat bigger project and my code is a mess sorry :D.
+
 NAER, the ultimate enemy randomization tool designed to enhance your gaming experience in the critically acclaimed action RPG. With NAER, you have the power to breathe new life into the game by introducing a variety of randomization options. Whether you seek to intensify the challenge or simply wish to explore the game from a fresh perspective, NAER is here to cater to your desires.
 
 ![grafik](https://github.com/Vluurie/NAER/assets/145698737/daa0572f-87c1-421d-986c-799dc4403c15)
@@ -42,8 +44,9 @@ To install and build the NAER tool, follow these steps:
 1. **Download Repository**: Clone or download the NAER repository from GitHub.
 2. **Install Flutter Dart CLI**: Download and install the Flutter Dart CLI, which will help manage dependencies and build the project.
 3. **Fetch Dependencies**: Navigate to the project directory and run `flutter pub get` to fetch the latest dependencies.
-4. **Compile the CLI Tool**: Utilize `dart compile exe bin\nier_cli.dart` to compile the modified nier_cli tool.
+4. **Compile the CLI Tool**: Utilize `dart compile exe bin\fork\nier_cli.dart` to compile the modified nier_cli tool.
 5. **Build Executable**: Execute `flutter build windows` to create the Windows executable for the tool.
+6. **Build Executable**: Execute `flutter build macos` to create the macOS application for the tool, then run the executable inside the application bundle and not the .app bundle itself!.
 
 After successfully installing NAER, simply run the executable
 
