@@ -58,14 +58,11 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
         Checkbox(
           fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
             if (!isCheckboxEnabled) {
-              return const Color.fromARGB(
-                  246, 78, 75, 75); // Color for disabled state
+              return const Color.fromARGB(246, 78, 75, 75);
             }
             return checkboxValue
-                ? const Color.fromRGBO(
-                    0, 255, 0, 1.0) // Color for checked state
-                : const Color.fromARGB(
-                    246, 0, 0, 0); // Color for unchecked state
+                ? const Color.fromRGBO(0, 255, 0, 1.0)
+                : const Color.fromARGB(246, 0, 0, 0);
           }),
           value: checkboxValue,
           onChanged: isCheckboxEnabled

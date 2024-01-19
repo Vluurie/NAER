@@ -63,7 +63,7 @@ class _LevitatingImageState extends State<LevitatingImage>
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            widget.imagePath.split('/').last, // Display the image file name
+            widget.imagePath.split('/').last,
             style: TextStyle(
               fontSize: 12,
               color: Colors.white,

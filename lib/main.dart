@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -76,21 +78,17 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String convertAndEscapePath(String path) {
     print("Path before function: $path");
 
-    // Check if the path contains spaces or special characters
-    // For Windows, macOS, or Linux: Do not add quotes here, let JSON encoding handle it
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       if (path.contains(' ') ||
           path.contains('(') ||
           path.contains(')') ||
           path.contains('&') ||
           path.contains('\\')) {
-        // No need to add quotes here
         print("Path contains special characters but not modifying it: $path");
         return path;
       }
     }
 
-    // Return the original path if no special characters or spaces
     return path;
   }
 
@@ -180,7 +178,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          // Icon Image
                           Padding(
                             padding: EdgeInsets.only(
                                 right: isLargeScreen ? 20.0 : 10.0),
@@ -190,7 +187,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                               width: isLargeScreen ? 70.0 : 50.0,
                             ),
                           ),
-                          // Text Title
                           Text(
                             'NAER',
                             style: TextStyle(
@@ -199,7 +195,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-
                           const Spacer(),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -448,8 +443,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Wrap(
-              spacing: 10, // Horizontal space between items
-              runSpacing: 10, // Vertical space between items
+              spacing: 10,
+              runSpacing: 10,
               children: [
                 DirectorySelectionCard(
                     title: "Input Directory:",
@@ -478,7 +473,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   enabled: Platform.isMacOS || Platform.isLinux,
                   hint: Platform.isWindows
                       ? "Only needed for macOS, Windows cannot select."
-                      : null, // Hint for Windows users
+                      : null,
                 ),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.open_in_full),
@@ -503,11 +498,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   onPressed: getNaerSettings,
                 ),
                 FutureBuilder<bool>(
-                  future: _loadPathsFuture, // This calls the load function
+                  future: _loadPathsFuture,
                   builder:
                       (BuildContext context, AsyncSnapshot<bool> snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      // When the future is complete, build the SavePathsWidget
                       return SavePathsWidget(
                         input: input,
                         output: specialDatOutputPath,
@@ -517,13 +511,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                           setState(() {
                             savePaths = value;
                             if (!value) {
-                              removePathsFile(); // Call to remove paths when the checkbox is unchecked
+                              removePathsFile();
                             }
                           });
                         },
                       );
                     } else {
-                      // While waiting for the future to complete, show a loading indicator
                       return const CircularProgressIndicator();
                     }
                   },
@@ -544,10 +537,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       return;
     }
 
-    // Remove enclosing double quotes if they exist
     outputPath = outputPath.replaceAll('"', '');
 
-    // Check if the path exists
     if (!await Directory(outputPath).exists()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Path does not exist: $outputPath')),
@@ -556,13 +547,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     }
 
     if (Platform.isWindows) {
-      // Use 'explorer' to open the directory on Windows
       await Process.run('explorer', [outputPath]);
     } else if (Platform.isMacOS) {
-      // Open the directory in Finder on macOS
       await Process.run('open', [outputPath]);
     } else if (Platform.isLinux) {
-      // Open the directory in the default file manager on Linux
       await Process.run('xdg-open', [outputPath]);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -577,15 +565,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
 
     if (Platform.isWindows) {
-      // Correctly format the path for Windows command line
-
-      // Use 'cmd' to execute the 'start' command which opens the folder
       await Process.run('cmd', ['/c', 'start', '', settingsDirectoryPath]);
     } else if (Platform.isMacOS) {
-      // Open the directory in Finder on macOS
       await Process.run('open', [settingsDirectoryPath]);
     } else if (Platform.isLinux) {
-      // Open the directory in the default file manager on Linux
       await Process.run('xdg-open', [settingsDirectoryPath]);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -671,7 +654,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         });
         updatePath(selectedDirectory);
       } else {
-        // Moved the showDialog inside a separate function
         _showInvalidDirectoryDialog();
         updatePath('');
       }
@@ -681,11 +663,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void _showInvalidDirectoryDialog() {
-    if (!mounted) return; // Check if the widget is still in the tree
+    if (!mounted) return;
 
     showDialog(
-      context:
-          context, // Safe to use context here as it's immediately after the check
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Invalid Directory"),
@@ -797,8 +778,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       });
 
       try {
-        await FileChange
-            .savePreRandomizationTime(); // Save pre-randomization time
+        await FileChange.savePreRandomizationTime();
         log("Ignored mod files before starting: $ignoredModFiles");
         await startRandomizing();
         await FileChange.saveChanges();
@@ -825,7 +805,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         enemyImageGridKey.currentState?.selectedImages;
     var enemyGroups = await readEnemyData();
 
-    // Remove file extensions from selected images, if they have any
     var formattedSelectedImages =
         selectedImages!.map((image) => image.split('.').first).toList();
 
@@ -1091,9 +1070,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void undoLastRandomization() async {
-    await FileChange
-        .loadChanges(); // Load the changes if they were saved previously
-    await FileChange.undoChanges(); // Undo the changes
+    await FileChange.loadChanges();
+    await FileChange.undoChanges();
 
     try {
       for (var filePath in createdFiles) {
@@ -1226,7 +1204,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String _generateModificationDetails() {
     List<String> details = [];
 
-    // Category details
+    String bossList = getSelectedBossesNames();
+
     String categoryDetail = level.entries
         .firstWhere((entry) => entry.value,
             orElse: () => const MapEntry("None", false))
@@ -1239,6 +1218,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       details.add("• Change Level: $enemyLevel");
     }
 
+    if (bossList.isNotEmpty && enemyStats != 0.0) {
+      details.add("• Change Boss Stats: x$enemyStats for $bossList");
+    } else {
+      details.add("• Change Boss Stats: None");
+    }
+
     List<String>? selectedImages =
         enemyImageGridKey.currentState?.selectedImages;
     if (selectedImages != null && selectedImages.isNotEmpty) {
@@ -1248,7 +1233,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           "• Selected Enemies: No Enemy selected, will use ALL Enemies for Randomization");
     }
 
-    // Explaining what each category means
     switch (categoryDetail) {
       case "All Enemies":
         details.add(
@@ -1271,7 +1255,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         break;
     }
 
-    // Categories details
     List<String> selectedCategories = categories.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
@@ -1287,7 +1270,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Widget setupLogOutput(List<String> logMessages, BuildContext context,
       VoidCallback clearLogMessages, ScrollController scrollController) {
-    // Function to determine text color based on message type
     Color messageColor(String message) {
       if (message.toLowerCase().contains('error') ||
           message.toLowerCase().contains('failed')) {
@@ -1301,7 +1283,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           message.toLowerCase().contains('finished')) {
         return const Color.fromARGB(255, 59, 255, 59);
       } else {
-        return Colors.white; // Color for informational messages
+        return Colors.white;
       }
     }
 
@@ -1314,8 +1296,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         );
       }
     });
-
-    // Function to determine if the last message is still being processed
 
     List<InlineSpan> buildLogMessageSpans() {
       return logMessages.map((message) {
@@ -1463,10 +1443,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Future<void> runSudoCommand(
       String scriptPath, List<String> processArgs) async {
-    // Convert arguments to a properly escaped string
     String arguments = processArgs.join(' ').replaceAll('"', '\\"');
-
-    // AppleScript command to prompt for the password and execute the command
     String appleScript = '''
 tell application "Terminal"
     activate
@@ -1743,9 +1720,6 @@ end tell
 
       if (stageIdentifier != null) {
         if (!loggedStages.contains(stageIdentifier)) {
-          // Start animation when a new stage begins
-
-          // Customizing the message for better readability
           switch (stageIdentifier) {
             case 'repacking_dat':
               log = "Repacking DAT files initiated.";
@@ -1858,16 +1832,15 @@ end tell
                 child: const Text("Remove"),
                 onPressed: () {
                   if (index != null) {
-                    modFiles.removeAt(index); // Remove a single file
+                    modFiles.removeAt(index);
                   } else {
-                    modFiles.clear(); // Remove all files
+                    modFiles.clear();
                   }
                   onModFilesUpdated(modFiles);
                   Navigator.of(context).pop();
                   if (modFiles.isNotEmpty) {
                     Navigator.of(context).pop();
-                    showModsMessage(modFiles,
-                        onModFilesUpdated); // Reopen with updated list
+                    showModsMessage(modFiles, onModFilesUpdated);
                   } else {
                     Navigator.of(context).pop();
                   }
@@ -1961,7 +1934,7 @@ end tell
 
   void clearLogMessages() {
     setState(() {
-      logMessages.clear(); // Clear the log messages
+      logMessages.clear();
     });
   }
 
@@ -2165,6 +2138,15 @@ end tell
     return selectedBosses.join(',');
   }
 
+  String getSelectedBossesNames() {
+    List<String> selectedBosses = bossList
+        .where((boss) => boss.isSelected)
+        .map((boss) => boss.name)
+        .toList();
+    print("Selected Bosses $selectedBosses");
+    return selectedBosses.join(',');
+  }
+
   Widget setupEnemyStatsSelection() {
     return Container(
       padding: const EdgeInsets.all(30),
@@ -2190,7 +2172,7 @@ end tell
           const Padding(
             padding: EdgeInsets.only(bottom: 10.0),
             child: Text(
-              "Adjust Boss Stats.(Still experimental)",
+              "Adjust Boss Stats.",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -2218,13 +2200,9 @@ end tell
                         BoxShadow(
                           color: Color.lerp(const Color.fromARGB(0, 41, 39, 39),
                                   Colors.red, enemyStats / 5.0)!
-                              .withOpacity(
-                                  0.1), // Dynamic glow color with some transparency
-                          blurRadius: 10.0 +
-                              (enemyStats / 5.0) *
-                                  10.0, // Increasing blur radius based on the slider value
-                          spreadRadius: (enemyStats / 5.0) *
-                              5.0, // Spread radius starts from 0 and increases as the value approaches 5
+                              .withOpacity(0.1),
+                          blurRadius: 10.0 + (enemyStats / 5.0) * 10.0,
+                          spreadRadius: (enemyStats / 5.0) * 5.0,
                         ),
                       ],
                     ),
@@ -2252,8 +2230,8 @@ end tell
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  activeColor: Color.fromARGB(255, 18, 180, 209),
-                  title: Text(
+                  activeColor: const Color.fromARGB(255, 18, 180, 209),
+                  title: const Text(
                     "Select All",
                     textScaler: TextScaler.linear(0.8),
                   ),
@@ -2273,14 +2251,13 @@ end tell
               Expanded(
                 child: CheckboxListTile(
                   tristate: false,
-                  activeColor: Color.fromARGB(255, 209, 18, 18),
-                  title: Text("None", textScaler: TextScaler.linear(0.8)),
+                  activeColor: const Color.fromARGB(255, 209, 18, 18),
+                  title: const Text("None", textScaler: TextScaler.linear(0.8)),
                   value: stats["None"],
                   onChanged: (bool? value) {
                     setState(() {
                       if (value == true || !stats["Select All"]!) {
-                        stats["None"] =
-                            true; // Keep "None" true if "Select All" is not selected
+                        stats["None"] = true;
                         for (var boss in bossList) {
                           boss.isSelected = false;
                         }
@@ -2294,12 +2271,12 @@ end tell
             ],
           ),
           SizedBox(
-            height: 320, // Set a fixed height
+            height: 320,
             child: Row(
               children: [
                 const Scrollbar(
                   trackVisibility: true,
-                  child: SizedBox(width: 10), // Minimal width to show scrollbar
+                  child: SizedBox(width: 10),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -2311,7 +2288,6 @@ end tell
                         final GlobalKey<ShakeAnimationWidgetState> shakeKey =
                             GlobalKey<ShakeAnimationWidgetState>();
 
-                        // Calculate scale factor based on enemyStats and selection status
                         double scale = boss.isSelected
                             ? 1.0 + 0.5 * (enemyStats / 5.0)
                             : 1.0;
@@ -2332,7 +2308,7 @@ end tell
                             ),
                           ),
                           title: Text(
-                            boss.name, // Display boss name here
+                            boss.name,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 16),
                           ),
@@ -2341,7 +2317,6 @@ end tell
                             onChanged: (bool? newValue) {
                               setState(() {
                                 boss.isSelected = newValue ?? false;
-                                // Update "Select All" and "None" based on current selections
                                 stats["Select All"] =
                                     bossList.every((b) => b.isSelected);
                                 stats["None"] =
@@ -2383,7 +2358,6 @@ end tell
     return false;
   }
 
-  // In your main widget class
   Future<void> removePathsFile() async {
     String directoryPath = await FileChange.ensureSettingsDirectory();
     File settingsFile = File(p.join(directoryPath, 'paths.json'));
@@ -2435,7 +2409,7 @@ IconData getIconForLevel(String levelEnemy) {
 
 void onNewLogMessage(BuildContext context, String newMessage) {
   if (newMessage.toLowerCase().contains('error')) {
-    log(newMessage); // Writing the error to the log file
+    log(newMessage);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(

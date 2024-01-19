@@ -8,8 +8,7 @@ class SecondPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('More Features in Future'),
-        backgroundColor:
-            const Color.fromARGB(255, 33, 33, 34), // You can change this color
+        backgroundColor: const Color.fromARGB(255, 33, 33, 34),
       ),
       body: const Center(
         child: Column(
@@ -20,23 +19,23 @@ class SecondPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueGrey, // Change this color as needed
+                color: Colors.blueGrey,
               ),
             ),
-            SizedBox(height: 20), // Adds space between the lines
+            SizedBox(height: 20),
             Text(
-              '1. Boss Stats Scaler and maybe Boss Speed up Scaler',
+              '1. Boss Speed up Scaler',
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.green, // Change this color as needed
+                color: Colors.green,
               ),
             ),
             SizedBox(height: 10),
             Text(
-              '2. My Mods as Install Option',
+              '2. My Mods as Install Option with a Mod package',
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.green, // Change this color as needed
+                color: Colors.green,
               ),
             ),
             SizedBox(height: 20),
@@ -45,7 +44,7 @@ class SecondPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
-                color: Colors.redAccent, // Change this color as needed
+                color: Colors.redAccent,
               ),
             ),
           ],

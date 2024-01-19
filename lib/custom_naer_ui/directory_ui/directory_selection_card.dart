@@ -56,7 +56,6 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine colors based on the platform and enabled state
     Color backgroundColor =
         isSelected ? Colors.green : const Color.fromARGB(255, 34, 34, 36);
     Color textColor = isSelected ? Colors.white : Colors.grey;

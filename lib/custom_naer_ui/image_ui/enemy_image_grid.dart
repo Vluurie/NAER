@@ -28,17 +28,16 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     int crossAxisCount;
 
     if (MediaQuery.of(context).size.width < 600) {
-      crossAxisCount = 3; // On smaller UI screens
+      crossAxisCount = 3;
       gridHeight = 350.0;
     } else if (MediaQuery.of(context).size.width < 900) {
-      crossAxisCount = 5; // On medium-sized UI screens
+      crossAxisCount = 5;
       gridHeight = 450.0;
     } else {
-      crossAxisCount = 6; // On larger UI screens
+      crossAxisCount = 6;
       gridHeight = 550.0;
     }
 
-    // Header section with text and info icon
     Widget headerSection = Padding(
       padding: const EdgeInsets.only(bottom: 10.0, top: 10.0),
       child: Row(
@@ -103,7 +102,6 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
       ),
     );
 
-    // Center the Column on the screen
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -353,7 +351,6 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
         return AlertDialog(
           title: const Text("Enemy Randomizer Information"),
           content: const SingleChildScrollView(
-            // Added for scrolling if content is too long
             child: ListBody(
               children: [
                 Text(
