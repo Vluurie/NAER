@@ -56,11 +56,19 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine colors based on the platform and enabled state
+    Color backgroundColor =
+        isSelected ? Colors.green : const Color.fromARGB(255, 34, 34, 36);
+    Color textColor = isSelected ? Colors.white : Colors.grey;
     Color iconColor = isSelected
         ? Theme.of(context).indicatorColor
-        : Platform.isWindows
-            ? Colors.red
-            : Colors.blue;
+        : const Color.fromARGB(255, 255, 0, 0);
+
+    if (Platform.isWindows && !widget.enabled) {
+      backgroundColor = const Color.fromARGB(24, 71, 70, 70);
+      textColor = const Color.fromARGB(151, 70, 69, 69);
+      iconColor = const Color.fromARGB(153, 58, 57, 57);
+    }
 
     return GestureDetector(
       onTap: widget.enabled ? handleBrowse : null,
@@ -69,19 +77,25 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
         width: widget.width,
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color:
-              isSelected ? Colors.green : const Color.fromARGB(255, 34, 34, 36),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Theme.of(context).highlightColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
+            Text(widget.title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(color: textColor)),
             const SizedBox(height: 5),
             Text(
               isSelected ? widget.path : 'No directory selected',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: textColor),
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 5),

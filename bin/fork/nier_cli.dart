@@ -205,9 +205,11 @@ Future<void> main(List<String> arguments) async {
       currentDir, sortedEnemiesPath, enemyLevel, enemyCategory);
   if (bossList.isNotEmpty && !bossList.contains('None')) {
     print("Started changing boss stats...");
-    await findBossStatFiles(currentDir, bossList, bossStats, enemyLevel);
+    print(bossList);
+    await findBossStatFiles(currentDir, bossList, bossStats);
   } else {
     print("No Boss Stats modified as argument is 'None'");
+    print(bossList);
   }
 
   var xmlFiles = yaxFiles.map((e) => e.replaceAll('.yax', '.xml'));

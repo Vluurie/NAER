@@ -1056,10 +1056,20 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           if (entity is File && entity.path.endsWith('.dat')) {
             var fileModTime = await entity.lastModified();
             var fileName = path.basename(entity.path);
-            log("Found .dat file: ${entity.path}, last modified: $fileModTime");
-            if (fileModTime.isBefore(preRandomizationTime)) {
-              modFiles.add(fileName);
-              log("Adding mod file: $fileName");
+            if (fileName.contains("p100") ||
+                fileName.contains("p200") ||
+                fileName.contains("p300") ||
+                fileName.contains("p400") ||
+                fileName.contains("q") ||
+                fileName.contains("r") ||
+                fileName.contains("corehap") ||
+                fileName.contains("em")) {
+              log("Found .dat file: ${entity.path}, last modified: $fileModTime");
+
+              if (fileModTime.isBefore(preRandomizationTime)) {
+                modFiles.add(fileName);
+                log("Adding mod file: $fileName");
+              }
             }
           }
         }
@@ -1148,10 +1158,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 "Important:",
                 style:
                     TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-              ),
-              Text(
-                "• Once the tool is closed, you cannot undo the last randomization.",
-                style: TextStyle(fontSize: 12),
               ),
               Text(
                 "• Avoid using this function while the game is running as it may cause issues.",
@@ -1397,13 +1403,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           children: [
             Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
+                  const EdgeInsets.symmetric(vertical: 60.0, horizontal: 20.0),
               child: ElevatedButton(
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(
                       const Color.fromARGB(255, 25, 25, 26)),
                   foregroundColor: MaterialStateProperty.all<Color>(
-                      Color.fromARGB(255, 240, 71, 71)),
+                      const Color.fromARGB(255, 240, 71, 71)),
                 ),
                 onPressed: clearLogMessages,
                 child: const Text('Clear Log'),
@@ -1468,7 +1474,6 @@ tell application "Terminal"
 end tell
 ''';
 
-    // Execute the AppleScript command
     Process.run('osascript', ['-e', appleScript]).then((result) {
       if (result.stderr.isNotEmpty) {
         print('Error: ${result.stderr}');
@@ -1498,28 +1503,22 @@ end tell
 
     File tempBatchFile = File('${Directory.systemTemp.path}\\run_command.bat');
 
-    // Humorous NieR-themed introduction
-    String batchCommand = '@echo off\n'
-        'setlocal EnableDelayedExpansion\n'
-        'set "text=Booting_Up_NieR:Automata_Enemy_Randomizer...Glory_to_Mankind!"\n'
-        'for /L %%a in (0,1,1000) do (\n'
-        '  if "!text:~%%a,1!"=="" goto :typingEnd\n'
-        '  <nul set /p "=!text:~%%a,1!"\n'
-        '  ping localhost -n 1 > nul\n'
-        ')\n'
-        ':typingEnd\n'
-        'echo.\n'
-        'echo.\n'
-        'echo === Automata Command Protocol Initiated ===\n'
-        'echo Directive: Enhance gameplay through randomized enemy encounters.\n'
-        'echo Alert: Configuration changes are irreversible (not undoable with the Tool). Proceed with caution.\n'
-        'echo Press any key to deploy the tactical argument review...\n'
-        'pause > nul\n';
+    // ignore: prefer_interpolation_to_compose_strings
 
-    // Display each argument with a NieR twist
+    String batchCommand = initNaerArt;
+
+    batchCommand += 'echo off\n';
     for (int i = 0; i < correctedArgs.length; i++) {
+      String commandIntro = 'echo Tactical Argument ${i + 1}: ____(';
+      String commandArg = '${correctedArgs[i]})____';
+      String commandDesc = ' ';
+
+      String typingEffectCommand = commandIntro + commandArg + commandDesc;
+      batchCommand += '$typingEffectCommand\n';
       batchCommand +=
-          'echo Tactical Argument ${i + 1} (${correctedArgs[i]}): ${argDescriptions[i]}\n';
+          'echo -------------------------------------------------------------------------------------\n';
+      batchCommand += 'echo Description: ${argDescriptions[i]}\n';
+
       if (i < correctedArgs.length - 1) {
         batchCommand += 'echo.\n';
         batchCommand += 'echo Press any key to analyze the next argument...\n';
@@ -1527,28 +1526,34 @@ end tell
         batchCommand += 'echo.\n';
       }
     }
-
-    // Final confirmation with thematic flavor
-    batchCommand += 'echo.\n'
-        'echo All tactical arguments analyzed. Press any key to initiate command sequence...\n'
-        'pause > nul\n'
-        '$scriptPath ${correctedArgs.join(" ")}\n'
-        'echo.\n'
-        'echo Mission accomplished. Press any key to retreat.\n'
-        'pause > nul';
+    batchCommand += 'echo.\n';
+    batchCommand +=
+        'echo Initiating NieR:Automata Enemy Randomizer Command Sequence\n';
+    batchCommand += 'echo.\n';
+    batchCommand += 'echo.\n';
+    batchCommand += 'echo $asciiStart';
+    batchCommand += 'echo.\n';
+    batchCommand += 'echo Press any key to start the process....\n';
+    batchCommand += 'echo.\n';
+    batchCommand += 'pause > nul\n';
+    batchCommand += 'call $scriptPath ${correctedArgs.join(" ")}\n';
 
     await tempBatchFile.writeAsString(batchCommand);
 
-    print(
-        'Initiating NieR:Automata Enemy Randomizer Command Sequence: $scriptPath ${correctedArgs.join(" ")}');
-
     try {
-      await Process.start(
+      final process = await Process.start(
         'cmd',
         ['/c', 'start', 'cmd', '/k', tempBatchFile.path],
         runInShell: true,
         mode: ProcessStartMode.normal,
       );
+
+      batchCommand +=
+          'echo The world changed, stop it before it is too late!...\n';
+      batchCommand += 'echo Enemies changed. Start Playing!\n';
+
+      final exitCode = await process.exitCode;
+      print('Process exited with code: $exitCode');
     } catch (e) {
       print('Error in Enemy Randomizer Deployment: $e');
     }
@@ -1874,17 +1879,27 @@ end tell
       );
     }
 
-    // Only show the mods message dialog if there are mod files
     if (modFiles.isNotEmpty) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Mod Files Detected"),
+            title: const Text("Manage Mod Files"),
             content: SizedBox(
               width: double.maxFinite,
-              child: modFiles.isNotEmpty
-                  ? Scrollbar(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      "Below is a list of detected mod files. Mods listed here will be ignored by the tool during modification. You can remove mods from this list to include them in the tool's operations.",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    child: Scrollbar(
                       thumbVisibility: true,
                       controller: scrollController,
                       child: ListView.builder(
@@ -1894,39 +1909,48 @@ end tell
                         itemCount: modFiles.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 4.0),
                             elevation: 2.0,
                             child: ListTile(
-                              leading: const Icon(Icons.extension),
+                              leading: const Icon(Icons.extension,
+                                  color: Colors.blueAccent),
                               title: Text(
                                 modFiles[index],
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(221, 243, 240, 34)),
                               ),
-                              subtitle:
-                                  const Text('Ignored during randomization'),
+                              subtitle: const Text(
+                                  'Currently ignored by the tool',
+                                  style: TextStyle(color: Colors.grey)),
                               trailing: IconButton(
-                                icon: const Icon(Icons.delete_outline),
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Colors.redAccent),
+                                tooltip: 'Remove mod from ignore list',
                                 onPressed: () => showRemoveConfirmation(index),
                               ),
                             ),
                           );
                         },
                       ),
-                    )
-                  : const Text('No mod files found'),
+                    ),
+                  ),
+                ],
+              ),
             ),
             actions: <Widget>[
               TextButton(
+                onPressed: () => showRemoveConfirmation(null),
+                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
                 child: const Text("Remove All"),
-                onPressed: () => showRemoveConfirmation(
-                    null), // Null indicates removal of all
               ),
               TextButton(
-                child: const Text("OK"),
                 onPressed: () {
                   onModFilesUpdated(modFiles);
                   Navigator.of(context).pop();
                 },
+                style: TextButton.styleFrom(foregroundColor: Colors.green),
+                child: const Text("OK"),
               ),
             ],
           );
@@ -2020,6 +2044,7 @@ end tell
 
   Widget setupAllCategorySelections() {
     return IntrinsicHeight(
+        child: SingleChildScrollView(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -2029,19 +2054,20 @@ end tell
           Expanded(
             child: setupCategorySelection(),
           ),
+          // if (Platform.isWindows)
           Expanded(
             child: setupEnemyStatsSelection(),
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget setupEnemyLevelSelection() {
     return Align(
       alignment: Alignment.topRight,
       child: Container(
-        padding: const EdgeInsets.all(30),
+        padding: const EdgeInsets.only(top: 30, bottom: 5, right: 30, left: 30),
         margin: const EdgeInsets.only(top: 16),
         decoration: BoxDecoration(
           color: Colors.deepPurpleAccent[800],
@@ -2155,6 +2181,9 @@ end tell
           ),
         ],
       ),
+      /*  child: SingleChildScrollView(
+          primary: true,
+          scrollDirection: Axis.vertical, */
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2223,14 +2252,16 @@ end tell
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  activeColor: const Color.fromARGB(255, 18, 180, 209),
-                  title: const Text("Select All"),
+                  activeColor: Color.fromARGB(255, 18, 180, 209),
+                  title: Text(
+                    "Select All",
+                    textScaler: TextScaler.linear(0.8),
+                  ),
                   value: stats["Select All"],
                   onChanged: (bool? value) {
                     setState(() {
                       stats["Select All"] = value ?? false;
-                      stats["None"] =
-                          !value!; // Set "None" to opposite of "Select All"
+                      stats["None"] = !value!;
                       for (var boss in bossList) {
                         boss.isSelected = value;
                       }
@@ -2242,8 +2273,8 @@ end tell
               Expanded(
                 child: CheckboxListTile(
                   tristate: false,
-                  activeColor: const Color.fromARGB(255, 209, 18, 18),
-                  title: const Text("None"),
+                  activeColor: Color.fromARGB(255, 209, 18, 18),
+                  title: Text("None", textScaler: TextScaler.linear(0.8)),
                   value: stats["None"],
                   onChanged: (bool? value) {
                     setState(() {

@@ -166,8 +166,9 @@ Future<bool> handleCpkExtract(
   var fileName = basename(input).toLowerCase();
 
   // Check if bossStats list is effectively empty
-  bool isBossListEffectivelyEmpty =
-      bossList.isEmpty || bossList.every((item) => item.trim().isEmpty);
+  bool isBossListEffectivelyEmpty = bossList.isEmpty ||
+      bossList.every(
+          (item) => item.trim().isEmpty || item.trim().toLowerCase() == 'none');
 
   // Skip extracting data006.cpk and data016.cpk if boss list is empty
   if (isBossListEffectivelyEmpty &&
@@ -180,7 +181,7 @@ Future<bool> handleCpkExtract(
       fileName == 'data100.cpk' ||
       fileName == 'data006.cpk' ||
       fileName == 'data016.cpk')) {
-    return false; // Skip processing if it's not one of the specified files
+    return false;
   }
 
   output ??= join(dirname(input), "${basename(input)}_extracted");
