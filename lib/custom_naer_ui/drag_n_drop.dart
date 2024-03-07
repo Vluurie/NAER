@@ -128,10 +128,8 @@ class _DragDropWidgetState extends State<DragDropWidget> {
       var type = FileSystemEntity.typeSync(path);
       if (type == FileSystemEntityType.directory) {
         _files.add(path);
-        logState.addLog(
-            "Processing folder: $path"); // Update logState with the log message
+        logState.addLog("Processing folder: $path");
 
-        // Continue with the directory processing
         randomizeDraggedFile([path]);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

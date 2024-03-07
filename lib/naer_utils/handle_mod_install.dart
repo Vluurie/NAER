@@ -2,13 +2,12 @@
 
 import 'dart:io';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
-
-import 'package:crypto/crypto.dart';
 
 class ModInstallHandler {
   final CLIArguments cliArguments;
@@ -145,8 +144,7 @@ class ModInstallHandler {
 
   Future<List<String>> verifyModFiles(String modId) async {
     List<String> filePaths = await extractFilePathsFromMetadata(modId);
-    List<String> invalidFiles =
-        []; // Tracks files that don't match their stored hashes
+    List<String> invalidFiles = [];
 
     for (String filePath in filePaths) {
       String installPath = await createModInstallPath(filePath);
@@ -155,14 +153,14 @@ class ModInstallHandler {
         String currentHash = await computeFileHash(fileToCheck);
         String? storedHash = await getFileHashFromPreferences(modId, filePath);
         if (currentHash != storedHash) {
-          invalidFiles.add(filePath); // Add to list instead of breaking
+          invalidFiles.add(filePath);
         }
       } else {
-        invalidFiles.add(filePath); // File doesn't exist
+        invalidFiles.add(filePath);
       }
     }
 
-    return invalidFiles; // Return the list of invalid or missing files
+    return invalidFiles;
   }
 
   Future<void> removeModFiles(String modId, List<String> invalidFiles) async {
@@ -175,7 +173,7 @@ class ModInstallHandler {
     bool deletedFiles = false;
     for (String filePath in filePaths) {
       String installPath = await createModInstallPath(filePath);
-      // Convert the logic: if file is NOT in the invalidFiles, then delete
+
       if (!invalidFiles.contains(filePath)) {
         File file = File(installPath);
         if (await file.exists()) {
@@ -191,7 +189,6 @@ class ModInstallHandler {
     }
 
     if (deletedFiles) {
-      // Remove related SharedPreferences entries for the mod
       var keysToRemove =
           prefs.getKeys().where((k) => k.contains('hash_$modId'));
       for (var key in keysToRemove) {
@@ -218,8 +215,7 @@ class ModInstallHandler {
   Future<String> createModInstallPath(String filePath) async {
     List<String> parts = path.split(filePath);
     if (parts.isNotEmpty) {
-      parts.removeAt(
-          0); // Assuming the first part is a common root to be replaced
+      parts.removeAt(0);
       String modifiedPath =
           path.join(cliArguments.specialDatOutputPath, path.joinAll(parts));
       return modifiedPath;
@@ -232,8 +228,7 @@ class ModInstallHandler {
     for (String filePath in filePaths) {
       List<String> parts = path.split(filePath);
       if (parts.isNotEmpty) {
-        parts.removeAt(
-            0); // Assuming the first part is a common root to be replaced
+        parts.removeAt(0);
         String modifiedPath =
             path.join(cliArguments.specialDatOutputPath, path.joinAll(parts));
         modifiedPaths.add(modifiedPath);
@@ -252,12 +247,9 @@ class ModInstallHandler {
       String metadataContent = await metadataFile.readAsString();
       Map<String, dynamic> metadata = jsonDecode(metadataContent);
       List<dynamic> mods = metadata['mods'];
-      // Filter out the mod with the given modId
       mods.removeWhere((mod) => mod['id'] == modId);
-      // Update the metadata with the removed mod
       metadata['mods'] = mods;
 
-      // Save the updated metadata back to the file
       await metadataFile.writeAsString(jsonEncode(metadata),
           mode: FileMode.write);
       print("Mod metadata for $modId deleted successfully.");
@@ -269,7 +261,6 @@ class ModInstallHandler {
   }
 
   Future<bool> deleteModDirectory(String modId) async {
-    // Construct the path to the specific mod directory within the ModPackage folder
     final String modDirectoryPath = path.join(
       await FileChange.ensureSettingsDirectory(),
       "ModPackage",

@@ -18,7 +18,7 @@ class Mod {
   final String author;
   final String description;
   final List<Map<String, String>> files;
-  final String? imagePath; // Optional image path
+  final String? imagePath;
 
   Mod({
     required this.id,
@@ -27,7 +27,7 @@ class Mod {
     required this.author,
     required this.description,
     required this.files,
-    this.imagePath, // Initialize in constructor
+    this.imagePath,
   });
 
   factory Mod.fromJson(Map<String, dynamic> json) {
@@ -133,7 +133,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       await modInstallHandler.uninstallMod(mod.id);
       widget.modStateManager.uninstallMod(mod.id);
     } else {
-      print("Step 1");
       await modInstallHandler.copyModToInstallPath(mod.id);
       widget.modStateManager.installMod(mod.id);
       await modInstallHandler.printAllSharedPreferences();
@@ -227,7 +226,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                                 fit: BoxFit.cover,
                                 errorBuilder: (BuildContext context,
                                     Object error, StackTrace? stackTrace) {
-                                  // Fallback to the placeholder if both file and asset fail to load
                                   return Container(
                                     width: 100,
                                     height: 100,
@@ -250,7 +248,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                             fit: BoxFit.cover,
                             errorBuilder: (BuildContext context, Object error,
                                 StackTrace? stackTrace) {
-                              // Directly show the placeholder if asset fails to load
                               return Container(
                                 width: 150,
                                 height: 150,
@@ -319,7 +316,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                             if (deletedSuccessfully && deleteModsSuccessfully) {
                               setState(() {
                                 mods.removeWhere((item) => item.id == mod.id);
-                                print("Mod metadata deleted and list updated.");
                               });
                             } else {
                               print("Failed to delete mod metadata.");
@@ -474,7 +470,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           phaseOptions.contains(baseNameWithoutExtension);
       String targetPath =
           await modInstallHandler.createModInstallPath(filePath);
-      print("Targetpath: $targetPath");
 
       if (!shouldProcess) {
         // Copy action for non-randomized files
@@ -492,7 +487,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         continue;
       }
 
-      // Randomization process for eligible files
+      // Randomization process
       try {
         Process process =
             await Process.start(command, arguments, runInShell: true);
@@ -504,16 +499,14 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         }
         int exitCode = await process.exitCode;
         if (exitCode == 0) {
-          randomizedFilesPaths
-              .add(targetPath); // Keep track of processed files if needed
-          File randomizedFile =
-              File(targetPath); // Create a File instance from the path
+          randomizedFilesPaths.add(targetPath);
+          File randomizedFile = File(targetPath);
           String fileHash = await modInstallHandler
               .computeFileHash(randomizedFile); // Compute hash for the File
           await modInstallHandler.storeFileHashInPreferences(
               modId, filePath, fileHash); // Store the hash
         } else {
-          success = false; // Handle randomization failure
+          success = false;
         }
       } catch (e) {
         success = false;
@@ -523,10 +516,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
     if (success) {
       await modInstallHandler.markFilesRandomized(modId, randomizedFilesPaths);
-      print("Randomized File Path: $randomizedFilesPaths");
-      print("Copied File Path: $copiedFilesPaths");
       await modInstallHandler.printAllSharedPreferences();
-
       modStateManager.installMod(selectedMod.id);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Mod installed and randomized successfully!")));

@@ -36,14 +36,14 @@ class FileChange {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(ignoredFiles);
     await prefs.setString('ignored_files', jsonData);
-    print('Saved ignoredFiles: $jsonData'); // Log the saved data
+    print('Saved ignoredFiles: $jsonData');
   }
 
   static Future<void> loadIgnoredFiles() async {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = prefs.getString('ignored_files') ?? '[]';
     ignoredFiles = List<String>.from(jsonDecode(jsonData));
-    print('Loaded ignoredFiles: $ignoredFiles'); // Log the loaded data
+    print('Loaded ignoredFiles: $ignoredFiles');
   }
 
   static Future<void> undoChanges() async {
@@ -137,7 +137,6 @@ class FileChange {
       if (kDebugMode) {
         print('Error parsing pre-randomization time: $e');
       }
-      // Fallback to current time if parsing fails
       return DateTime.now();
     }
   }

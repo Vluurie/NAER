@@ -107,7 +107,6 @@ class _MetadataFormState extends State<MetadataForm> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Display the selected image or a placeholder
                   if (_selectedImagePath != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
@@ -138,8 +137,6 @@ class _MetadataFormState extends State<MetadataForm> {
                         ),
                       ),
                     ),
-
-                  // Button for picking or changing the image
                   ElevatedButton(
                     onPressed: _pickImage,
                     style: ElevatedButton.styleFrom(
@@ -154,7 +151,7 @@ class _MetadataFormState extends State<MetadataForm> {
               ),
               const SizedBox(height: 20),
               Align(
-                  alignment: Alignment.center, // Align buttons to the start
+                  alignment: Alignment.center,
                   child: ButtonTheme(
                       minWidth: 100,
                       child: ElevatedButton(
@@ -171,19 +168,16 @@ class _MetadataFormState extends State<MetadataForm> {
               _buildDirectoryStructure(),
               const SizedBox(height: 10),
               Align(
-                  alignment: Alignment.center, // Align buttons to the start
+                  alignment: Alignment.center,
                   child: ButtonTheme(
                     minWidth: 100,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Check if the form is valid and the mod path is not null/empty
                         if ((_formKey.currentState?.validate() ?? false) &&
                             (_directoryContentsInfo.isNotEmpty)) {
-                          // Save metadata and close the widget if both conditions are met
                           _saveMetadata();
                           Navigator.of(context).pop();
                         } else {
-                          // Show a message if the mod path has not been selected
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(

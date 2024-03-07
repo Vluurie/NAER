@@ -83,7 +83,7 @@ Future<void> main(List<String> arguments) async {
 
   String? sortedEnemiesPath;
   if (arguments.length >= 4) {
-    sortedEnemiesPath = arguments[3]; // Assuming it's the fourth argument
+    sortedEnemiesPath = arguments[3];
   }
 
   if (sortedEnemiesPath == null || sortedEnemiesPath.isEmpty) {
