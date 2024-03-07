@@ -2,7 +2,9 @@
 
 import 'dart:io';
 
+import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_boss_stats.dart';
+import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:args/args.dart';
 import 'package:NAER/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli_fork_utils/utils/exception.dart';
@@ -41,16 +43,17 @@ Future<void> main(List<String> arguments) async {
   argParser.addFlag("wemVolNorm",
       help: "Enable volume normalization", negatable: false);
   argParser.addSeparator("Extraction filters:");
-  argParser.addFlag("allquests",
-      help: "Randomize all quests", negatable: false, defaultsTo: false);
-  argParser.addFlag("allmaps",
-      help: "Randomize all maps", negatable: false, defaultsTo: false);
-  argParser.addFlag("allphases",
-      help: "Randomize the DLC", negatable: false, defaultsTo: false);
-  argParser.addFlag("ignoredlc",
-      help: "Randomize all phases", negatable: false, defaultsTo: false);
   argParser.addOption("ignore",
       help: "List of files to ignore during repacking");
+  for (var option in questOptions) {
+    argParser.addFlag(option, negatable: false, defaultsTo: false);
+  }
+  for (var option in mapOptions) {
+    argParser.addFlag(option, negatable: false, defaultsTo: false);
+  }
+  for (var option in phaseOptions) {
+    argParser.addFlag(option, negatable: false, defaultsTo: false);
+  }
   argParser.addOption("bosses",
       help: "List of Selected bosses to change stats");
   argParser.addOption("bossStats",
@@ -123,13 +126,9 @@ Future<void> main(List<String> arguments) async {
   String input = args.rest[0];
   List<String> pendingFiles = [];
   Set<String> processedFiles = {};
-  bool randomizeAllQuests = args["allquests"];
-  bool randomizeAllMaps = args["allmaps"];
-  bool randomizeAllPhases = args["allphases"];
   List<String> ignoreList = args["ignore"]?.split(',') ?? [];
   String enemyLevel = args["level"];
-  String enemyCategory = args["category"];
-  bool ignoredlc = args["ignoredlc"];
+  String enemyCategory = args["category"] ?? '';
   double bossStats = double.parse(args["bossStats"]);
   List<String> bossList = (args["bosses"] as String?)?.split(',') ?? [];
 
@@ -173,6 +172,7 @@ Future<void> main(List<String> arguments) async {
   List<String> yaxFiles = [];
   List<String> pakFolders = [];
   List<String> datFolders = [];
+  var fileManager = FileCategoryManager(args);
   for (var entity in Directory(currentDir).listSync(recursive: true)) {
     if (entity is File) {
       if (entity.path.endsWith('.yax')) {
@@ -226,7 +226,8 @@ Future<void> main(List<String> arguments) async {
 
 // Repack & Export DAT files
   for (var datFolder in datFolders) {
-    var baseName = basename(datFolder); // This is the file name
+    var baseNameWithExtension = basename(datFolder);
+
     bool processFile = false;
 
     bossList = bossList
@@ -234,9 +235,9 @@ Future<void> main(List<String> arguments) async {
         .toList();
 
     if (bossList.isNotEmpty && !bossList.contains('None')) {
-      if (baseName.startsWith('em')) {
+      if (baseNameWithExtension.startsWith('em')) {
         for (var criteria in bossList) {
-          if (baseName.contains(criteria)) {
+          if (baseNameWithExtension.contains(criteria)) {
             processFile = true;
             break;
           }
@@ -244,49 +245,24 @@ Future<void> main(List<String> arguments) async {
       }
     }
 
-    // Check if the file should be ignored due to 'ignoredlc'
-    if (ignoredlc &&
-        (baseName.startsWith('q085') ||
-            baseName.startsWith('q086') ||
-            baseName.startsWith('q090') ||
-            baseName.startsWith('q091') ||
-            baseName.startsWith('q092') ||
-            baseName.startsWith('q095') ||
-            baseName.startsWith('q060') ||
-            baseName.startsWith('qa60') ||
-            baseName.startsWith('qa61') ||
-            baseName.startsWith('qa62') ||
-            baseName.startsWith('qa63') ||
-            baseName.startsWith('qa64') ||
-            baseName.startsWith('qc50') ||
-            baseName.startsWith('r5a8') ||
-            baseName.startsWith('r5a9') ||
-            baseName.startsWith('r5aa') ||
-            baseName.startsWith('r5ac') ||
-            baseName.startsWith('p400'))) {
-      continue; // Skip the file
+    var baseNameWithoutExtension = basenameWithoutExtension(datFolder);
+    if (!baseNameWithExtension.startsWith('em')) {
+      if (!fileManager.shouldProcessFile(baseNameWithoutExtension)) {
+        continue;
+      } else {
+        processFile = true;
+      }
     }
 
-    // Check if the file is in the ignoreList
-    if (ignoreList.contains(baseName) || baseName.startsWith('r5a5')) {
+    if (ignoreList.contains(baseNameWithExtension) ||
+        baseNameWithExtension.startsWith('r5a5')) {
       continue;
     }
 
-    // Check if the file matches the selected categories
-    if (randomizeAllQuests && baseName.startsWith('q')) {
-      processFile = true;
-    } else if (randomizeAllMaps && baseName.startsWith('r')) {
-      processFile = true;
-    } else if (randomizeAllPhases && baseName.startsWith('p') ||
-        baseName.startsWith('corehap')) {
-      processFile = true;
-    }
-
-    // Process the file if it matches any of the selected categories
     if (processFile) {
       try {
-        var datSubFolder = getDatFolder(baseName);
-        var datOutput = join(output, datSubFolder, baseName);
+        var datSubFolder = getDatFolder(baseNameWithExtension);
+        var datOutput = join(output, datSubFolder, baseNameWithExtension);
         await handleInput(
             datFolder, datOutput, options, [], processedFiles, bossList);
         print("Folder created: $datOutput");
@@ -302,6 +278,16 @@ Future<void> main(List<String> arguments) async {
     'data100.cpk_extracted',
     'data016.cpk_extracted',
     'data006.cpk_extracted',
+    "st5/nier2blender_extracted",
+    "st2/nier2blender_extracted",
+    "st1/nier2blender_extracted",
+    "quest/nier2blender_extracted",
+    "ph4/nier2blender_extracted",
+    "ph3/nier2blender_extracted",
+    "ph2/nier2blender_extracted",
+    "ph1/nier2blender_extracted",
+    "em/nier2blender_extracted",
+    "core/nier2blender_extracted",
   ]);
   print("Randomizing complete");
 }

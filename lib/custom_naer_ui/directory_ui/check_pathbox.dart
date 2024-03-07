@@ -1,8 +1,5 @@
-import 'dart:convert';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SavePathsWidget extends StatefulWidget {
   final String? input;
@@ -12,13 +9,13 @@ class SavePathsWidget extends StatefulWidget {
   final Function(bool) onCheckboxChanged;
 
   const SavePathsWidget({
-    Key? key,
+    super.key,
     this.input,
     this.output,
     this.scriptPath,
     required this.savePaths,
     required this.onCheckboxChanged,
-  }) : super(key: key);
+  });
 
   @override
   _SavePathsWidgetState createState() => _SavePathsWidgetState();
@@ -33,18 +30,13 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
     checkboxValue = widget.savePaths;
   }
 
-  Future<void> savePathsToJson() async {
-    String directoryPath = await FileChange.ensureSettingsDirectory();
-    File settingsFile = File(p.join(directoryPath, 'paths.json'));
+  Future<void> savePathsToPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
 
-    Map<String, dynamic> paths = {
-      'input': widget.input ?? '',
-      'output': widget.output ?? '',
-      'scriptPath': widget.scriptPath ?? '',
-      'savePaths': checkboxValue,
-    };
-
-    await settingsFile.writeAsString(jsonEncode(paths));
+    await prefs.setString('input', widget.input ?? '');
+    await prefs.setString('output', widget.output ?? '');
+    await prefs.setString('scriptPath', widget.scriptPath ?? '');
+    await prefs.setBool('savePaths', checkboxValue);
   }
 
   @override
@@ -71,7 +63,7 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
                     checkboxValue = newValue ?? false;
                     widget.onCheckboxChanged(checkboxValue);
                     if (checkboxValue) {
-                      savePathsToJson();
+                      savePathsToPreferences(); // Updated method name here
                     }
                   });
                 }

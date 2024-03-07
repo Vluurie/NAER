@@ -5,7 +5,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
 import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
-import 'package:NAER/custom_naer_ui/other/arg_descriptions.dart';
+import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
+import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
+import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:NAER/naer_utils/handle_mod_install.dart';
+import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/nier_enemy_data/sorted_data/nier_maps.dart';
+import 'package:NAER/nier_enemy_data/sorted_data/nier_script_phase.dart';
+import 'package:NAER/nier_enemy_data/sorted_data/nier_side_quests.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -21,9 +28,16 @@ import 'package:NAER/custom_naer_ui/animations/dotted_line_progress_animation.da
 import 'package:NAER/custom_naer_ui/animations/shacke_animation_widget.dart';
 import 'package:NAER/custom_naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(EnemyRandomizerApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => LogState(),
+      child: EnemyRandomizerApp(),
+    ),
+  );
 }
 
 class EnemyRandomizerApp extends StatelessWidget {
@@ -63,17 +77,29 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   GlobalKey setupCategorySelectionKey = GlobalKey();
   GlobalKey setupLogOutputKey = GlobalKey();
   GlobalKey<EnemyImageGridState> enemyImageGridKey = GlobalKey();
+  Future<ElevatedButton>? _buttonFuture;
   int _selectedIndex = 0;
   List<String> createdFiles = [];
+  List<String> createdDatFiles = [];
   bool isLoading = false;
   bool isButtonEnabled = true;
   bool isLogIconBlinking = false;
   bool hasError = false;
   bool isProcessing = false;
+  bool selectAllQuests = true;
+  bool selectAllMaps = true;
+  bool selectAllPhases = true;
+  bool ignoreDLC = false;
   String input = '';
   String scriptPath = '';
   int enemyLevel = 1;
-  bool advancedCli = false;
+  List<dynamic> getAllItems() {
+    return [
+      ...ScriptingPhase.scriptingPhases,
+      ...MapLocation.mapLocations,
+      ...SideQuest.sideQuests,
+    ];
+  }
 
   String convertAndEscapePath(String path) {
     print("Path before function: $path");
@@ -95,12 +121,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String specialDatOutputPath = '';
   List<String> ignoredModFiles = [];
   List<String> logMessages = [];
-  Map<String, bool> categories = {
-    "All Quests": true,
-    "All Maps": true,
-    "All Phases": true,
-    'Ignore DLC': true
-  };
+  Map<String, bool> categories = {};
   Map<String, bool> level = {
     "All Enemies": false,
     "All Enemies without Randomization": false,
@@ -120,8 +141,16 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   void initState() {
     super.initState();
     FileChange.loadChanges();
-    FileChange.loadIgnoredFiles();
-    _loadPathsFuture = loadPathsFromJson();
+    FileChange.loadIgnoredFiles().then((_) {
+      print('Ignored files loaded successfully.');
+    }).catchError((error) {
+      print('Failed to load ignored files: $error');
+    });
+    _buttonFuture = _navigateButton(context);
+    updateItemsByType(SideQuest, true);
+    updateItemsByType(MapLocation, true);
+    updateItemsByType(ScriptingPhase, true);
+    _loadPathsFuture = loadPathsFromSharedPreferences();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -285,10 +314,30 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: <Widget>[
-                                _navigateButton(context),
+                                FutureBuilder<ElevatedButton>(
+                                  future:
+                                      _buttonFuture, // Use the cached future here
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<ElevatedButton> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      // Return a loader or placeholder
+                                      return const CircularProgressIndicator();
+                                    } else if (snapshot.hasError) {
+                                      // Handle error
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData) {
+                                      // Return the button
+                                      return snapshot.data!;
+                                    } else {
+                                      // Return an empty widget if there's no data and no error
+                                      return const SizedBox.shrink();
+                                    }
+                                  },
+                                ),
                               ],
                             ),
-                          ),
+                          )
                         ],
                       );
                     },
@@ -384,11 +433,33 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         ]));
   }
 
-  ElevatedButton _navigateButton(BuildContext context) {
+  Future<ElevatedButton> _navigateButton(BuildContext context) async {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
+        CLIArguments cliArgs = await gatherCLIArguments(
+          scrollController: scrollController,
+          enemyImageGridKey: enemyImageGridKey,
+          categories: categories,
+          level: level,
+          ignoredModFiles: ignoredModFiles,
+          input: input,
+          specialDatOutputPath: specialDatOutputPath,
+          scriptPath: scriptPath,
+          enemyStats: enemyStats,
+          enemyLevel: enemyLevel,
+        );
+
+        ModInstallHandler modInstallHandler =
+            ModInstallHandler(cliArguments: cliArgs);
+        ModStateManager modStateManager = ModStateManager(modInstallHandler);
+
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const SecondPage()),
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider<ModStateManager>(
+              create: (_) => modStateManager,
+              child: SecondPage(cliArguments: cliArgs),
+            ),
+          ),
         );
       },
       style: ElevatedButton.styleFrom(
@@ -497,35 +568,43 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   ),
                   onPressed: getNaerSettings,
                 ),
-                FutureBuilder<bool>(
-                  future: _loadPathsFuture,
-                  builder:
-                      (BuildContext context, AsyncSnapshot<bool> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return SavePathsWidget(
-                        input: input,
-                        output: specialDatOutputPath,
-                        scriptPath: scriptPath,
-                        savePaths: savePaths,
-                        onCheckboxChanged: (bool value) {
-                          setState(() {
-                            savePaths = value;
-                            if (!value) {
-                              removePathsFile();
-                            }
-                          });
-                        },
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
-                  },
-                )
+                savePathCheckbox()
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget savePathCheckbox() {
+    return FutureBuilder<bool>(
+      future: _loadPathsFuture,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return SavePathsWidget(
+            input: input,
+            output: specialDatOutputPath,
+            scriptPath: scriptPath,
+            savePaths: savePaths,
+            onCheckboxChanged: (bool value) async {
+              if (!value) {
+                await clearPathsFromSharedPreferences();
+                setState(() {
+                  input = '';
+                  specialDatOutputPath = '';
+                  scriptPath = '';
+                });
+              }
+              setState(() {
+                savePaths = value;
+              });
+            },
+          );
+        } else {
+          return const CircularProgressIndicator();
+        }
+      },
     );
   }
 
@@ -710,11 +789,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       var modFiles = await findModFiles(selectedDirectory);
       if (modFiles.isNotEmpty) {
-        showModsMessage(modFiles, (updatedModFiles) {
+        showModsMessage(modFiles, (updatedModFiles) async {
           setState(() {
             ignoredModFiles = updatedModFiles;
           });
           log("Updated ignoredModFiles after dialog: $ignoredModFiles");
+          final prefs = await SharedPreferences.getInstance();
+          String jsonData = jsonEncode(ignoredModFiles);
+          await prefs.setString('ignored_mod_files', jsonData);
         });
       } else {
         _showNoModFilesDialog();
@@ -829,6 +911,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     return sortedSelection;
   }
 
+// MAIN MODIFY BUTTON FUNCTIONALITY
   Future<void> startRandomizing() async {
     hasError = true;
     setState(() {
@@ -840,160 +923,88 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (input.isEmpty || specialDatOutputPath.isEmpty) {
       updateLog("Error: Please select both input and output directories. 💋 ",
           scrollController);
-      setState(() {
-        startBlinkAnimation();
-      });
-      return;
     }
-
-    String tempFilePath;
-    List<String>? selectedImages =
-        enemyImageGridKey.currentState?.selectedImages;
-
-    try {
-      if (selectedImages!.isNotEmpty) {
-        updateLog("Sorting selected enemies... 💬 ", scrollController);
-        var sortedEnemies = await sortSelectedEnemies(selectedImages);
-        var tempFile =
-            await File('${Directory.systemTemp.path}/temp_sorted_enemies.dart')
-                .create();
-        var buffer = StringBuffer();
-        buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
-        sortedEnemies.forEach((group, enemies) {
-          var enemiesFormatted = enemies.map((e) => '"$e"').join(', ');
-          buffer.writeln('  "$group": [$enemiesFormatted],');
-        });
-        buffer.writeln("};");
-        await tempFile.writeAsString(buffer.toString());
-        tempFilePath = convertAndEscapePath(tempFile.path);
-        updateLog("Temporary file created: $tempFilePath", scrollController);
-      } else {
-        tempFilePath = "ALL";
-        updateLog(
-            "No selected images. Using ALL enemies. 💬 ", scrollController);
-      }
-    } catch (e) {
-      updateLog("Error during file preparation: $e", scrollController);
-      return;
-    }
-
-    String bossList = getSelectedBossesArgument();
-    List<String> createdDatFiles = [];
 
     if (!Platform.isWindows && scriptPath.isEmpty) {
-      print("path $scriptPath");
       updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
       setState(() {
         startBlinkAnimation();
       });
-      return;
+      throw ArgumentError("Nier CLI path is missing.");
     }
-
-// Construct the process arguments
-
-    List<String> processArgs = [
-      input,
-      '--output',
-      specialDatOutputPath,
-      tempFilePath,
-      '--bosses',
-      bossList.isNotEmpty ? bossList : 'None',
-      '--bossStats',
-      enemyStats.toString(),
-      '--level=$enemyLevel',
-      ...categories.entries
-          .where((entry) => entry.value)
-          .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
-    ];
-
-    if (level["Only Selected Enemies"] == true) {
-      processArgs.add("--category=onlyselectedenemies");
-    }
-
-    if (level["Only Bosses"] == true) {
-      processArgs.add("--category=onlybosses");
-    }
-
-    if (level["All Enemies"] == true) {
-      processArgs.add("--category=allenemies");
-    }
-
-    if (level["All Enemies without Randomization"] == true) {
-      processArgs.add("--category=onlylevel");
-    }
-
-    if (level["None"] == true) {
-      processArgs.add("--category=default");
-    }
-
-    if (ignoredModFiles.isNotEmpty) {
-      String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
-      processArgs.add(ignoreArgs);
-      log("Ignore arguments added: $ignoreArgs");
-    }
-
-    print("Final process arguments: $processArgs");
-
-    updateLog("Process arguments: $scriptPath ${processArgs.join(' ')}",
-        scrollController);
 
     try {
-      updateLog("Starting nier_cli...", scrollController);
+      CLIArguments cliArgs = await gatherCLIArguments(
+        scrollController: scrollController,
+        enemyImageGridKey: enemyImageGridKey,
+        categories: categories,
+        level: level,
+        ignoredModFiles: ignoredModFiles,
+        input: input,
+        specialDatOutputPath: specialDatOutputPath,
+        scriptPath: scriptPath,
+        enemyStats: enemyStats,
+        enemyLevel: enemyLevel,
+      );
 
-      // Construct the command based on the platform
-      String command = scriptPath;
-      if (Platform.isMacOS || Platform.isLinux) {
-        processArgs.insert(0, scriptPath);
-        command = 'sudo';
-      } else if (Platform.isWindows) {
+      String command = cliArgs.command;
+      List<String> arguments = cliArgs.processArgs;
+
+      if (Platform.isWindows) {
         var currentDir = Directory.current.path;
         command = p.join(currentDir, 'bin/fork/nier_cli.exe');
       }
 
-      // Start the process
-      Process process = await Process.start(command, processArgs);
+      updateLog(
+          "Executing command: $command with arguments: ${arguments.join(' ')}",
+          scrollController);
 
-      // Handle standard output
-      process.stdout.transform(utf8.decoder).listen((data) {
-        var lines = data.split('\n');
-        for (var line in lines) {
-          updateLog(line.trim(), scrollController);
+      Process process =
+          await Process.start(command, arguments, runInShell: true);
 
-          if (line.contains("Folder created:")) {
-            var parts = line.split("Folder created:");
-            if (parts.length >= 2) {
-              var fullPath = parts[1].trim();
+// Listen to stdout and stderr
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+        updateLog(line, scrollController);
 
-              if (fullPath.endsWith('.dat')) {
-                setState(() {
-                  createdFiles.add(fullPath);
-                  FileChange.logChange(fullPath, 'create');
-                });
-              }
+        // Check for "Folder created:" messages and log .dat file creation
+        if (line.contains("Folder created:")) {
+          var parts = line.split("Folder created:");
+          if (parts.length >= 2) {
+            var fullPath = parts[1].trim();
+            if (fullPath.endsWith('.dat')) {
+              setState(() {
+                createdDatFiles.add(fullPath);
+                FileChange.logChange(fullPath, 'create');
+              });
             }
           }
         }
       });
 
-      // Handle standard error
-      process.stderr.transform(utf8.decoder).listen((data) {
-        updateLog("stderr: $data", scrollController);
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+        updateLog("stderr: $line", scrollController);
       });
 
-      // Handle process exit
       final exitCode = await process.exitCode;
       if (exitCode == 0) {
         updateLog(
             "Randomization process completed successfully with exit code $exitCode",
             scrollController);
-        setState(() {
-          createdFiles.addAll(createdDatFiles);
-        });
       } else {
         updateLog(
             "Randomization process ended with error. Exit code: $exitCode",
             scrollController);
       }
+
+      setState(() {
+        createdFiles.addAll(createdDatFiles);
+      });
     } on FormatException catch (formatException) {
       updateLog("Format error: ${formatException.message}", scrollController);
     } on FileSystemException catch (fileSystemException) {
@@ -1262,7 +1273,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (selectedCategories.isNotEmpty) {
       details.add("• Selected Categories: ${selectedCategories.join(', ')}");
     } else {
-      details.add("• No specific categories selected.");
+      details
+          .add("• No specific categories selected. Will use all categories!!!");
     }
 
     return details.join('\n\n');
@@ -1410,147 +1422,74 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 onPressed: () => onnCopyArgsPressed(),
               ),
             ),
-            if (Platform.isWindows)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 30.0, horizontal: 10.0),
-                child: ElevatedButton.icon(
-                    icon: const Icon(Icons.window),
-                    label: const Text('Advanced Terminal CLI'),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 25, 25, 26)),
-                      foregroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 71, 192, 240)),
-                    ),
-                    onPressed: () => onAdvancedCliPressed()),
-              ),
           ],
         )
       ],
     );
   }
 
-  void onAdvancedCliPressed() {
-    advancedCli = true;
-    copyCLIArguments(advancedCli);
-  }
-
   void onnCopyArgsPressed() {
-    advancedCli = false;
-    copyCLIArguments(advancedCli);
+    copyCLIArguments();
   }
 
-  Future<void> runSudoCommand(
-      String scriptPath, List<String> processArgs) async {
-    String arguments = processArgs.join(' ').replaceAll('"', '\\"');
-    String appleScript = '''
-tell application "Terminal"
-    activate
-    do script "echo 'Please enter your password to proceed:' && sudo -S $scriptPath $arguments"
-end tell
-''';
-
-    Process.run('osascript', ['-e', appleScript]).then((result) {
-      if (result.stderr.isNotEmpty) {
-        print('Error: ${result.stderr}');
-      }
-      if (result.stdout.isNotEmpty) {
-        print('Output: ${result.stdout}');
-      }
-    }).catchError((error) {
-      print('Error: $error');
-    });
-  }
-
-  Future<void> runCommandThroughBatch(String scriptPath,
-      List<String> processArgs, List<String> argDescriptions) async {
-    scriptPath = scriptPath.contains(' ') && !scriptPath.startsWith('"')
-        ? '"$scriptPath"'
-        : scriptPath;
-
-    List<String> correctedArgs = processArgs.map((arg) {
-      return arg.contains(' ') && !arg.startsWith('"') ? '"$arg"' : arg;
-    }).toList();
-
-    if (argDescriptions.length != correctedArgs.length) {
-      throw ArgumentError(
-          'The number of argument descriptions must match the number of arguments.');
-    }
-
-    File tempBatchFile = File('${Directory.systemTemp.path}\\run_command.bat');
-
-    // ignore: prefer_interpolation_to_compose_strings
-
-    String batchCommand = initNaerArt;
-
-    batchCommand += 'echo off\n';
-    for (int i = 0; i < correctedArgs.length; i++) {
-      String commandIntro = 'echo Tactical Argument ${i + 1}: ____(';
-      String commandArg = '${correctedArgs[i]})____';
-      String commandDesc = ' ';
-
-      String typingEffectCommand = commandIntro + commandArg + commandDesc;
-      batchCommand += '$typingEffectCommand\n';
-      batchCommand +=
-          'echo -------------------------------------------------------------------------------------\n';
-      batchCommand += 'echo Description: ${argDescriptions[i]}\n';
-
-      if (i < correctedArgs.length - 1) {
-        batchCommand += 'echo.\n';
-        batchCommand += 'echo Press any key to analyze the next argument...\n';
-        batchCommand += 'pause > nul\n';
-        batchCommand += 'echo.\n';
-      }
-    }
-    batchCommand += 'echo.\n';
-    batchCommand +=
-        'echo Initiating NieR:Automata Enemy Randomizer Command Sequence\n';
-    batchCommand += 'echo.\n';
-    batchCommand += 'echo.\n';
-    batchCommand += 'echo $asciiStart';
-    batchCommand += 'echo.\n';
-    batchCommand += 'echo Press any key to start the process....\n';
-    batchCommand += 'echo.\n';
-    batchCommand += 'pause > nul\n';
-    batchCommand += 'call $scriptPath ${correctedArgs.join(" ")}\n';
-
-    await tempBatchFile.writeAsString(batchCommand);
-
+  void copyCLIArguments() async {
     try {
-      final process = await Process.start(
-        'cmd',
-        ['/c', 'start', 'cmd', '/k', tempBatchFile.path],
-        runInShell: true,
-        mode: ProcessStartMode.normal,
+      if (input.isEmpty || specialDatOutputPath.isEmpty) {
+        updateLog("Error: Please select both input and output directories. 💋 ",
+            scrollController);
+      }
+
+      if (!Platform.isWindows && scriptPath.isEmpty) {
+        updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
+        setState(() {
+          startBlinkAnimation();
+        });
+        throw ArgumentError("Nier CLI path is missing.");
+      }
+      // Await the result from gatherCLIArguments
+      CLIArguments cliArgs = await gatherCLIArguments(
+        scrollController: scrollController,
+        enemyImageGridKey: enemyImageGridKey,
+        categories: categories,
+        level: level,
+        ignoredModFiles: ignoredModFiles,
+        input: input,
+        specialDatOutputPath: specialDatOutputPath,
+        scriptPath: scriptPath,
+        enemyStats: enemyStats,
+        enemyLevel: enemyLevel,
       );
 
-      batchCommand +=
-          'echo The world changed, stop it before it is too late!...\n';
-      batchCommand += 'echo Enemies changed. Start Playing!\n';
+      // Use properties from the CLIArguments object
+      updateLog(
+          "NieR CLI Arguments: ${cliArgs.command} ${cliArgs.processArgs.join(' ')}",
+          scrollController);
 
-      final exitCode = await process.exitCode;
-      print('Process exited with code: $exitCode');
+      Clipboard.setData(ClipboardData(text: cliArgs.fullCommand.join(' ')))
+          .then((result) {
+        const snackBar = SnackBar(content: Text('Command copied to clipboard'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }).catchError((e) {
+        updateLog("Error copying to clipboard: $e", scrollController);
+      });
     } catch (e) {
-      print('Error in Enemy Randomizer Deployment: $e');
+      // Handle any errors that might occur during the gathering of CLI arguments
+      updateLog("Error gathering CLI arguments: $e", scrollController);
     }
   }
 
-  void copyCLIArguments(bool advancedCli) async {
-    if (input.isEmpty || specialDatOutputPath.isEmpty) {
-      updateLog("Error: Please select both input and output directories. 💋 ",
-          scrollController);
-      return;
-    }
-
-    if (!Platform.isWindows && scriptPath.isEmpty) {
-      updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
-      setState(() {
-        startBlinkAnimation();
-      });
-      return;
-    }
-
+  Future<CLIArguments> gatherCLIArguments({
+    required ScrollController scrollController,
+    required GlobalKey<EnemyImageGridState> enemyImageGridKey,
+    required Map<String, bool> categories,
+    required Map<String, bool> level,
+    required List<String> ignoredModFiles,
+    required String input,
+    required String specialDatOutputPath,
+    required String scriptPath,
+    required double enemyStats,
+    required int enemyLevel,
+  }) async {
     String tempFilePath;
     List<String>? selectedImages =
         enemyImageGridKey.currentState?.selectedImages;
@@ -1559,9 +1498,9 @@ end tell
       if (selectedImages!.isNotEmpty) {
         updateLog("Sorting selected enemies... 💬 ", scrollController);
         var sortedEnemies = await sortSelectedEnemies(selectedImages);
-        var tempFile =
-            await File('${Directory.systemTemp.path}/temp_sorted_enemies.dart')
-                .create();
+        var tempFile = await File(
+                '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
+            .create();
         var buffer = StringBuffer();
         buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
         sortedEnemies.forEach((group, enemies) {
@@ -1575,7 +1514,7 @@ end tell
         tempFilePath = "ALL";
       }
     } catch (e) {
-      return;
+      throw ArgumentError("Error creating temporary file");
     }
 
     String bossList = getSelectedBossesArgument();
@@ -1614,10 +1553,11 @@ end tell
       processArgs.add("--category=default");
     }
 
+    List<String> ignoredModFiles = FileChange.ignoredFiles;
     if (ignoredModFiles.isNotEmpty) {
       String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
       processArgs.add(ignoreArgs);
-      log("Ignore arguments added: $ignoreArgs");
+      print("Ignore arguments added: $ignoreArgs");
     }
 
     String command = scriptPath;
@@ -1637,23 +1577,15 @@ end tell
       fullCommand = [command] + processArgs;
     }
 
-    updateLog("NieR CLI Arguments: $command ${processArgs.join(' ')}",
-        scrollController);
-
-    if (Platform.isWindows && advancedCli == true) {
-      await runCommandThroughBatch(command, processArgs, argDescriptions);
-    } else {
-      if (advancedCli != true) {
-        Clipboard.setData(ClipboardData(text: fullCommand.join(' ')))
-            .then((result) {
-          const snackBar =
-              SnackBar(content: Text('Command copied to clipboard'));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        }).catchError((e) {
-          updateLog("Error copying to clipboard: $e", scrollController);
-        });
-      }
-    }
+    return CLIArguments(
+      input: input,
+      specialDatOutputPath: specialDatOutputPath,
+      tempFilePath: tempFilePath,
+      bossList: bossList,
+      processArgs: processArgs,
+      command: command,
+      fullCommand: fullCommand,
+    );
   }
 
   Set<String> loggedStages = {};
@@ -1673,9 +1605,15 @@ end tell
       }
     });
 
-    setState(() {
-      isProcessing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          isProcessing = true;
+        });
+      }
     });
+
+    setState(() {});
 
     setState(() {
       String? stageIdentifier;
@@ -1938,79 +1876,168 @@ end tell
     });
   }
 
+  void updateItemsByType(Type type, bool value) {
+    List<dynamic> allItems = getAllItems();
+    for (var item in allItems.where((item) => item.runtimeType == type)) {
+      categories[item.id] = value;
+    }
+  }
+
   Widget setupCategorySelection() {
-    return Align(
-      alignment: Alignment.topRight,
-      child: Container(
-        padding: const EdgeInsets.all(30),
-        margin: const EdgeInsets.only(top: 16),
-        decoration: BoxDecoration(
-          color: Colors.deepPurpleAccent[800],
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    // Method to create a special checkbox widget
+    Widget specialCheckbox(
+        String title, bool value, void Function(bool?) onChanged) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10.0),
+            Expanded(
               child: Text(
-                "Select Categories for Randomization (at least one must be selected)",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                title,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            ...categories.keys.map((category) {
-              IconData icon = getIconForCategory(category);
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  leading: Icon(icon, color: Colors.white, size: 28),
-                  title: Text(
-                    category,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  trailing: Transform.scale(
-                    scale: 1.2,
-                    child: Checkbox(
-                      value: categories[category],
-                      activeColor: Colors.blue,
-                      checkColor: Colors.white,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          if (newValue == true ||
-                              categories.values.where((v) => v).length > 1) {
-                            categories[category] = newValue!;
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'At least one category must be selected.'),
-                                backgroundColor:
-                                    Color.fromARGB(255, 255, 255, 255),
-                              ),
-                            );
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              );
-            }),
+            Checkbox(
+              value: value,
+              onChanged: onChanged,
+              activeColor: Colors.blue,
+              checkColor: Colors.white,
+            ),
           ],
         ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(30),
+      margin: const EdgeInsets.only(top: 16),
+      decoration: BoxDecoration(
+        color: Colors.deepPurpleAccent[800],
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 10.0),
+            child: Text(
+              "Select Categories for Randomization",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          specialCheckbox(
+            "All Quests",
+            selectAllQuests,
+            (newValue) {
+              setState(() {
+                selectAllQuests = newValue!;
+                updateItemsByType(SideQuest, newValue);
+              });
+            },
+          ),
+          specialCheckbox(
+            "All Maps",
+            selectAllMaps,
+            (newValue) {
+              setState(() {
+                selectAllMaps = newValue!;
+                updateItemsByType(MapLocation, newValue);
+              });
+            },
+          ),
+          specialCheckbox(
+            "All Phases",
+            selectAllPhases,
+            (newValue) {
+              setState(() {
+                selectAllPhases = newValue!;
+                updateItemsByType(ScriptingPhase, newValue);
+              });
+            },
+          ),
+          SizedBox(
+            height: 320,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                children: getAllItems().map((item) {
+                  IconData icon = getIconForItem(item);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16.0),
+                      leading: Icon(icon, color: Colors.white, size: 28),
+                      title: Text(
+                        item.description,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      trailing: Transform.scale(
+                        scale: 1.2,
+                        child: Checkbox(
+                          value: categories[item.id] ?? false,
+                          activeColor: Colors.blue,
+                          checkColor: Colors.white,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              categories[item.id] = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData getIconForItem(dynamic item) {
+    if (item is MapLocation) {
+      return Icons.map; // Example icon for MapLocation
+    } else if (item is SideQuest) {
+      return Icons.question_answer; // Placeholder, use appropriate icon
+    } else if (item is ScriptingPhase) {
+      return Icons.timeline; // Example icon for ScriptingPhase
+    }
+    return Icons.help_outline; // Default icon
+  }
+
+  Widget specialCheckbox(String title, bool value, Function(bool?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+          Checkbox(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Colors.blue,
+            checkColor: Colors.white,
+          ),
+        ],
       ),
     );
   }
@@ -2340,91 +2367,67 @@ end tell
     );
   }
 
-  Future<bool> loadPathsFromJson() async {
-    String directoryPath = await FileChange.ensureSettingsDirectory();
-    File settingsFile = File(p.join(directoryPath, 'paths.json'));
+  Future<bool> loadPathsFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
 
-    if (await settingsFile.exists()) {
-      String contents = await settingsFile.readAsString();
-      Map<String, dynamic> paths = jsonDecode(contents);
-      setState(() {
-        input = paths['input'] ?? '';
-        specialDatOutputPath = paths['output'] ?? '';
-        scriptPath = paths['scriptPath'] ?? '';
-        savePaths = paths['savePaths'] ?? false;
-      });
-      return true;
-    }
-    return false;
-  }
-
-  Future<void> removePathsFile() async {
-    String directoryPath = await FileChange.ensureSettingsDirectory();
-    File settingsFile = File(p.join(directoryPath, 'paths.json'));
-
-    if (await settingsFile.exists()) {
-      await settingsFile.delete();
-    }
-
+    String? input = prefs.getString('input');
+    String? specialDatOutputPath = prefs.getString('output');
+    String? scriptPath = prefs.getString('scriptPath');
+    bool savePaths = prefs.getBool('savePaths') ?? false;
     setState(() {
-      input = '';
-      specialDatOutputPath = '';
-      scriptPath = '';
-      savePaths = false;
+      this.input = input ?? '';
+      this.specialDatOutputPath = specialDatOutputPath ?? '';
+      this.scriptPath = scriptPath ?? '';
+      this.savePaths = savePaths;
     });
+
+    return input != null || specialDatOutputPath != null || scriptPath != null;
   }
 
-  IconData getIconForCategory(String category) {
-    switch (category) {
-      case "All Quests":
-        return Icons.announcement_rounded;
-      case "All Maps":
-        return Icons.map;
-      case "All Phases":
-        return Icons.loop;
-      case "Ignore DLC":
-        return Icons.image_not_supported_rounded;
+  Future<void> clearPathsFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('input');
+    await prefs.remove('output');
+    await prefs.remove('scriptPath');
+    await prefs.setBool('savePaths', false);
+  }
+
+  IconData getIconForLevel(String levelEnemy) {
+    switch (levelEnemy) {
+      case "All Enemies":
+        return Icons.emoji_events;
+      case "All Enemies without Randomization":
+        return Icons.emoji_flags_outlined;
+      case "Only Bosses":
+        return Icons.emoji_emotions_rounded;
+      case "Only Selected Enemies":
+        return Icons.radio_button_checked;
+      case "None":
+        return Icons.not_interested;
       default:
         return Icons.error;
     }
   }
-}
 
-IconData getIconForLevel(String levelEnemy) {
-  switch (levelEnemy) {
-    case "All Enemies":
-      return Icons.emoji_events;
-    case "All Enemies without Randomization":
-      return Icons.emoji_flags_outlined;
-    case "Only Bosses":
-      return Icons.emoji_emotions_rounded;
-    case "Only Selected Enemies":
-      return Icons.radio_button_checked;
-    case "None":
-      return Icons.not_interested;
-    default:
-      return Icons.error;
-  }
-}
+  void onNewLogMessage(BuildContext context, String newMessage) {
+    if (newMessage.toLowerCase().contains('error')) {
+      log(newMessage);
 
-void onNewLogMessage(BuildContext context, String newMessage) {
-  if (newMessage.toLowerCase().contains('error')) {
-    log(newMessage);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ' $newMessage',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ' $newMessage',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            backgroundColor: const Color.fromARGB(255, 255, 81, 81),
           ),
-          backgroundColor: const Color.fromARGB(255, 255, 81, 81),
-        ),
-      );
-    });
+        );
+      });
+    }
   }
 }
