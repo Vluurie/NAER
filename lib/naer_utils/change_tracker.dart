@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FileChange {
   String filePath;
@@ -18,9 +19,10 @@ class FileChange {
   static List<String> ignoredFiles = [];
 
   static Future<String> ensureSettingsDirectory() async {
-    var settingsDirectory = Directory(settingsDirectoryPath);
+    var exeDirectory = File(Platform.resolvedExecutable).parent.path;
+    final settingsDirectory = Directory('$exeDirectory/NAER_Settings');
     if (!await settingsDirectory.exists()) {
-      await settingsDirectory.create();
+      await settingsDirectory.create(recursive: true);
     }
     return settingsDirectory.path;
   }
@@ -31,18 +33,17 @@ class FileChange {
   }
 
   static Future<void> saveIgnoredFiles() async {
-    var settingsPath = await ensureSettingsDirectory();
-    var file = File('$settingsPath/ignored_files.json');
+    final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(ignoredFiles);
-    await file.writeAsString(jsonData);
+    await prefs.setString('ignored_files', jsonData);
+    print('Saved ignoredFiles: $jsonData'); // Log the saved data
   }
 
   static Future<void> loadIgnoredFiles() async {
-    var file = File('ignored_files.json');
-    if (await file.exists()) {
-      String jsonData = await file.readAsString();
-      ignoredFiles = List<String>.from(jsonDecode(jsonData));
-    }
+    final prefs = await SharedPreferences.getInstance();
+    String jsonData = prefs.getString('ignored_files') ?? '[]';
+    ignoredFiles = List<String>.from(jsonDecode(jsonData));
+    print('Loaded ignoredFiles: $ignoredFiles'); // Log the loaded data
   }
 
   static Future<void> undoChanges() async {
@@ -71,20 +72,16 @@ class FileChange {
   }
 
   static Future<void> saveChanges() async {
-    var settingsPath = await ensureSettingsDirectory();
-    var file = File('$settingsPath/file_changes.json');
+    final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(changes.map((c) => c.toJson()).toList());
-    await file.writeAsString(jsonData);
+    await prefs.setString('file_changes', jsonData);
   }
 
   static Future<void> loadChanges() async {
-    var settingsPath = await ensureSettingsDirectory();
-    var file = File('$settingsPath/file_changes.json');
-    if (await file.exists()) {
-      String jsonData = await file.readAsString();
-      List<dynamic> data = jsonDecode(jsonData);
-      changes = data.map((json) => FileChange.fromJson(json)).toList();
-    }
+    final prefs = await SharedPreferences.getInstance();
+    String jsonData = prefs.getString('file_changes') ?? '[]';
+    List<dynamic> data = jsonDecode(jsonData);
+    changes = data.map((json) => FileChange.fromJson(json)).toList();
   }
 
   Map<String, dynamic> toJson() => {
@@ -102,59 +99,46 @@ class FileChange {
   }
 
   static Future<void> savePreRandomizationTime() async {
+    final prefs = await SharedPreferences.getInstance();
     var bufferTime = const Duration(minutes: 60);
     var preRandomizationTime = DateTime.now().subtract(bufferTime);
     var formattedTime =
         DateFormat('yyyy-MM-dd HH:mm:ss').format(preRandomizationTime);
-    var preRandomizationData =
-        jsonEncode({'pre_randomization_time': formattedTime});
-    var settingsPath = await ensureSettingsDirectory();
-    var file = File('$settingsPath/pre_randomization_time.json');
-    await file.writeAsString(preRandomizationData);
+    await prefs.setString('pre_randomization_time', formattedTime);
     if (kDebugMode) {
       print("Pre-randomization time saved: $formattedTime");
     }
   }
 
   static Future<void> saveLastRandomizationTime() async {
+    final prefs = await SharedPreferences.getInstance();
     var lastRandomizationTime = DateTime.now();
     var formattedTime =
         DateFormat('yyyy-MM-dd HH:mm:ss').format(lastRandomizationTime);
-
-    var lastRandomizationData =
-        jsonEncode({'last_randomization_time': formattedTime});
-    var settingsPath = await ensureSettingsDirectory();
-    var file = File('$settingsPath/last_randomization_time.json');
-    await file.writeAsString(lastRandomizationData);
+    await prefs.setString('last_randomization_time', formattedTime);
+    if (kDebugMode) {
+      print("Last randomization time saved: $formattedTime");
+    }
   }
 
   static Future<DateTime> getPreRandomizationTime() async {
-    var settingsPath = await ensureSettingsDirectory();
-    var preRandomizationFile =
-        File('$settingsPath/pre_randomization_time.json');
+    final prefs = await SharedPreferences.getInstance();
+    String formattedTime = prefs.getString('pre_randomization_time') ??
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     try {
-      if (await preRandomizationFile.exists()) {
-        var content = await preRandomizationFile.readAsString();
-        var preRandomizationData = jsonDecode(content);
-        DateTime parsedTime = DateFormat('yyyy-MM-dd HH:mm:ss')
-            .parse(preRandomizationData['pre_randomization_time']);
-        if (kDebugMode) {
-          print("Loaded pre-randomization time from file: $parsedTime");
-        }
-        return parsedTime;
-      } else {
-        if (kDebugMode) {
-          print("Pre-randomization time file does not exist.");
-        }
+      DateTime parsedTime =
+          DateFormat('yyyy-MM-dd HH:mm:ss').parse(formattedTime);
+      if (kDebugMode) {
+        print(
+            "Loaded pre-randomization time from SharedPreferences: $parsedTime");
       }
+      return parsedTime;
     } catch (e) {
       if (kDebugMode) {
-        print('Error reading pre-randomization time: $e');
+        print('Error parsing pre-randomization time: $e');
       }
+      // Fallback to current time if parsing fails
+      return DateTime.now();
     }
-    if (kDebugMode) {
-      print("Using current time as fallback for pre-randomization time.");
-    }
-    return DateTime.now();
   }
 }

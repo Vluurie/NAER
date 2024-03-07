@@ -54,7 +54,7 @@ class ByteDataWrapper {
         position += bytes.length;
         int currentProgress = ((position / fileSize) * 100).round();
         if (currentProgress >= lastReportedProgress + 10) {
-          stdout.write("$currentProgress%\r");
+          stdout.write("$currentProgress%\r cooking..");
           lastReportedProgress = currentProgress;
         }
       }

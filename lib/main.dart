@@ -1,9 +1,21 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
+import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
+import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
+import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
+import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:NAER/naer_utils/handle_mod_install.dart';
+import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/nier_enemy_data/sorted_data/nier_maps.dart';
+import 'package:NAER/nier_enemy_data/sorted_data/nier_script_phase.dart';
+import 'package:NAER/nier_enemy_data/sorted_data/nier_side_quests.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path/path.dart' as p;
 import 'package:NAER/naer_pages/second_page.dart';
@@ -16,9 +28,16 @@ import 'package:NAER/custom_naer_ui/animations/dotted_line_progress_animation.da
 import 'package:NAER/custom_naer_ui/animations/shacke_animation_widget.dart';
 import 'package:NAER/custom_naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(EnemyRandomizerApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => LogState(),
+      child: EnemyRandomizerApp(),
+    ),
+  );
 }
 
 class EnemyRandomizerApp extends StatelessWidget {
@@ -58,24 +77,51 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   GlobalKey setupCategorySelectionKey = GlobalKey();
   GlobalKey setupLogOutputKey = GlobalKey();
   GlobalKey<EnemyImageGridState> enemyImageGridKey = GlobalKey();
+  Future<ElevatedButton>? _buttonFuture;
   int _selectedIndex = 0;
   List<String> createdFiles = [];
+  List<String> createdDatFiles = [];
   bool isLoading = false;
   bool isButtonEnabled = true;
   bool isLogIconBlinking = false;
   bool hasError = false;
   bool isProcessing = false;
+  bool selectAllQuests = true;
+  bool selectAllMaps = true;
+  bool selectAllPhases = true;
+  bool ignoreDLC = false;
   String input = '';
+  String scriptPath = '';
   int enemyLevel = 1;
+  List<dynamic> getAllItems() {
+    return [
+      ...ScriptingPhase.scriptingPhases,
+      ...MapLocation.mapLocations,
+      ...SideQuest.sideQuests,
+    ];
+  }
+
+  String convertAndEscapePath(String path) {
+    print("Path before function: $path");
+
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      if (path.contains(' ') ||
+          path.contains('(') ||
+          path.contains(')') ||
+          path.contains('&') ||
+          path.contains('\\')) {
+        print("Path contains special characters but not modifying it: $path");
+        return path;
+      }
+    }
+
+    return path;
+  }
+
   String specialDatOutputPath = '';
   List<String> ignoredModFiles = [];
   List<String> logMessages = [];
-  Map<String, bool> categories = {
-    "All Quests": true,
-    "All Maps": true,
-    "All Phases": true,
-    'Ignore DLC': true
-  };
+  Map<String, bool> categories = {};
   Map<String, bool> level = {
     "All Enemies": false,
     "All Enemies without Randomization": false,
@@ -85,15 +131,26 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   };
   double enemyStats = 0.0;
   Map<String, bool> stats = {"None": true, "Select All": false};
+  bool savePaths = false;
 
   late ScrollController scrollController;
   late AnimationController _blinkController;
+  late Future<bool> _loadPathsFuture;
 
   @override
   void initState() {
     super.initState();
     FileChange.loadChanges();
-    FileChange.loadIgnoredFiles();
+    FileChange.loadIgnoredFiles().then((_) {
+      print('Ignored files loaded successfully.');
+    }).catchError((error) {
+      print('Failed to load ignored files: $error');
+    });
+    _buttonFuture = _navigateButton(context);
+    updateItemsByType(SideQuest, true);
+    updateItemsByType(MapLocation, true);
+    updateItemsByType(ScriptingPhase, true);
+    _loadPathsFuture = loadPathsFromSharedPreferences();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -140,135 +197,151 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             ),
             child: Stack(
               children: <Widget>[
-                Positioned(
-                    left: 110,
-                    width: 70,
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                        Color.fromARGB(0, 117, 100, 100),
-                        BlendMode.srcOver,
-                      ),
-                      child: Image.asset(
-                        'assets/naer_icons/icon.png',
-                        fit: BoxFit.cover,
-                      ),
-                    )),
                 AppBar(
                   toolbarHeight: 100.0,
-                  title: const Padding(
-                    padding: EdgeInsets.only(left: 40),
-                    child: Text('NAER'),
-                  ),
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  actions: <Widget>[
-                    const Spacer(),
-                    const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'NAER',
-                          style: TextStyle(
-                              fontSize: 36.0,
-                              color: Color.fromRGBO(0, 255, 255, 1),
-                              fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.info, size: 32.0),
-                          color: const Color.fromRGBO(49, 217, 240, 1),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("Information"),
-                                  content: RichText(
-                                    text: const TextSpan(
-                                      style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                            text:
-                                                "Thank you for using this tool! It is provided free of charge and developed in my personal time. "),
-                                        TextSpan(
-                                            text:
-                                                "\n\nIf you encounter any issues or have questions, feel free to ask in the Nier Modding community! "),
-                                        TextSpan(
-                                            text:
-                                                ".\n\nSpecial thanks to RaiderB with his NieR CLI and the entire mod community for making this possible."),
-                                      ],
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text("Close"),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        const Text(
-                          'Information',
-                          style: TextStyle(fontSize: 10.0),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                            icon: AnimatedBuilder(
-                              animation: _blinkController,
-                              builder: (context, child) {
-                                final color = ColorTween(
-                                  begin:
-                                      const Color.fromARGB(31, 206, 198, 198),
-                                  end: const Color.fromARGB(255, 86, 244, 54),
-                                ).animate(_blinkController).value;
-
-                                if (_blinkController.status ==
-                                    AnimationStatus.forward) {}
-
-                                return Icon(
-                                  Icons.terminal,
-                                  size: 32.0,
-                                  color: color,
-                                );
-                              },
-                            ),
-                            onPressed: () {
-                              scrollToSetup(setupLogOutputKey);
-                            }),
-                        const Text(
-                          'Log',
-                          style: TextStyle(fontSize: 10.0),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 100.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                  title: LayoutBuilder(
+                    builder: (context, constraints) {
+                      bool isLargeScreen = constraints.maxWidth > 600;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          _navigateButton(context),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                right: isLargeScreen ? 20.0 : 10.0),
+                            child: Image.asset(
+                              'assets/naer_icons/icon.png',
+                              fit: BoxFit.cover,
+                              width: isLargeScreen ? 70.0 : 50.0,
+                            ),
+                          ),
+                          Text(
+                            'NAER',
+                            style: TextStyle(
+                              fontSize: isLargeScreen ? 36.0 : 24.0,
+                              color: const Color.fromRGBO(0, 255, 255, 1),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Spacer(),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.info, size: 32.0),
+                                color: const Color.fromRGBO(49, 217, 240, 1),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Information"),
+                                        content: RichText(
+                                          text: const TextSpan(
+                                            style: TextStyle(
+                                                color: Color.fromARGB(
+                                                    255, 255, 255, 255)),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                  text:
+                                                      "Thank you for using this tool! It is provided free of charge and developed in my personal time. "),
+                                              TextSpan(
+                                                  text:
+                                                      "\n\nIf you encounter any issues or have questions, feel free to ask in the Nier Modding community! "),
+                                              TextSpan(
+                                                  text:
+                                                      ".\n\nSpecial thanks to RaiderB with his NieR CLI and the entire mod community for making this possible."),
+                                            ],
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text("Close"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                              const Text(
+                                'Information',
+                                style: TextStyle(fontSize: 10.0),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  icon: AnimatedBuilder(
+                                    animation: _blinkController,
+                                    builder: (context, child) {
+                                      final color = ColorTween(
+                                        begin: const Color.fromARGB(
+                                            31, 206, 198, 198),
+                                        end: const Color.fromARGB(
+                                            255, 86, 244, 54),
+                                      ).animate(_blinkController).value;
+
+                                      if (_blinkController.status ==
+                                          AnimationStatus.forward) {}
+
+                                      return Icon(
+                                        Icons.terminal,
+                                        size: 32.0,
+                                        color: color,
+                                      );
+                                    },
+                                  ),
+                                  onPressed: () {
+                                    scrollToSetup(setupLogOutputKey);
+                                  }),
+                              const Text(
+                                'Log',
+                                style: TextStyle(fontSize: 10.0),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 100.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                FutureBuilder<ElevatedButton>(
+                                  future:
+                                      _buttonFuture, // Use the cached future here
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<ElevatedButton> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      // Return a loader or placeholder
+                                      return const CircularProgressIndicator();
+                                    } else if (snapshot.hasError) {
+                                      // Handle error
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (snapshot.hasData) {
+                                      // Return the button
+                                      return snapshot.data!;
+                                    } else {
+                                      // Return an empty widget if there's no data and no error
+                                      return const SizedBox.shrink();
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          )
                         ],
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -360,11 +433,33 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         ]));
   }
 
-  ElevatedButton _navigateButton(BuildContext context) {
+  Future<ElevatedButton> _navigateButton(BuildContext context) async {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
+        CLIArguments cliArgs = await gatherCLIArguments(
+          scrollController: scrollController,
+          enemyImageGridKey: enemyImageGridKey,
+          categories: categories,
+          level: level,
+          ignoredModFiles: ignoredModFiles,
+          input: input,
+          specialDatOutputPath: specialDatOutputPath,
+          scriptPath: scriptPath,
+          enemyStats: enemyStats,
+          enemyLevel: enemyLevel,
+        );
+
+        ModInstallHandler modInstallHandler =
+            ModInstallHandler(cliArguments: cliArgs);
+        ModStateManager modStateManager = ModStateManager(modInstallHandler);
+
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const SecondPage()),
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider<ModStateManager>(
+              create: (_) => modStateManager,
+              child: SecondPage(cliArguments: cliArgs),
+            ),
+          ),
         );
       },
       style: ElevatedButton.styleFrom(
@@ -400,6 +495,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           !lastMessage.contains("Completed") &&
           !lastMessage.contains("Error") &&
           !lastMessage.contains("Randomization") &&
+          !lastMessage.contains("NieR CLI") &&
           !lastMessage.contains("Last");
 
       return isProcessing;
@@ -413,35 +509,215 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       alignment: Alignment.topLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-        constraints: const BoxConstraints(maxWidth: 600),
+        constraints: const BoxConstraints(maxWidth: 800),
         child: Column(
-          // Changed to Column for vertical layout
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Row(
-              // First row for directory selection
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
               children: [
                 DirectorySelectionCard(
-                  title: "Input Directory:",
-                  path: input,
-                  onBrowse: (updatePath) => openInputFileDialog(updatePath),
-                  icon: Icons.folder_open,
-                  width: 250,
-                ),
-                const SizedBox(width: 10),
+                    title: "Input Directory:",
+                    path: input,
+                    onBrowse: (updatePath) => openInputFileDialog(updatePath),
+                    icon: Icons.folder_open,
+                    width: 200,
+                    hints: "Hints: Your Game data folder."),
                 DirectorySelectionCard(
-                  title: "Output Directory:",
-                  path: specialDatOutputPath,
-                  onBrowse: (updatePath) => openOutputFileDialog(updatePath),
-                  icon: Icons.folder_open,
-                  width: 250,
+                    title: "Output Directory:",
+                    path: specialDatOutputPath,
+                    onBrowse: (updatePath) => openOutputFileDialog(updatePath),
+                    icon: Icons.folder_open,
+                    width: 200,
+                    hints: "Hints: Also Game data folder."),
+                DirectorySelectionCard(
+                  title: "Select NieR CLI:",
+                  path: scriptPath,
+                  onBrowse: Platform.isMacOS || Platform.isLinux
+                      ? (updatePath) => openCliSearch(updatePath)
+                      : (_) async {}, // No-op function for Windows
+                  icon: Platform.isWindows
+                      ? Icons.disabled_by_default
+                      : Icons.apple,
+                  width: 300,
+                  enabled: Platform.isMacOS || Platform.isLinux,
+                  hint: Platform.isWindows
+                      ? "Only needed for macOS, Windows cannot select."
+                      : null,
                 ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.open_in_full),
+                  label: const Text('Open output path'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 25, 25, 26)),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 71, 192, 240)),
+                  ),
+                  onPressed: () => getOutputPath(context, specialDatOutputPath),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Open NAER_settings'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 25, 25, 26)),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 71, 192, 240)),
+                  ),
+                  onPressed: getNaerSettings,
+                ),
+                savePathCheckbox()
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget savePathCheckbox() {
+    return FutureBuilder<bool>(
+      future: _loadPathsFuture,
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return SavePathsWidget(
+            input: input,
+            output: specialDatOutputPath,
+            scriptPath: scriptPath,
+            savePaths: savePaths,
+            onCheckboxChanged: (bool value) async {
+              if (!value) {
+                await clearPathsFromSharedPreferences();
+                setState(() {
+                  input = '';
+                  specialDatOutputPath = '';
+                  scriptPath = '';
+                });
+              }
+              setState(() {
+                savePaths = value;
+              });
+            },
+          );
+        } else {
+          return const CircularProgressIndicator();
+        }
+      },
+    );
+  }
+
+  void getOutputPath(BuildContext context, String outputPath) async {
+    if (outputPath.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Output path is empty')),
+      );
+      return;
+    }
+
+    outputPath = outputPath.replaceAll('"', '');
+
+    if (!await Directory(outputPath).exists()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Path does not exist: $outputPath')),
+      );
+      return;
+    }
+
+    if (Platform.isWindows) {
+      await Process.run('explorer', [outputPath]);
+    } else if (Platform.isMacOS) {
+      await Process.run('open', [outputPath]);
+    } else if (Platform.isLinux) {
+      await Process.run('xdg-open', [outputPath]);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('Opening output path is not supported on this platform.')),
+      );
+    }
+  }
+
+  void getNaerSettings() async {
+    String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
+
+    if (Platform.isWindows) {
+      await Process.run('cmd', ['/c', 'start', '', settingsDirectoryPath]);
+    } else if (Platform.isMacOS) {
+      await Process.run('open', [settingsDirectoryPath]);
+    } else if (Platform.isLinux) {
+      await Process.run('xdg-open', [settingsDirectoryPath]);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Opening output path is not supported on this platform.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> openCliSearch(Function(String) updatePath) async {
+    String? scriptFile = await getCLIFilePath();
+
+    if (scriptFile != null && scriptFile.isNotEmpty) {
+      setState(() {
+        scriptPath = scriptFile;
+      });
+    }
+
+    updatePath(scriptFile ?? '');
+  }
+
+  Future<String?> getCLIFilePath() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null && result.files.single.path != null) {
+      String scriptFile = result.files.single.path!;
+      print(scriptFile);
+
+      bool isValidCli = await _isValidCliFile(scriptFile);
+      if (isValidCli) {
+        return convertAndEscapePath(scriptFile);
+      } else {
+        _showInvalidCli();
+      }
+    }
+
+    return null;
+  }
+
+  Future<bool> _isValidCliFile(String scriptPath) async {
+    bool isWindows = Platform.isWindows;
+    bool isValidExtension = isWindows
+        ? scriptPath.toLowerCase().endsWith('nier_cli.exe')
+        : scriptPath.toLowerCase().endsWith('nier_cli');
+
+    return File(scriptPath).existsSync() && isValidExtension;
+  }
+
+  void _showInvalidCli() {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Invalid File"),
+          content: const Text(
+              "The selected file is not a valid NieR CLI executable. ('nier_cli.exe') || ('nier_cli') "),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -453,11 +729,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (containsValidFiles) {
         setState(() {
-          input = selectedDirectory;
+          input = convertAndEscapePath(selectedDirectory);
         });
         updatePath(selectedDirectory);
       } else {
-        // Moved the showDialog inside a separate function
         _showInvalidDirectoryDialog();
         updatePath('');
       }
@@ -467,11 +742,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void _showInvalidDirectoryDialog() {
-    if (!mounted) return; // Check if the widget is still in the tree
+    if (!mounted) return;
 
     showDialog(
-      context:
-          context, // Safe to use context here as it's immediately after the check
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Invalid Directory"),
@@ -509,17 +783,20 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (selectedDirectory != null) {
       setState(() {
-        specialDatOutputPath = selectedDirectory;
+        specialDatOutputPath = convertAndEscapePath(selectedDirectory);
       });
       updatePath(selectedDirectory);
 
       var modFiles = await findModFiles(selectedDirectory);
       if (modFiles.isNotEmpty) {
-        showModsMessage(modFiles, (updatedModFiles) {
+        showModsMessage(modFiles, (updatedModFiles) async {
           setState(() {
             ignoredModFiles = updatedModFiles;
           });
           log("Updated ignoredModFiles after dialog: $ignoredModFiles");
+          final prefs = await SharedPreferences.getInstance();
+          String jsonData = jsonEncode(ignoredModFiles);
+          await prefs.setString('ignored_mod_files', jsonData);
         });
       } else {
         _showNoModFilesDialog();
@@ -583,8 +860,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       });
 
       try {
-        await FileChange
-            .savePreRandomizationTime(); // Save pre-randomization time
+        await FileChange.savePreRandomizationTime();
         log("Ignored mod files before starting: $ignoredModFiles");
         await startRandomizing();
         await FileChange.saveChanges();
@@ -611,7 +887,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         enemyImageGridKey.currentState?.selectedImages;
     var enemyGroups = await readEnemyData();
 
-    // Remove file extensions from selected images, if they have any
     var formattedSelectedImages =
         selectedImages!.map((image) => image.split('.').first).toList();
 
@@ -636,6 +911,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     return sortedSelection;
   }
 
+// MAIN MODIFY BUTTON FUNCTIONALITY
   Future<void> startRandomizing() async {
     hasError = true;
     setState(() {
@@ -647,129 +923,72 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (input.isEmpty || specialDatOutputPath.isEmpty) {
       updateLog("Error: Please select both input and output directories. 💋 ",
           scrollController);
+    }
+
+    if (!Platform.isWindows && scriptPath.isEmpty) {
+      updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
       setState(() {
         startBlinkAnimation();
       });
-      return;
+      throw ArgumentError("Nier CLI path is missing.");
     }
 
-    String tempFilePath;
-    List<String>? selectedImages =
-        enemyImageGridKey.currentState?.selectedImages;
-
     try {
-      if (selectedImages!.isNotEmpty) {
-        updateLog("Sorting selected enemies... 💬 ", scrollController);
-        var sortedEnemies = await sortSelectedEnemies(selectedImages);
-        var tempFile =
-            await File('${Directory.systemTemp.path}/temp_sorted_enemies.dart')
-                .create();
-        var buffer = StringBuffer();
-        buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
-        sortedEnemies.forEach((group, enemies) {
-          var enemiesFormatted = enemies.map((e) => '"$e"').join(', ');
-          buffer.writeln('  "$group": [$enemiesFormatted],');
-        });
-        buffer.writeln("};");
-        await tempFile.writeAsString(buffer.toString());
-        tempFilePath = tempFile.path;
-        updateLog("Temporary file created: $tempFilePath", scrollController);
-      } else {
-        tempFilePath = "ALL";
-        updateLog(
-            "No selected images. Using ALL enemies. 💬 ", scrollController);
+      CLIArguments cliArgs = await gatherCLIArguments(
+        scrollController: scrollController,
+        enemyImageGridKey: enemyImageGridKey,
+        categories: categories,
+        level: level,
+        ignoredModFiles: ignoredModFiles,
+        input: input,
+        specialDatOutputPath: specialDatOutputPath,
+        scriptPath: scriptPath,
+        enemyStats: enemyStats,
+        enemyLevel: enemyLevel,
+      );
+
+      String command = cliArgs.command;
+      List<String> arguments = cliArgs.processArgs;
+
+      if (Platform.isWindows) {
+        var currentDir = Directory.current.path;
+        command = p.join(currentDir, 'bin/fork/nier_cli.exe');
       }
-    } catch (e) {
-      updateLog("Error during file preparation: $e", scrollController);
-      return;
-    }
 
-    String bossList = getSelectedBossesArgument();
+      updateLog(
+          "Executing command: $command with arguments: ${arguments.join(' ')}",
+          scrollController);
 
-// Construct the process arguments
-    List<String> processArgs = [
-      input,
-      '--output',
-      specialDatOutputPath,
-      tempFilePath,
-      '--bosses',
-      bossList.isNotEmpty ? bossList : 'None',
-      '--bossStats',
-      enemyStats.toString(),
-      '--level=$enemyLevel',
-      ...categories.entries
-          .where((entry) => entry.value)
-          .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
-    ];
+      Process process =
+          await Process.start(command, arguments, runInShell: true);
 
-    if (level["Only Selected Enemies"] == true) {
-      processArgs.add("--category=onlyselectedenemies");
-    }
+// Listen to stdout and stderr
+      process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+        updateLog(line, scrollController);
 
-    if (level["Only Bosses"] == true) {
-      processArgs.add("--category=onlybosses");
-    }
-
-    if (level["All Enemies"] == true) {
-      processArgs.add("--category=allenemies");
-    }
-
-    if (level["All Enemies without Randomization"] == true) {
-      processArgs.add("--category=onlylevel");
-    }
-
-    if (level["None"] == true) {
-      processArgs.add("--category=default");
-    }
-
-    if (ignoredModFiles.isNotEmpty) {
-      String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
-      processArgs.add(ignoreArgs);
-      log("Ignore arguments added: $ignoreArgs");
-    }
-
-    print("Final process arguments: $processArgs");
-
-    updateLog("Process arguments: ${processArgs.join(' ')}", scrollController);
-
-    var currentDir = Directory.current.path;
-    var scriptPath = p.join(currentDir, 'bin/fork/nier_cli.exe');
-
-    List<String> createdDatFiles = []; // To track created .dat files
-
-    try {
-      updateLog("Starting nier_cli.exe...", scrollController);
-      final process = await Process.start(
-          scriptPath, processArgs); // calling the .exe with arguments
-
-      process.stdout.transform(utf8.decoder).listen((data) {
-        // Split the data by new lines and process each line separately
-        var lines = data.split('\n');
-        for (var line in lines) {
-          updateLog(line.trim(), scrollController);
-
-          // Check if the line contains 'Folder created:'
-          if (line.contains("Folder created:")) {
-            // Split the line and get the part after 'Folder created:'
-            var parts = line.split("Folder created:");
-            if (parts.length >= 2) {
-              var fullPath = parts[1].trim(); // Extract the path
-              log("Debug - Extracted path: $fullPath");
-
-              if (fullPath.endsWith('.dat')) {
-                setState(() {
-                  createdFiles.add(fullPath);
-                  FileChange.logChange(fullPath, 'create');
-                  log("Debug - Added to createdFiles: $fullPath");
-                });
-              }
+        // Check for "Folder created:" messages and log .dat file creation
+        if (line.contains("Folder created:")) {
+          var parts = line.split("Folder created:");
+          if (parts.length >= 2) {
+            var fullPath = parts[1].trim();
+            if (fullPath.endsWith('.dat')) {
+              setState(() {
+                createdDatFiles.add(fullPath);
+                FileChange.logChange(fullPath, 'create');
+              });
             }
           }
         }
       });
 
-      process.stderr.transform(utf8.decoder).listen((data) {
-        updateLog("stderr: $data", scrollController);
+      process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((line) {
+        updateLog("stderr: $line", scrollController);
       });
 
       final exitCode = await process.exitCode;
@@ -777,17 +996,25 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         updateLog(
             "Randomization process completed successfully with exit code $exitCode",
             scrollController);
-        setState(() {
-          createdFiles
-              .addAll(createdDatFiles); // Update state with tracked .dat files
-        });
       } else {
         updateLog(
             "Randomization process ended with error. Exit code: $exitCode",
             scrollController);
       }
-    } catch (e) {
-      updateLog("Error during process execution: $e", scrollController);
+
+      setState(() {
+        createdFiles.addAll(createdDatFiles);
+      });
+    } on FormatException catch (formatException) {
+      updateLog("Format error: ${formatException.message}", scrollController);
+    } on FileSystemException catch (fileSystemException) {
+      updateLog("File system error: ${fileSystemException.message}",
+          scrollController);
+    } on ProcessException catch (processException) {
+      updateLog("Process error: ${processException.message}", scrollController);
+    } catch (e, stackTrace) {
+      updateLog("Unexpected error: $e", scrollController);
+      logErrorDetails(e, stackTrace);
     } finally {
       setState(() {
         isLoading = false;
@@ -795,9 +1022,17 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       loggedStages.clear();
       updateLog(
           'Thank you for using the randomization tool.', scrollController);
+      updateLog(asciiArt2B, scrollController);
+      Duration duration = const Duration(seconds: 3);
+      Future.delayed(duration);
       updateLog("Randomization process finished.", scrollController);
       showCompletionDialog();
     }
+  }
+
+  void logErrorDetails(dynamic e, StackTrace stackTrace) {
+    updateLog("Error: $e", scrollController);
+    updateLog("Stack Trace: $stackTrace", scrollController);
   }
 
   Future<List<String>> findModFiles(String outputDirectory) async {
@@ -810,12 +1045,21 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         await for (FileSystemEntity entity in directory.list(recursive: true)) {
           if (entity is File && entity.path.endsWith('.dat')) {
             var fileModTime = await entity.lastModified();
-            var fileName =
-                path.basename(entity.path); // Extract only the file name
-            log("Found .dat file: ${entity.path}, last modified: $fileModTime");
-            if (fileModTime.isBefore(preRandomizationTime)) {
-              modFiles.add(fileName); // Add only the file name
-              log("Adding mod file: $fileName");
+            var fileName = path.basename(entity.path);
+            if (fileName.contains("p100") ||
+                fileName.contains("p200") ||
+                fileName.contains("p300") ||
+                fileName.contains("p400") ||
+                fileName.contains("q") ||
+                fileName.contains("r") ||
+                fileName.contains("corehap") ||
+                fileName.contains("em")) {
+              log("Found .dat file: ${entity.path}, last modified: $fileModTime");
+
+              if (fileModTime.isBefore(preRandomizationTime)) {
+                modFiles.add(fileName);
+                log("Adding mod file: $fileName");
+              }
             }
           }
         }
@@ -837,9 +1081,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void undoLastRandomization() async {
-    await FileChange
-        .loadChanges(); // Load the changes if they were saved previously
-    await FileChange.undoChanges(); // Undo the changes
+    await FileChange.loadChanges();
+    await FileChange.undoChanges();
 
     try {
       for (var filePath in createdFiles) {
@@ -904,10 +1147,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 "Important:",
                 style:
                     TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-              ),
-              Text(
-                "• Once the tool is closed, you cannot undo the last randomization.",
-                style: TextStyle(fontSize: 12),
               ),
               Text(
                 "• Avoid using this function while the game is running as it may cause issues.",
@@ -976,7 +1215,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String _generateModificationDetails() {
     List<String> details = [];
 
-    // Category details
+    String bossList = getSelectedBossesNames();
+
     String categoryDetail = level.entries
         .firstWhere((entry) => entry.value,
             orElse: () => const MapEntry("None", false))
@@ -989,6 +1229,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       details.add("• Change Level: $enemyLevel");
     }
 
+    if (bossList.isNotEmpty && enemyStats != 0.0) {
+      details.add("• Change Boss Stats: x$enemyStats for $bossList");
+    } else {
+      details.add("• Change Boss Stats: None");
+    }
+
     List<String>? selectedImages =
         enemyImageGridKey.currentState?.selectedImages;
     if (selectedImages != null && selectedImages.isNotEmpty) {
@@ -998,7 +1244,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           "• Selected Enemies: No Enemy selected, will use ALL Enemies for Randomization");
     }
 
-    // Explaining what each category means
     switch (categoryDetail) {
       case "All Enemies":
         details.add(
@@ -1021,7 +1266,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         break;
     }
 
-    // Categories details
     List<String> selectedCategories = categories.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
@@ -1029,7 +1273,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (selectedCategories.isNotEmpty) {
       details.add("• Selected Categories: ${selectedCategories.join(', ')}");
     } else {
-      details.add("• No specific categories selected.");
+      details
+          .add("• No specific categories selected. Will use all categories!!!");
     }
 
     return details.join('\n\n');
@@ -1037,7 +1282,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   Widget setupLogOutput(List<String> logMessages, BuildContext context,
       VoidCallback clearLogMessages, ScrollController scrollController) {
-    // Function to determine text color based on message type
     Color messageColor(String message) {
       if (message.toLowerCase().contains('error') ||
           message.toLowerCase().contains('failed')) {
@@ -1051,7 +1295,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           message.toLowerCase().contains('finished')) {
         return const Color.fromARGB(255, 59, 255, 59);
       } else {
-        return Colors.white; // Color for informational messages
+        return Colors.white;
       }
     }
 
@@ -1064,8 +1308,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         );
       }
     });
-
-    // Function to determine if the last message is still being processed
 
     List<InlineSpan> buildLogMessageSpans() {
       return logMessages.map((message) {
@@ -1130,7 +1372,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             ? buildLogMessageSpans()
                             : [
                                 const TextSpan(
-                                    text: "Hey there! It's quiet for now... 🤫")
+                                    text:
+                                        "Hey there! It's quiet for now... 🤫\n\n"),
+                                TextSpan(text: asciiArt2B)
                               ],
                       ),
                     ),
@@ -1146,22 +1390,201 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30.0),
-          child: Center(
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(255, 25, 25, 26)),
-                foregroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(255, 71, 192, 240)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 60.0, horizontal: 20.0),
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 25, 25, 26)),
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 240, 71, 71)),
+                ),
+                onPressed: clearLogMessages,
+                child: const Text('Clear Log'),
               ),
-              onPressed: clearLogMessages,
-              child: const Text('Clear Log'),
             ),
-          ),
-        ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy CLI Arguments'),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 25, 25, 26)),
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 71, 192, 240)),
+                ),
+                onPressed: () => onnCopyArgsPressed(),
+              ),
+            ),
+          ],
+        )
       ],
+    );
+  }
+
+  void onnCopyArgsPressed() {
+    copyCLIArguments();
+  }
+
+  void copyCLIArguments() async {
+    try {
+      if (input.isEmpty || specialDatOutputPath.isEmpty) {
+        updateLog("Error: Please select both input and output directories. 💋 ",
+            scrollController);
+      }
+
+      if (!Platform.isWindows && scriptPath.isEmpty) {
+        updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
+        setState(() {
+          startBlinkAnimation();
+        });
+        throw ArgumentError("Nier CLI path is missing.");
+      }
+      // Await the result from gatherCLIArguments
+      CLIArguments cliArgs = await gatherCLIArguments(
+        scrollController: scrollController,
+        enemyImageGridKey: enemyImageGridKey,
+        categories: categories,
+        level: level,
+        ignoredModFiles: ignoredModFiles,
+        input: input,
+        specialDatOutputPath: specialDatOutputPath,
+        scriptPath: scriptPath,
+        enemyStats: enemyStats,
+        enemyLevel: enemyLevel,
+      );
+
+      // Use properties from the CLIArguments object
+      updateLog(
+          "NieR CLI Arguments: ${cliArgs.command} ${cliArgs.processArgs.join(' ')}",
+          scrollController);
+
+      Clipboard.setData(ClipboardData(text: cliArgs.fullCommand.join(' ')))
+          .then((result) {
+        const snackBar = SnackBar(content: Text('Command copied to clipboard'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }).catchError((e) {
+        updateLog("Error copying to clipboard: $e", scrollController);
+      });
+    } catch (e) {
+      // Handle any errors that might occur during the gathering of CLI arguments
+      updateLog("Error gathering CLI arguments: $e", scrollController);
+    }
+  }
+
+  Future<CLIArguments> gatherCLIArguments({
+    required ScrollController scrollController,
+    required GlobalKey<EnemyImageGridState> enemyImageGridKey,
+    required Map<String, bool> categories,
+    required Map<String, bool> level,
+    required List<String> ignoredModFiles,
+    required String input,
+    required String specialDatOutputPath,
+    required String scriptPath,
+    required double enemyStats,
+    required int enemyLevel,
+  }) async {
+    String tempFilePath;
+    List<String>? selectedImages =
+        enemyImageGridKey.currentState?.selectedImages;
+
+    try {
+      if (selectedImages!.isNotEmpty) {
+        updateLog("Sorting selected enemies... 💬 ", scrollController);
+        var sortedEnemies = await sortSelectedEnemies(selectedImages);
+        var tempFile = await File(
+                '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
+            .create();
+        var buffer = StringBuffer();
+        buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
+        sortedEnemies.forEach((group, enemies) {
+          var enemiesFormatted = enemies.map((e) => '"$e"').join(', ');
+          buffer.writeln('  "$group": [$enemiesFormatted],');
+        });
+        buffer.writeln("};");
+        await tempFile.writeAsString(buffer.toString());
+        tempFilePath = convertAndEscapePath(tempFile.path);
+      } else {
+        tempFilePath = "ALL";
+      }
+    } catch (e) {
+      throw ArgumentError("Error creating temporary file");
+    }
+
+    String bossList = getSelectedBossesArgument();
+    List<String> processArgs = [
+      input,
+      '--output',
+      specialDatOutputPath,
+      tempFilePath,
+      '--bosses',
+      bossList.isNotEmpty ? bossList : 'None',
+      '--bossStats',
+      enemyStats.toString(),
+      '--level=$enemyLevel',
+      ...categories.entries
+          .where((entry) => entry.value)
+          .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
+    ];
+
+    if (level["Only Selected Enemies"] == true) {
+      processArgs.add("--category=onlyselectedenemies");
+    }
+
+    if (level["Only Bosses"] == true) {
+      processArgs.add("--category=onlybosses");
+    }
+
+    if (level["All Enemies"] == true) {
+      processArgs.add("--category=allenemies");
+    }
+
+    if (level["All Enemies without Randomization"] == true) {
+      processArgs.add("--category=onlylevel");
+    }
+
+    if (level["None"] == true) {
+      processArgs.add("--category=default");
+    }
+
+    List<String> ignoredModFiles = FileChange.ignoredFiles;
+    if (ignoredModFiles.isNotEmpty) {
+      String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
+      processArgs.add(ignoreArgs);
+      print("Ignore arguments added: $ignoreArgs");
+    }
+
+    String command = scriptPath;
+    if (Platform.isMacOS || Platform.isLinux) {
+      processArgs.insert(0, scriptPath);
+      command = 'sudo';
+    } else if (Platform.isWindows) {
+      var currentDir = Directory.current.path;
+      command = p.join(currentDir, 'bin/fork/nier_cli.exe');
+    }
+
+    List<String> fullCommand = [scriptPath] + processArgs;
+
+    if (Platform.isMacOS || Platform.isLinux) {
+      fullCommand = [scriptPath] + processArgs;
+    } else if (Platform.isWindows) {
+      fullCommand = [command] + processArgs;
+    }
+
+    return CLIArguments(
+      input: input,
+      specialDatOutputPath: specialDatOutputPath,
+      tempFilePath: tempFilePath,
+      bossList: bossList,
+      processArgs: processArgs,
+      command: command,
+      fullCommand: fullCommand,
     );
   }
 
@@ -1182,9 +1605,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       }
     });
 
-    setState(() {
-      isProcessing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          isProcessing = true;
+        });
+      }
     });
+
+    setState(() {});
 
     setState(() {
       String? stageIdentifier;
@@ -1229,9 +1658,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (stageIdentifier != null) {
         if (!loggedStages.contains(stageIdentifier)) {
-          // Start animation when a new stage begins
-
-          // Customizing the message for better readability
           switch (stageIdentifier) {
             case 'repacking_dat':
               log = "Repacking DAT files initiated.";
@@ -1344,16 +1770,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 child: const Text("Remove"),
                 onPressed: () {
                   if (index != null) {
-                    modFiles.removeAt(index); // Remove a single file
+                    modFiles.removeAt(index);
                   } else {
-                    modFiles.clear(); // Remove all files
+                    modFiles.clear();
                   }
                   onModFilesUpdated(modFiles);
                   Navigator.of(context).pop();
                   if (modFiles.isNotEmpty) {
                     Navigator.of(context).pop();
-                    showModsMessage(modFiles,
-                        onModFilesUpdated); // Reopen with updated list
+                    showModsMessage(modFiles, onModFilesUpdated);
                   } else {
                     Navigator.of(context).pop();
                   }
@@ -1365,17 +1790,27 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       );
     }
 
-    // Only show the mods message dialog if there are mod files
     if (modFiles.isNotEmpty) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Mod Files Detected"),
+            title: const Text("Manage Mod Files"),
             content: SizedBox(
               width: double.maxFinite,
-              child: modFiles.isNotEmpty
-                  ? Scrollbar(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      "Below is a list of detected mod files. Mods listed here will be ignored by the tool during modification. You can remove mods from this list to include them in the tool's operations.",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    child: Scrollbar(
                       thumbVisibility: true,
                       controller: scrollController,
                       child: ListView.builder(
@@ -1385,39 +1820,48 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                         itemCount: modFiles.length,
                         itemBuilder: (BuildContext context, int index) {
                           return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 4.0),
                             elevation: 2.0,
                             child: ListTile(
-                              leading: const Icon(Icons.extension),
+                              leading: const Icon(Icons.extension,
+                                  color: Colors.blueAccent),
                               title: Text(
                                 modFiles[index],
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(221, 243, 240, 34)),
                               ),
-                              subtitle:
-                                  const Text('Ignored during randomization'),
+                              subtitle: const Text(
+                                  'Currently ignored by the tool',
+                                  style: TextStyle(color: Colors.grey)),
                               trailing: IconButton(
-                                icon: const Icon(Icons.delete_outline),
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Colors.redAccent),
+                                tooltip: 'Remove mod from ignore list',
                                 onPressed: () => showRemoveConfirmation(index),
                               ),
                             ),
                           );
                         },
                       ),
-                    )
-                  : const Text('No mod files found'),
+                    ),
+                  ),
+                ],
+              ),
             ),
             actions: <Widget>[
               TextButton(
+                onPressed: () => showRemoveConfirmation(null),
+                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
                 child: const Text("Remove All"),
-                onPressed: () => showRemoveConfirmation(
-                    null), // Null indicates removal of all
               ),
               TextButton(
-                child: const Text("OK"),
                 onPressed: () {
                   onModFilesUpdated(modFiles);
                   Navigator.of(context).pop();
                 },
+                style: TextButton.styleFrom(foregroundColor: Colors.green),
+                child: const Text("OK"),
               ),
             ],
           );
@@ -1428,89 +1872,179 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   void clearLogMessages() {
     setState(() {
-      logMessages.clear(); // Clear the log messages
+      logMessages.clear();
     });
   }
 
+  void updateItemsByType(Type type, bool value) {
+    List<dynamic> allItems = getAllItems();
+    for (var item in allItems.where((item) => item.runtimeType == type)) {
+      categories[item.id] = value;
+    }
+  }
+
   Widget setupCategorySelection() {
-    return Align(
-      alignment: Alignment.topRight,
-      child: Container(
-        padding: const EdgeInsets.all(30),
-        margin: const EdgeInsets.only(top: 16),
-        decoration: BoxDecoration(
-          color: Colors.deepPurpleAccent[800],
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    // Method to create a special checkbox widget
+    Widget specialCheckbox(
+        String title, bool value, void Function(bool?) onChanged) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10.0),
+            Expanded(
               child: Text(
-                "Select Categories for Randomization (at least one must be selected)",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                title,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            ...categories.keys.map((category) {
-              IconData icon = getIconForCategory(category);
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  leading: Icon(icon, color: Colors.white, size: 28),
-                  title: Text(
-                    category,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  trailing: Transform.scale(
-                    scale: 1.2,
-                    child: Checkbox(
-                      value: categories[category],
-                      activeColor: Colors.blue,
-                      checkColor: Colors.white,
-                      onChanged: (bool? newValue) {
-                        setState(() {
-                          if (newValue == true ||
-                              categories.values.where((v) => v).length > 1) {
-                            categories[category] = newValue!;
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'At least one category must be selected.'),
-                                backgroundColor:
-                                    Color.fromARGB(255, 255, 255, 255),
-                              ),
-                            );
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              );
-            }),
+            Checkbox(
+              value: value,
+              onChanged: onChanged,
+              activeColor: Colors.blue,
+              checkColor: Colors.white,
+            ),
           ],
         ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(30),
+      margin: const EdgeInsets.only(top: 16),
+      decoration: BoxDecoration(
+        color: Colors.deepPurpleAccent[800],
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 10.0),
+            child: Text(
+              "Select Categories for Randomization",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          specialCheckbox(
+            "All Quests",
+            selectAllQuests,
+            (newValue) {
+              setState(() {
+                selectAllQuests = newValue!;
+                updateItemsByType(SideQuest, newValue);
+              });
+            },
+          ),
+          specialCheckbox(
+            "All Maps",
+            selectAllMaps,
+            (newValue) {
+              setState(() {
+                selectAllMaps = newValue!;
+                updateItemsByType(MapLocation, newValue);
+              });
+            },
+          ),
+          specialCheckbox(
+            "All Phases",
+            selectAllPhases,
+            (newValue) {
+              setState(() {
+                selectAllPhases = newValue!;
+                updateItemsByType(ScriptingPhase, newValue);
+              });
+            },
+          ),
+          SizedBox(
+            height: 320,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                children: getAllItems().map((item) {
+                  IconData icon = getIconForItem(item);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16.0),
+                      leading: Icon(icon, color: Colors.white, size: 28),
+                      title: Text(
+                        item.description,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      trailing: Transform.scale(
+                        scale: 1.2,
+                        child: Checkbox(
+                          value: categories[item.id] ?? false,
+                          activeColor: Colors.blue,
+                          checkColor: Colors.white,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              categories[item.id] = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData getIconForItem(dynamic item) {
+    if (item is MapLocation) {
+      return Icons.map; // Example icon for MapLocation
+    } else if (item is SideQuest) {
+      return Icons.question_answer; // Placeholder, use appropriate icon
+    } else if (item is ScriptingPhase) {
+      return Icons.timeline; // Example icon for ScriptingPhase
+    }
+    return Icons.help_outline; // Default icon
+  }
+
+  Widget specialCheckbox(String title, bool value, Function(bool?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+          Checkbox(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Colors.blue,
+            checkColor: Colors.white,
+          ),
+        ],
       ),
     );
   }
 
   Widget setupAllCategorySelections() {
     return IntrinsicHeight(
+        child: SingleChildScrollView(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1520,19 +2054,20 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           Expanded(
             child: setupCategorySelection(),
           ),
+          // if (Platform.isWindows)
           Expanded(
             child: setupEnemyStatsSelection(),
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget setupEnemyLevelSelection() {
     return Align(
       alignment: Alignment.topRight,
       child: Container(
-        padding: const EdgeInsets.all(30),
+        padding: const EdgeInsets.only(top: 30, bottom: 5, right: 30, left: 30),
         margin: const EdgeInsets.only(top: 16),
         decoration: BoxDecoration(
           color: Colors.deepPurpleAccent[800],
@@ -1630,6 +2165,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     return selectedBosses.join(',');
   }
 
+  String getSelectedBossesNames() {
+    List<String> selectedBosses = bossList
+        .where((boss) => boss.isSelected)
+        .map((boss) => boss.name)
+        .toList();
+    print("Selected Bosses $selectedBosses");
+    return selectedBosses.join(',');
+  }
+
   Widget setupEnemyStatsSelection() {
     return Container(
       padding: const EdgeInsets.all(30),
@@ -1646,13 +2190,16 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           ),
         ],
       ),
+      /*  child: SingleChildScrollView(
+          primary: true,
+          scrollDirection: Axis.vertical, */
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
             padding: EdgeInsets.only(bottom: 10.0),
             child: Text(
-              "Adjust Boss Stats.(Still experimental)",
+              "Adjust Boss Stats.",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -1680,13 +2227,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                         BoxShadow(
                           color: Color.lerp(const Color.fromARGB(0, 41, 39, 39),
                                   Colors.red, enemyStats / 5.0)!
-                              .withOpacity(
-                                  0.1), // Dynamic glow color with some transparency
-                          blurRadius: 10.0 +
-                              (enemyStats / 5.0) *
-                                  10.0, // Increasing blur radius based on the slider value
-                          spreadRadius: (enemyStats / 5.0) *
-                              5.0, // Spread radius starts from 0 and increases as the value approaches 5
+                              .withOpacity(0.1),
+                          blurRadius: 10.0 + (enemyStats / 5.0) * 10.0,
+                          spreadRadius: (enemyStats / 5.0) * 5.0,
                         ),
                       ],
                     ),
@@ -1715,13 +2258,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               Expanded(
                 child: CheckboxListTile(
                   activeColor: const Color.fromARGB(255, 18, 180, 209),
-                  title: const Text("Select All"),
+                  title: const Text(
+                    "Select All",
+                    textScaler: TextScaler.linear(0.8),
+                  ),
                   value: stats["Select All"],
                   onChanged: (bool? value) {
                     setState(() {
                       stats["Select All"] = value ?? false;
-                      stats["None"] =
-                          !value!; // Set "None" to opposite of "Select All"
+                      stats["None"] = !value!;
                       for (var boss in bossList) {
                         boss.isSelected = value;
                       }
@@ -1734,13 +2279,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 child: CheckboxListTile(
                   tristate: false,
                   activeColor: const Color.fromARGB(255, 209, 18, 18),
-                  title: const Text("None"),
+                  title: const Text("None", textScaler: TextScaler.linear(0.8)),
                   value: stats["None"],
                   onChanged: (bool? value) {
                     setState(() {
                       if (value == true || !stats["Select All"]!) {
-                        stats["None"] =
-                            true; // Keep "None" true if "Select All" is not selected
+                        stats["None"] = true;
                         for (var boss in bossList) {
                           boss.isSelected = false;
                         }
@@ -1754,12 +2298,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             ],
           ),
           SizedBox(
-            height: 320, // Set a fixed height
+            height: 320,
             child: Row(
               children: [
                 const Scrollbar(
                   trackVisibility: true,
-                  child: SizedBox(width: 10), // Minimal width to show scrollbar
+                  child: SizedBox(width: 10),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -1771,7 +2315,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                         final GlobalKey<ShakeAnimationWidgetState> shakeKey =
                             GlobalKey<ShakeAnimationWidgetState>();
 
-                        // Calculate scale factor based on enemyStats and selection status
                         double scale = boss.isSelected
                             ? 1.0 + 0.5 * (enemyStats / 5.0)
                             : 1.0;
@@ -1792,7 +2335,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             ),
                           ),
                           title: Text(
-                            boss.name, // Display boss name here
+                            boss.name,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 16),
                           ),
@@ -1801,7 +2344,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             onChanged: (bool? newValue) {
                               setState(() {
                                 boss.isSelected = newValue ?? false;
-                                // Update "Select All" and "None" based on current selections
                                 stats["Select All"] =
                                     bossList.every((b) => b.isSelected);
                                 stats["None"] =
@@ -1825,57 +2367,67 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     );
   }
 
-  IconData getIconForCategory(String category) {
-    switch (category) {
-      case "All Quests":
-        return Icons.announcement_rounded;
-      case "All Maps":
-        return Icons.map;
-      case "All Phases":
-        return Icons.loop;
-      case "Ignore DLC":
-        return Icons.image_not_supported_rounded;
+  Future<bool> loadPathsFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? input = prefs.getString('input');
+    String? specialDatOutputPath = prefs.getString('output');
+    String? scriptPath = prefs.getString('scriptPath');
+    bool savePaths = prefs.getBool('savePaths') ?? false;
+    setState(() {
+      this.input = input ?? '';
+      this.specialDatOutputPath = specialDatOutputPath ?? '';
+      this.scriptPath = scriptPath ?? '';
+      this.savePaths = savePaths;
+    });
+
+    return input != null || specialDatOutputPath != null || scriptPath != null;
+  }
+
+  Future<void> clearPathsFromSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('input');
+    await prefs.remove('output');
+    await prefs.remove('scriptPath');
+    await prefs.setBool('savePaths', false);
+  }
+
+  IconData getIconForLevel(String levelEnemy) {
+    switch (levelEnemy) {
+      case "All Enemies":
+        return Icons.emoji_events;
+      case "All Enemies without Randomization":
+        return Icons.emoji_flags_outlined;
+      case "Only Bosses":
+        return Icons.emoji_emotions_rounded;
+      case "Only Selected Enemies":
+        return Icons.radio_button_checked;
+      case "None":
+        return Icons.not_interested;
       default:
         return Icons.error;
     }
   }
-}
 
-IconData getIconForLevel(String levelEnemy) {
-  switch (levelEnemy) {
-    case "All Enemies":
-      return Icons.emoji_events;
-    case "All Enemies without Randomization":
-      return Icons.emoji_flags_outlined;
-    case "Only Bosses":
-      return Icons.emoji_emotions_rounded;
-    case "Only Selected Enemies":
-      return Icons.radio_button_checked;
-    case "None":
-      return Icons.not_interested;
-    default:
-      return Icons.error;
-  }
-}
+  void onNewLogMessage(BuildContext context, String newMessage) {
+    if (newMessage.toLowerCase().contains('error')) {
+      log(newMessage);
 
-void onNewLogMessage(BuildContext context, String newMessage) {
-  if (newMessage.toLowerCase().contains('error')) {
-    log(newMessage); // Writing the error to the log file
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ' $newMessage',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ' $newMessage',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            backgroundColor: const Color.fromARGB(255, 255, 81, 81),
           ),
-          backgroundColor: const Color.fromARGB(255, 255, 81, 81),
-        ),
-      );
-    });
+        );
+      });
+    }
   }
 }

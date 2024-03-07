@@ -114,8 +114,8 @@ int traverseDirectory(
     for (var entity in directory.listSync()) {
       print('Processing entity: ${entity.path}');
       if (entity is File && entity.path.endsWith('.xml')) {
-        processXmlFile(entity, sortedEnemyData, enemyLevel, enemyCategory,
-            important_ids); // Use sortedEnemyData here
+        processXmlFile(
+            entity, sortedEnemyData, enemyLevel, enemyCategory, important_ids);
         localFileCount++;
       } else if (entity is Directory) {
         localFileCount += traverseDirectory(
@@ -257,7 +257,6 @@ Future<void> processElement(
   }
 }
 
-// Helper function to find 'value' element with a specific 'name'
 xml.XmlElement? findValueElementWithName(xml.XmlElement element, String name) {
   var nameElements = element.findElements('name');
   if (nameElements.isNotEmpty) {
@@ -267,7 +266,6 @@ xml.XmlElement? findValueElementWithName(xml.XmlElement element, String name) {
     }
   }
 
-  // Search within nested 'value' elements
   for (var nestedValue in element.findElements('value')) {
     var result = findValueElementWithName(nestedValue, name);
     if (result != null) {
@@ -458,7 +456,6 @@ dynamic xmlToJson(xml.XmlNode node) {
   if (node is xml.XmlElement) {
     final Map<String, dynamic> jsonMap = {};
 
-    // Handle attributes
     if (node.attributes.isNotEmpty) {
       jsonMap['@attributes'] = {
         for (var a in node.attributes) a.name.local: a.value
@@ -470,7 +467,6 @@ dynamic xmlToJson(xml.XmlNode node) {
       if (child is xml.XmlElement) {
         var childJson = xmlToJson(child);
         if (jsonMap.containsKey(child.name.local)) {
-          // If the same element is repeated, create a list
           if (jsonMap[child.name.local] is! List) {
             jsonMap[child.name.local] = [jsonMap[child.name.local]];
           }
@@ -495,13 +491,11 @@ int compareFilePaths(String a, String b) {
   var aParts = a.split('/');
   var bParts = b.split('/');
 
-  // Compare folder names
   int folderCompare = aParts[0].compareTo(bParts[0]);
   if (folderCompare != 0) {
     return folderCompare;
   }
 
-  // If folder names are the same, compare file names
   return aParts[1].compareTo(bParts[1]);
 }
 
@@ -518,7 +512,7 @@ String? findGroupForEmNumber(
 String getRandomEmNumberFromGroup(
     String group, Map<String, List<String>> sortedEnemyData) {
   var groupList = List.from(sortedEnemyData[group]!);
-  groupList.shuffle(); // Shuffle the list for better randomness
+  groupList.shuffle(); // Shuffle for better randomness
   var selected = groupList[random.nextInt(groupList.length)];
   return selected;
 }

@@ -4,10 +4,8 @@ import 'package:NAER/nier_enemy_data/values_data/nier_enemy_setType_map.dart'
     as em_number_values_map;
 
 void setSpecificValues(xml.XmlElement objIdElement, String newEmNumber) {
-  // Retrieve the values from the map
   var values = em_number_values_map.emNumberValues[newEmNumber];
 
-  // If no values are found, remove elements and exit
   if (values == null) {
     removeSetTypeAndSetRtnAndSetFlag(objIdElement);
     return;
@@ -52,7 +50,6 @@ void removeSetTypeAndSetRtnAndSetFlag(xml.XmlElement objIdElement) {
   // Elements to remove
   List<String> elementsToRemove = ['setType', 'setRtn', 'setFlag'];
 
-  // Using the generalized function to remove specific child elements
   XmlElementHandler.removeSpecifiedChildElements(objIdElement, elementsToRemove,
       'value' // This specifies that removal should occur within the 'value' parent element
       );

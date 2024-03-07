@@ -26,6 +26,11 @@ dependencies:
   uuid: ^4.2.2
   xml: ^6.2.2
   tuple: ^2.0.2
+  desktop_drop: ^0.4.4
+  shared_preferences: ^2.2.2
+  provider: ^6.1.2
+  fluttertoast: ^8.2.4
+  crypto: ^3.0.3
 
 
 
@@ -37,6 +42,7 @@ flutter:
     - assets/naer_icons/icon.png
     - assets/naer_backgrounds/error_background.png
     - assets/naer_backgrounds/naer_background.png
+    - assets/mods/
   uses-material-design: true
   fonts:
     - family: MaterialIcons
