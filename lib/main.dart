@@ -102,15 +102,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   String convertAndEscapePath(String path) {
-    print("Path before function: $path");
-
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       if (path.contains(' ') ||
           path.contains('(') ||
           path.contains(')') ||
           path.contains('&') ||
           path.contains('\\')) {
-        print("Path contains special characters but not modifying it: $path");
         return path;
       }
     }
@@ -141,11 +138,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   void initState() {
     super.initState();
     FileChange.loadChanges();
-    FileChange.loadIgnoredFiles().then((_) {
-      print('Ignored files loaded successfully.');
-    }).catchError((error) {
-      print('Failed to load ignored files: $error');
-    });
+    FileChange.loadIgnoredFiles().then((_) {}).catchError((error) {});
     _buttonFuture = _navigateButton(context);
     updateItemsByType(SideQuest, true);
     updateItemsByType(MapLocation, true);
@@ -676,7 +669,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (result != null && result.files.single.path != null) {
       String scriptFile = result.files.single.path!;
-      print(scriptFile);
 
       bool isValidCli = await _isValidCliFile(scriptFile);
       if (isValidCli) {
@@ -1446,7 +1438,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         });
         throw ArgumentError("Nier CLI path is missing.");
       }
-      // Await the result from gatherCLIArguments
+
       CLIArguments cliArgs = await gatherCLIArguments(
         scrollController: scrollController,
         enemyImageGridKey: enemyImageGridKey,
@@ -1460,7 +1452,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         enemyLevel: enemyLevel,
       );
 
-      // Use properties from the CLIArguments object
       updateLog(
           "NieR CLI Arguments: ${cliArgs.command} ${cliArgs.processArgs.join(' ')}",
           scrollController);
@@ -1473,7 +1464,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         updateLog("Error copying to clipboard: $e", scrollController);
       });
     } catch (e) {
-      // Handle any errors that might occur during the gathering of CLI arguments
       updateLog("Error gathering CLI arguments: $e", scrollController);
     }
   }
@@ -1884,7 +1874,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Widget setupCategorySelection() {
-    // Method to create a special checkbox widget
     Widget specialCheckbox(
         String title, bool value, void Function(bool?) onChanged) {
       return Padding(
@@ -2011,13 +2000,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   IconData getIconForItem(dynamic item) {
     if (item is MapLocation) {
-      return Icons.map; // Example icon for MapLocation
+      return Icons.map;
     } else if (item is SideQuest) {
-      return Icons.question_answer; // Placeholder, use appropriate icon
+      return Icons.question_answer;
     } else if (item is ScriptingPhase) {
-      return Icons.timeline; // Example icon for ScriptingPhase
+      return Icons.timeline;
     }
-    return Icons.help_outline; // Default icon
+    return Icons.help_outline;
   }
 
   Widget specialCheckbox(String title, bool value, Function(bool?) onChanged) {
@@ -2161,7 +2150,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         .where((boss) => boss.isSelected)
         .map((boss) => boss.emIdentifiers)
         .toList();
-    print("Selected Bosses $selectedBosses");
     return selectedBosses.join(',');
   }
 
@@ -2170,7 +2158,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         .where((boss) => boss.isSelected)
         .map((boss) => boss.name)
         .toList();
-    print("Selected Bosses $selectedBosses");
     return selectedBosses.join(',');
   }
 
@@ -2190,9 +2177,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           ),
         ],
       ),
-      /*  child: SingleChildScrollView(
-          primary: true,
-          scrollDirection: Axis.vertical, */
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
