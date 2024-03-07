@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as p;
 
 class ModStateManager extends ChangeNotifier {
-  Set<String> _installedModsIds = Set();
+  Set<String> _installedModsIds = {};
   List<Mod> _mods = [];
   List<Mod> get mods => _mods;
 

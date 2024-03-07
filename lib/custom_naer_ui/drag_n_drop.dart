@@ -10,8 +10,7 @@ import 'package:provider/provider.dart';
 class DragDropWidget extends StatefulWidget {
   final CLIArguments cliArguments;
 
-  const DragDropWidget({Key? key, required this.cliArguments})
-      : super(key: key);
+  const DragDropWidget({super.key, required this.cliArguments});
 
   @override
   _DragDropWidgetState createState() => _DragDropWidgetState();

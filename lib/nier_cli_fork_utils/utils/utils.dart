@@ -400,56 +400,6 @@ extension StringNullTrim on String {
   String trimNull() => replaceAll(RegExp("\x00+\$"), "");
 }
 
-void openInVsCode(String path) {
-  if (Platform.isWindows) {
-    Process.run("code", [path], runInShell: true);
-  } else if (Platform.isMacOS) {
-    Process.run("open", ["-a", "Visual Studio Code", path], runInShell: true);
-  } else if (Platform.isLinux) {
-    Process.run("code", [path], runInShell: true);
-  } else {
-    throw Exception("Unsupported platform");
-  }
-}
-
-/* Future<String?> findDttDir(String extractedDatDir, String datName) async {
-  var parentDir = dirname(extractedDatDir);
-  var dttDir = join(parentDir, "$datName.dtt");
-  if (!await Directory(dttDir).exists()) {
-    // try finding DTT file and extract it
-    var dttPath = join(dirname(parentDir), "$datName.dtt");
-    if (!await File(dttPath).exists())
-      return null;
-    var dttExtractDir = join(dirname(dttPath), datExtractSubDir, basename(dttPath));
-    print("Extracting DTT file to $dttExtractDir");
-    await extractDatFiles(dttPath, dttExtractDir);
-    if (!await Directory(dttDir).exists())
-      return null;
-  }
-  return dttDir;
-}
-
-Future<String?> findWtpPath(String datDir, String wtpName) async {
-  var wtpPath = join(datDir, wtpName);
-  if (!await FileSystemEntity.isFile(wtpPath)) {
-    var dttName = basenameWithoutExtension(datDir);
-    var dttDir = await findDttDir(datDir, dttName);
-    if (dttDir == null) {
-      dttName = basenameWithoutExtension(datDir);
-      dttDir = await findDttDir(datDir, dttName);
-      if (dttDir == null)
-        throw FileHandlingException("Could not find WTP file for $wtpName");
-      else
-        wtpPath = join(dttDir, wtpName);
-    } else {
-      wtpPath = join(dttDir, wtpName);
-    }
-  }
-  if (!await FileSystemEntity.isFile(wtpPath))
-    return null;
-  return wtpPath;
-} */
-
 const _assetsDirName = "assets";
 const _assetsDirSubDirs = {"vgmStream"};
 String? _assetsDir;

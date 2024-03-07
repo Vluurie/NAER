@@ -97,11 +97,11 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
         height: _isDraggingOver ? 220 : 200,
         decoration: BoxDecoration(
           color: _isDraggingOver
-              ? Color.fromARGB(134, 25, 224, 250).withOpacity(0.3)
+              ? const Color.fromARGB(134, 25, 224, 250).withOpacity(0.3)
               : Colors.grey.withOpacity(0.2),
           border: Border.all(
             color: _isDraggingOver
-                ? Color.fromARGB(255, 33, 219, 243)
+                ? const Color.fromARGB(255, 33, 219, 243)
                 : Colors.grey,
             width: _isDraggingOver ? 4 : 1,
           ),
@@ -115,7 +115,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
             style: TextStyle(
               fontSize: 25,
               color: _isDraggingOver
-                  ? Color.fromARGB(255, 21, 219, 47)
+                  ? const Color.fromARGB(255, 21, 219, 47)
                   : const Color.fromARGB(255, 255, 255, 255),
             ),
           ),

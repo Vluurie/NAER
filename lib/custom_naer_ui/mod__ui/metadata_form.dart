@@ -143,7 +143,7 @@ class _MetadataFormState extends State<MetadataForm> {
                   ElevatedButton(
                     onPressed: _pickImage,
                     style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context)
+                      backgroundColor: Theme.of(context)
                           .primaryColor, // Use the primary theme color
                     ),
                     child: Text(_selectedImagePath == null
@@ -356,7 +356,6 @@ class _MetadataFormState extends State<MetadataForm> {
     final modDirectory = Directory(modDirectoryPath);
 
     if (!await modDirectory.exists()) {
-      ;
       await modDirectory.create(recursive: true);
     } else {}
 
