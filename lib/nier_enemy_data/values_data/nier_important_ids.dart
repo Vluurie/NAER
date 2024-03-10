@@ -7,7 +7,18 @@ const Map<String, List<String>> important_ids = {
     '0xa85d4ceb',
     '0xa0f02852',
     '0x4337e41b',
-    '0x1bd59060'
+    '0x1bd59060',
+    '0xfc9f8dd9',
+    '0x851d3816',
+    '0x9621fd68',
+    '0x93d9f22b',
+    '0xfdbf3011',
+    '0xd668539d',
+    '0x9694a602',
+    '0xaf899d63',
+    '0xaf6ec127',
+    '0x8aa4e5a2',
+    '0x7164ad39'
   ],
   "EnemySetArea": [
     '0xf1b8d119',

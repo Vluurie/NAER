@@ -200,7 +200,6 @@ Future<void> main(List<String> arguments) async {
   print("Processed ${processedFiles.length} files "
       "in ${timeStr(tD)} "
       ":D");
-  print("Calling enemy find script...");
   findEnemiesInDirectory(
       currentDir, sortedEnemiesPath, enemyLevel, enemyCategory);
   if (bossList.isNotEmpty && !bossList.contains('None')) {
@@ -225,28 +224,34 @@ Future<void> main(List<String> arguments) async {
   }
 
 // Repack & Export DAT files
+  // Assuming bossList is now a List<String> of identifiers after modification
   for (var datFolder in datFolders) {
     var baseNameWithExtension = basename(datFolder);
+    print(
+        "Processing DAT Folder: $datFolder with base name: $baseNameWithExtension");
 
     bool processFile = false;
 
-    bossList = bossList
-        .map((criteria) => criteria.replaceAll('[', '').replaceAll(']', ''))
-        .toList();
-
     if (bossList.isNotEmpty && !bossList.contains('None')) {
       if (baseNameWithExtension.startsWith('em')) {
-        for (var criteria in bossList) {
+        var cleanedBossList = bossList
+            .map((criteria) =>
+                criteria.replaceAll('[', '').replaceAll(']', '').trim())
+            .toList();
+        for (var criteria in cleanedBossList) {
           if (baseNameWithExtension.contains(criteria)) {
+            print("Match found with criteria: $criteria - processed = true");
             processFile = true;
-            break;
+            continue;
           }
         }
       }
+    } else {
+      print("Skipping processing due to Boss List conditions.");
     }
 
     var baseNameWithoutExtension = basenameWithoutExtension(datFolder);
-    if (!baseNameWithExtension.startsWith('em')) {
+    if (!baseNameWithExtension.startsWith('em') && !processFile) {
       if (!fileManager.shouldProcessFile(baseNameWithoutExtension)) {
         continue;
       } else {

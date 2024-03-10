@@ -3,7 +3,7 @@
 import 'dart:io';
 
 Future<void> findBossStatFiles(
-    String directoryPath, List<String> bossList, double bossStats) async {
+    String directoryPath, List<dynamic> bossList, double bossStats) async {
   var directory = Directory(directoryPath);
 
   if (!await directory.exists()) {
@@ -11,16 +11,33 @@ Future<void> findBossStatFiles(
     return;
   }
 
+  var flattenedBossList = flattenList(bossList);
+
+  // Define a pattern for directories of interest
+  String directoryPattern = '\\nier2blender_extracted\\';
+
   await for (var entity in directory.list(recursive: true)) {
-    if (entity is Directory &&
-        entity.path.contains("_extracted\\em\\nier2blender_extracted\\")) {
-      await for (var file in entity.list()) {
-        if (file is File && file.path.contains('ExpInfo')) {
-          await processCsvFile(file, bossList, bossStats);
-        }
-      }
+    if (entity is File &&
+        entity.path.contains(directoryPattern) &&
+        entity.path.contains('ExpInfo')) {
+      await processCsvFile(entity, flattenedBossList, bossStats);
     }
   }
+}
+
+// Helper function to flatten the list
+List<String> flattenList(List<dynamic> list) {
+  var flattenedList = <String>[];
+  for (var element in list) {
+    if (element is List) {
+      flattenedList.addAll(flattenList(element));
+    } else if (element is String) {
+      flattenedList.add(element);
+    } else {
+      flattenedList.add(element.toString());
+    }
+  }
+  return flattenedList;
 }
 
 Future<void> processCsvFile(
@@ -42,7 +59,7 @@ Future<void> processCsvFile(
 
 String modifyLine(String line, double bossStats) {
   const double maxFactorColumn2 = 2.30;
-  const double maxFactorColumn3 = 1.75;
+  const double maxFactorColumn3 = 1.90;
 
   var values = line.split(',');
 

@@ -19,9 +19,14 @@ class ModInstallHandler {
   });
 
   Future<String> computeFileHash(File file) async {
-    var contents = await file.readAsBytes();
-    var digest = sha256.convert(contents);
-    return digest.toString();
+    try {
+      var contents = await file.readAsBytes();
+      var digest = sha256.convert(contents);
+      return digest.toString();
+    } catch (e) {
+      print("Error computing file hash: $e");
+      return "ERROR_COMPUTING_HASH";
+    }
   }
 
   Future<void> storeFileHashInPreferences(
@@ -106,40 +111,6 @@ class ModInstallHandler {
     final metadataPath = path.join(directoryPath, 'mod_metadata.json');
     print("Found metadata at $metadataPath");
     return metadataPath;
-  }
-
-  Future<void> markFilesRandomized(
-      String modId, List<String> randomizedFilesPaths) async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
-    final String metadataPath = path.join(directoryPath, 'mod_metadata.json');
-    final File metadataFile = File(metadataPath);
-
-    if (await metadataFile.exists()) {
-      String metadataContent = await metadataFile.readAsString();
-      Map<String, dynamic> metadata = jsonDecode(metadataContent);
-
-      List<dynamic> mods = metadata['mods'];
-      for (var mod in mods) {
-        if (mod['id'] == modId) {
-          List<dynamic> files = mod['files'];
-          for (var file in files) {
-            String adjustedFilePath = file['path'].contains('/')
-                ? file['path'].substring(file['path'].indexOf('/') + 1)
-                : file['path'];
-            String fullPath =
-                path.join(cliArguments.specialDatOutputPath, adjustedFilePath);
-            String fileHash = await computeFileHash(File(fullPath));
-            file['hash'] = fileHash;
-            file['isRandomized'] = randomizedFilesPaths.contains(fullPath);
-            file['isCopied'] = !randomizedFilesPaths.contains(fullPath);
-          }
-        }
-      }
-
-      await metadataFile.writeAsString(jsonEncode(metadata),
-          mode: FileMode.write);
-    }
   }
 
   Future<List<String>> verifyModFiles(String modId) async {
@@ -235,6 +206,26 @@ class ModInstallHandler {
       }
     }
     return modifiedPaths;
+  }
+
+  Future<void> saveHashesForModFiles(String modId) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> filePaths = await extractFilePathsFromMetadata(modId);
+
+    for (String filePath in filePaths) {
+      String installPath = await createModInstallPath(filePath);
+      File fileToCheck = File(installPath);
+      if (await fileToCheck.exists()) {
+        String currentHash = await computeFileHash(fileToCheck);
+        String hashKey = 'hash_${modId}_$filePath';
+        await prefs.setString(hashKey, currentHash);
+        print("Saved hash for file: $filePath");
+      } else {
+        print(
+            "File does not exist at install path: $installPath, skipping hash saving.");
+      }
+    }
+    print("Completed saving hashes for modId: $modId.");
   }
 
   Future<bool> deleteModMetadata(String modId) async {

@@ -30,12 +30,15 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     if (MediaQuery.of(context).size.width < 600) {
       crossAxisCount = 3;
       gridHeight = 350.0;
-    } else if (MediaQuery.of(context).size.width < 900) {
-      crossAxisCount = 5;
+    } else if (MediaQuery.of(context).size.width < 1100) {
+      crossAxisCount = 3;
       gridHeight = 450.0;
-    } else {
-      crossAxisCount = 6;
+    } else if (MediaQuery.of(context).size.width < 1500) {
+      crossAxisCount = 5;
       gridHeight = 550.0;
+    } else {
+      crossAxisCount = 9;
+      gridHeight = 800.0;
     }
 
     Widget headerSection = Padding(

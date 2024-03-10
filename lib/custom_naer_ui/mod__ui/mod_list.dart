@@ -1,10 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/handle_mod_install.dart';
 import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/nier_enemy_data/boss_data/nier_boss_class_list.dart';
 import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
@@ -19,6 +21,7 @@ class Mod {
   final String description;
   final List<Map<String, String>> files;
   final String? imagePath;
+  final bool? canBeRandomized;
 
   Mod({
     required this.id,
@@ -28,6 +31,7 @@ class Mod {
     required this.description,
     required this.files,
     this.imagePath,
+    this.canBeRandomized,
   });
 
   factory Mod.fromJson(Map<String, dynamic> json) {
@@ -45,6 +49,7 @@ class Mod {
       description: json['description'],
       files: parsedFiles,
       imagePath: json['imagePath'],
+      canBeRandomized: json['randomized'],
     );
   }
 }
@@ -75,6 +80,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   double modLoaderWidgetOpacity = 0.0;
   bool shouldShowMissingFilesSnackbar = false;
   final Map<String, bool> _installingMods = {};
+  final Map<int, bool> _loadingMap = {};
 
   @override
   void initState() {
@@ -123,30 +129,50 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   }
 
   void toggleInstallUninstallMod(int index) async {
-    Mod mod = widget.mods[index];
-    final ModInstallHandler modInstallHandler = ModInstallHandler(
+    setState(() {
+      _loadingMap[index] = true; // Mark as loading
+    });
+
+    try {
+      Mod mod = widget.mods[index];
+      final ModInstallHandler modInstallHandler = ModInstallHandler(
         cliArguments: widget.cliArguments,
-        modStateManager: widget.modStateManager);
+        modStateManager: widget.modStateManager,
+      );
 
-    if (widget.modStateManager.isModInstalled(mod.id)) {
-      // Call to uninstall the mod
-      await modInstallHandler.uninstallMod(mod.id);
-      widget.modStateManager.uninstallMod(mod.id);
-    } else {
-      await modInstallHandler.copyModToInstallPath(mod.id);
-      widget.modStateManager.installMod(mod.id);
-      await modInstallHandler.printAllSharedPreferences();
+      if (widget.modStateManager.isModInstalled(mod.id)) {
+        // Uninstall the mod
+        await modInstallHandler.uninstallMod(mod.id);
+        widget.modStateManager.uninstallMod(mod.id);
+      } else {
+        // Install the mod
+        await modInstallHandler.copyModToInstallPath(mod.id);
+        widget.modStateManager.installMod(mod.id);
+        await modInstallHandler.printAllSharedPreferences();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(widget.modStateManager.isModInstalled(mod.id)
+              ? 'Mod installed.'
+              : 'Mod uninstalled.'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (error) {
+      // Handle any errors that occur during install/uninstall
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $error'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      // Always stop loading, regardless of the operation's outcome
+      setState(() {
+        _loadingMap[index] = false;
+      });
     }
-
-    setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(!widget.modStateManager.isModInstalled(mod.id)
-            ? 'Mod uninstalled.'
-            : 'Mod installed.'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   Future<void> verifyAllModFiles() async {
@@ -192,6 +218,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       cliArguments: widget.cliArguments,
       modStateManager: widget.modStateManager,
     );
+
     return Consumer<ModStateManager>(
         builder: (context, modStateManager, child) {
       final modStateManager = Provider.of<ModStateManager>(context);
@@ -201,7 +228,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         itemBuilder: (context, index) {
           Mod mod = mods[index];
           bool modIsInstalled = modStateManager.isModInstalled(mod.id);
-
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             elevation: 10,
@@ -242,7 +268,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                             },
                           )
                         : Image.asset(
-                            'assets/mods/mod${mod.id}.png',
+                            'assets/mods/mod${mod.id}.gif',
                             width: 150,
                             height: 150,
                             fit: BoxFit.cover,
@@ -281,26 +307,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                   Wrap(
                     spacing: 12,
                     children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          modIsInstalled
-                              ? Icons.check_circle_outline
-                              : Icons.download,
-                          color: modIsInstalled
-                              ? const Color.fromARGB(255, 76, 163, 175)
-                              : Colors.grey,
-                        ),
-                        onPressed: () => toggleInstallUninstallMod(index),
-                        tooltip: modIsInstalled
-                            ? 'Uninstall Mod'
-                            : 'Only Install Mod',
-                      ),
-                      IconButton(
-                        icon:
-                            const Icon(Icons.delete_outline, color: Colors.red),
-                        onPressed: () => toggleInstallUninstallMod(index),
-                        tooltip: 'Uninstall Mod',
-                      ),
+                      _iconButton(index, modIsInstalled),
+                      _iconUninstallButton(index, modIsInstalled),
                       IconButton(
                         icon:
                             const Icon(Icons.delete_forever, color: Colors.red),
@@ -333,6 +341,37 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         },
       );
     });
+  }
+
+  _iconButton(index, bool modIsInstalled) {
+    bool isLoading = _loadingMap[index] ?? false;
+
+    return IconButton(
+      icon: isLoading
+          ? const CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            )
+          : Icon(
+              modIsInstalled ? Icons.check_circle_outline : Icons.download,
+              color: modIsInstalled
+                  ? const Color.fromARGB(255, 76, 163, 175)
+                  : Colors.grey,
+            ),
+      onPressed: isLoading ? null : () => toggleInstallUninstallMod(index),
+      tooltip: modIsInstalled ? 'Uninstall Mod' : 'Only Install Mod',
+    );
+  }
+
+  _iconUninstallButton(int index, bool isInstalled) {
+    if (!isInstalled) {
+      return const SizedBox.shrink();
+    }
+    return IconButton(
+      icon: const Icon(Icons.delete_outline, color: Colors.red),
+      onPressed: () => toggleInstallUninstallMod(index),
+      tooltip: 'Uninstall Mod',
+    );
   }
 
   Future<bool?> showConditionalPopup(BuildContext context, String mod) async {
@@ -401,130 +440,204 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
     final logState = Provider.of<LogState>(context, listen: false);
     final modStateManager =
         Provider.of<ModStateManager>(context, listen: false);
-    Mod selectedMod = widget.mods[modIndex];
-    String modId = selectedMod.id;
+    var mods = widget.modStateManager.mods;
     final ModInstallHandler modInstallHandler = ModInstallHandler(
-        cliArguments: widget.cliArguments,
-        modStateManager: widget.modStateManager);
+      cliArguments: widget.cliArguments,
+      modStateManager: widget.modStateManager,
+    );
+    Mod selectedMod = mods[modIndex];
+    String modId = selectedMod.id;
 
-    setState(() {
-      _installingMods[modId] = true;
-    });
+    setState(() => _installingMods[modId] = true);
 
     if (!Platform.isWindows ||
         widget.cliArguments.input.isEmpty ||
         widget.cliArguments.specialDatOutputPath.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(!Platform.isWindows
               ? 'This feature is currently only supported on Windows.'
-              : 'Please select both input and output directory first on the first page!'),
-        ),
-      );
-      setState(() => _installingMods[modId] = false);
-      return;
-    }
-
-    if (modIndex < 0 || modIndex >= widget.mods.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid mod selection.')),
-      );
+              : 'Please select both input and output directory first!')));
       setState(() => _installingMods[modId] = false);
       return;
     }
 
     if (isInstalled) {
-      try {
-        await modInstallHandler.uninstallMod(selectedMod.id);
-        modStateManager.uninstallMod(selectedMod.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Mod uninstalled successfully!")),
-        );
-      } catch (e) {
-        logState.addLog("Exception caught while uninstalling mod: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Exception caught: $e")),
-        );
-      } finally {
-        setState(() => _installingMods[modId] = false);
-      }
+      await _uninstallMod(selectedMod, modStateManager, logState);
+      setState(() => _installingMods[modId] = false);
       return;
     }
 
+    bool success =
+        await _processModFiles(selectedMod, modInstallHandler, logState);
+
+    if (success) {
+      modStateManager.installMod(selectedMod.id);
+      const snackBar = SnackBar(
+        content: Text("Mod installed and randomized successfully!"),
+        backgroundColor: Colors.green,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      const snackBar = SnackBar(
+        content: Text("Error processing mod file"),
+        backgroundColor: Colors.red,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
+    setState(() => _installingMods[modId] = false);
+  }
+
+  Future<bool> _processModFiles(Mod selectedMod,
+      ModInstallHandler modInstallHandler, LogState logState) async {
     var currentDir = Directory.current.path;
-    String command = p.join(currentDir, 'bin', 'fork', 'nier_cli.exe');
-    bool success = true;
-    List<String> randomizedFilesPaths = [];
-    List<String> copiedFilesPaths = [];
+    var command = p.join(currentDir, 'bin', 'fork', 'nier_cli.exe');
+    Set<String> uniqueDirectories = {};
+    List<String> filesToHash = [];
 
     for (var file in selectedMod.files) {
       String filePath = file['path'] ?? '';
       String createdPath =
           "${await FileChange.ensureSettingsDirectory()}/Modpackage/$filePath";
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
-      String directoryPath = p.dirname(createdPath);
-      List<String> arguments = List.from(widget.cliArguments.processArgs);
-      arguments[0] = directoryPath;
-      bool shouldProcess = questOptions.contains(baseNameWithoutExtension) ||
-          mapOptions.contains(baseNameWithoutExtension) ||
-          phaseOptions.contains(baseNameWithoutExtension);
-      String targetPath =
-          await modInstallHandler.createModInstallPath(filePath);
+
+      bool shouldProcess = _shouldProcessFile(baseNameWithoutExtension,
+          questOptions, mapOptions, phaseOptions, bossList);
 
       if (!shouldProcess) {
-        // Copy action for non-randomized files
-        await Directory(p.dirname(targetPath)).create(recursive: true);
-        try {
-          await File(createdPath).copy(targetPath);
-          copiedFilesPaths.add(targetPath);
-          String fileHash =
-              await modInstallHandler.computeFileHash(File(targetPath));
-          await modInstallHandler.storeFileHashInPreferences(
-              modId, targetPath, fileHash);
-        } catch (e) {
-          logState.addLog("Failed to copy file: $e");
+        bool copySuccess = await _copyFile(
+            logState, createdPath, filePath, modInstallHandler, selectedMod.id);
+        if (!copySuccess) {
+          return false;
         }
-        continue;
+      } else {
+        uniqueDirectories.add(p.dirname(createdPath));
       }
+    }
 
-      // Randomization process
-      try {
-        Process process =
-            await Process.start(command, arguments, runInShell: true);
-        await for (var output in process.stdout.transform(utf8.decoder)) {
-          logState.addLog(output);
-        }
-        await for (var error in process.stderr.transform(utf8.decoder)) {
-          logState.addLog(error);
-        }
-        int exitCode = await process.exitCode;
-        if (exitCode == 0) {
-          randomizedFilesPaths.add(targetPath);
-          File randomizedFile = File(targetPath);
-          String fileHash = await modInstallHandler
-              .computeFileHash(randomizedFile); // Compute hash for the File
-          await modInstallHandler.storeFileHashInPreferences(
-              modId, filePath, fileHash); // Store the hash
-        } else {
-          success = false;
-        }
-      } catch (e) {
-        success = false;
-        logState.addLog("Error processing file: $e");
+    bool success = true;
+    for (String dirPath in uniqueDirectories) {
+      List<String> arguments = List.from(widget.cliArguments.processArgs);
+      arguments[0] = dirPath;
+      print("$command $arguments");
+      success =
+          await _executeCLICommand(logState, command, arguments) && success;
+      if (!success) {
+        logState.addLog("Failed to process directory: $dirPath");
+        break;
       }
     }
 
     if (success) {
-      await modInstallHandler.markFilesRandomized(modId, randomizedFilesPaths);
-      await modInstallHandler.printAllSharedPreferences();
-      modStateManager.installMod(selectedMod.id);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Mod installed and randomized successfully!")));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error processing mod file")));
+      // Compute and store the hashes only after all other processes are finished
+      for (var file in selectedMod.files) {
+        String originalFilePath = file['path'] ?? '';
+
+        // Normalize the path by removing the modId directory and any './'
+        String installedFilePath = p.join(
+            widget.cliArguments.specialDatOutputPath,
+            p.normalize(p.joinAll(p.split(originalFilePath)..removeAt(0))));
+
+        if (await File(installedFilePath).exists()) {
+          filesToHash.add(installedFilePath);
+        } else {
+          logState.addLog(
+              "File not found at the installed path: $installedFilePath");
+        }
+      }
+
+      // After all files are processed, compute and store the hashes
+      for (String filePath in filesToHash) {
+        String fileHash =
+            await modInstallHandler.computeFileHash(File(filePath));
+        await modInstallHandler.storeFileHashInPreferences(
+            selectedMod.id, filePath, fileHash);
+      }
     }
 
-    setState(() => _installingMods[modId] = false);
+    return success;
+  }
+
+  Future<bool> _executeCLICommand(
+      LogState logState, String command, List<String> arguments) async {
+    try {
+      Process process =
+          await Process.start(command, arguments, runInShell: true);
+      await for (var output in process.stdout.transform(utf8.decoder)) {
+        logState.addLog(output);
+      }
+      await for (var error in process.stderr.transform(utf8.decoder)) {
+        logState.addLog(error);
+      }
+      int exitCode = await process.exitCode;
+      if (exitCode != 0) {
+        logState.addLog("CLI command exited with code $exitCode");
+        return false;
+      }
+      return true;
+    } catch (e) {
+      logState.addLog("Error executing CLI command: $e");
+      return false;
+    }
+  }
+
+  bool _shouldProcessFile(
+      String baseNameWithoutExtension,
+      List<String> questOptions,
+      List<String> mapOptions,
+      List<String> phaseOptions,
+      List<Boss> bossList) {
+    // Check against quest, map, and phase options first
+    if (questOptions.contains(baseNameWithoutExtension) ||
+        mapOptions.contains(baseNameWithoutExtension) ||
+        phaseOptions.contains(baseNameWithoutExtension)) {
+      return true;
+    }
+
+    var allEmIdentifiers = <String>{};
+    for (var boss in bossList) {
+      allEmIdentifiers.addAll(boss.emIdentifiers
+          .expand((id) => id.split(',').map((item) => item.trim())));
+    }
+
+    return allEmIdentifiers
+        .any((identifier) => baseNameWithoutExtension.contains(identifier));
+  }
+
+  Future<bool> _copyFile(LogState logState, String createdPath, String filePath,
+      ModInstallHandler modInstallHandler, String modId) async {
+    try {
+      String targetPath =
+          await modInstallHandler.createModInstallPath(filePath);
+      await Directory(p.dirname(targetPath)).create(recursive: true);
+      await File(createdPath).copy(targetPath);
+      String fileHash =
+          await modInstallHandler.computeFileHash(File(targetPath));
+      await modInstallHandler.storeFileHashInPreferences(
+          modId, targetPath, fileHash);
+      logState.addLog("Copied file: $filePath to $targetPath");
+      return true;
+    } catch (e) {
+      logState.addLog("Failed to copy file: $e");
+      return false;
+    }
+  }
+
+  Future<void> _uninstallMod(Mod selectedMod, ModStateManager modStateManager,
+      LogState logState) async {
+    final ModInstallHandler modInstallHandler = ModInstallHandler(
+      cliArguments: widget.cliArguments,
+      modStateManager: widget.modStateManager,
+    );
+    try {
+      modInstallHandler.uninstallMod(selectedMod.id);
+      modStateManager.uninstallMod(selectedMod.id);
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Mod uninstalled successfully!")));
+    } catch (e) {
+      logState.addLog("Exception caught while uninstalling mod: $e");
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Exception caught: $e")));
+    }
   }
 }

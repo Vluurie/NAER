@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:NAER/custom_naer_ui/animations/dotted_line_progress_animation.dart';
 import 'package:NAER/custom_naer_ui/mod__ui/mod_list.dart';
 import 'package:NAER/naer_utils/handle_zip_file.dart';
 import 'package:NAER/naer_utils/mod_state_managment.dart';
@@ -30,6 +31,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
   bool modsWerePreviouslyLoaded = false;
   final List<Mod> _mods = [];
   late AnimationController _animationController;
+  bool _isLoadingMods = false;
 
   @override
   void initState() {
@@ -59,6 +61,13 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
   }
 
   Widget _buildDragDropArea() {
+    // You might want to adjust the appearance based on whether you're loading mods
+    if (_isLoadingMods) {
+      return const Center(
+          child:
+              DottedLineProgressIndicator()); // Loading indicator while processing mods
+    }
+
     return DropTarget(
       onDragEntered: (details) {
         setState(() => _isDraggingOver = true);
@@ -69,6 +78,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
         _animationController.reverse();
       },
       onDragDone: (details) async {
+        setState(() => _isLoadingMods = true); // Start loading
         var mods = await ModHandler.handleZipFile(
             details.files.map((file) => file.path).toList());
 
@@ -76,6 +86,8 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
           setState(() {
             _isDragDropEnabled = false;
             _mods.addAll(mods);
+            widget.modStateManager.fetchAndUpdateModsList();
+            _isLoadingMods = false; // Stop loading
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -84,9 +96,12 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
                 duration: Duration(seconds: 3)),
           );
         } else {
+          setState(
+              () => _isLoadingMods = false); // Stop loading on failure as well
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text("Failed to load mods or unsupported ZIP file."),
+                content:
+                    Text("Unsupported ZIP file. Only ModPackage.zip allowed"),
                 duration: Duration(seconds: 3)),
           );
         }
@@ -124,16 +139,25 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
     );
   }
 
+  bool _isLoading = false; // Initialize loading state to true
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (_isDragDropEnabled) _buildDragDropArea(),
+        if (_isDragDropEnabled)
+          _isLoading
+              ? const DottedLineProgressIndicator()
+              : _buildDragDropArea(),
         Expanded(
-          child: ModsList(
-              mods: _mods,
-              cliArguments: widget.cliArguments,
-              modStateManager: widget.modStateManager),
+          child: _isLoading
+              ? const Center(
+                  child:
+                      DottedLineProgressIndicator()) // Show loading indicator
+              : ModsList(
+                  mods: _mods,
+                  cliArguments: widget.cliArguments,
+                  modStateManager: widget.modStateManager),
         ),
       ],
     );

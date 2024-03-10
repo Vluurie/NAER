@@ -10,6 +10,8 @@ class ModHandler {
     if (filePaths.isEmpty) return null;
 
     var zipFilePath = filePaths.first;
+    var package =
+        path.basenameWithoutExtension(zipFilePath).contains("ModPackage");
     var bytes = File(zipFilePath).readAsBytesSync();
     final archive = ZipDecoder().decodeBytes(bytes);
 
@@ -18,10 +20,15 @@ class ModHandler {
     String modDirectoryName = path.basenameWithoutExtension(zipFilePath);
     final modDirectoryPath = path.join(modsDirectoryPath, modDirectoryName);
 
-    if (await extractZipToDirectory(archive, modDirectoryPath)) {
-      return await parseModMetadata(modDirectoryPath);
-    } else {
+    if (!package) {
+      print(package);
       return null;
+    } else {
+      if (await extractZipToDirectory(archive, modDirectoryPath)) {
+        return await parseModMetadata(modDirectoryPath);
+      } else {
+        return null;
+      }
     }
   }
 

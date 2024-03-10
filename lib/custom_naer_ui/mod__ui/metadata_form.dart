@@ -27,6 +27,7 @@ class _MetadataFormState extends State<MetadataForm> {
   final TextEditingController _authorController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String? _selectedDirectory;
+  bool _showModFolderWarning = false;
   List<String> _directoryContentsInfo = [];
   String? _selectedImagePath;
   List<String> validFolderNames = [
@@ -57,144 +58,224 @@ class _MetadataFormState extends State<MetadataForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Title(
-                      color: const Color.fromARGB(255, 0, 0, 255),
-                      child: const Text(
-                        "Add custom mods to the mod list.",
-                        style: TextStyle(fontSize: 24),
-                      ))),
-              _buildTextFormField(
-                controller: _idController,
-                label: 'ID',
-                validator: _validateId,
-              ),
-              const SizedBox(height: 10),
-              _buildTextFormField(
-                controller: _nameController,
-                label: 'Name',
-                validator: (value) => _validateText(value, fieldName: 'Name'),
-              ),
-              const SizedBox(height: 10),
-              _buildTextFormField(
-                controller: _versionController,
-                label: 'Version',
-                validator: _validateVersion,
-              ),
-              const SizedBox(height: 10),
-              _buildTextFormField(
-                controller: _authorController,
-                label: 'Author',
-                validator: (value) => _validateText(value, fieldName: 'Author'),
-              ),
-              const SizedBox(height: 10),
-              _buildTextFormField(
-                controller: _descriptionController,
-                label: 'Description',
-                validator: (value) =>
-                    _validateText(value, fieldName: 'Description'),
-              ),
-              const SizedBox(height: 20),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_selectedImagePath != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(_selectedImagePath!),
-                          width: 100, // Thumbnail size
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.image,
-                          color: Colors.grey[800],
-                          size: 50,
-                        ),
-                      ),
-                    ),
-                  ElevatedButton(
-                    onPressed: _pickImage,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context)
-                          .primaryColor, // Use the primary theme color
-                    ),
-                    child: Text(_selectedImagePath == null
-                        ? 'Select Image'
-                        : 'Change Image'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+            "Metadata Form"), // Updated for better context understanding
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(), // Close button action
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const Text(
+                  "Add custom mods to the mod list.",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                    padding: const EdgeInsets.only(right: 20, left: 20),
+                    child: _buildTextFormField(
+                      controller: _idController,
+                      label: 'ID',
+                      validator: _validateId,
+                    )),
+                const SizedBox(height: 10),
+                Padding(
+                    padding: const EdgeInsets.only(right: 20, left: 20),
+                    child: _buildTextFormField(
+                      controller: _nameController,
+                      label: 'Name',
+                      validator: (value) =>
+                          _validateText(value, fieldName: 'Name'),
+                    )),
+                const SizedBox(height: 10),
+                Padding(
+                    padding: const EdgeInsets.only(right: 20, left: 20),
+                    child: _buildTextFormField(
+                      controller: _versionController,
+                      label: 'Version',
+                      validator: _validateVersion,
+                    )),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20, left: 20),
+                  child: _buildTextFormField(
+                    controller: _authorController,
+                    label: 'Author',
+                    validator: (value) =>
+                        _validateText(value, fieldName: 'Author'),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Align(
-                  alignment: Alignment.center,
-                  child: ButtonTheme(
-                      minWidth: 100,
-                      child: ElevatedButton(
-                        onPressed: _addFileField,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.cyan,
-                          padding: const EdgeInsets.all(15),
-                        ),
-                        child: const Text(
-                          'Add Modfolder',
-                          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-                        ),
-                      ))),
-              _buildDirectoryStructure(),
-              const SizedBox(height: 10),
-              Align(
-                  alignment: Alignment.center,
-                  child: ButtonTheme(
-                    minWidth: 100,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if ((_formKey.currentState?.validate() ?? false) &&
-                            (_directoryContentsInfo.isNotEmpty)) {
-                          _saveMetadata();
-                          Navigator.of(context).pop();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Please add a mod folder before saving.'),
-                              duration: Duration(seconds: 3),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20, left: 20),
+                  child: _buildTextFormField(
+                    controller: _descriptionController,
+                    label: 'Description',
+                    validator: (value) =>
+                        _validateText(value, fieldName: 'Description'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_selectedImagePath != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(_selectedImagePath!),
+                              width: 200, // Thumbnail size
+                              height: 200,
+                              fit: BoxFit.cover,
                             ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 12, 109, 15),
-                        padding: const EdgeInsets.all(15),
+                          ),
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Center(
+                          child: Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 48, 46, 46),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.image,
+                              color: Color.fromARGB(255, 255, 255, 255),
+                              size: 50,
+                            ),
+                          ),
+                        ),
                       ),
-                      child: const Text('Save Metadata'),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton(
+                          onPressed: _pickImage,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context)
+                                .primaryColor, // Use the primary theme color
+                          ),
+                          child: Text(_selectedImagePath == null
+                              ? 'Select Image/GIF'
+                              : 'Change Image/GIF'),
+                        ),
+                      ),
                     ),
-                  ))
-            ],
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Align(
+                        alignment: Alignment.center,
+                        child: ButtonTheme(
+                            minWidth: 300,
+                            child: ElevatedButton(
+                              onPressed: _addFileField,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 52, 54, 54),
+                                padding: const EdgeInsets.all(20),
+                              ),
+                              child: const Text(
+                                'Add Modfolder',
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 255, 255, 255)),
+                              ),
+                            ))),
+                  ],
+                ),
+                _buildDirectoryStructure(),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: ButtonTheme(
+                        minWidth: 100,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if ((_formKey.currentState?.validate() ?? false) &&
+                                (_directoryContentsInfo.isNotEmpty)) {
+                              _saveMetadata();
+                              Navigator.of(context).pop();
+                            } else {
+                              setState(() {
+                                _showModFolderWarning = true;
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 12, 109, 15),
+                            padding: const EdgeInsets.all(20),
+                          ),
+                          child: const Text('Save Metadata'),
+                        ),
+                      ),
+                    ),
+
+                    // Conditionally display the warning message
+                    if (_showModFolderWarning)
+                      Container(
+                        margin: const EdgeInsets.only(left: 20),
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(
+                              255, 41, 39, 39), // Soft red background
+                          borderRadius: BorderRadius.circular(5.0),
+                          border: Border.all(
+                            color: Colors.red, // Red border
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons
+                                  .warning_amber_rounded, // Adds an icon for visual emphasis
+                              color: Colors.red,
+                              size: 24.0,
+                            ),
+                            const SizedBox(
+                                width: 10), // Space between icon and text
+                            Text(
+                              "Please add a mod folder before saving.",
+                              style: TextStyle(
+                                color: Colors
+                                    .red[800], // Darker shade of red for text
+                                fontSize: 16,
+                                fontWeight:
+                                    FontWeight.bold, // Makes the text bold
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),
