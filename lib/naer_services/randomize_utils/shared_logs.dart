@@ -11,10 +11,8 @@ class LogState extends ChangeNotifier {
   void addLog(String log) {
     String modifiedLog = processLog(log);
 
-    // Update frequency count
     _logCounts.update(modifiedLog, (count) => count + 1, ifAbsent: () => 1);
 
-    // Avoid printing the same log message consecutively
     if (_lastLog != modifiedLog) {
       _logs.add(modifiedLog);
       _lastLog = modifiedLog;
@@ -100,9 +98,9 @@ class LogState extends ChangeNotifier {
         case 'skip':
           return "I had an issue, but this issue is not an issue.";
         default:
-          return log; // If none of the cases match, return the original log
+          return log;
       }
     }
-    return log; // Return the original log if stageIdentifier is null
+    return log;
   }
 }

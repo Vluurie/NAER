@@ -63,7 +63,7 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
                     checkboxValue = newValue ?? false;
                     widget.onCheckboxChanged(checkboxValue);
                     if (checkboxValue) {
-                      savePathsToPreferences(); // Updated method name here
+                      savePathsToPreferences();
                     }
                   });
                 }

@@ -308,22 +308,17 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: <Widget>[
                                 FutureBuilder<ElevatedButton>(
-                                  future:
-                                      _buttonFuture, // Use the cached future here
+                                  future: _buttonFuture,
                                   builder: (BuildContext context,
                                       AsyncSnapshot<ElevatedButton> snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {
-                                      // Return a loader or placeholder
                                       return const CircularProgressIndicator();
                                     } else if (snapshot.hasError) {
-                                      // Handle error
                                       return Text('Error: ${snapshot.error}');
                                     } else if (snapshot.hasData) {
-                                      // Return the button
                                       return snapshot.data!;
                                     } else {
-                                      // Return an empty widget if there's no data and no error
                                       return const SizedBox.shrink();
                                     }
                                   },
@@ -954,7 +949,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       Process process =
           await Process.start(command, arguments, runInShell: true);
 
-// Listen to stdout and stderr
       process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -1486,7 +1480,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     try {
       if (selectedImages!.isNotEmpty) {
-        updateLog("Sorting selected enemies... 💬 ", scrollController);
         var sortedEnemies = await sortSelectedEnemies(selectedImages);
         var tempFile = await File(
                 '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')

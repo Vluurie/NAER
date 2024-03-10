@@ -60,12 +60,11 @@ class _MetadataFormState extends State<MetadataForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-            "Metadata Form"), // Updated for better context understanding
+        title: const Text("Metadata Form"),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(), // Close button action
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
@@ -139,7 +138,7 @@ class _MetadataFormState extends State<MetadataForm> {
                             borderRadius: BorderRadius.circular(8),
                             child: Image.file(
                               File(_selectedImagePath!),
-                              width: 200, // Thumbnail size
+                              width: 200,
                               height: 200,
                               fit: BoxFit.cover,
                             ),
@@ -171,8 +170,7 @@ class _MetadataFormState extends State<MetadataForm> {
                         child: ElevatedButton(
                           onPressed: _pickImage,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context)
-                                .primaryColor, // Use the primary theme color
+                            backgroundColor: Theme.of(context).primaryColor,
                           ),
                           child: Text(_selectedImagePath == null
                               ? 'Select Image/GIF'
@@ -233,18 +231,15 @@ class _MetadataFormState extends State<MetadataForm> {
                         ),
                       ),
                     ),
-
-                    // Conditionally display the warning message
                     if (_showModFolderWarning)
                       Container(
                         margin: const EdgeInsets.only(left: 20),
                         padding: const EdgeInsets.all(10.0),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(
-                              255, 41, 39, 39), // Soft red background
+                          color: const Color.fromARGB(255, 41, 39, 39),
                           borderRadius: BorderRadius.circular(5.0),
                           border: Border.all(
-                            color: Colors.red, // Red border
+                            color: Colors.red,
                             width: 1.0,
                           ),
                         ),
@@ -252,21 +247,17 @@ class _MetadataFormState extends State<MetadataForm> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(
-                              Icons
-                                  .warning_amber_rounded, // Adds an icon for visual emphasis
+                              Icons.warning_amber_rounded,
                               color: Colors.red,
                               size: 24.0,
                             ),
-                            const SizedBox(
-                                width: 10), // Space between icon and text
+                            const SizedBox(width: 10),
                             Text(
                               "Please add a mod folder before saving.",
                               style: TextStyle(
-                                color: Colors
-                                    .red[800], // Darker shade of red for text
+                                color: Colors.red[800],
                                 fontSize: 16,
-                                fontWeight:
-                                    FontWeight.bold, // Makes the text bold
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],

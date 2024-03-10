@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 class DragDropWidget extends StatefulWidget {
   final CLIArguments cliArguments;
-  final EdgeInsetsGeometry padding; // Customizable padding
+  final EdgeInsetsGeometry padding;
 
   const DragDropWidget(
       {super.key,

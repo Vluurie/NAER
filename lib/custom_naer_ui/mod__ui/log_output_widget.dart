@@ -76,8 +76,7 @@ class _LogoutOutWidgetState extends State<LogoutOutWidget> {
           ),
           child: ListView.builder(
             controller: _scrollController,
-            itemCount:
-                logs.isEmpty ? 1 : logs.length, // Check if logs are empty
+            itemCount: logs.isEmpty ? 1 : logs.length,
             itemBuilder: (context, index) {
               if (logs.isEmpty) {
                 return const Center(

@@ -13,7 +13,6 @@ Future<void> findBossStatFiles(
 
   var flattenedBossList = flattenList(bossList);
 
-  // Define a pattern for directories of interest
   String directoryPattern = '\\nier2blender_extracted\\';
 
   await for (var entity in directory.list(recursive: true)) {
@@ -66,7 +65,6 @@ String modifyLine(String line, double bossStats) {
   if (values.length >= 5) {
     var valueColumn2 = double.tryParse(values[1]);
     if (valueColumn2 != null) {
-      // Scale factor for column 2 based on bossStats
       double scaleFactorColumn2 = bossStats / 5.0 * maxFactorColumn2;
       double modifiedValueColumn2 = valueColumn2 * scaleFactorColumn2;
       values[1] = modifiedValueColumn2.round().toString();

@@ -130,7 +130,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
   void toggleInstallUninstallMod(int index) async {
     setState(() {
-      _loadingMap[index] = true; // Mark as loading
+      _loadingMap[index] = true;
     });
 
     try {
@@ -160,7 +160,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         ),
       );
     } catch (error) {
-      // Handle any errors that occur during install/uninstall
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $error'),
@@ -168,7 +167,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         ),
       );
     } finally {
-      // Always stop loading, regardless of the operation's outcome
       setState(() {
         _loadingMap[index] = false;
       });

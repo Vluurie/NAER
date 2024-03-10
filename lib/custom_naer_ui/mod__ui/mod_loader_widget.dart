@@ -61,11 +61,8 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
   }
 
   Widget _buildDragDropArea() {
-    // You might want to adjust the appearance based on whether you're loading mods
     if (_isLoadingMods) {
-      return const Center(
-          child:
-              DottedLineProgressIndicator()); // Loading indicator while processing mods
+      return const Center(child: DottedLineProgressIndicator());
     }
 
     return DropTarget(
@@ -78,7 +75,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
         _animationController.reverse();
       },
       onDragDone: (details) async {
-        setState(() => _isLoadingMods = true); // Start loading
+        setState(() => _isLoadingMods = true);
         var mods = await ModHandler.handleZipFile(
             details.files.map((file) => file.path).toList());
 
@@ -87,7 +84,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
             _isDragDropEnabled = false;
             _mods.addAll(mods);
             widget.modStateManager.fetchAndUpdateModsList();
-            _isLoadingMods = false; // Stop loading
+            _isLoadingMods = false;
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -96,8 +93,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
                 duration: Duration(seconds: 3)),
           );
         } else {
-          setState(
-              () => _isLoadingMods = false); // Stop loading on failure as well
+          setState(() => _isLoadingMods = false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content:
@@ -139,7 +135,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
     );
   }
 
-  bool _isLoading = false; // Initialize loading state to true
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -151,9 +147,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
               : _buildDragDropArea(),
         Expanded(
           child: _isLoading
-              ? const Center(
-                  child:
-                      DottedLineProgressIndicator()) // Show loading indicator
+              ? const Center(child: DottedLineProgressIndicator())
               : ModsList(
                   mods: _mods,
                   cliArguments: widget.cliArguments,

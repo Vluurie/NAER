@@ -1,8 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:NAER/custom_naer_ui/mod__ui/log_output_widget.dart';
+import 'package:NAER/main.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/handle_mod_install.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/custom_naer_ui/mod__ui/metadata_form.dart';
 import 'package:NAER/naer_utils/mod_state_managment.dart';
@@ -71,13 +75,59 @@ class _SecondPageState extends State<SecondPage>
     final outputPath = widget.cliArguments.specialDatOutputPath;
     final inputPath = widget.cliArguments.input;
 
-    // Define action buttons
     final actionButtons = <Widget>[
       Padding(
         padding: const EdgeInsets.only(right: 50),
         child: TextButton.icon(
-          icon: const Icon(Icons.clear_all), // Icon
-          label: const Text("Clear Logs"), // Text
+          icon: const Icon(Icons.refresh),
+          label: const Text("Refresh all settings."),
+          onPressed: () async {
+            bool? confirm = await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Are you sure?'),
+                  content: const Text(
+                      'This will reset the app and clear all data of the local app settings. Do you want to proceed?'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                    TextButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+
+            if (confirm == true) {
+              final ModInstallHandler modInstallHandler = ModInstallHandler(
+                cliArguments: widget.cliArguments,
+                modStateManager: modStateManager,
+              );
+              await modInstallHandler.deleteAllSharedPreferences();
+              final logState = Provider.of<LogState>(context, listen: false);
+              logState.clearLogs();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => EnemyRandomizerApp()),
+                (Route<dynamic> route) => false,
+              );
+            }
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(right: 50),
+        child: TextButton.icon(
+          icon: const Icon(Icons.clear_all),
+          label: const Text("Clear Logs"),
           onPressed: () async {
             setState(() {
               final logState = Provider.of<LogState>(context, listen: false);
@@ -85,47 +135,43 @@ class _SecondPageState extends State<SecondPage>
             });
           },
           style: TextButton.styleFrom(
-            foregroundColor:
-                const Color.fromARGB(255, 255, 0, 0), // Text and icon color
+            foregroundColor: const Color.fromARGB(255, 255, 0, 0),
           ),
         ),
       ),
       TextButton.icon(
-        icon: const Icon(Icons.input), // Icon
-        label: const Text("Open Input Path"), // Text
+        icon: const Icon(Icons.input),
+        label: const Text("Open Input Path"),
         onPressed: () async {
           await openPaths(inputPath);
         },
         style: TextButton.styleFrom(
-          foregroundColor:
-              const Color.fromARGB(255, 0, 217, 255), // Text and icon color
+          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
         ),
       ),
       TextButton.icon(
-        icon: const Icon(Icons.output), // Icon
-        label: const Text("Open Output Path"), // Text
+        icon: const Icon(Icons.output),
+        label: const Text("Open Output Path"),
         onPressed: () async {
           await openPaths(outputPath);
         },
         style: TextButton.styleFrom(
-          foregroundColor:
-              const Color.fromARGB(255, 0, 217, 255), // Text and icon color
+          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
         ),
       ),
       TextButton.icon(
-        icon: const Icon(Icons.settings), // Icon
-        label: const Text("Settings"), // Text
+        icon: const Icon(Icons.settings),
+        label: const Text("Settings"),
         onPressed: () async {
           await openSettings();
         },
         style: TextButton.styleFrom(
-          foregroundColor:
-              const Color.fromARGB(255, 0, 217, 255), // Text and icon color
+          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
         ),
       ),
       TextButton.icon(
-        icon: const Icon(Icons.discord), // Icon
-        label: const Text("Help"), // Text
+        icon: const Icon(Icons.discord),
+        label: const Text("Help"),
         onPressed: () async {
           final Uri url = Uri.parse('https://discord.gg/RTax46x94J');
           if (await canLaunchUrl(url)) {
@@ -135,8 +181,7 @@ class _SecondPageState extends State<SecondPage>
           }
         },
         style: TextButton.styleFrom(
-          foregroundColor:
-              const Color.fromARGB(255, 0, 217, 255), // Text and icon color
+          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
         ),
       ),
     ];
@@ -146,13 +191,9 @@ class _SecondPageState extends State<SecondPage>
         title: const Text('Additional Features'),
         backgroundColor: const Color.fromARGB(255, 49, 50, 51),
         elevation: 0,
-        // Conditionally set leading widget
-        leading: canPop
-            ? null // Allow Flutter to automatically handle the back button
-            : (actionButtons.isNotEmpty ? Container() : null),
-        actions: canPop
-            ? actionButtons
-            : null, // If canPop, move icons to the leading position
+        leading:
+            canPop ? null : (actionButtons.isNotEmpty ? Container() : null),
+        actions: canPop ? actionButtons : null,
       ),
       body: Column(
         children: [

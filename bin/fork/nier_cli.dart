@@ -15,9 +15,6 @@ import 'package:NAER/naer_services/handle_find_replace_em_data.dart';
 
 Future<void> main(List<String> arguments) async {
   var t1 = DateTime.now();
-
-  // arguments: [input, -o (optional) output, (optional) args]])]
-  // arguments: [input1, [input2], [input...], (optional) args]])]
   var configArgs = await readConfig();
   arguments = [...configArgs, ...arguments];
   var argParser = ArgParser();
@@ -29,7 +26,6 @@ Future<void> main(List<String> arguments) async {
       abbr: "r",
       help: "Extract all files in a folder and all subfolders",
       negatable: false);
-  // Set autoExtractChildren to true by default
   argParser.addFlag("autoExtractChildren",
       help:
           "When unpacking DAT, CPK, PAK, etc. files automatically process all extracted files",
@@ -99,7 +95,6 @@ Future<void> main(List<String> arguments) async {
     output: null,
     folderMode: args["folder"],
     recursiveMode: args["recursive"],
-    // Set autoExtractChildren to true by default
     wwiseCliPath: args["wwiseCli"],
     isCpk: args["CPK"],
     isDat: args["DAT"],
@@ -219,16 +214,12 @@ Future<void> main(List<String> arguments) async {
           file, null, options, pendingFiles, processedFiles, bossList);
       processedFiles.add(file);
     } catch (e) {
-      // handle exceptions
+      print("input error");
     }
   }
 
-// Repack & Export DAT files
-  // Assuming bossList is now a List<String> of identifiers after modification
   for (var datFolder in datFolders) {
     var baseNameWithExtension = basename(datFolder);
-    print(
-        "Processing DAT Folder: $datFolder with base name: $baseNameWithExtension");
 
     bool processFile = false;
 
@@ -240,7 +231,6 @@ Future<void> main(List<String> arguments) async {
             .toList();
         for (var criteria in cleanedBossList) {
           if (baseNameWithExtension.contains(criteria)) {
-            print("Match found with criteria: $criteria - processed = true");
             processFile = true;
             continue;
           }
