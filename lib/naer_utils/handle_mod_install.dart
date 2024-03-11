@@ -134,7 +134,7 @@ class ModInstallHandler {
     return invalidFiles;
   }
 
-  Future<void> removeModFiles(String modId, List<String> invalidFiles) async {
+  Future<void> removeModFiles(String modId, List<String> matchedFiles) async {
     print(
         'Attempting to remove mod files for modId: $modId, except explicitly modified files.');
 
@@ -145,12 +145,13 @@ class ModInstallHandler {
     for (String filePath in filePaths) {
       String installPath = await createModInstallPath(filePath);
 
-      if (!invalidFiles.contains(filePath)) {
+      if (matchedFiles.contains(path.basename(filePath))) {
         File file = File(installPath);
         if (await file.exists()) {
           try {
             await file.delete();
-            print("Deleted file: $installPath as it's not modified by user.");
+            print(
+                "Deleted file: $installPath as it matched modId's file list.");
             deletedFiles = true;
           } catch (e) {
             print("Error deleting file $installPath: $e");

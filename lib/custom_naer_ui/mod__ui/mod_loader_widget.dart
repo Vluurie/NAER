@@ -75,29 +75,46 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
         _animationController.reverse();
       },
       onDragDone: (details) async {
-        setState(() => _isLoadingMods = true);
-        var mods = await ModHandler.handleZipFile(
-            details.files.map((file) => file.path).toList());
+        bool isFileSupported = false;
+        String filePath = details.files.first.path;
+        if (filePath.endsWith("ModPackage.zip")) {
+          isFileSupported = true;
+        }
 
-        if (mods != null && mods.isNotEmpty) {
-          setState(() {
-            _isDragDropEnabled = false;
-            _mods.addAll(mods);
-            widget.modStateManager.fetchAndUpdateModsList();
-            _isLoadingMods = false;
-          });
+        if (isFileSupported) {
+          setState(() => _isLoadingMods = true);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Mods loaded successfully!"),
-                duration: Duration(seconds: 3)),
-          );
+          var mods = await ModHandler.handleZipFile(
+              details.files.map((file) => file.path).toList());
+
+          if (mods != null && mods.isNotEmpty) {
+            setState(() {
+              _isDragDropEnabled = false;
+              _mods.addAll(mods);
+              widget.modStateManager.fetchAndUpdateModsList();
+              _isLoadingMods = false;
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("Mods loaded successfully!"),
+                  duration: Duration(seconds: 3)),
+            );
+          } else {
+            setState(() => _isLoadingMods = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text(
+                      "Failed to load mods from the ZIP file. Probably invalid package/name/file."),
+                  duration: Duration(seconds: 3)),
+            );
+          }
         } else {
           setState(() => _isLoadingMods = false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content:
-                    Text("Unsupported ZIP file. Only ModPackage.zip allowed"),
+                    Text("Unsupported file. Only ModPackage.zip is allowed."),
                 duration: Duration(seconds: 3)),
           );
         }
@@ -118,16 +135,19 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
           ),
           borderRadius: BorderRadius.circular(_isDraggingOver ? 20 : 0),
         ),
-        child: Center(
-          child: Text(
-            _isDraggingOver
-                ? "Drag to load mods "
-                : "Drag NAER ModPackage here to load the mods",
-            style: TextStyle(
-              fontSize: 25,
-              color: _isDraggingOver
-                  ? const Color.fromARGB(255, 21, 219, 47)
-                  : const Color.fromARGB(255, 255, 255, 255),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Text(
+              _isDraggingOver
+                  ? "Drag to load mods "
+                  : "Drop ModPackage.zip here to load the mod manager feature.",
+              style: TextStyle(
+                fontSize: 25,
+                color: _isDraggingOver
+                    ? const Color.fromARGB(255, 21, 219, 47)
+                    : const Color.fromARGB(255, 255, 255, 255),
+              ),
             ),
           ),
         ),

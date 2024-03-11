@@ -1561,14 +1561,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     }
 
     return CLIArguments(
-      input: input,
-      specialDatOutputPath: specialDatOutputPath,
-      tempFilePath: tempFilePath,
-      bossList: bossList,
-      processArgs: processArgs,
-      command: command,
-      fullCommand: fullCommand,
-    );
+        input: input,
+        specialDatOutputPath: specialDatOutputPath,
+        tempFilePath: tempFilePath,
+        bossList: bossList,
+        processArgs: processArgs,
+        command: command,
+        fullCommand: fullCommand,
+        ignoreList: ignoredModFiles);
   }
 
   Set<String> loggedStages = {};

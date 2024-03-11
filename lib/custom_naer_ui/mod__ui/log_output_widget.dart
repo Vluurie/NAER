@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
 import 'package:path/path.dart' as p;
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';

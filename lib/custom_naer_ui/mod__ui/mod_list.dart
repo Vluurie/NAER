@@ -85,6 +85,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    print(widget.cliArguments.ignoreList);
     widget.modStateManager.fetchAndUpdateModsList();
     _animationController = AnimationController(
       vsync: this,
@@ -102,22 +103,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
     });
 
     NotificationManager.notificationStream.listen((event) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Notification"),
-              content: Text(event.message),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text("OK"),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            );
-          },
-        );
+      if (mounted && event.message == "Affected mods have been handled") {
+        widget.modStateManager.showStyledPopup(context);
       }
     });
   }
@@ -144,11 +131,25 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         // Uninstall the mod
         await modInstallHandler.uninstallMod(mod.id);
         widget.modStateManager.uninstallMod(mod.id);
+        List<String> filenamesToRemove = mod.files
+            .map((fileMap) => fileMap['path'] ?? '')
+            .where((path) => path.isNotEmpty)
+            .map((path) => p.basename(path))
+            .toList();
+        await FileChange.removeIgnoreFiles(filenamesToRemove);
       } else {
         // Install the mod
         await modInstallHandler.copyModToInstallPath(mod.id);
         widget.modStateManager.installMod(mod.id);
-        await modInstallHandler.printAllSharedPreferences();
+        for (var fileMap in mod.files) {
+          String filePath = fileMap['path'] ?? '';
+          if (filePath.isNotEmpty) {
+            String fileName = p.basename(filePath);
+            FileChange.ignoredFiles.add(fileName);
+          }
+        }
+        FileChange.saveIgnoredFiles();
+        // await modInstallHandler.printAllSharedPreferences();
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -187,6 +188,12 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           widget.modStateManager.isModInstalled(mod.id)) {
         await modInstallHandler.removeModFiles(mod.id, invalidFiles);
         widget.modStateManager.uninstallMod(mod.id);
+        List<String> filenamesToRemove = mod.files
+            .map((fileMap) => fileMap['path'] ?? '')
+            .where((path) => path.isNotEmpty)
+            .map((path) => p.basename(path))
+            .toList();
+        await FileChange.removeIgnoreFiles(filenamesToRemove);
         foundInvalidFiles = true;
       }
     }
@@ -465,11 +472,27 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       return;
     }
 
+    List<String> fileNames = selectedMod.files
+        .map((fileMap) => fileMap['path'] ?? '')
+        .where((path) => path.isNotEmpty)
+        .map((path) => p.basename(path))
+        .toList();
+    await FileChange.removeIgnoreFiles(fileNames);
+
     bool success =
         await _processModFiles(selectedMod, modInstallHandler, logState);
 
     if (success) {
       modStateManager.installMod(selectedMod.id);
+      List<String> filenamesToSave = selectedMod.files
+          .map((fileMap) => fileMap['path'] ?? '')
+          .where((path) => path.isNotEmpty)
+          .map((path) => p.basename(path))
+          .toList();
+
+      await FileChange.removeIgnoreFiles(fileNames);
+      FileChange.ignoredFiles.addAll(filenamesToSave);
+      await FileChange.saveIgnoredFiles();
       const snackBar = SnackBar(
         content: Text("Mod installed and randomized successfully!"),
         backgroundColor: Colors.green,
@@ -517,7 +540,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
     for (String dirPath in uniqueDirectories) {
       List<String> arguments = List.from(widget.cliArguments.processArgs);
       arguments[0] = dirPath;
-      print("$command $arguments");
       success =
           await _executeCLICommand(logState, command, arguments) && success;
       if (!success) {
@@ -544,7 +566,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         }
       }
 
-      // After all files are processed, compute and store the hashes
       for (String filePath in filesToHash) {
         String fileHash =
             await modInstallHandler.computeFileHash(File(filePath));
@@ -630,6 +651,12 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
     try {
       modInstallHandler.uninstallMod(selectedMod.id);
       modStateManager.uninstallMod(selectedMod.id);
+      List<String> filenamesToRemove = selectedMod.files
+          .map((fileMap) => fileMap['path'] ?? '')
+          .where((path) => path.isNotEmpty)
+          .map((path) => p.basename(path))
+          .toList();
+      await FileChange.removeIgnoreFiles(filenamesToRemove);
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Mod uninstalled successfully!")));
     } catch (e) {

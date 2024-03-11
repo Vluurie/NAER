@@ -46,6 +46,13 @@ class FileChange {
     print('Loaded ignoredFiles: $ignoredFiles');
   }
 
+  static Future<void> removeIgnoreFiles(List<String> filesToRemove) async {
+    await loadIgnoredFiles();
+    ignoredFiles.removeWhere((file) => filesToRemove.contains(file));
+    await saveIgnoredFiles();
+    print('Removed files and updated ignoredFiles');
+  }
+
   static Future<void> undoChanges() async {
     for (FileChange change in changes.reversed) {
       try {
