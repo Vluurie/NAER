@@ -77,17 +77,33 @@ class ModStateManager extends ChangeNotifier {
         affectedModName = modName;
 
         await modInstallHandler.removeModFiles(modId, allFilePathsToUnignore);
-        currentModfiles = await getModFilePaths(modId);
+
+        Mod currentMod = mods.firstWhere((mod) => mod.id == modId,
+            orElse: () => Mod(
+                id: modId,
+                name: 'Unknown Mod',
+                version: '1.0.0',
+                author: 'Unknown',
+                description: '',
+                files: []));
+        List<String> filenamesToRemove = currentMod.files
+            .map((fileMap) => fileMap['path'] ?? '')
+            .where((path) => path.isNotEmpty)
+            .map((path) => p.basename(path))
+            .toList();
+        await FileChange.removeIgnoreFiles(filenamesToRemove);
+
         _installedModsIds.remove(modId);
         changed = true;
       }
     }
 
     if (changed) {
-      if (_isDisposed) return;
+      if (_isDisposed) {
+        return;
+      }
       await _saveInstalledMods();
       notifyListeners();
-      await FileChange.removeIgnoreFiles(allFilePathsToUnignore);
       String notificationMessage = "Affected mods have been handled";
       NotificationManager.notify(notificationMessage);
     }
@@ -178,12 +194,6 @@ class ModStateManager extends ChangeNotifier {
                       text:
                           "🚫 And there’s a chance that some files didn’t make it to the installation path due to our 'ignore files' setting:\nFiles that where in installation path: $currentlyIgnored \n\n",
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                  TextSpan(
-                      text: "Modfiles of the mod: $affectedModName: ",
-                      style: const TextStyle(color: Colors.greenAccent)),
-                  TextSpan(
-                      text: " $currentModfiles.\n\n",
-                      style: const TextStyle(fontStyle: FontStyle.italic)),
                   const TextSpan(
                       text: "Affected mod files of the mod: ",
                       style: TextStyle(color: Colors.greenAccent)),

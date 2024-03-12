@@ -148,7 +148,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
             FileChange.ignoredFiles.add(fileName);
           }
         }
-        FileChange.saveIgnoredFiles();
+        await FileChange.saveIgnoredFiles();
         // await modInstallHandler.printAllSharedPreferences();
       }
 
