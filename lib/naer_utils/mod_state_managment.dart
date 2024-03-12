@@ -71,17 +71,15 @@ class ModStateManager extends ChangeNotifier {
                     files: []))
             .name;
 
+        allFilePathsToUnignore
+            .addAll(affectedFiles.map((file) => p.basename(file)).toList());
         affectedModsInfo.add("$modName: (${affectedFiles.join(', ')})");
         affectedModName = modName;
 
+        await modInstallHandler.removeModFiles(modId, allFilePathsToUnignore);
+        currentModfiles = await getModFilePaths(modId);
         _installedModsIds.remove(modId);
         changed = true;
-
-        await modInstallHandler.removeModFiles(modId, affectedFiles);
-        currentModfiles = await getModFilePaths(modId);
-
-        allFilePathsToUnignore
-            .addAll(affectedFiles.map((file) => p.basename(file)).toList());
       }
     }
 

@@ -186,14 +186,14 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           await modInstallHandler.verifyModFiles(mod.id);
       if (invalidFiles.isNotEmpty &&
           widget.modStateManager.isModInstalled(mod.id)) {
-        await modInstallHandler.removeModFiles(mod.id, invalidFiles);
-        widget.modStateManager.uninstallMod(mod.id);
         List<String> filenamesToRemove = mod.files
             .map((fileMap) => fileMap['path'] ?? '')
             .where((path) => path.isNotEmpty)
             .map((path) => p.basename(path))
             .toList();
         await FileChange.removeIgnoreFiles(filenamesToRemove);
+        await modInstallHandler.removeModFiles(mod.id, invalidFiles);
+        widget.modStateManager.uninstallMod(mod.id);
         foundInvalidFiles = true;
       }
     }
