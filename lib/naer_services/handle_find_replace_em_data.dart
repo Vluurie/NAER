@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:xml/xml.dart' as xml;
+import 'package:path/path.dart' as path;
 import 'package:NAER/nier_cli_fork_utils/fileTypeUtils/xml/xmlExtension.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/nier_enemy_data/boss_data/nier_boss_level_list.dart';
@@ -80,8 +81,36 @@ Future<void> find(
     String enemyCategory) async {
   print('Found enemy randomizer... starting');
 
-  final Directory directory = Directory(directoryPath);
+  Future<String> ensureNAERSettingsDirectory() async {
+    var currentDirectory = Directory.current.path;
 
+    // Navigate two directories up from 'bin/fork' to 'NAER'
+    final naerDirectoryPath =
+        Directory(path.join(currentDirectory)).absolute.path;
+    final naerSettingsDirectoryPath =
+        path.join(naerDirectoryPath, 'NAER_Settings');
+
+    final naerSettingsDirectory = Directory(naerSettingsDirectoryPath);
+    if (!await naerSettingsDirectory.exists()) {
+      await naerSettingsDirectory.create(recursive: true);
+    }
+    return naerSettingsDirectory.path;
+  }
+
+  Future<String> getMetaDataPath() async {
+    final String settingsDirectoryPath = await ensureNAERSettingsDirectory();
+    final String metadataPath =
+        path.join(settingsDirectoryPath, 'ModPackage', 'mod_metadata.json');
+    print("Found metadata at $metadataPath");
+    return metadataPath;
+  }
+
+  // Load ImportantIDs with the metadata added IDs
+  var ids = await ImportantIDs.loadFromMetadata(await getMetaDataPath());
+
+  print(ids.entries);
+
+  final Directory directory = Directory(directoryPath);
   if (!directory.existsSync()) {
     print('Directory does not exist: $directoryPath');
     return;
@@ -95,7 +124,7 @@ Future<void> find(
 
   print('Starting directory traversal...');
   fileCount = traverseDirectory(
-      directory, findings, sortedEnemyData, enemyLevel, enemyCategory);
+      directory, findings, sortedEnemyData, enemyLevel, enemyCategory, ids);
 
   stopwatch.stop();
   print('Traversal complete. Processed $fileCount files.');
@@ -108,18 +137,18 @@ int traverseDirectory(
     List<Map<String, dynamic>> findings,
     Map<String, List<String>> sortedEnemyData,
     String enemyLevel,
-    String enemyCategory) {
+    String enemyCategory,
+    ImportantIDs ids) {
   int localFileCount = 0;
   try {
     for (var entity in directory.listSync()) {
       print('Processing entity: ${entity.path}');
       if (entity is File && entity.path.endsWith('.xml')) {
-        processXmlFile(
-            entity, sortedEnemyData, enemyLevel, enemyCategory, important_ids);
+        processXmlFile(entity, sortedEnemyData, enemyLevel, enemyCategory, ids);
         localFileCount++;
       } else if (entity is Directory) {
         localFileCount += traverseDirectory(
-            entity, findings, sortedEnemyData, enemyLevel, enemyCategory);
+            entity, findings, sortedEnemyData, enemyLevel, enemyCategory, ids);
       }
     }
   } catch (e) {}
@@ -131,7 +160,7 @@ Future<void> processXmlFile(
     Map<String, List<String>> sortedEnemyData,
     String enemyLevel,
     String enemyCategory,
-    Map<String, List<String>> importantIds) async {
+    ImportantIDs importantIds) async {
   String content = file.readAsStringSync();
   var document = xml.XmlDocument.parse(content);
 

@@ -26,6 +26,11 @@ class _MetadataFormState extends State<MetadataForm> {
   final TextEditingController _versionController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _enemySetActionController =
+      TextEditingController();
+  final TextEditingController _enemySetAreaController = TextEditingController();
+  final TextEditingController _enemyGeneratorController =
+      TextEditingController();
   String? _selectedDirectory;
   bool _showModFolderWarning = false;
   List<String> _directoryContentsInfo = [];
@@ -124,6 +129,25 @@ class _MetadataFormState extends State<MetadataForm> {
                     label: 'Description',
                     validator: (value) =>
                         _validateText(value, fieldName: 'Description'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                            textScaler: TextScaler.linear(1.5),
+                            "Extra: Advanced for ignoring enemies from modifying in this entities: (example: 0x864ec3e4)"),
+                      ),
+                      _buildIdInputField("Enemy Set Action ID",
+                          _enemySetActionController, "EnemySetAction"),
+                      _buildIdInputField("Enemy Set Area ID",
+                          _enemySetAreaController, "EnemySetArea"),
+                      _buildIdInputField("Enemy Generator ID",
+                          _enemyGeneratorController, "EnemyGenerator"),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -273,6 +297,25 @@ class _MetadataFormState extends State<MetadataForm> {
     );
   }
 
+  Widget _buildIdInputField(
+      String label, TextEditingController controller, String category) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 20, left: 20),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        onFieldSubmitted: (value) {
+          setState(() {
+            controller.clear();
+          });
+        },
+      ),
+    );
+  }
+
   Widget _buildDirectoryStructure() {
     if (_selectedDirectory == null) {
       return Container();
@@ -345,6 +388,33 @@ class _MetadataFormState extends State<MetadataForm> {
         return {"path": modFilePath};
       }).toList();
 
+      final List<String> enemySetActionIds = _enemySetActionController.text
+          .split(',')
+          .where((id) => id.isNotEmpty)
+          .map((id) => id.trim())
+          .toList();
+      final List<String> enemySetAreaIds = _enemySetAreaController.text
+          .split(',')
+          .where((id) => id.isNotEmpty)
+          .map((id) => id.trim())
+          .toList();
+      final List<String> enemyGeneratorIds = _enemyGeneratorController.text
+          .split(',')
+          .where((id) => id.isNotEmpty)
+          .map((id) => id.trim())
+          .toList();
+
+      final Map<String, List<String>> idsData = {};
+      if (enemySetActionIds.isNotEmpty) {
+        idsData["EnemySetAction"] = enemySetActionIds;
+      }
+      if (enemySetAreaIds.isNotEmpty) {
+        idsData["EnemySetArea"] = enemySetAreaIds;
+      }
+      if (enemyGeneratorIds.isNotEmpty) {
+        idsData["EnemyGenerator"] = enemyGeneratorIds;
+      }
+
       final newMod = {
         "id": modId,
         "name": _nameController.text.trim(),
@@ -353,9 +423,10 @@ class _MetadataFormState extends State<MetadataForm> {
         "author": _authorController.text.trim(),
         "description": _descriptionController.text.trim(),
         "files": filesMetadata,
+        "importantIDs": idsData,
       };
 
-      print(newMod);
+      // print(jsonEncode(newMod));
       await _updateMetadata(newMod, widget.modStateManager);
     }
   }

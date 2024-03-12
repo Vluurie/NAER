@@ -1,4 +1,78 @@
-const Map<String, List<String>> important_ids = {
+import 'dart:convert';
+import 'dart:io';
+
+class ImportantIDs {
+  Map<String, List<String>> ids;
+
+  ImportantIDs(this.ids);
+
+  Iterable<MapEntry<String, List<String>>> get entries => ids.entries;
+
+  // Method to add an ID to a specific category
+  void addId(String category, String id) {
+    if (!ids.containsKey(category)) {
+      ids[category] = [];
+    }
+    ids[category]?.add(id);
+  }
+
+  // Method to remove an ID from a specific category
+  bool removeId(String category, String id) {
+    return ids[category]?.remove(id) ?? false;
+  }
+
+  // Get all IDs for a category
+  List<String>? getIdsForCategory(String category) {
+    return ids[category];
+  }
+
+  // Check if an ID exists within a specific category
+  bool idExists(String category, String id) {
+    if (!ids.containsKey(category)) {
+      return false;
+    }
+    return ids[category]?.contains(id) ?? false;
+  }
+
+  static Future<ImportantIDs> loadFromMetadata(String metadataPath) async {
+    try {
+      final File metadataFile = File(metadataPath);
+      if (await metadataFile.exists()) {
+        final String metadataContent = await metadataFile.readAsString();
+        final Map<String, dynamic> decoded = jsonDecode(metadataContent);
+        final Map<String, List<String>> loadedIds = {...importantIds};
+
+        for (var mod in (decoded['mods'] as List? ?? [])) {
+          Map<String, dynamic>? modImportantIDs = (mod
+              as Map<String, dynamic>)['importantIDs'] as Map<String, dynamic>?;
+
+          if (modImportantIDs != null) {
+            modImportantIDs.forEach((category, ids) {
+              var newIds = List<String>.from(ids as List? ?? []);
+              if (loadedIds.containsKey(category)) {
+                loadedIds[category] = [
+                  ...loadedIds[category]!,
+                  ...newIds.where((id) => !loadedIds[category]!.contains(id))
+                ];
+              } else {
+                loadedIds[category] = newIds;
+              }
+            });
+          }
+        }
+
+        return ImportantIDs(loadedIds);
+      } else {
+        print("Metadata file does not exist.");
+      }
+    } catch (e) {
+      print("Failed to load IDs from metadata: $e");
+    }
+    return ImportantIDs({...importantIds});
+  }
+}
+
+Map<String, List<String>> importantIds = {
   "EnemySetAction": [
     '0x864ec3e4',
     '0x82f0aad8',
