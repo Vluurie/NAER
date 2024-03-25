@@ -1,19 +1,26 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
-
-import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
-import 'package:NAER/naer_services/value_utils/handle_boss_stats.dart';
-import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:args/args.dart';
+import 'package:path/path.dart';
+import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
+import 'package:NAER/naer_services/handle_find_replace_em_data.dart';
+import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
+import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
+import 'package:NAER/naer_services/value_utils/handle_boss_stats.dart';
 import 'package:NAER/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli_fork_utils/utils/fileTypeHandler.dart';
 import 'package:NAER/nier_cli_fork_utils/utils/utils.dart';
-import 'package:path/path.dart';
-import 'package:NAER/naer_services/handle_find_replace_em_data.dart';
 
-Future<void> main(List<String> arguments) async {
+final logState = LogState();
+
+void logAndPrint(String message) {
+  print(message);
+  logState.addLog(message);
+}
+
+Future<void> nierCli(List<String> arguments) async {
   var t1 = DateTime.now();
   var configArgs = await readConfig();
   arguments = [...configArgs, ...arguments];
@@ -106,15 +113,16 @@ Future<void> main(List<String> arguments) async {
   var fileModeOptionsCount =
       [options.recursiveMode, options.folderMode].where((b) => b).length;
   if (fileModeOptionsCount > 1) {
-    print("Only one of --folder, or --recursive can be used at a time");
+    logState
+        .addLog("Only one of --folder, or --recursive can be used at a time");
     return;
   }
   if (fileModeOptionsCount > 0 && options.output != null) {
-    print("Cannot use --folder or --recursive with --output");
+    logAndPrint("Cannot use --folder or --recursive with --output");
     return;
   }
   if (args.rest.isEmpty) {
-    print("No input files specified");
+    logAndPrint("No input files specified");
     return;
   }
 
@@ -152,11 +160,11 @@ Future<void> main(List<String> arguments) async {
           input, null, options, pendingFiles, processedFiles, bossList);
       processedFiles.add(input);
     } on FileHandlingException catch (e) {
-      print("Invalid input");
+      logAndPrint("Invalid input");
       print(e);
       errorFiles.add(input);
     } catch (e, stackTrace) {
-      print("Failed to process file");
+      logAndPrint("Failed to process file");
       print(e);
       print(stackTrace);
       errorFiles.add(input);
@@ -183,26 +191,26 @@ Future<void> main(List<String> arguments) async {
 
   var tD = DateTime.now().difference(t1);
   if (processedFiles.length == 1) {
-    print("Done (${timeStr(tD)}) :D");
+    logAndPrint("Done (${timeStr(tD)}) :D");
   } else {
     if (errorFiles.isNotEmpty) {
-      print("Failed to process ${errorFiles.length} files:");
+      logAndPrint("Failed to process ${errorFiles.length} files:");
       for (var f in errorFiles) {
-        print("- $f");
+        logAndPrint("- $f");
       }
     }
   }
-  print("Processed ${processedFiles.length} files "
+  logAndPrint("Processed ${processedFiles.length} files "
       "in ${timeStr(tD)} "
       ":D");
   findEnemiesInDirectory(
       currentDir, sortedEnemiesPath, enemyLevel, enemyCategory);
   if (bossList.isNotEmpty && !bossList.contains('None')) {
-    print("Started changing boss stats...");
+    logAndPrint("Started changing boss stats...");
     print(bossList);
     await findBossStatFiles(currentDir, bossList, bossStats);
   } else {
-    print("No Boss Stats modified as argument is 'None'");
+    logAndPrint("No Boss Stats modified as argument is 'None'");
     print(bossList);
   }
 
@@ -214,7 +222,7 @@ Future<void> main(List<String> arguments) async {
           file, null, options, pendingFiles, processedFiles, bossList);
       processedFiles.add(file);
     } catch (e) {
-      print("input error");
+      logAndPrint("input error");
     }
   }
 
@@ -237,7 +245,7 @@ Future<void> main(List<String> arguments) async {
         }
       }
     } else {
-      print("Skipping processing due to Boss List conditions.");
+      logAndPrint("Skipping processing due to Boss List conditions.");
     }
 
     var baseNameWithoutExtension = basenameWithoutExtension(datFolder);
@@ -260,9 +268,9 @@ Future<void> main(List<String> arguments) async {
         var datOutput = join(output, datSubFolder, baseNameWithExtension);
         await handleInput(
             datFolder, datOutput, options, [], processedFiles, bossList);
-        print("Folder created: $datOutput");
+        logAndPrint("Folder created: $datOutput");
       } catch (e) {
-        print("Failed to process DAT folder");
+        logAndPrint("Failed to process DAT folder");
         print(e);
       }
     }
@@ -284,7 +292,7 @@ Future<void> main(List<String> arguments) async {
     "em/nier2blender_extracted",
     "core/nier2blender_extracted",
   ]);
-  print("Randomizing complete");
+  logAndPrint("Randomizing complete");
 }
 
 void printHelp(ArgParser argParser) {

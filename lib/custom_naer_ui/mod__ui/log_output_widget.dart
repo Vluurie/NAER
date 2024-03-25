@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as p;
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
-import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:NAER/nier_cli.dart';
+import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
+import 'package:NAER/naer_utils/cli_arguments.dart';
 
 class LogoutOutWidget extends StatefulWidget {
   final CLIArguments cliArguments;
@@ -114,10 +113,7 @@ class RandomizeDraggedFile {
       return;
     }
 
-    String command = cliArguments.command;
     List<String> baseArgs = List.from(cliArguments.processArgs);
-    var currentDir = Directory.current.path;
-    command = p.join(currentDir, 'bin', 'fork', 'nier_cli.exe');
 
     for (String folderPath in droppedFolders) {
       if (FileSystemEntity.typeSync(folderPath) ==
@@ -126,15 +122,7 @@ class RandomizeDraggedFile {
         arguments[0] = folderPath;
 
         try {
-          Process process =
-              await Process.start(command, arguments, runInShell: true);
-          await for (var data in process.stdout.transform(utf8.decoder)) {
-            for (var line in data.split('\n')) {
-              logState.addLog(line);
-            }
-          }
-
-          await process.exitCode;
+          await nierCli(arguments);
         } catch (e) {
           logState.addLog("Failed to process folder $folderPath: $e");
         }

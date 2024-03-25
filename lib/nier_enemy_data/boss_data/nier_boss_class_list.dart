@@ -131,7 +131,7 @@ List<Boss> bossList = [
   Boss(
       name: 'Ro-Shi Shade',
       imageUrl: 'assets/nier_image_folders/nier_boss_images/em8030.png',
-      emIdentifiers: ['em8030', 'em8040']),
+      emIdentifiers: ['em8030']),
   Boss(
       name: 'Adam Shade',
       imageUrl: 'assets/nier_image_folders/nier_boss_images/em6400.png',

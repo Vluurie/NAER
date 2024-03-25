@@ -41,7 +41,6 @@ const Map<String, List<String>> bossData = {
     'em8010',
     'em8020',
     'em8030',
-    'em8040',
     'em8801',
     'em8802',
     'em9001',

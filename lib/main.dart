@@ -4,20 +4,24 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
+import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
 import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/handle_mod_install.dart';
 import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/nier_cli.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_maps.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_side_quests.dart';
-import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
-import 'package:path/path.dart' as path;
-import 'package:path/path.dart' as p;
 import 'package:NAER/naer_pages/second_page.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart'
@@ -28,16 +32,19 @@ import 'package:NAER/custom_naer_ui/animations/dotted_line_progress_animation.da
 import 'package:NAER/custom_naer_ui/animations/shacke_animation_widget.dart';
 import 'package:NAER/custom_naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => LogState(),
-      child: EnemyRandomizerApp(),
-    ),
-  );
+Future<void> main(List<String> arguments) async {
+  if (arguments.isNotEmpty) {
+    await nierCli(arguments);
+    exit(0);
+  } else {
+    runApp(
+      ChangeNotifierProvider(
+        create: (context) => LogState(),
+        child: EnemyRandomizerApp(),
+      ),
+    );
+  }
 }
 
 class EnemyRandomizerApp extends StatelessWidget {
@@ -101,6 +108,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     ];
   }
 
+  void logAndPrint(String message) {
+    print(message);
+    logState.addLog(message);
+  }
+
   String convertAndEscapePath(String path) {
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       if (path.contains(' ') ||
@@ -118,6 +130,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   String specialDatOutputPath = '';
   List<String> ignoredModFiles = [];
   List<String> logMessages = [];
+  Set<String> loggedStages = {};
+  static String? _lastLogProcessed;
   Map<String, bool> categories = {};
   Map<String, bool> level = {
     "All Enemies": false,
@@ -459,7 +473,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         shadowColor: Colors.black.withOpacity(0.5),
       ),
       child: const Text(
-        'Go to Second Page',
+        'Mod Manager',
         style: TextStyle(
           fontSize: 16.0,
           color: Color.fromRGBO(0, 255, 255, 1),
@@ -496,67 +510,68 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     return Align(
       alignment: Alignment.topLeft,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
         constraints: const BoxConstraints(maxWidth: 800),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Directory Selection',
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(
+                height:
+                    16), // Provides spacing between the title and the content
             Wrap(
-              spacing: 10,
-              runSpacing: 10,
+              spacing: 16, // Horizontal spacing between children
+              runSpacing: 16, // Vertical spacing between lines
               children: [
                 DirectorySelectionCard(
                     title: "Input Directory:",
                     path: input,
                     onBrowse: (updatePath) => openInputFileDialog(updatePath),
                     icon: Icons.folder_open,
-                    width: 200,
                     hints: "Hints: Your Game data folder."),
                 DirectorySelectionCard(
                     title: "Output Directory:",
                     path: specialDatOutputPath,
                     onBrowse: (updatePath) => openOutputFileDialog(updatePath),
                     icon: Icons.folder_open,
-                    width: 200,
                     hints: "Hints: Also Game data folder."),
-                DirectorySelectionCard(
-                  title: "Select NieR CLI:",
-                  path: scriptPath,
-                  onBrowse: Platform.isMacOS || Platform.isLinux
-                      ? (updatePath) => openCliSearch(updatePath)
-                      : (_) async {}, // No-op function for Windows
-                  icon: Platform.isWindows
-                      ? Icons.disabled_by_default
-                      : Icons.apple,
-                  width: 300,
-                  enabled: Platform.isMacOS || Platform.isLinux,
-                  hint: Platform.isWindows
-                      ? "Only needed for macOS, Windows cannot select."
-                      : null,
-                ),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.open_in_full),
-                  label: const Text('Open output path'),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 25, 25, 26)),
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 71, 192, 240)),
-                  ),
+                  icon: const Icon(Icons.open_in_full,
+                      size: 18), // Adjust icon size
+                  label: const Text('Open output',
+                      style: TextStyle(fontSize: 14)), // Adjust font size
                   onPressed: () => getOutputPath(context, specialDatOutputPath),
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.settings),
-                  label: const Text('Open NAER_settings'),
                   style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8), // Reduce padding
+                    ),
                     backgroundColor: MaterialStateProperty.all<Color>(
                         const Color.fromARGB(255, 25, 25, 26)),
                     foregroundColor: MaterialStateProperty.all<Color>(
                         const Color.fromARGB(255, 71, 192, 240)),
                   ),
-                  onPressed: getNaerSettings,
                 ),
-                savePathCheckbox()
+                ElevatedButton.icon(
+                  icon:
+                      const Icon(Icons.settings, size: 18), // Adjust icon size
+                  label: const Text('Settings',
+                      style: TextStyle(fontSize: 14)), // Adjust font size
+                  onPressed: getNaerSettings,
+                  style: ButtonStyle(
+                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8), // Reduce padding
+                    ),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 25, 25, 26)),
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 71, 192, 240)),
+                  ),
+                ),
+                // Assuming savePathCheckbox() is a compact widget
+                savePathCheckbox(),
               ],
             ),
           ],
@@ -645,67 +660,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         ),
       );
     }
-  }
-
-  Future<void> openCliSearch(Function(String) updatePath) async {
-    String? scriptFile = await getCLIFilePath();
-
-    if (scriptFile != null && scriptFile.isNotEmpty) {
-      setState(() {
-        scriptPath = scriptFile;
-      });
-    }
-
-    updatePath(scriptFile ?? '');
-  }
-
-  Future<String?> getCLIFilePath() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null && result.files.single.path != null) {
-      String scriptFile = result.files.single.path!;
-
-      bool isValidCli = await _isValidCliFile(scriptFile);
-      if (isValidCli) {
-        return convertAndEscapePath(scriptFile);
-      } else {
-        _showInvalidCli();
-      }
-    }
-
-    return null;
-  }
-
-  Future<bool> _isValidCliFile(String scriptPath) async {
-    bool isWindows = Platform.isWindows;
-    bool isValidExtension = isWindows
-        ? scriptPath.toLowerCase().endsWith('nier_cli.exe')
-        : scriptPath.toLowerCase().endsWith('nier_cli');
-
-    return File(scriptPath).existsSync() && isValidExtension;
-  }
-
-  void _showInvalidCli() {
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Invalid File"),
-          content: const Text(
-              "The selected file is not a valid NieR CLI executable. ('nier_cli.exe') || ('nier_cli') "),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> openInputFileDialog(Function(String) updatePath) async {
@@ -905,20 +859,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       isLoading = true;
       loggedStages.clear();
     });
-    updateLog("Starting randomization process... 🏃‍➡️", scrollController);
 
     if (input.isEmpty || specialDatOutputPath.isEmpty) {
       updateLog("Error: Please select both input and output directories. 💋 ",
           scrollController);
+      return;
     }
 
-    if (!Platform.isWindows && scriptPath.isEmpty) {
-      updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
-      setState(() {
-        startBlinkAnimation();
-      });
-      throw ArgumentError("Nier CLI path is missing.");
-    }
+    updateLog("Starting randomization process... 🏃‍➡️", scrollController);
 
     try {
       CLIArguments cliArgs = await gatherCLIArguments(
@@ -934,85 +882,23 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         enemyLevel: enemyLevel,
       );
 
-      String command = cliArgs.command;
-      List<String> arguments = cliArgs.processArgs;
-
-      if (Platform.isWindows) {
-        var currentDir = Directory.current.path;
-        command = p.join(currentDir, 'bin/fork/nier_cli.exe');
-      }
+      await nierCli(cliArgs.processArgs);
 
       updateLog(
-          "Executing command: $command with arguments: ${arguments.join(' ')}",
-          scrollController);
-
-      Process process =
-          await Process.start(command, arguments, runInShell: true);
-
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
-        updateLog(line, scrollController);
-
-        // Check for "Folder created:" messages and log .dat file creation
-        if (line.contains("Folder created:")) {
-          var parts = line.split("Folder created:");
-          if (parts.length >= 2) {
-            var fullPath = parts[1].trim();
-            if (fullPath.endsWith('.dat')) {
-              setState(() {
-                createdDatFiles.add(fullPath);
-                FileChange.logChange(fullPath, 'create');
-              });
-            }
-          }
-        }
-      });
-
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((line) {
-        updateLog("stderr: $line", scrollController);
-      });
-
-      final exitCode = await process.exitCode;
-      if (exitCode == 0) {
-        updateLog(
-            "Randomization process completed successfully with exit code $exitCode",
-            scrollController);
-      } else {
-        updateLog(
-            "Randomization process ended with error. Exit code: $exitCode",
-            scrollController);
-      }
-
-      setState(() {
-        createdFiles.addAll(createdDatFiles);
-      });
-    } on FormatException catch (formatException) {
-      updateLog("Format error: ${formatException.message}", scrollController);
-    } on FileSystemException catch (fileSystemException) {
-      updateLog("File system error: ${fileSystemException.message}",
-          scrollController);
-    } on ProcessException catch (processException) {
-      updateLog("Process error: ${processException.message}", scrollController);
-    } catch (e, stackTrace) {
-      updateLog("Unexpected error: $e", scrollController);
-      logErrorDetails(e, stackTrace);
+          "Randomization process completed successfully.", scrollController);
+    } on Exception catch (e) {
+      updateLog("Error occurred: $e", scrollController);
     } finally {
       setState(() {
         isLoading = false;
       });
-      loggedStages.clear();
       updateLog(
           'Thank you for using the randomization tool.', scrollController);
       updateLog(asciiArt2B, scrollController);
-      Duration duration = const Duration(seconds: 3);
-      Future.delayed(duration);
-      updateLog("Randomization process finished.", scrollController);
-      showCompletionDialog();
+      Future.delayed(const Duration(seconds: 3), () {
+        updateLog("Randomization process finished.", scrollController);
+        showCompletionDialog();
+      });
     }
   }
 
@@ -1423,14 +1309,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       if (input.isEmpty || specialDatOutputPath.isEmpty) {
         updateLog("Error: Please select both input and output directories. 💋 ",
             scrollController);
-      }
-
-      if (!Platform.isWindows && scriptPath.isEmpty) {
-        updateLog("Error: Please select the Nier CLI. 💩 ", scrollController);
-        setState(() {
-          startBlinkAnimation();
-        });
-        throw ArgumentError("Nier CLI path is missing.");
+        return;
       }
 
       CLIArguments cliArgs = await gatherCLIArguments(
@@ -1549,7 +1428,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       command = 'sudo';
     } else if (Platform.isWindows) {
       var currentDir = Directory.current.path;
-      command = p.join(currentDir, 'bin/fork/nier_cli.exe');
+      command = p.join(currentDir, 'NAER.exe');
     }
 
     List<String> fullCommand = [scriptPath] + processArgs;
@@ -1571,10 +1450,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         ignoreList: ignoredModFiles);
   }
 
-  Set<String> loggedStages = {};
-
   void updateLog(String log, ScrollController scrollController) async {
     if (log.trim().isEmpty) {
+      return;
+    }
+
+    final processedLog = LogState.processLog(log);
+
+    if (processedLog.isEmpty || processedLog == _lastLogProcessed) {
       return;
     }
 
@@ -1582,124 +1465,18 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
         );
       }
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          isProcessing = true;
-        });
-      }
-    });
-
-    setState(() {});
-
     setState(() {
-      String? stageIdentifier;
-
+      isProcessing = true;
+      logMessages.add(processedLog);
       startBlinkAnimation();
-
-      if (log.startsWith("Repacking DAT file")) {
-        stageIdentifier = 'repacking_dat';
-      } else if (log.contains("Converting YAX to XML")) {
-        stageIdentifier = 'converting_yax_to_xml';
-      } else if (log.contains("Converting XML to YAX")) {
-        stageIdentifier = 'converting_xml_to_yax';
-      } else if (log.startsWith("Extracting CPK")) {
-        stageIdentifier = 'extracting_cpk';
-      } else if (log.contains('Processing entity:')) {
-        stageIdentifier = 'processing_entity';
-      } else if (log.contains('Replaced objId')) {
-        stageIdentifier = 'replacing_objid';
-      } else if (log.contains("Randomizing complete")) {
-        stageIdentifier = 'randomizing_complete';
-      } else if (log.contains("Decompressing")) {
-        stageIdentifier = 'decompressing';
-      } else if (log.contains("Skipping")) {
-        stageIdentifier = 'skipping';
-      } else if (log.contains("Object ID")) {
-        stageIdentifier = 'id';
-      } else if (log.contains("Folder created")) {
-        stageIdentifier = 'folder';
-      } else if (log.contains("Export path")) {
-        stageIdentifier = 'export';
-      } else if (log.contains("Deleted")) {
-        stageIdentifier = 'deleted';
-      } else if (log.contains("Reading")) {
-        stageIdentifier = 'read';
-      } else if (log.contains("r5a5.dat")) {
-        stageIdentifier = 'write';
-      } else if (log.contains("Bad state")) {
-        stageIdentifier = 'skip';
-      } else {
-        logMessages.add(log);
-      }
-
-      if (stageIdentifier != null) {
-        if (!loggedStages.contains(stageIdentifier)) {
-          switch (stageIdentifier) {
-            case 'repacking_dat':
-              log = "Repacking DAT files initiated.";
-              break;
-            case 'converting_yax_to_xml':
-              log = "Conversion from YAX to XML in progress...";
-              break;
-            case 'converting_xml_to_yax':
-              log = "Conversion from XML to YAX in progress...";
-              break;
-            case 'extracting_cpk':
-              log = "CPK Extraction started.";
-              break;
-            case 'processing_entity':
-              log = "Searching and replacing Enemies...";
-              break;
-            case 'replacing_objid':
-              log = "Replaced Enemies.";
-              break;
-            case 'randomizing_complete':
-              log = "Randomizing process completed.";
-              break;
-            case 'decompressing':
-              log = "Decompressing DAT files in progress.";
-              break;
-            case 'skipping':
-              log = "Skipping unnecessary DAT files.";
-              break;
-            case 'id':
-              log = "Replacing Enemies in process.";
-              break;
-            case 'folder':
-              log = "Processing files.. copy to output path.";
-              break;
-            case 'export':
-              log = "Exporting dat files to output directory started.";
-              break;
-            case 'deleted':
-              log = "Deleting extracted CPK files in output directory...";
-              break;
-            case 'read':
-              log = "Reading extracted files in process.";
-              break;
-            case 'write':
-              log = "Im the issue that can be ignored.";
-              break;
-            case 'skip':
-              log = "I had an issue, but this issue is not an issue. ";
-              break;
-          }
-
-          logMessages.add(log);
-          startBlinkAnimation();
-          loggedStages.add(stageIdentifier);
-        }
-      }
-    });
-
-    setState(() {
+      loggedStages.add(processedLog);
+      _lastLogProcessed = processedLog;
       isProcessing = false;
     });
 
@@ -2082,26 +1859,28 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Enemy Level: $enemyLevel",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+                  if (level['None'] == false)
+                    Text(
+                      "Enemy Level: $enemyLevel",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  Slider(
-                    activeColor: const Color.fromRGBO(0, 255, 255, 1),
-                    value: enemyLevel.toDouble(),
-                    min: 1,
-                    max: 99,
-                    divisions: 98,
-                    label: enemyLevel.toString(),
-                    onChanged: (double newValue) {
-                      setState(() {
-                        enemyLevel = newValue.round();
-                      });
-                    },
-                  ),
+                  if (level['None'] == false)
+                    Slider(
+                      activeColor: const Color.fromRGBO(0, 255, 255, 1),
+                      value: enemyLevel.toDouble(),
+                      min: 1,
+                      max: 99,
+                      divisions: 98,
+                      label: enemyLevel.toString(),
+                      onChanged: (double newValue) {
+                        setState(() {
+                          enemyLevel = newValue.round();
+                        });
+                      },
+                    ),
                 ],
               ),
             ),
@@ -2189,42 +1968,47 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Boss Stats: ${enemyStats.toStringAsFixed(1)}",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
+                !stats["None"]!
+                    ? Text(
+                        "Boss Stats: ${enemyStats.toStringAsFixed(1)}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      )
+                    : Container(),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                   child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.lerp(const Color.fromARGB(0, 41, 39, 39),
-                                  Colors.red, enemyStats / 5.0)!
-                              .withOpacity(0.1),
-                          blurRadius: 10.0 + (enemyStats / 5.0) * 10.0,
-                          spreadRadius: (enemyStats / 5.0) * 5.0,
-                        ),
-                      ],
-                    ),
-                    child: Slider(
-                      activeColor:
-                          Color.lerp(Colors.cyan, Colors.red, enemyStats / 5.0),
-                      value: enemyStats,
-                      min: 0.0,
-                      max: 5.0,
-                      divisions: 50,
-                      label: enemyStats.toStringAsFixed(1),
-                      onChanged: (double newValue) {
-                        setState(() {
-                          enemyStats = newValue;
-                        });
-                      },
-                    ),
-                  ),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color.lerp(
+                                    const Color.fromARGB(0, 41, 39, 39),
+                                    Colors.red,
+                                    enemyStats / 5.0)!
+                                .withOpacity(0.1),
+                            blurRadius: 10.0 + (enemyStats / 5.0) * 10.0,
+                            spreadRadius: (enemyStats / 5.0) * 5.0,
+                          ),
+                        ],
+                      ),
+                      child: !stats["None"]!
+                          ? Slider(
+                              activeColor: Color.lerp(
+                                  Colors.cyan, Colors.red, enemyStats / 5.0),
+                              value: enemyStats,
+                              min: 0.0,
+                              max: 5.0,
+                              divisions: 50,
+                              label: enemyStats.toStringAsFixed(1),
+                              onChanged: (double newValue) {
+                                setState(() {
+                                  enemyStats = newValue;
+                                });
+                              },
+                            )
+                          : Container()),
                 ),
               ],
             ),

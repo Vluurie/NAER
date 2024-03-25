@@ -1,11 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/handle_mod_install.dart';
 import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/nier_cli.dart';
 import 'package:NAER/nier_enemy_data/boss_data/nier_boss_class_list.dart';
 import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:flutter/material.dart';
@@ -511,8 +511,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
   Future<bool> _processModFiles(Mod selectedMod,
       ModInstallHandler modInstallHandler, LogState logState) async {
-    var currentDir = Directory.current.path;
-    var command = p.join(currentDir, 'bin', 'fork', 'nier_cli.exe');
     Set<String> uniqueDirectories = {};
     List<String> filesToHash = [];
 
@@ -540,8 +538,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
     for (String dirPath in uniqueDirectories) {
       List<String> arguments = List.from(widget.cliArguments.processArgs);
       arguments[0] = dirPath;
-      success =
-          await _executeCLICommand(logState, command, arguments) && success;
+      success = await _executeCLICommand(logState, arguments) && success;
       if (!success) {
         logState.addLog("Failed to process directory: $dirPath");
         break;
@@ -578,21 +575,9 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   }
 
   Future<bool> _executeCLICommand(
-      LogState logState, String command, List<String> arguments) async {
+      LogState logState, List<String> arguments) async {
     try {
-      Process process =
-          await Process.start(command, arguments, runInShell: true);
-      await for (var output in process.stdout.transform(utf8.decoder)) {
-        logState.addLog(output);
-      }
-      await for (var error in process.stderr.transform(utf8.decoder)) {
-        logState.addLog(error);
-      }
-      int exitCode = await process.exitCode;
-      if (exitCode != 0) {
-        logState.addLog("CLI command exited with code $exitCode");
-        return false;
-      }
+      await nierCli(arguments);
       return true;
     } catch (e) {
       logState.addLog("Error executing CLI command: $e");

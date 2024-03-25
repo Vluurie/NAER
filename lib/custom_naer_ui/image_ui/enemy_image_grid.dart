@@ -368,7 +368,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                     "• Multiple Enemies Selection: Selecting multiple enemies will randomize the game's enemies, limiting them to your chosen selections."),
                 SizedBox(height: 5),
                 Text(
-                    "• Full Randomization: For a completely unpredictable experience, simply hit 'Start Randomizing' without making any specific selections. This option includes all enemies in the randomization process."),
+                    "• Full Randomization: For a completely unpredictable experience, simply hit 'Modify' without making any specific selections. This option includes all enemies in the randomization process."),
                 SizedBox(height: 10),
                 Text(
                   "Important Notes:",

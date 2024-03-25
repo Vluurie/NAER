@@ -10,7 +10,6 @@ class LogState extends ChangeNotifier {
 
   void addLog(String log) {
     String modifiedLog = processLog(log);
-
     _logCounts.update(modifiedLog, (count) => count + 1, ifAbsent: () => 1);
 
     if (_lastLog != modifiedLog) {
@@ -27,7 +26,7 @@ class LogState extends ChangeNotifier {
     notifyListeners();
   }
 
-  String processLog(String log) {
+  static String processLog(String log) {
     String? stageIdentifier;
     if (log.startsWith("Repacking DAT file")) {
       stageIdentifier = 'repacking_dat';
