@@ -78,16 +78,17 @@ class EnemyRandomizerAppState extends StatefulWidget {
 
 class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     with TickerProviderStateMixin {
+  Future<ElevatedButton>? _buttonFuture;
   GlobalKey setupDirectorySelectionKey = GlobalKey();
-  GlobalKey setupButtonsKey = GlobalKey();
   GlobalKey setupImageGridKey = GlobalKey();
   GlobalKey setupCategorySelectionKey = GlobalKey();
   GlobalKey setupLogOutputKey = GlobalKey();
   GlobalKey<EnemyImageGridState> enemyImageGridKey = GlobalKey();
-  Future<ElevatedButton>? _buttonFuture;
-  int _selectedIndex = 0;
   List<String> createdFiles = [];
   List<String> createdDatFiles = [];
+  List<String> ignoredModFiles = [];
+  List<String> logMessages = [];
+  Set<String> loggedStages = {};
   bool isLoading = false;
   bool isButtonEnabled = true;
   bool isLogIconBlinking = false;
@@ -96,10 +97,23 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   bool selectAllQuests = true;
   bool selectAllMaps = true;
   bool selectAllPhases = true;
-  bool ignoreDLC = false;
+  bool savePaths = false;
   String input = '';
   String scriptPath = '';
+  String specialDatOutputPath = '';
+  String? _lastLogProcessed;
   int enemyLevel = 1;
+  int _selectedIndex = 0;
+  double enemyStats = 0.0;
+  Map<String, bool> stats = {"None": true, "Select All": false};
+  Map<String, bool> categories = {};
+  Map<String, bool> level = {
+    "All Enemies": false,
+    "All Enemies without Randomization": false,
+    "Only Bosses": false,
+    "Only Selected Enemies": false,
+    'None': true
+  };
   List<dynamic> getAllItems() {
     return [
       ...ScriptingPhase.scriptingPhases,
@@ -108,8 +122,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     ];
   }
 
-  void logAndPrint(String message) {
-    print(message);
+  void logAndprint(String message) {
+    // prin(message);
     logState.addLog(message);
   }
 
@@ -126,23 +140,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     return path;
   }
-
-  String specialDatOutputPath = '';
-  List<String> ignoredModFiles = [];
-  List<String> logMessages = [];
-  Set<String> loggedStages = {};
-  static String? _lastLogProcessed;
-  Map<String, bool> categories = {};
-  Map<String, bool> level = {
-    "All Enemies": false,
-    "All Enemies without Randomization": false,
-    "Only Bosses": false,
-    "Only Selected Enemies": false,
-    'None': true
-  };
-  double enemyStats = 0.0;
-  Map<String, bool> stats = {"None": true, "Select All": false};
-  bool savePaths = false;
 
   late ScrollController scrollController;
   late AnimationController _blinkController;
@@ -517,12 +514,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           children: [
             Text('Directory Selection',
                 style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(
-                height:
-                    16), // Provides spacing between the title and the content
+            const SizedBox(height: 16),
             Wrap(
-              spacing: 16, // Horizontal spacing between children
-              runSpacing: 16, // Vertical spacing between lines
+              spacing: 16,
+              runSpacing: 16,
               children: [
                 DirectorySelectionCard(
                     title: "Input Directory:",
@@ -539,13 +534,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 ElevatedButton.icon(
                   icon: const Icon(Icons.open_in_full,
                       size: 18), // Adjust icon size
-                  label: const Text('Open output',
-                      style: TextStyle(fontSize: 14)), // Adjust font size
+                  label:
+                      const Text('Open output', style: TextStyle(fontSize: 14)),
                   onPressed: () => getOutputPath(context, specialDatOutputPath),
                   style: ButtonStyle(
                     padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8), // Reduce padding
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
                     backgroundColor: MaterialStateProperty.all<Color>(
                         const Color.fromARGB(255, 25, 25, 26)),
@@ -731,9 +725,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       var modFiles = await findModFiles(selectedDirectory);
       if (modFiles.isNotEmpty) {
         showModsMessage(modFiles, (updatedModFiles) async {
-          setState(() {
-            ignoredModFiles = updatedModFiles;
-          });
+          if (updatedModFiles.isEmpty) {
+            setState(() {
+              ignoredModFiles = [];
+            });
+          } else {
+            setState(() {
+              ignoredModFiles = updatedModFiles;
+            });
+          }
           log("Updated ignoredModFiles after dialog: $ignoredModFiles");
           final prefs = await SharedPreferences.getInstance();
           String jsonData = jsonEncode(ignoredModFiles);
@@ -941,7 +941,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     } catch (e) {
       log('Error while finding mod files: $e');
     }
-    FileChange.ignoredFiles.clear();
     FileChange.ignoredFiles.addAll(modFiles);
     await FileChange.saveIgnoredFiles();
     log("Mod files found: $modFiles");
@@ -1528,11 +1527,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               ),
               TextButton(
                 child: const Text("Remove"),
-                onPressed: () {
+                onPressed: () async {
                   if (index != null) {
-                    modFiles.removeAt(index);
+                    String fileToRemove = modFiles.removeAt(index);
+                    await FileChange.removeIgnoreFiles([fileToRemove]);
                   } else {
                     modFiles.clear();
+                    FileChange.ignoredFiles.clear();
+                    await FileChange.saveIgnoredFiles();
                   }
                   onModFilesUpdated(modFiles);
                   Navigator.of(context).pop();
