@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:NAER/nier_cli.dart';
+import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 

@@ -6,7 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 
 class ModInstallHandler {

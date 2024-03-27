@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:NAER/custom_naer_ui/mod__ui/mod_list.dart';
+import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
-import 'package:NAER/naer_utils/handle_mod_install.dart';
+import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as p;

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:NAER/custom_naer_ui/mod__ui/log_output_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/log_output_widget.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';

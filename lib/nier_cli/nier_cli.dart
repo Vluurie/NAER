@@ -8,10 +8,10 @@ import 'package:NAER/naer_services/handle_find_replace_em_data.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_services/value_utils/handle_boss_stats.dart';
-import 'package:NAER/nier_cli_fork_utils/utils/CliOptions.dart';
-import 'package:NAER/nier_cli_fork_utils/utils/exception.dart';
-import 'package:NAER/nier_cli_fork_utils/utils/fileTypeHandler.dart';
-import 'package:NAER/nier_cli_fork_utils/utils/utils.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/fileTypeHandler.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
 
 final logState = LogState();
 

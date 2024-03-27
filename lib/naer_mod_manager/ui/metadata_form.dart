@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;

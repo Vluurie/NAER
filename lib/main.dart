@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
+import 'package:NAER/custom_naer_ui/appbar/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -11,18 +12,19 @@ import 'package:path/path.dart' as path;
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
 import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:NAER/naer_utils/handle_mod_install.dart';
-import 'package:NAER/naer_utils/mod_state_managment.dart';
-import 'package:NAER/nier_cli.dart';
+import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
+import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_maps.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_side_quests.dart';
-import 'package:NAER/naer_pages/second_page.dart';
+import 'package:NAER/naer_mod_manager/mod_manager.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart'
     as enemy_data;
@@ -38,6 +40,13 @@ Future<void> main(List<String> arguments) async {
     await nierCli(arguments);
     exit(0);
   } else {
+    WidgetsFlutterBinding.ensureInitialized();
+    await windowManager.ensureInitialized();
+    windowManager.waitUntilReadyToShow().then((_) async {
+      await windowManager.setAsFrameless();
+      await windowManager.show();
+      await windowManager.focus();
+    });
     runApp(
       ChangeNotifierProvider(
         create: (context) => LogState(),
@@ -78,7 +87,6 @@ class EnemyRandomizerAppState extends StatefulWidget {
 
 class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     with TickerProviderStateMixin {
-  Future<ElevatedButton>? _buttonFuture;
   GlobalKey setupDirectorySelectionKey = GlobalKey();
   GlobalKey setupImageGridKey = GlobalKey();
   GlobalKey setupCategorySelectionKey = GlobalKey();
@@ -144,13 +152,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   late ScrollController scrollController;
   late AnimationController _blinkController;
   late Future<bool> _loadPathsFuture;
+  late Future<ElevatedButton> _buttonFuture;
 
   @override
   void initState() {
     super.initState();
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles().then((_) {}).catchError((error) {});
-    _buttonFuture = _navigateButton(context);
     updateItemsByType(SideQuest, true);
     updateItemsByType(MapLocation, true);
     updateItemsByType(ScriptingPhase, true);
@@ -201,146 +209,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             ),
             child: Stack(
               children: <Widget>[
-                AppBar(
-                  toolbarHeight: 100.0,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  title: LayoutBuilder(
-                    builder: (context, constraints) {
-                      bool isLargeScreen = constraints.maxWidth > 600;
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(
-                                right: isLargeScreen ? 20.0 : 10.0),
-                            child: Image.asset(
-                              'assets/naer_icons/icon.png',
-                              fit: BoxFit.cover,
-                              width: isLargeScreen ? 70.0 : 50.0,
-                            ),
-                          ),
-                          Text(
-                            'NAER',
-                            style: TextStyle(
-                              fontSize: isLargeScreen ? 36.0 : 24.0,
-                              color: const Color.fromRGBO(0, 255, 255, 1),
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const Spacer(),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.info, size: 32.0),
-                                color: const Color.fromRGBO(49, 217, 240, 1),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text("Information"),
-                                        content: RichText(
-                                          text: const TextSpan(
-                                            style: TextStyle(
-                                                color: Color.fromARGB(
-                                                    255, 255, 255, 255)),
-                                            children: <TextSpan>[
-                                              TextSpan(
-                                                  text:
-                                                      "Thank you for using this tool! It is provided free of charge and developed in my personal time. "),
-                                              TextSpan(
-                                                  text:
-                                                      "\n\nIf you encounter any issues or have questions, feel free to ask in the Nier Modding community! "),
-                                              TextSpan(
-                                                  text:
-                                                      ".\n\nSpecial thanks to RaiderB with his NieR CLI and the entire mod community for making this possible."),
-                                            ],
-                                          ),
-                                        ),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: const Text("Close"),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                              const Text(
-                                'Information',
-                                style: TextStyle(fontSize: 10.0),
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                  icon: AnimatedBuilder(
-                                    animation: _blinkController,
-                                    builder: (context, child) {
-                                      final color = ColorTween(
-                                        begin: const Color.fromARGB(
-                                            31, 206, 198, 198),
-                                        end: const Color.fromARGB(
-                                            255, 86, 244, 54),
-                                      ).animate(_blinkController).value;
-
-                                      if (_blinkController.status ==
-                                          AnimationStatus.forward) {}
-
-                                      return Icon(
-                                        Icons.terminal,
-                                        size: 32.0,
-                                        color: color,
-                                      );
-                                    },
-                                  ),
-                                  onPressed: () {
-                                    scrollToSetup(setupLogOutputKey);
-                                  }),
-                              const Text(
-                                'Log',
-                                style: TextStyle(fontSize: 10.0),
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 100.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                FutureBuilder<ElevatedButton>(
-                                  future: _buttonFuture,
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<ElevatedButton> snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const CircularProgressIndicator();
-                                    } else if (snapshot.hasError) {
-                                      return Text('Error: ${snapshot.error}');
-                                    } else if (snapshot.hasData) {
-                                      return snapshot.data!;
-                                    } else {
-                                      return const SizedBox.shrink();
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  ),
+                NaerAppBar(
+                  blinkController: _blinkController,
+                  scrollToSetup: () => scrollToSetup(setupLogOutputKey),
+                  setupLogOutputKey: setupLogOutputKey,
+                  button: navigateButton(context),
                 ),
               ],
             ),
@@ -432,9 +305,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         ]));
   }
 
-  Future<ElevatedButton> _navigateButton(BuildContext context) async {
+  ElevatedButton navigateButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () async {
+        // Assuming gatherCLIArguments and other async operations
+        // are required to prepare for navigation.
         CLIArguments cliArgs = await gatherCLIArguments(
           scrollController: scrollController,
           enemyImageGridKey: enemyImageGridKey,

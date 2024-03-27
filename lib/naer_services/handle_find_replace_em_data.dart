@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:xml/xml.dart' as xml;
 import 'package:path/path.dart' as path;
-import 'package:NAER/nier_cli_fork_utils/fileTypeUtils/xml/xmlExtension.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/xml/xmlExtension.dart';
 import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/nier_enemy_data/boss_data/nier_boss_level_list.dart';
 import 'package:NAER/nier_enemy_data/values_data/nier_important_ids.dart';

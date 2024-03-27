@@ -11,9 +11,9 @@ dependencies:
   archive: ^3.3.6
   args: ^2.4.2
   crclib: ^3.0.0
-  csv: ^5.1.1
+  csv: ^6.0.0
   euc: ^1.0.6+8
-  file_picker: ^6.1.1
+  file_picker: ^8.0.0+1
   flutter:
     sdk: flutter
   flutter_test:
@@ -32,6 +32,8 @@ dependencies:
   crypto: ^3.0.3
   intl: ^0.19.0
   url_launcher: ^6.0.20
+  window_manager: ^0.3.8
+  bitsdojo_window: ^0.1.6
 
 
 

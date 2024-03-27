@@ -2,17 +2,17 @@
 
 import 'dart:io';
 
-import 'package:NAER/custom_naer_ui/mod__ui/log_output_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/log_output_widget.dart';
 import 'package:NAER/main.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
-import 'package:NAER/naer_utils/handle_mod_install.dart';
+import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:flutter/material.dart';
-import 'package:NAER/custom_naer_ui/mod__ui/metadata_form.dart';
-import 'package:NAER/naer_utils/mod_state_managment.dart';
+import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
+import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:provider/provider.dart';
 import 'package:NAER/custom_naer_ui/drag_n_drop.dart';
-import 'package:NAER/custom_naer_ui/mod__ui/mod_loader_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:url_launcher/url_launcher.dart';
 
