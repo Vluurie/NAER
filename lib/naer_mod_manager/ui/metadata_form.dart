@@ -253,13 +253,17 @@ class _MetadataFormState extends State<MetadataForm> {
                         minWidth: 100,
                         child: ElevatedButton(
                           onPressed: () {
-                            if ((_formKey.currentState?.validate() ?? false) &&
-                                (_directoryContentsInfo.isNotEmpty)) {
+                            bool formIsValid =
+                                _formKey.currentState?.validate() ?? false;
+                            bool directoryHasContents =
+                                _directoryContentsInfo.isNotEmpty;
+
+                            if (formIsValid && directoryHasContents) {
                               _saveMetadata();
                               Navigator.of(context).pop();
                             } else {
                               setState(() {
-                                _showModFolderWarning = true;
+                                _showModFolderWarning = !directoryHasContents;
                               });
                             }
                           },
@@ -273,35 +277,38 @@ class _MetadataFormState extends State<MetadataForm> {
                       ),
                     ),
                     if (_showModFolderWarning)
-                      Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 41, 39, 39),
-                          borderRadius: BorderRadius.circular(5.0),
-                          border: Border.all(
-                            color: Colors.red,
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
+                      Visibility(
+                        visible: _showModFolderWarning,
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 20),
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 41, 39, 39),
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
                               color: Colors.red,
-                              size: 24.0,
+                              width: 1.0,
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              "Please add a mod folder or check your input again before saving.",
-                              style: TextStyle(
-                                color: Colors.red[800],
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.red,
+                                size: 24.0,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 10),
+                              Text(
+                                "Please add a mod folder or check your input again before saving.",
+                                style: TextStyle(
+                                  color: Colors.red[800],
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                   ],
@@ -331,7 +338,11 @@ class _MetadataFormState extends State<MetadataForm> {
                 border: const OutlineInputBorder(),
               ),
               validator: (value) {
-                return value?.validateHexValue();
+                if (value == null || value.isEmpty) {
+                  return null;
+                } else {
+                  return value.validateHexValue();
+                }
               },
             ),
           ),
@@ -364,7 +375,7 @@ class _MetadataFormState extends State<MetadataForm> {
             child: IconButton(
               icon: const Icon(Icons.add_circle_outline),
               onPressed: onAdded,
-              tooltip: 'Add more', // Providing a tooltip for better UX
+              tooltip: 'Add more',
             ),
           ),
         ),
@@ -377,6 +388,25 @@ class _MetadataFormState extends State<MetadataForm> {
       return Container();
     }
 
+    if (_directoryContentsInfo.isEmpty) {
+      setState(() {
+        _showModFolderWarning = true;
+      });
+    } else {
+      setState(() {
+        _showModFolderWarning = false;
+      });
+    }
+
+    if (_directoryContentsInfo.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 10.0),
+        child: Text(
+          'No mod files found',
+          style: TextStyle(color: Colors.red),
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
