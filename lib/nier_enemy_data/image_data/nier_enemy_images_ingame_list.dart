@@ -28,7 +28,6 @@ List<String> imageNamesIngame = [
   'em0040.jpg',
   'em0042.jpg',
   'em0046.jpg',
-  'em004b.jpg',
   'em004d.jpg',
   'em0050.jpg',
   'em0052.jpg',

@@ -153,7 +153,8 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
       'emb080.png',
       'em1030.png',
       'em1040.png',
-      'em1074.png'
+      'em1074.png',
+      'emb014.png'
     };
 
     bool isBuggyEnemy = buggyEnemies.contains(baseName);
@@ -272,8 +273,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     String mapKey =
         'PAUSE_ENEMY_${imageName.replaceAll(RegExp(r'(_?[eE][mM])|(\.PNG)', caseSensitive: false), '').toUpperCase()}';
 
-    String description =
-        enemyDescriptions[mapKey] ?? 'No description available';
+    String description = enemyDescriptions[mapKey] ?? '....';
 
     showDialog(
       context: context,

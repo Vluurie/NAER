@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
 import 'package:NAER/custom_naer_ui/appbar/appbar.dart';
+import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -135,24 +136,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     logState.addLog(message);
   }
 
-  String convertAndEscapePath(String path) {
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      if (path.contains(' ') ||
-          path.contains('(') ||
-          path.contains(')') ||
-          path.contains('&') ||
-          path.contains('\\')) {
-        return path;
-      }
-    }
-
-    return path;
-  }
-
   late ScrollController scrollController;
   late AnimationController _blinkController;
   late Future<bool> _loadPathsFuture;
-  late Future<ElevatedButton> _buttonFuture;
 
   @override
   void initState() {
@@ -539,7 +525,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (containsValidFiles) {
         setState(() {
-          input = convertAndEscapePath(selectedDirectory);
+          input = selectedDirectory.convertAndEscapePath();
         });
         updatePath(selectedDirectory);
       } else {
@@ -593,7 +579,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
     if (selectedDirectory != null) {
       setState(() {
-        specialDatOutputPath = convertAndEscapePath(selectedDirectory);
+        specialDatOutputPath = selectedDirectory.convertAndEscapePath();
       });
       updatePath(selectedDirectory);
 
@@ -1245,7 +1231,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         });
         buffer.writeln("};");
         await tempFile.writeAsString(buffer.toString());
-        tempFilePath = convertAndEscapePath(tempFile.path);
+        tempFilePath = tempFile.path.convertAndEscapePath();
       } else {
         tempFilePath = "ALL";
       }

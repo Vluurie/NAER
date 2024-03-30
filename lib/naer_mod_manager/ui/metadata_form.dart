@@ -1,11 +1,10 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
@@ -26,11 +25,15 @@ class _MetadataFormState extends State<MetadataForm> {
   final TextEditingController _versionController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _enemySetActionController =
-      TextEditingController();
-  final TextEditingController _enemySetAreaController = TextEditingController();
-  final TextEditingController _enemyGeneratorController =
-      TextEditingController();
+  final List<TextEditingController> _enemySetActionControllers = [
+    TextEditingController()
+  ];
+  final List<TextEditingController> _enemySetAreaControllers = [
+    TextEditingController()
+  ];
+  final List<TextEditingController> _enemyGeneratorControllers = [
+    TextEditingController()
+  ];
   String? _selectedDirectory;
   bool _showModFolderWarning = false;
   List<String> _directoryContentsInfo = [];
@@ -90,27 +93,26 @@ class _MetadataFormState extends State<MetadataForm> {
                 Padding(
                     padding: const EdgeInsets.only(right: 20, left: 20),
                     child: _buildTextFormField(
-                      controller: _idController,
-                      label: 'ID',
-                      validator: _validateId,
-                    )),
+                        controller: _idController,
+                        label: 'ID',
+                        validator: (value) => value?.validateId(value))),
                 const SizedBox(height: 10),
                 Padding(
                     padding: const EdgeInsets.only(right: 20, left: 20),
                     child: _buildTextFormField(
-                      controller: _nameController,
-                      label: 'Name',
-                      validator: (value) =>
-                          _validateText(value, fieldName: 'Name'),
-                    )),
+                        controller: _nameController,
+                        label: 'Name',
+                        validator: (value) => value?.validateText(
+                              value,
+                              fieldName: 'Name',
+                            ))),
                 const SizedBox(height: 10),
                 Padding(
                     padding: const EdgeInsets.only(right: 20, left: 20),
                     child: _buildTextFormField(
-                      controller: _versionController,
-                      label: 'Version',
-                      validator: _validateVersion,
-                    )),
+                        controller: _versionController,
+                        label: 'Version',
+                        validator: (value) => value?.validateVersion(value))),
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.only(right: 20, left: 20),
@@ -118,7 +120,7 @@ class _MetadataFormState extends State<MetadataForm> {
                     controller: _authorController,
                     label: 'Author',
                     validator: (value) =>
-                        _validateText(value, fieldName: 'Author'),
+                        value?.validateText(value, fieldName: 'Author'),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -128,7 +130,7 @@ class _MetadataFormState extends State<MetadataForm> {
                     controller: _descriptionController,
                     label: 'Description',
                     validator: (value) =>
-                        _validateText(value, fieldName: 'Description'),
+                        value?.validateText(value, fieldName: 'Description'),
                   ),
                 ),
                 Padding(
@@ -141,12 +143,27 @@ class _MetadataFormState extends State<MetadataForm> {
                             textScaler: TextScaler.linear(1.5),
                             "Extra: Advanced for ignoring enemies from modifying in this entities: (example: 0x864ec3e4)"),
                       ),
-                      _buildIdInputField("Enemy Set Action ID",
-                          _enemySetActionController, "EnemySetAction"),
-                      _buildIdInputField("Enemy Set Area ID",
-                          _enemySetAreaController, "EnemySetArea"),
-                      _buildIdInputField("Enemy Generator ID",
-                          _enemyGeneratorController, "EnemyGenerator"),
+                      _buildIdList(
+                          "Enemy Set Action ID", _enemySetActionControllers,
+                          () {
+                        setState(() {
+                          _enemySetActionControllers
+                              .add(TextEditingController());
+                        });
+                      }),
+                      _buildIdList(
+                          "Enemy Set Area ID", _enemySetAreaControllers, () {
+                        setState(() {
+                          _enemySetAreaControllers.add(TextEditingController());
+                        });
+                      }),
+                      _buildIdList(
+                          "Enemy Generator ID", _enemyGeneratorControllers, () {
+                        setState(() {
+                          _enemyGeneratorControllers
+                              .add(TextEditingController());
+                        });
+                      }),
                     ],
                   ),
                 ),
@@ -277,7 +294,7 @@ class _MetadataFormState extends State<MetadataForm> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              "Please add a mod folder before saving.",
+                              "Please add a mod folder or check your input again before saving.",
                               style: TextStyle(
                                 color: Colors.red[800],
                                 fontSize: 16,
@@ -298,21 +315,60 @@ class _MetadataFormState extends State<MetadataForm> {
   }
 
   Widget _buildIdInputField(
-      String label, TextEditingController controller, String category) {
+      String label,
+      List<TextEditingController> controllers,
+      int index,
+      VoidCallback onRemoved) {
     return Padding(
-      padding: const EdgeInsets.only(right: 20, left: 20),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        onFieldSubmitted: (value) {
-          setState(() {
-            controller.clear();
-          });
-        },
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controllers[index],
+              decoration: InputDecoration(
+                labelText: "$label ${index + 1}",
+                border: const OutlineInputBorder(),
+              ),
+              validator: (value) {
+                return value?.validateHexValue();
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed: onRemoved,
+            tooltip: 'Remove',
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildIdList(String label, List<TextEditingController> controllers,
+      VoidCallback onAdded) {
+    return Column(
+      children: [
+        ...List.generate(
+            controllers.length,
+            (i) => _buildIdInputField(label, controllers, i, () {
+                  if (controllers.length > 1) {
+                    setState(() => controllers.removeAt(i));
+                  }
+                })),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              onPressed: onAdded,
+              tooltip: 'Add more', // Providing a tooltip for better UX
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -388,32 +444,26 @@ class _MetadataFormState extends State<MetadataForm> {
         return {"path": modFilePath};
       }).toList();
 
-      final List<String> enemySetActionIds = _enemySetActionController.text
-          .split(',')
-          .where((id) => id.isNotEmpty)
-          .map((id) => id.trim())
-          .toList();
-      final List<String> enemySetAreaIds = _enemySetAreaController.text
-          .split(',')
-          .where((id) => id.isNotEmpty)
-          .map((id) => id.trim())
-          .toList();
-      final List<String> enemyGeneratorIds = _enemyGeneratorController.text
-          .split(',')
-          .where((id) => id.isNotEmpty)
-          .map((id) => id.trim())
-          .toList();
+      List<String> processIds(List<TextEditingController> controllers) {
+        return controllers
+            .map((controller) => controller.text)
+            .expand((idString) => idString.split(','))
+            .where((id) => id.isNotEmpty)
+            .map((id) => id.trim())
+            .toList();
+      }
 
-      final Map<String, List<String>> idsData = {};
-      if (enemySetActionIds.isNotEmpty) {
-        idsData["EnemySetAction"] = enemySetActionIds;
-      }
-      if (enemySetAreaIds.isNotEmpty) {
-        idsData["EnemySetArea"] = enemySetAreaIds;
-      }
-      if (enemyGeneratorIds.isNotEmpty) {
-        idsData["EnemyGenerator"] = enemyGeneratorIds;
-      }
+      final List<String> enemySetActionIds =
+          processIds(_enemySetActionControllers);
+      final List<String> enemySetAreaIds = processIds(_enemySetAreaControllers);
+      final List<String> enemyGeneratorIds =
+          processIds(_enemyGeneratorControllers);
+
+      final Map<String, List<String>> idsData = {
+        if (enemySetActionIds.isNotEmpty) "EnemySetAction": enemySetActionIds,
+        if (enemySetAreaIds.isNotEmpty) "EnemySetArea": enemySetAreaIds,
+        if (enemyGeneratorIds.isNotEmpty) "EnemyGenerator": enemyGeneratorIds,
+      };
 
       final newMod = {
         "id": modId,
@@ -426,7 +476,6 @@ class _MetadataFormState extends State<MetadataForm> {
         "importantIDs": idsData,
       };
 
-      // print(jsonEncode(newMod));
       await _updateMetadata(newMod, widget.modStateManager);
     }
   }
@@ -525,32 +574,5 @@ class _MetadataFormState extends State<MetadataForm> {
         _selectedImagePath = pickedFile.files.single.path;
       });
     }
-  }
-
-  String? _validateId(String? value) {
-    final RegExp idRegExp = RegExp(r'^[a-z0-9_]+$');
-    if (value == null || value.isEmpty || !idRegExp.hasMatch(value)) {
-      return 'Please enter a valid ID (lowercase, numbers, underscore only)';
-    }
-    return null;
-  }
-
-  String? _validateText(String? value, {required String fieldName}) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter $fieldName';
-    }
-    final RegExp textRegExp = RegExp(r'^[^{}\[\]]+$');
-    if (!textRegExp.hasMatch(value)) {
-      return 'Invalid characters in $fieldName';
-    }
-    return null;
-  }
-
-  String? _validateVersion(String? value) {
-    final RegExp versionRegExp = RegExp(r'^\d+\.\d+\.\d+$');
-    if (value == null || value.isEmpty || !versionRegExp.hasMatch(value)) {
-      return 'Please enter a valid version (e.g., 1.0.0)';
-    }
-    return null;
   }
 }

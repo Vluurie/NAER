@@ -95,22 +95,7 @@ Map<String, List<String>> importantIds = {
     '0x7164ad39'
   ],
   "EnemySetArea": [
-    '0xf1b8d119',
-    '0xf322e980',
     '0x47e03801',
-    '0xf3f7f209',
-    '0x740cd356',
-    '0xad392c70',
-    '0xa973d12e',
-    '0xbc234936',
-    '0x521571c3',
-    '0x9ccc9d76',
-    '0xafffffbd',
-    '0xf4a1e07e',
-    '0x838e7472',
-    '0xad9df817',
-    '0x44f70860',
-    '0x9c179e67',
     '0xae1b61f4',
     '0x8db48f87',
     '0x443b60c9',
@@ -131,11 +116,5 @@ Map<String, List<String>> importantIds = {
     '0xdab3f76e',
     '0x4647d8ff'
   ],
-  "EnemyGenerator": [
-    '0x4f69e00a',
-    '0xee58f4a6',
-    '0xa7a0c6a5',
-    '0xf176cc2c',
-    '0x3716b0fd'
-  ]
+  "EnemyGenerator": ['0x3716b0fd']
 };

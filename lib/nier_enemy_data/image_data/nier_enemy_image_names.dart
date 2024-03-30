@@ -28,7 +28,6 @@ List<String> imageNames = [
   'em0040.png',
   'em0042.png',
   'em0046.png',
-  'em004b.png',
   'em004d.png',
   'em0050.png',
   'em0052.png',
@@ -79,4 +78,10 @@ List<String> imageNames = [
   'emb05d.png',
   'emb060.png',
   'emb080.png',
+  'em9000.png',
+  "ema001.png",
+  'ema002.png',
+  'ema010.png',
+  'ema011.png',
+  'emb014.png',
 ];

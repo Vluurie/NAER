@@ -149,7 +149,9 @@ final Map<String, String> enemyDescriptions = {
   'PAUSE_ENEMY_B05D':
       'Important: Be aware, this enemy is very strong, from big aoes up to tanking alot!\n\nA blacksmith in the forest kingdom. His teacher was a master craftsman, known for improving the 8 legendary weapons of Virtue and Cruelty. He separated himself from the network due to an internal malfunction, so he is no longer hostile towards androids. He loves weapons more than anything, and as proof of your respect for weapons, he grants you the weapon his teacher honed.',
   'PAUSE_ENEMY_B060':
-      'Important: This enemy tanks alot!\n\nThis unit—a medium-sized quadruped with antlers on its head—resembles an animal in both appearance and behavior. After forming a pack of ferocious beasts and attacking the native animals, it appears to have been ostracized by its fellow lifeforms.',
+      'Important: This enemy tanks alot!\n\nLONG LONG AGO. A RECORD LEFT IN A BROKEN MEMORY CIRCUIT. THE LEADER OF AN ANIMAL PACK PICKED ME UP WHEN I WAS BROKEN AND COULD NOT MOVE AND SAVED ME. HE WAS A GREAT LEADER. HE LIVED FOR THE PACK. WHEN HE DIED I WANTED TO DO THE SAME. TO LIVE FOR EVERYONE"S SAKE AND DIE FOR EVERYONE"S SAKE. BUT I AM A MACHINE SO EVERYONE WOULD LEAVE ME BEHIND.',
   'PAUSE_ENEMY_B080':
-      'Important: This enemy tanks alot!\n\nIt is a rare and powerful machine resembling that of a Tyrannosaurus rex and attacks using enhanced projectiles and laser beams emanating from its mouth.Outfitted with extra parts, this reverse-jointed, Goliath-class machine resembles a dinosaur more than ever. It uses energy stored in its dorsal fins to fire lasers from its mouth.'
+      'Important: This enemy tanks alot!\n\nIt is a rare and powerful machine resembling that of a Tyrannosaurus rex and attacks using enhanced projectiles and laser beams emanating from its mouth.Outfitted with extra parts, this reverse-jointed, Goliath-class machine resembles a dinosaur more than ever. It uses energy stored in its dorsal fins to fire lasers from its mouth.',
+  'PAUSE_ENEMY_B014':
+      'Important: This enemy tanks alot!\n\nA medium-sized biped that guards the grave of the Forest Castles first king, attacking intruders on sight. The moss on its armor serves as proof of the many long years it has spent in this role.'
 };
