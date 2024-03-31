@@ -6,6 +6,7 @@ import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:NAER/nier_enemy_data/boss_data/nier_boss_class_list.dart';
 import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:flutter/material.dart';
@@ -577,7 +578,9 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   Future<bool> _executeCLICommand(
       LogState logState, List<String> arguments) async {
     try {
-      await nierCli(arguments);
+      bool isManagerFile = true;
+      arguments.modifyArgumentsForForcedBossList();
+      await nierCli(arguments, isManagerFile);
       return true;
     } catch (e) {
       logState.addLog("Error executing CLI command: $e");

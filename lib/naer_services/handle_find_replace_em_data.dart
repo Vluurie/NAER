@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'dart:math';
+import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:path/path.dart' as path;
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/xml/xmlExtension.dart';
@@ -81,24 +82,9 @@ Future<void> find(
     String enemyCategory) async {
   print('Found enemy randomizer... starting');
 
-  Future<String> ensureNAERSettingsDirectory() async {
-    var currentDirectory = Directory.current.path;
-
-    // Navigate two directories up from 'bin/fork' to 'NAER'
-    final naerDirectoryPath =
-        Directory(path.join(currentDirectory)).absolute.path;
-    final naerSettingsDirectoryPath =
-        path.join(naerDirectoryPath, 'NAER_Settings');
-
-    final naerSettingsDirectory = Directory(naerSettingsDirectoryPath);
-    if (!await naerSettingsDirectory.exists()) {
-      await naerSettingsDirectory.create(recursive: true);
-    }
-    return naerSettingsDirectory.path;
-  }
-
   Future<String> getMetaDataPath() async {
-    final String settingsDirectoryPath = await ensureNAERSettingsDirectory();
+    final String settingsDirectoryPath =
+        await FileChange.ensureSettingsDirectory();
     final String metadataPath =
         path.join(settingsDirectoryPath, 'ModPackage', 'mod_metadata.json');
     print("Found metadata at $metadataPath");

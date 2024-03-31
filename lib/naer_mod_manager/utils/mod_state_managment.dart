@@ -202,25 +202,7 @@ class ModStateManager extends ChangeNotifier {
                       style: const TextStyle(fontStyle: FontStyle.italic)),
                   const TextSpan(
                       text:
-                          "Could you take a peek at your randomization settings? Just to make sure everything’s shipshape. Oh, and if you spot ",
-                      style: TextStyle(color: Colors.white)),
-                  const TextSpan(
-                      text: "“em” dat files",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                          color: Colors.yellowAccent)),
-                  const TextSpan(
-                      text: " being affected, maybe give ",
-                      style: TextStyle(color: Colors.white)),
-                  const TextSpan(
-                      text: "“Change boss stats” ",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.yellowAccent)),
-                  const TextSpan(
-                      text:
-                          "a try? If it's not selected, it does not install em files during randomization only.",
+                          "Could you take a peek at your randomization settings? Just to make sure everything’s shipshape.",
                       style: TextStyle(color: Colors.white)),
                   const TextSpan(
                       text:

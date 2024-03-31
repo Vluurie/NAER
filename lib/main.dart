@@ -38,7 +38,8 @@ import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
 
 Future<void> main(List<String> arguments) async {
   if (arguments.isNotEmpty) {
-    await nierCli(arguments);
+    bool isManagerFile = false;
+    await nierCli(arguments, isManagerFile);
     exit(0);
   } else {
     WidgetsFlutterBinding.ensureInitialized();
@@ -295,8 +296,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   ElevatedButton navigateButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () async {
-        // Assuming gatherCLIArguments and other async operations
-        // are required to prepare for navigation.
         CLIArguments cliArgs = await gatherCLIArguments(
           scrollController: scrollController,
           enemyImageGridKey: enemyImageGridKey,
@@ -394,8 +393,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     icon: Icons.folder_open,
                     hints: "Hints: Also Game data folder."),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.open_in_full,
-                      size: 18), // Adjust icon size
+                  icon: const Icon(Icons.open_in_full, size: 18),
                   label:
                       const Text('Open output', style: TextStyle(fontSize: 14)),
                   onPressed: () => getOutputPath(context, specialDatOutputPath),
@@ -410,15 +408,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   ),
                 ),
                 ElevatedButton.icon(
-                  icon:
-                      const Icon(Icons.settings, size: 18), // Adjust icon size
-                  label: const Text('Settings',
-                      style: TextStyle(fontSize: 14)), // Adjust font size
+                  icon: const Icon(Icons.settings, size: 18),
+                  label: const Text('Settings', style: TextStyle(fontSize: 14)),
                   onPressed: getNaerSettings,
                   style: ButtonStyle(
                     padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8), // Reduce padding
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
                     backgroundColor: MaterialStateProperty.all<Color>(
                         const Color.fromARGB(255, 25, 25, 26)),
@@ -426,7 +421,6 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                         const Color.fromARGB(255, 71, 192, 240)),
                   ),
                 ),
-                // Assuming savePathCheckbox() is a compact widget
                 savePathCheckbox(),
               ],
             ),
@@ -743,8 +737,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         enemyStats: enemyStats,
         enemyLevel: enemyLevel,
       );
-
-      await nierCli(cliArgs.processArgs);
+      bool isManagerFile = false;
+      await nierCli(cliArgs.processArgs, isManagerFile);
 
       updateLog(
           "Randomization process completed successfully.", scrollController);
@@ -757,10 +751,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       updateLog(
           'Thank you for using the randomization tool.', scrollController);
       updateLog(asciiArt2B, scrollController);
-      Future.delayed(const Duration(seconds: 3), () {
-        updateLog("Randomization process finished.", scrollController);
-        showCompletionDialog();
-      });
+      updateLog("Randomization process finished.", scrollController);
+      showCompletionDialog();
     }
   }
 

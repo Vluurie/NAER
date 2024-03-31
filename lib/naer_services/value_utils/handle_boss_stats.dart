@@ -42,6 +42,10 @@ List<String> flattenList(List<dynamic> list) {
 Future<void> processCsvFile(
     File file, List<String> bossList, double bossStats) async {
   try {
+    if (bossStats == 0.0) {
+      print("Boss stats are 0.0, skipping file ${file.path}");
+      return;
+    }
     final lines = await file.readAsLines();
     List<String> modifiedLines = [];
 

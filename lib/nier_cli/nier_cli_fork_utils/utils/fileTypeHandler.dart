@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 
 import 'CliOptions.dart';
 import 'exception.dart';
+import 'package:path/path.dart' as path;
 import '../fileTypeUtils/cpk/cpkExtractor.dart';
 import '../fileTypeUtils/dat/datExtractor.dart';
 import '../fileTypeUtils/dat/datRepacker.dart';
@@ -23,16 +24,55 @@ Future<bool> handleDatExtract(
     bool isFile,
     bool isDirectory,
     List<String> pendingFiles,
-    Set<String> processedFiles) async {
-  if (input != 'dtt') if (args.fileTypeIsKnown && !args.isDat) return false;
-  if (!strEndsWithDat(input)) return false;
-  if (!isFile) return false;
+    Set<String> processedFiles,
+    List<String> activeOptions,
+    bool? isManagerFile) async {
+  String normalizePath(String filePath) {
+    return path.normalize(filePath).toLowerCase();
+  }
+
+  String normalizedInput = normalizePath(input);
+  if (isManagerFile != true) {
+    // Check if the input path is in active options
+    if (!activeOptions.map(normalizePath).contains(normalizedInput)) {
+      return false;
+    }
+  } else {
+    // print('isManagerFile is true, bypassing active options check.');
+  }
+
+  // Skip if the file type is known but not a DAT file
+  if (args.fileTypeIsKnown && !args.isDat) {
+    return false;
+  }
+
+  // Skip if the input does not end with .dat
+  if (!strEndsWithDat(input)) {
+    return false;
+  }
+
+  // Skip if the input is not a file
+  if (!isFile) {
+    return false;
+  }
 
   output ??= join(dirname(input), datExtractSubDir, basename(input));
 
-  await Directory(output).create(recursive: true);
+  if (isManagerFile != true) {
+    print('Extracting DAT file: $input to $output');
+    // Create the output directory if isManagerFile is not true
+    await Directory(output).create(recursive: true);
+  } else {
+    //print('Skipping directory creation for manager file.');
+  }
+
+  // Proceed with extraction, ensuring output is non-null with `!`
   var extractedFiles = await extractDatFiles(input, output);
-  if (args.autoExtractChildren) pendingFiles.insertAll(0, extractedFiles);
+  print('Extracted files from $input: ${extractedFiles.length} files.');
+
+  if (args.autoExtractChildren) {
+    pendingFiles.insertAll(0, extractedFiles);
+  }
 
   return true;
 }
@@ -44,7 +84,9 @@ Future<bool> handleDatRepack(
     bool isFile,
     bool isDirectory,
     List<String> pendingFiles,
-    Set<String> processedFiles) async {
+    Set<String> processedFiles,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   if (args.fileTypeIsKnown && !args.isDat) return false;
   if (!strEndsWithDat(input)) return false;
   if (!isDirectory) return false;
@@ -75,7 +117,9 @@ Future<bool> handlePakExtract(
     bool isFile,
     bool isDirectory,
     List<String> pendingFiles,
-    Set<String> processedFiles) async {
+    Set<String> processedFiles,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isFile) return false;
@@ -96,7 +140,9 @@ Future<bool> handlePakRepack(
     bool isFile,
     bool isDirectory,
     List<String> pendingFiles,
-    Set<String> processedFiles) async {
+    Set<String> processedFiles,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isDirectory) return false;
@@ -112,7 +158,9 @@ Future<bool> handleYaxToXml(
     bool isFile,
     bool isDirectory,
     List<String> pendingFiles,
-    Set<String> processedFiles) async {
+    Set<String> processedFiles,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".yax")) return false;
   if (!isFile) return false;
@@ -134,7 +182,9 @@ Future<bool> handleXmlToYax(
     bool isFile,
     bool isDirectory,
     List<String> pendingFiles,
-    Set<String> processedFiles) async {
+    Set<String> processedFiles,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".xml")) return false;
   if (!isFile) return false;
@@ -158,7 +208,9 @@ Future<bool> handleCpkExtract(
     bool isDirectory,
     List<String> pendingFiles,
     Set<String> processedFiles,
-    List<String> bossList) async {
+    List<String> bossList,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   if (args.fileTypeIsKnown && !args.isCpk) return false;
   if (!input.endsWith(".cpk")) return false;
   if (!isFile) return false;
@@ -196,9 +248,8 @@ Future<bool> handleCpkExtract(
 }
 
 const List<
-        Future<bool> Function(
-            String, String?, CliOptions, bool, bool, List<String>, Set<String>)>
-    _handlers = [
+    Future<bool> Function(String, String?, CliOptions, bool, bool, List<String>,
+        Set<String>, List<String>, bool? ismanagerFile)> _handlers = [
   handleDatExtract,
   handleDatRepack,
   handlePakExtract,
@@ -213,7 +264,9 @@ Future<void> handleInput(
     CliOptions args,
     List<String> pendingFiles,
     Set<String> processedFiles,
-    List<String> bossList) async {
+    List<String> bossList,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
   bool isFile = await FileSystemEntity.isFile(input);
   bool isDirectory = await FileSystemEntity.isDirectory(input);
   if (!isFile && !isDirectory) {
@@ -221,7 +274,7 @@ Future<void> handleInput(
         "Input file or directory does not exist ($input)");
   }
   await handleCpkExtract(input, output, args, isFile, isDirectory, pendingFiles,
-      processedFiles, bossList);
+      processedFiles, bossList, activeOptions, ismanagerFile);
   for (var handler in _handlers) {
     String? currentOutput = output;
     if (handler == handleDatRepack && args.specialDatOutputPath != null) {
@@ -230,7 +283,7 @@ Future<void> handleInput(
     }
 
     if (await handler(input, currentOutput, args, isFile, isDirectory,
-        pendingFiles, processedFiles)) {
+        pendingFiles, processedFiles, activeOptions, ismanagerFile)) {
       return;
     }
   }

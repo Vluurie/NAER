@@ -1,8 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
+import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/handle_file_paths.dart';
 import 'package:args/args.dart';
 import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:NAER/naer_services/handle_find_replace_em_data.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
@@ -20,7 +23,7 @@ void logAndPrint(String message) {
   logState.addLog(message);
 }
 
-Future<void> nierCli(List<String> arguments) async {
+Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
   var t1 = DateTime.now();
   var configArgs = await readConfig();
   arguments = [...configArgs, ...arguments];
@@ -126,6 +129,36 @@ Future<void> nierCli(List<String> arguments) async {
     return;
   }
 
+  List<String> getActiveOptionPaths(ArgResults argResults, String output) {
+    List<String> allOptions = [...questOptions, ...mapOptions, ...phaseOptions];
+
+    var activePaths = allOptions
+        .where((option) =>
+            argResults[option] == true && FilePaths.paths.containsKey(option))
+        .map((option) => FilePaths.paths[option]!)
+        .map((path) => '$output\\$path')
+        .toList();
+
+    String? bossesArgument = argResults["bosses"] as String?;
+    List<String> bossList = [];
+    if (bossesArgument != null) {
+      RegExp exp = RegExp(r'\[(.*?)\]');
+      var matches = exp.allMatches(bossesArgument);
+      for (var match in matches) {
+        bossList.addAll(match.group(1)!.split(',').map((s) => s.trim()));
+      }
+    }
+
+    var bossPaths = bossList
+        .where((boss) => FilePaths.paths.containsKey(boss))
+        .map((boss) => FilePaths.paths[boss]!)
+        .map((path) => '$output\\$path')
+        .toList();
+
+    var fullPaths = (activePaths + bossPaths).toSet().toList();
+    return fullPaths;
+  }
+
   String input = args.rest[0];
   List<String> pendingFiles = [];
   Set<String> processedFiles = {};
@@ -134,10 +167,13 @@ Future<void> nierCli(List<String> arguments) async {
   String enemyCategory = args["category"] ?? '';
   double bossStats = double.parse(args["bossStats"]);
   List<String> bossList = (args["bosses"] as String?)?.split(',') ?? [];
+  List<String> activeOptions = getActiveOptionPaths(args, output);
 
 //-------------------------------------------------------------------
 
   var currentDir = input;
+  logAndPrint(
+      "Starting processing in directory: $currentDir, recursive mode: ${options.recursiveMode}");
 
   if (options.recursiveMode) {
     pendingFiles.addAll(Directory(currentDir)
@@ -155,20 +191,33 @@ Future<void> nierCli(List<String> arguments) async {
   while (pendingFiles.isNotEmpty) {
     input = pendingFiles.removeAt(0);
     if (processedFiles.contains(input)) continue;
+    String fileType =
+        path.extension(input).toLowerCase(); // Extract file extension
+    logAndPrint(
+        "Processing file: $input, File type: $fileType"); // Log file path and type
     try {
-      await handleInput(
-          input, null, options, pendingFiles, processedFiles, bossList);
+      await handleInput(input, null, options, pendingFiles, processedFiles,
+          bossList, activeOptions, ismanagerFile);
       processedFiles.add(input);
+      logAndPrint("Successfully processed file: $input, File type: $fileType");
     } on FileHandlingException catch (e) {
-      logAndPrint("Invalid input");
-      print(e);
+      logAndPrint("Invalid input for file $input (File type: $fileType): $e");
       errorFiles.add(input);
     } catch (e, stackTrace) {
-      logAndPrint("Failed to process file");
+      logAndPrint("Failed to process file $input (File type: $fileType)");
       print(e);
       print(stackTrace);
       errorFiles.add(input);
     }
+  }
+
+  if (errorFiles.isNotEmpty) {
+    logAndPrint("Failed to process ${errorFiles.length} files:");
+    for (var file in errorFiles) {
+      logAndPrint("- $file");
+    }
+  } else {
+    logAndPrint("All files processed successfully.");
   }
 
   // Collect files
@@ -218,8 +267,8 @@ Future<void> nierCli(List<String> arguments) async {
   var entitiesToProcess = xmlFiles.followedBy(pakFolders);
   for (var file in entitiesToProcess) {
     try {
-      await handleInput(
-          file, null, options, pendingFiles, processedFiles, bossList);
+      await handleInput(file, null, options, pendingFiles, processedFiles,
+          bossList, activeOptions, ismanagerFile);
       processedFiles.add(file);
     } catch (e) {
       logAndPrint("input error");
@@ -266,15 +315,18 @@ Future<void> nierCli(List<String> arguments) async {
       try {
         var datSubFolder = getDatFolder(baseNameWithExtension);
         var datOutput = join(output, datSubFolder, baseNameWithExtension);
-        await handleInput(
-            datFolder, datOutput, options, [], processedFiles, bossList);
-        logAndPrint("Folder created: $datOutput");
+        await handleInput(datFolder, datOutput, options, [], processedFiles,
+            bossList, activeOptions, ismanagerFile);
+        FileChange change = FileChange(datOutput, 'create');
+        FileChange.changes.add(change);
+        logState.addLog("Folder created: $datOutput");
       } catch (e) {
         logAndPrint("Failed to process DAT folder");
         print(e);
       }
     }
   }
+
   await deleteFolders(output, [
     'data002.cpk_extracted',
     'data012.cpk_extracted',

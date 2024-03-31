@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
@@ -120,9 +121,11 @@ class RandomizeDraggedFile {
           FileSystemEntityType.directory) {
         List<String> arguments = List.from(baseArgs);
         arguments[0] = folderPath;
+        arguments.modifyArgumentsForForcedBossList();
 
         try {
-          await nierCli(arguments);
+          bool isManagerFile = true;
+          await nierCli(arguments, isManagerFile);
         } catch (e) {
           logState.addLog("Failed to process folder $folderPath: $e");
         }
