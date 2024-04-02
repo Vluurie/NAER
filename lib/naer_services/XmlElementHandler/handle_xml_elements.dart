@@ -1,33 +1,39 @@
 import 'package:xml/xml.dart' as xml;
 
 class XmlElementHandler {
-  static Future<void> updateOrCreateElement(
+  static void updateOrCreateElement(
       xml.XmlElement parentElement,
       String targetElementName,
       int? numericalValue,
       int insertionPosition,
-      String? textualValue) async {
+      String? textualValue) {
+    // Find the existing element if any
     var existingElement =
         parentElement.findElements(targetElementName).firstOrNull;
-    if (numericalValue != null) {
-      var newElement = xml.XmlElement(xml.XmlName(targetElementName), [],
-          [xml.XmlText(numericalValue.toString())]);
-      if (existingElement == null) {
-        if (insertionPosition != -1) {
-          parentElement.children.insert(insertionPosition, newElement);
-        } else {
-          parentElement.children.add(newElement);
-        }
+
+    // Determine the value to insert
+    var valueToInsert = numericalValue?.toString() ?? textualValue;
+
+    if (existingElement == null && valueToInsert != null) {
+      // If the element doesn't exist, create it with the provided value
+      var newElement = xml.XmlElement(
+          xml.XmlName(targetElementName), [], [xml.XmlText(valueToInsert)]);
+      if (insertionPosition != -1 &&
+          insertionPosition < parentElement.children.length) {
+        parentElement.children.insert(insertionPosition, newElement);
       } else {
-        updateElementText(existingElement, numericalValue.toString());
+        parentElement.children.add(newElement);
       }
+    } else if (existingElement != null && valueToInsert != null) {
+      // If the element exists, update its text value
+      updateElementText(existingElement, valueToInsert);
     } else if (existingElement != null) {
+      // If no value to insert is provided, remove the existing element
       parentElement.children.remove(existingElement);
     }
   }
 
-  static Future<void> updateElementText(
-      xml.XmlElement targetElement, String newText) async {
+  static void updateElementText(xml.XmlElement targetElement, String newText) {
     targetElement.children.clear();
     targetElement.children.add(xml.XmlText(newText));
   }

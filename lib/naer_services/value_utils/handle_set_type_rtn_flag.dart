@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:xml/xml.dart' as xml;
 import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 import 'package:NAER/nier_enemy_data/values_data/nier_enemy_setType_map.dart'
@@ -5,45 +6,69 @@ import 'package:NAER/nier_enemy_data/values_data/nier_enemy_setType_map.dart'
 
 void setSpecificValues(xml.XmlElement objIdElement, String newEmNumber) {
   var values = em_number_values_map.emNumberValues[newEmNumber];
-
   if (values == null) {
     removeSetTypeAndSetRtnAndSetFlag(objIdElement);
     return;
   }
 
-  int? setTypeValue = values['setType'];
-  int? setRtnValue = values['setRtn'];
-  int? setFlagValue = values['setFlag'];
+  var setTypeValues = values['setType'];
+  List<int?>? setFlagValues = values['setFlag'];
 
-  // Navigate up to the parent 'value' element
-  var currentElement = objIdElement.parent;
-  xml.XmlElement? parentValueElement;
+  const int setTypeBias =
+      65; // Bias towards setType (65% setType favor, 35% setFlag favor)
+  bool chooseSetType = setTypeValues != null &&
+      setTypeValues.isNotEmpty &&
+      (setFlagValues == null ||
+          setFlagValues.isEmpty ||
+          Random().nextInt(100) < setTypeBias);
 
+  String? selectedElementName;
+  String? valueToWrite;
+
+  if (chooseSetType) {
+    int setTypeValue = setTypeValues![Random().nextInt(setTypeValues.length)]!;
+    if (setTypeValue == 0) {
+      removeSetTypeAndSetRtnAndSetFlag(objIdElement);
+      return;
+    }
+    selectedElementName = 'setType';
+    valueToWrite = setTypeValue.toString();
+  } else if (setFlagValues != null && setFlagValues.isNotEmpty) {
+    int setFlagValue = setFlagValues[Random().nextInt(setFlagValues.length)]!;
+    selectedElementName = 'setFlag';
+    valueToWrite = "0x${setFlagValue.toRadixString(16)}";
+  }
+
+  var parentValueElement = findParentValueElement(objIdElement);
+  if (parentValueElement != null &&
+      selectedElementName != null &&
+      valueToWrite != null) {
+    var paramElementIndex = findInsertionPosition(parentValueElement);
+
+    // Remove setRtn along with the unselected setType or setFlag
+    XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
+        ['setRtn', selectedElementName == 'setType' ? 'setFlag' : 'setType']);
+
+    // Update or create the selected element with the new value
+    XmlElementHandler.updateOrCreateElement(parentValueElement,
+        selectedElementName, null, paramElementIndex, valueToWrite);
+  }
+}
+
+xml.XmlElement? findParentValueElement(xml.XmlElement startingElement) {
+  var currentElement = startingElement.parent;
   while (currentElement != null && currentElement is xml.XmlElement) {
     if (currentElement.name.local == 'value') {
-      parentValueElement = currentElement;
-      break;
+      return currentElement;
     }
     currentElement = currentElement.parent;
   }
+  return null;
+}
 
-  if (parentValueElement != null) {
-    // Find the position where setType, setRtn, and setFlag should be inserted
-    var paramElementIndex = parentValueElement.children.indexWhere((element) =>
-        element is xml.XmlElement && element.name.local == 'param');
-
-    // Handle setType element
-    XmlElementHandler.updateOrCreateElement(
-        parentValueElement, 'setType', setTypeValue, paramElementIndex, null);
-
-    // Handle setRtn element
-    XmlElementHandler.updateOrCreateElement(
-        parentValueElement, 'setRtn', setRtnValue, paramElementIndex, null);
-
-    // Handle setFlag element
-    XmlElementHandler.updateOrCreateElement(
-        parentValueElement, 'setFlag', setFlagValue, paramElementIndex, null);
-  }
+int findInsertionPosition(xml.XmlElement parentValueElement) {
+  return parentValueElement.children.indexWhere(
+      (element) => element is xml.XmlElement && element.name.local == 'param');
 }
 
 void removeSetTypeAndSetRtnAndSetFlag(xml.XmlElement objIdElement) {

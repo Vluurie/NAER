@@ -45,7 +45,7 @@ Future<void> main(List<String> arguments) async {
     WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
     windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setAsFrameless();
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
       await windowManager.show();
       await windowManager.focus();
     });
@@ -121,8 +121,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   Map<String, bool> level = {
     "All Enemies": false,
     "All Enemies without Randomization": false,
-    "Only Bosses": false,
-    "Only Selected Enemies": false,
+    // "Only Bosses": false,
+    // "Only Selected Enemies": false,
     'None': true
   };
   List<dynamic> getAllItems() {
@@ -974,14 +974,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         details.add(
             "• Level Change: Every randomized enemy & bosses in the game will be included.");
         break;
-      case "Only Bosses":
-        details.add("• Level Change: Only boss-type enemies will be included.");
-        break;
-      case "Only Selected Enemies":
-        details.add(
-            "• Level Change: Only randomized selected enemies will be included.");
+      // case "Only Bosses":
+      //   details.add("• Level Change: Only boss-type enemies will be included.");
+      //   break;
+      // case "Only Selected Enemies":
+      //   details.add(
+      //       "• Level Change: Only randomized selected enemies will be included.");
 
-        break;
+      //   break;
       case "None":
         details.add(
             "• Level Change: No specific category selected. No level will be modified");
@@ -2015,10 +2015,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         return Icons.emoji_events;
       case "All Enemies without Randomization":
         return Icons.emoji_flags_outlined;
-      case "Only Bosses":
-        return Icons.emoji_emotions_rounded;
-      case "Only Selected Enemies":
-        return Icons.radio_button_checked;
+      // case "Only Bosses":
+      //   return Icons.emoji_emotions_rounded;
+      // case "Only Selected Enemies":
+      //   return Icons.radio_button_checked;
       case "None":
         return Icons.not_interested;
       default:
