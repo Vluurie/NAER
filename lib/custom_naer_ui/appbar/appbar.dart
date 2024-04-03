@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:NAER/custom_naer_ui/appbar/appbar_icon.dart';
 
 class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -26,34 +25,31 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       title: SizedBox(
         height: 70,
-        child: MoveWindow(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              bool isLargeScreen = isScreenLarge(constraints.maxWidth);
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  logoPadding(isLargeScreen),
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: SizedBox(
-                      height: 100,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          logoText(isLargeScreen, context),
-                          AppIcons.informationIcon(context),
-                          AppIcons.logIcon(blinkController, scrollToSetup),
-                          button,
-                          AppIcons.windowControls(),
-                        ],
-                      ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            bool isLargeScreen = isScreenLarge(constraints.maxWidth);
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                logoPadding(isLargeScreen),
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: SizedBox(
+                    height: 100,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        logoText(isLargeScreen, context),
+                        AppIcons.informationIcon(context),
+                        AppIcons.logIcon(blinkController, scrollToSetup),
+                        button,
+                      ],
                     ),
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

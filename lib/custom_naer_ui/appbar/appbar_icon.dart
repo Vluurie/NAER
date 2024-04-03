@@ -1,6 +1,5 @@
 import 'package:NAER/custom_naer_ui/appbar/informationdialog.dart';
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
 
 class AppIcons {
   static Widget informationIcon(BuildContext context) {
@@ -36,34 +35,6 @@ class AppIcons {
           onPressed: scrollToSetup,
         ),
         const Text('Log', style: TextStyle(fontSize: 10.0)),
-      ],
-    );
-  }
-
-  static Widget windowControls() {
-    return Row(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.minimize),
-          onPressed: () async => await windowManager.minimize(),
-          tooltip: 'Minimize',
-        ),
-        IconButton(
-          icon: const Icon(Icons.crop_square),
-          onPressed: () async {
-            if (await windowManager.isMaximized()) {
-              await windowManager.restore();
-            } else {
-              await windowManager.maximize();
-            }
-          },
-          tooltip: 'Maximize/Restore',
-        ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () async => await windowManager.close(),
-          tooltip: 'Close',
-        ),
       ],
     );
   }

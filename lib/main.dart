@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
 import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
@@ -42,13 +41,6 @@ Future<void> main(List<String> arguments) async {
     await nierCli(arguments, isManagerFile);
     exit(0);
   } else {
-    WidgetsFlutterBinding.ensureInitialized();
-    await windowManager.ensureInitialized();
-    windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-      await windowManager.show();
-      await windowManager.focus();
-    });
     runApp(
       ChangeNotifierProvider(
         create: (context) => LogState(),

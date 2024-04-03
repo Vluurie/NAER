@@ -1,5 +1,17 @@
 const Map<String, List<String>> enemyData = {
   "Ground": [
+    "em0110",
+    "em0111",
+    "emb002",
+    "emb010",
+    "emb004",
+    "emb012",
+    "emb051",
+    "emb041",
+    "emb052",
+    "emb056",
+    "emb061",
+    "emb110",
     "em3010",
     "em004d",
     "em002d",
@@ -80,7 +92,7 @@ const Map<String, List<String>> enemyData = {
     'ema011',
     'emb014',
   ],
-  "Fly": ["em0030", "em0032", "em0033", "em0034", "em0035", "em0036"],
+  "Fly": ["em0030", "em0032", "em0033", "em0034", "em0035", "em0036", "emb031"],
   "Delete": [
     "emf000",
     "em9002",

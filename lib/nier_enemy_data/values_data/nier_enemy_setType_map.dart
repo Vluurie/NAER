@@ -195,4 +195,28 @@ Map<String, Map<String, List<int?>>> emNumberValues = {
   'em6400': {
     'setType': [17]
   },
+  'emb002': {
+    'setType': [0, 1, 2, 3, 4],
+    'setFlag': [0x20000000, 0x9004000]
+  },
+  'emb004': {
+    'setType': [0, 1, 2, 3, 4],
+    'setFlag': [0x20000000, 0x9004000]
+  },
+  'emb010': {
+    'setType': [4, 5],
+    'setFlag': [0x20000000]
+  },
+  'emb012': {
+    'setType': [0, 1, 2, 3, 4],
+    'setFlag': [0x20000000, 0x10000010]
+  },
+  'emb051': {
+    'setType': [0, 1, 2, 3, 4],
+    'setFlag': [0x20000000]
+  },
+  'emb056': {
+    'setType': [0, 1, 2, 3, 4],
+    'setFlag': [0x20000000]
+  },
 };

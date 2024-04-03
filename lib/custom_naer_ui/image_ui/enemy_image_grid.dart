@@ -141,7 +141,10 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
       'em2007.png',
       'em8030.png',
       'em3010.png',
-      'em0112.png'
+      'em0112.png',
+      'em0110.png',
+      'em0111.png',
+      'emb110.png'
     };
 
     const specialEnemies = {
