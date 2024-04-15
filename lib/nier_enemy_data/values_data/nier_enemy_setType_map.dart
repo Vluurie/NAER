@@ -4,7 +4,7 @@ Map<String, Map<String, List<int?>>> emNumberValues = {
     'setFlag': [0x20000000, 0x10000010]
   },
   'em0030': {
-    'setType': [0, 1, 2, 3]
+    'setType': [1]
   },
   'em0000': {
     'setType': [0, 1, 2, 3, 4],
@@ -30,7 +30,7 @@ Map<String, Map<String, List<int?>>> emNumberValues = {
     'setFlag': [0x20000000]
   },
   'em0032': {
-    'setType': [0, 1, 2, 3]
+    'setType': [1]
   },
   'em0012': {
     'setType': [0, 1, 2, 3, 4],
@@ -137,13 +137,7 @@ Map<String, Map<String, List<int?>>> emNumberValues = {
     'setType': [0, 1, 2, 3, 5]
   },
   'em0033': {
-    'setType': [0, 1, 2, 3]
-  },
-  'em0034': {
-    'setType': [0, 1, 2, 3]
-  },
-  'em0035': {
-    'setType': [0, 1, 2, 3]
+    'setType': [2]
   },
   'em0066': {
     'setType': [1, 2, 4]
