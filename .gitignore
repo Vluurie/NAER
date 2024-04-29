@@ -36,7 +36,7 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
-
+/assets/nier_image_folders
 bin/configExamples
 bin/config.txt
 NAER_Settings/
