@@ -59,7 +59,7 @@ Future<bool> handleDatExtract(
   output ??= join(dirname(input), datExtractSubDir, basename(input));
 
   if (isManagerFile != true) {
-    print('Extracting DAT file: $input to $output');
+    // print('Extracting DAT file: $input to $output');
     // Create the output directory if isManagerFile is not true
     await Directory(output).create(recursive: true);
   } else {
@@ -168,7 +168,7 @@ Future<bool> handleYaxToXml(
   output ??= "${withoutExtension(input)}.xml";
 
   conversionCounter++;
-  stdout.write('\rConverting YAX to XML ($conversionCounter): $output     ');
+//  stdout.write('\rConverting YAX to XML ($conversionCounter): $output     ');
 
   await yaxFileToXmlFile(input, output);
 
@@ -193,7 +193,7 @@ Future<bool> handleXmlToYax(
   output ??= "${withoutExtension(input)}.yax";
 
   conversionCounter++;
-  stdout.write('\rConverting XML to YAX ($conversionCounter): $output     ');
+  // stdout.write('\rConverting XML to YAX ($conversionCounter): $output     ');
 
   await xmlFileToYaxFile(input, output);
 

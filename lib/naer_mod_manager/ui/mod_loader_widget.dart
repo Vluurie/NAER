@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:NAER/custom_naer_ui/animations/dotted_line_progress_animation.dart';
+import 'package:NAER/naer_ui/animations/dotted_line_progress_animation.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_zip_file.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';

@@ -1,8 +1,8 @@
-import 'package:NAER/custom_naer_ui/image_ui/levitating_image.dart';
-import 'package:NAER/nier_enemy_data/image_data/nier_enemy_descriptions.dart';
-import 'package:NAER/nier_enemy_data/image_data/nier_enemy_image_names.dart';
+import 'package:NAER/data/image_data/nier_enemy_descriptions.dart';
+import 'package:NAER/data/image_data/nier_enemy_image_names.dart';
+import 'package:NAER/data/image_data/nier_enemy_images_ingame_list.dart';
+import 'package:NAER/naer_ui/image_ui/levitating_image.dart';
 import 'package:flutter/material.dart';
-import 'package:NAER/nier_enemy_data/image_data/nier_enemy_images_ingame_list.dart';
 
 class EnemyImageGrid extends StatefulWidget {
   @override

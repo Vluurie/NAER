@@ -2,6 +2,16 @@
 
 import 'dart:io';
 
+/// Finds and processes enemy CSV files containing boss stats in the specified directory.
+///
+/// This function searches through the given [directoryPath] for files that match
+/// the specific boss pattern that contains boss stats information. It then processes each
+/// matching file by modifying its contents based on the provided [bossStats] value.
+///
+/// - Parameters:
+///   - directoryPath: The path of the directory to search in.
+///   - bossList: A list of boss names or identifiers, which can be nested.
+///   - bossStats: A value representing the boss stats to be used for modifying file contents.
 Future<void> findBossStatFiles(
     String directoryPath, List<dynamic> bossList, double bossStats) async {
   var directory = Directory(directoryPath);
@@ -24,7 +34,14 @@ Future<void> findBossStatFiles(
   }
 }
 
-// Helper function to flatten the list
+/// Flattens a nested list of boss names or identifiers into a single list.
+///
+/// This helper function recursively flattens the provided [list], ensuring that all
+/// nested lists are merged into a single list of strings.
+///
+/// - Parameters:
+///   - list: A list which may contain nested lists of strings.
+/// - Returns: A flattened list of strings.
 List<String> flattenList(List<dynamic> list) {
   var flattenedList = <String>[];
   for (var element in list) {
@@ -39,6 +56,16 @@ List<String> flattenList(List<dynamic> list) {
   return flattenedList;
 }
 
+/// Processes a CSV file by modifying its contents based on the boss stats.
+///
+/// This function reads the lines of the specified [file], modifies each line
+/// based on the provided [bossStats] value, and then writes the modified lines
+/// back to the file. If [bossStats] is 0.0, the file is skipped.
+///
+/// - Parameters:
+///   - file: The file to process.
+///   - bossList: A list of boss names or identifiers, not used in this function but retained for possible future use.
+///   - bossStats: A value representing the boss stats to be used for modifying file contents.
 Future<void> processCsvFile(
     File file, List<String> bossList, double bossStats) async {
   try {
@@ -60,6 +87,18 @@ Future<void> processCsvFile(
   }
 }
 
+/// Modifies a line of CSV content based on the boss stats.
+///
+/// This function takes a line of CSV data, parses it, and modifies the values in
+/// specific columns (columns 2 and 3) based on the provided [bossStats] value. The
+/// values are scaled by predetermined factors and the modified line is returned as a string.
+/// If the values in columns 2 or 3 are not valid numbers, they are left unchanged.
+/// The values in columns 0, 3, and 4 are preserved as they are.
+///
+/// - Parameters:
+///   - line: A line of CSV content to modify.
+///   - bossStats: A value representing the boss stats to be used for modifying the line.
+/// - Returns: The modified line of CSV content as a string.
 String modifyLine(String line, double bossStats) {
   const double maxFactorColumn2 = 2.30;
   const double maxFactorColumn3 = 1.90;
@@ -67,6 +106,7 @@ String modifyLine(String line, double bossStats) {
   var values = line.split(',');
 
   if (values.length >= 5) {
+    // Parse and modify the value in the second column (index 1)
     var valueColumn2 = double.tryParse(values[1]);
     if (valueColumn2 != null) {
       double scaleFactorColumn2 = bossStats / 5.0 * maxFactorColumn2;
@@ -74,14 +114,15 @@ String modifyLine(String line, double bossStats) {
       values[1] = modifiedValueColumn2.round().toString();
     }
 
+    // Parse and modify the value in the third column (index 2)
     var valueColumn3 = double.tryParse(values[2]);
     if (valueColumn3 != null) {
-      // Scale factor for column 3 based on bossStats
       double scaleFactorColumn3 = bossStats / 5.0 * maxFactorColumn3;
       double modifiedValueColumn3 = valueColumn3 * scaleFactorColumn3;
       values[2] = modifiedValueColumn3.round().toString();
     }
 
+    // Preserve the original values for columns 0, 3, and 4
     values[0] = line.split(',')[0];
     values[3] = line.split(',')[3];
     values[4] = line.split(',')[4];

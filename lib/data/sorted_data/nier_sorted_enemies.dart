@@ -95,6 +95,7 @@ const Map<String, List<String>> enemyData = {
   "Fly": ["em0030", "em0032", "em0033", "em0034", "em0035", "em0036", "emb031"],
   "Delete": [
     "emf000",
+    "em1030",
     "em9002",
     "em1090",
     "em4120",

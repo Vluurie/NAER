@@ -1,14 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
 import 'dart:io';
+import 'package:NAER/data/boss_data/nier_boss_class_list.dart';
+import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
-import 'package:NAER/nier_enemy_data/boss_data/nier_boss_class_list.dart';
-import 'package:NAER/nier_enemy_data/category_data/nier_categories.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:provider/provider.dart';

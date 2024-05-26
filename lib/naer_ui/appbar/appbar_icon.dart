@@ -1,4 +1,4 @@
-import 'package:NAER/custom_naer_ui/appbar/informationdialog.dart';
+import 'package:NAER/naer_ui/appbar/informationdialog.dart';
 import 'package:flutter/material.dart';
 
 class AppIcons {

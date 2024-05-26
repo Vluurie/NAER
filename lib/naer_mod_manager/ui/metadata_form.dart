@@ -41,6 +41,7 @@ class _MetadataFormState extends State<MetadataForm> {
   List<String> validFolderNames = [
     "ph4",
     "st5",
+    "wd5",
     "quest",
     "ph2",
     "ph3",

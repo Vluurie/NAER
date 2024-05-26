@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
+/// Handles Important Ids that should not be randomized to not get into an soft lock in the game or if they where used by mods to be ignored.
 class ImportantIDs {
   Map<String, List<String>> ids;
 
   ImportantIDs(this.ids);
 
+  /// Returns an iterable of the entries in the [ids] map.
   Iterable<MapEntry<String, List<String>>> get entries => ids.entries;
 
-  // Method to add an ID to a specific category
+  /// Adds an ID to a specific category.
+  ///
+  /// If the category does not exist, it will be created.
+  ///
+  /// Parameters:
+  /// - [category]: The category to which the ID should be added.
+  /// - [id]: The ID to add to the category.
   void addId(String category, String id) {
     if (!ids.containsKey(category)) {
       ids[category] = [];
@@ -16,17 +24,34 @@ class ImportantIDs {
     ids[category]?.add(id);
   }
 
-  // Method to remove an ID from a specific category
+  /// Removes an ID from a specific category.
+  ///
+  /// Parameters:
+  /// - [category]: The category from which the ID should be removed.
+  /// - [id]: The ID to remove from the category.
+  ///
+  /// Returns true if the ID was removed, false otherwise.
   bool removeId(String category, String id) {
     return ids[category]?.remove(id) ?? false;
   }
 
-  // Get all IDs for a category
+  /// Gets all IDs for a category.
+  ///
+  /// Parameters:
+  /// - [category]: The category for which to retrieve the IDs.
+  ///
+  /// Returns a list of IDs for the specified category, or null if the category does not exist.
   List<String>? getIdsForCategory(String category) {
     return ids[category];
   }
 
-  // Check if an ID exists within a specific category
+  /// Checks if an ID exists within a specific category.
+  ///
+  /// Parameters:
+  /// - [category]: The category to check.
+  /// - [id]: The ID to check for existence.
+  ///
+  /// Returns true if the ID exists in the category, false otherwise.
   bool idExists(String category, String id) {
     if (!ids.containsKey(category)) {
       return false;
@@ -34,6 +59,16 @@ class ImportantIDs {
     return ids[category]?.contains(id) ?? false;
   }
 
+  /// Loads important IDs from the metadata file.
+  ///
+  /// This method reads the metadata file, parses its content, and loads the important IDs.
+  /// If the metadata file does not exist or an error occurs, it returns a new instance
+  /// of [ImportantIDs] with default important IDs.
+  ///
+  /// Parameters:
+  /// - [metadataPath]: The path to the metadata file.
+  ///
+  /// Returns a Future that completes with an instance of [ImportantIDs] loaded from the metadata file.
   static Future<ImportantIDs> loadFromMetadata(String metadataPath) async {
     try {
       final File metadataFile = File(metadataPath);
@@ -72,6 +107,7 @@ class ImportantIDs {
   }
 }
 
+/// Important Ids that should not be randomized to not get into an soft lock
 Map<String, List<String>> importantIds = {
   "EnemySetAction": [
     '0x864ec3e4',
@@ -92,7 +128,13 @@ Map<String, List<String>> importantIds = {
     '0xaf899d63',
     '0xaf6ec127',
     '0x8aa4e5a2',
-    '0x7164ad39'
+    '0x7164ad39',
+    '0xa1b007a4',
+    '0x9478baf7',
+    '0x41767365',
+    '0x884e9675',
+    '0xd6bda69e',
+    '0x7d5e581d'
   ],
   "EnemySetArea": [
     '0x47e03801',
@@ -114,7 +156,23 @@ Map<String, List<String>> importantIds = {
     '0x97e2183a',
     '0xd11568ec',
     '0xdab3f76e',
-    '0x4647d8ff'
+    '0x4647d8ff',
+    '0x5a9d0ee6',
+    '0x6b63498',
+    '0xd7397939',
+    '0x46452e8a',
+    '0xb49a4554',
+    '0x9292cc3e',
+    '0xebfa1784',
+    '0x936d169a',
+    '0x655d4023',
+    '0xc1a4a8f',
+    '0xfff25741',
+    '0xa332fdfb',
+    '0x1122d8a7',
+    '0x48d420a6',
+    '0xef31395a'
   ],
-  "EnemyGenerator": ['0x3716b0fd']
+  "EnemyGenerator": ['0x3716b0fd', '0x9a62b308'],
+  "EnemyLayoutAction": ['0xa99c6914']
 };

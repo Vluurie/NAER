@@ -4,8 +4,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
-import 'package:NAER/custom_naer_ui/appbar/appbar.dart';
+import 'package:NAER/data/boss_data/nier_boss_class_list.dart';
+import 'package:NAER/data/sorted_data/nier_maps.dart';
+import 'package:NAER/data/sorted_data/nier_script_phase.dart';
+import 'package:NAER/data/sorted_data/nier_side_quests.dart';
+import 'package:NAER/naer_ui/animations/dotted_line_progress_animation.dart';
+import 'package:NAER/naer_ui/animations/shacke_animation_widget.dart';
+import 'package:NAER/naer_ui/appbar/appbar.dart';
+import 'package:NAER/naer_ui/directory_ui/check_pathbox.dart';
+import 'package:NAER/naer_ui/directory_ui/directory_selection_card.dart';
+import 'package:NAER/naer_ui/other/asciiArt.dart';
+import 'package:NAER/naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -13,26 +24,15 @@ import 'package:path/path.dart' as path;
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:NAER/custom_naer_ui/directory_ui/check_pathbox.dart';
-import 'package:NAER/custom_naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
-import 'package:NAER/nier_enemy_data/sorted_data/nier_maps.dart';
-import 'package:NAER/nier_enemy_data/sorted_data/nier_script_phase.dart';
-import 'package:NAER/nier_enemy_data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_mod_manager/mod_manager.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
-import 'package:NAER/nier_enemy_data/sorted_data/nier_sorted_enemies.dart'
-    as enemy_data;
-import 'package:NAER/nier_enemy_data/boss_data/nier_boss_class_list.dart';
-import 'package:NAER/custom_naer_ui/directory_ui/directory_selection_card.dart';
-import 'package:NAER/custom_naer_ui/animations/dotted_line_progress_animation.dart';
-import 'package:NAER/custom_naer_ui/animations/shacke_animation_widget.dart';
-import 'package:NAER/custom_naer_ui/other/shacking_message_list.dart';
+import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart' as enemy_data;
+
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -390,12 +390,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                       const Text('Open output', style: TextStyle(fontSize: 14)),
                   onPressed: () => getOutputPath(context, specialDatOutputPath),
                   style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(
+                    backgroundColor: WidgetStateProperty.all<Color>(
                         const Color.fromARGB(255, 25, 25, 26)),
-                    foregroundColor: MaterialStateProperty.all<Color>(
+                    foregroundColor: WidgetStateProperty.all<Color>(
                         const Color.fromARGB(255, 71, 192, 240)),
                   ),
                 ),
@@ -404,12 +404,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   label: const Text('Settings', style: TextStyle(fontSize: 14)),
                   onPressed: getNaerSettings,
                   style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(
+                    backgroundColor: WidgetStateProperty.all<Color>(
                         const Color.fromARGB(255, 25, 25, 26)),
-                    foregroundColor: MaterialStateProperty.all<Color>(
+                    foregroundColor: WidgetStateProperty.all<Color>(
                         const Color.fromARGB(255, 71, 192, 240)),
                   ),
                 ),
@@ -1115,9 +1115,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   const EdgeInsets.symmetric(vertical: 60.0, horizontal: 20.0),
               child: ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: WidgetStateProperty.all<Color>(
                       const Color.fromARGB(255, 25, 25, 26)),
-                  foregroundColor: MaterialStateProperty.all<Color>(
+                  foregroundColor: WidgetStateProperty.all<Color>(
                       const Color.fromARGB(255, 240, 71, 71)),
                 ),
                 onPressed: clearLogMessages,
@@ -1131,9 +1131,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 icon: const Icon(Icons.copy),
                 label: const Text('Copy CLI Arguments'),
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: WidgetStateProperty.all<Color>(
                       const Color.fromARGB(255, 25, 25, 26)),
-                  foregroundColor: MaterialStateProperty.all<Color>(
+                  foregroundColor: WidgetStateProperty.all<Color>(
                       const Color.fromARGB(255, 71, 192, 240)),
                 ),
                 onPressed: () => onnCopyArgsPressed(),

@@ -27,7 +27,7 @@ class ModHandler {
 
   static bool validateModPackageWithKeyFromArchive(Archive archive) {
     const String keyFileName = 'validate_key.bin';
-    const String knownValidKey = "key";
+    const String knownValidKey = "b59f63a2efbeabcbc4b00780897c6b8a";
     for (final file in archive) {
       if (file.name.endsWith(keyFileName)) {
         String key = String.fromCharCodes(file.content as List<int>);

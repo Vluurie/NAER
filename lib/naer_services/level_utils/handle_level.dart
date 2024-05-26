@@ -1,14 +1,5 @@
+import 'package:NAER/naer_services/xml_files_randomization/nier_xml/handle_enemy_groups.dart';
 import 'package:xml/xml.dart' as xml;
-
-String? findGroupForEmNumber(
-    String emNumber, Map<String, List<String>> enemyData) {
-  for (var group in enemyData.keys) {
-    if (enemyData[group]!.contains(emNumber)) {
-      return group;
-    }
-  }
-  return null;
-}
 
 bool isDeletedEnemy(String emNumber, Map<String, List<String>> enemyData) {
   return findGroupForEmNumber(emNumber, enemyData) == "Delete";

@@ -1,4 +1,4 @@
-// List of all quest options
+/// List of all quest options
 List<String> questOptions = [
   "q020",
   "q031",
@@ -73,7 +73,7 @@ List<String> questOptions = [
   "q095",
 ];
 
-// List of all map options
+/// List of all map options
 List<String> mapOptions = [
   "r5a0",
   "r5a1",
@@ -97,5 +97,5 @@ List<String> mapOptions = [
   "r120",
 ];
 
-// List of all phase options
+/// List of all phase options
 List<String> phaseOptions = ["p100", "p200", "p300", "p400", "corehap"];
