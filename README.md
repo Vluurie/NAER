@@ -44,6 +44,7 @@ To install and build the NAER tool, follow these steps:
 1. **Download Repository**: Clone or download the NAER repository from GitHub.
 2. **Install Flutter Dart CLI**: Download and install the Flutter Dart CLI, which will help manage dependencies and build the project.
 3. **Fetch Dependencies**: Navigate to the project directory and run `flutter pub get` to fetch the latest dependencies.
+4. **For the missing assets, feel free to get them from the last release assets folder and copy them into the assets folder.
 5. **Build Executable**: Execute `flutter build windows` to create the Windows executable for the tool.
 6. **Build Executable**: Execute `flutter build macos` to create the macOS application for the tool, then run the executable inside the application bundle and not the .app bundle itself!.
 

@@ -34,6 +34,9 @@ class _MetadataFormState extends State<MetadataForm> {
   final List<TextEditingController> _enemyGeneratorControllers = [
     TextEditingController()
   ];
+  final List<TextEditingController> _enemyLayoutActionControllers = [
+    TextEditingController()
+  ];
   String? _selectedDirectory;
   bool _showModFolderWarning = false;
   List<String> _directoryContentsInfo = [];
@@ -162,6 +165,13 @@ class _MetadataFormState extends State<MetadataForm> {
                           "Enemy Generator ID", _enemyGeneratorControllers, () {
                         setState(() {
                           _enemyGeneratorControllers
+                              .add(TextEditingController());
+                        });
+                      }),
+                      _buildIdList("Enemy Layout Action ID",
+                          _enemyLayoutActionControllers, () {
+                        setState(() {
+                          _enemyLayoutActionControllers
                               .add(TextEditingController());
                         });
                       }),
@@ -489,11 +499,15 @@ class _MetadataFormState extends State<MetadataForm> {
       final List<String> enemySetAreaIds = processIds(_enemySetAreaControllers);
       final List<String> enemyGeneratorIds =
           processIds(_enemyGeneratorControllers);
+      final List<String> enemyLayoutActionIds =
+          processIds(_enemyLayoutActionControllers);
 
       final Map<String, List<String>> idsData = {
         if (enemySetActionIds.isNotEmpty) "EnemySetAction": enemySetActionIds,
         if (enemySetAreaIds.isNotEmpty) "EnemySetArea": enemySetAreaIds,
         if (enemyGeneratorIds.isNotEmpty) "EnemyGenerator": enemyGeneratorIds,
+        if (enemyLayoutActionIds.isNotEmpty)
+          "EnemyLayoutAction": enemyLayoutActionIds,
       };
 
       final newMod = {
