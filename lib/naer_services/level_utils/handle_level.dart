@@ -1,4 +1,4 @@
-import 'package:NAER/naer_services/xml_files_randomization/nier_xml/handle_enemy_groups.dart';
+import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:xml/xml.dart' as xml;
 
 bool isDeletedEnemy(String emNumber, Map<String, List<String>> enemyData) {

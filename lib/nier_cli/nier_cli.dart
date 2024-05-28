@@ -95,7 +95,7 @@ Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
   var collectedFiles = collectFiles(input);
 
 //##### Finds enemies within the input .xml files to be processed and modifies/randomizes them #####
-  await findEnemiesInDirectory(
+  await modifyEnemiesInDirectory(
       input, sortedEnemiesPath!, enemyLevel, enemyCategory);
 
 //##### Find and process bossStats for the specified bosses out of the bossList #####

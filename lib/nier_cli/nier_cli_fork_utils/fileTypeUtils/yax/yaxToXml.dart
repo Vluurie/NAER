@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:xml/xml.dart';
 
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/xml/xmlExtension.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/xml/xml_extension.dart';
 import 'hashToStringMap.dart';
 import 'japToEng.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/utils/ByteDataWrapper.dart';

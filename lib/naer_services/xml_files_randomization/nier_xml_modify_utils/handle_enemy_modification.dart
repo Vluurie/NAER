@@ -1,8 +1,8 @@
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
+import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 import 'package:NAER/naer_services/level_utils/handle_level.dart';
 import 'package:NAER/naer_services/value_utils/handle_set_type_rtn_flag.dart';
-import 'package:NAER/naer_services/xml_files_randomization/nier_xml/handle_enemy_groups.dart';
-import 'package:NAER/naer_services/xml_files_randomization/nier_xml/handle_update_xml.dart';
+import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// Handles the processing of an enemy entity object in the XML element.
@@ -25,7 +25,7 @@ Future<void> handleEnemyEntityObject(
   bool handleLevels = false,
   bool randomizeAndSetValues = false,
 }) async {
-  String? group = findGroupForEmNumber(objIdElement.text, enemyData);
+  String? group = findGroupForEmNumber(objIdElement.innerText, enemyData);
 
   if (group != null &&
       !isExcludedGroup(group) &&
@@ -33,7 +33,7 @@ Future<void> handleEnemyEntityObject(
     if (randomizeAndSetValues) {
       String newEmNumber = userSelectedEnemyData[group]![
           random.nextInt(userSelectedEnemyData[group]!.length)];
-      replaceTextInXmlElement(objIdElement, newEmNumber);
+      XmlElementHandler.replaceTextInXmlElement(objIdElement, newEmNumber);
       setSpecificValues(objIdElement, newEmNumber);
     }
 

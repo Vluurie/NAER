@@ -69,7 +69,7 @@ class ImportantIDs {
   /// - [metadataPath]: The path to the metadata file.
   ///
   /// Returns a Future that completes with an instance of [ImportantIDs] loaded from the metadata file.
-  static Future<ImportantIDs> loadFromMetadata(String metadataPath) async {
+  static Future<ImportantIDs> loadIdsFromMetadata(String metadataPath) async {
     try {
       final File metadataFile = File(metadataPath);
       if (await metadataFile.exists()) {
