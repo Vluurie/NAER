@@ -18,8 +18,8 @@ int fileCount = 0;
 /// [sortedEnemiesPath] is the path to the sorted enemies data file.
 /// [enemyLevel] specifies the level of enemies to be modified.
 /// [enemyCategory] specifies the category of enemies to be modified.
-Future<void> modifyEnemiesInDirectory(String directoryPath,
-    String sortedEnemiesPath, String enemyLevel, String enemyCategory) async {
+Future<void> processEnemies(String directoryPath, String sortedEnemiesPath,
+    String enemyLevel, String enemyCategory) async {
   Map<String, List<String>> sortedEnemyData =
       await getSortedEnemyData(sortedEnemiesPath);
   await findEnemiesAndModify(
