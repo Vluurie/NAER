@@ -51,7 +51,7 @@ List<String> folderNames = [
 ///   "core/nier2blender_extracted",
 /// ]);
 /// ```
-Future<void> deleteFolders(String directoryPath) async {
+Future<void> deleteExtractedGameFolders(String directoryPath) async {
   for (var folderName in folderNames) {
     var folderPath = Directory(join(directoryPath, folderName));
     if (await folderPath.exists()) {

@@ -13,7 +13,7 @@ import 'dart:io';
 /// - `'pakFolders'`: List of paths to directories ending with .pak.
 /// - `'datFolders'`: List of paths to directories ending with .dat.
 ///
-Map<String, List<String>> collectFiles(String currentDir) {
+Map<String, List<String>> collectExtractedGameFiles(String currentDir) {
   List<String> yaxFiles = [];
   List<String> pakFolders = [];
   List<String> datFolders = [];

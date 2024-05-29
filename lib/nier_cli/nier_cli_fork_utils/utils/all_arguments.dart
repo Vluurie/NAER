@@ -103,7 +103,7 @@ ArgParser allArguments() {
 /// [output] is the directory where the paths should be output.
 ///
 /// Returns a list of active option paths.
-List<String> getActiveOptionPaths(ArgResults argResults, String output) {
+List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
   List<String> allOptions = [...questOptions, ...mapOptions, ...phaseOptions];
 
   var activePaths = allOptions

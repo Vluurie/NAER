@@ -17,7 +17,7 @@ class FileHandlingException implements Exception {
 ///
 /// [errorFiles] is a list of file paths that encountered errors during processing.
 ///
-void handleErrors(List<String> errorFiles) {
+void handleExtractErrors(List<String> errorFiles) {
   if (errorFiles.isNotEmpty) {
     logAndPrint("Failed to process ${errorFiles.length} files:");
     for (var file in errorFiles) {

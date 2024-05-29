@@ -76,23 +76,23 @@ Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
 
   /// List of active options, determined by getActiveOptionPaths()
   /// See the method for more information
-  List<String> activeOptions = getActiveOptionPaths(args, output!);
+  List<String> activeOptions = getActiveGameOptionPaths(args, output!);
 
   ///#######################################[_FOR THE GLORY OF MANKIND_]#######################################################################
   ///#######[_START_NEW_SEED_PROCCESS]#########################################################################################################
 
 //##### Processing the input directory to identify files to be processed #####
-  await processDirectory(input, options, pendingFiles, processedFiles);
+  await getGameFilesForProcessing(input, options, pendingFiles, processedFiles);
 
 //##### Extracts the files to be processed and capture any errors encountered #####
-  List<String> errorFiles = await processFiles(pendingFiles, processedFiles,
+  List<String> errorFiles = await extractGameFiles(pendingFiles, processedFiles,
       options, bossList, activeOptions, ismanagerFile);
 
 //##### Handles any errors that occurred during file processing #####
-  handleErrors(errorFiles);
+  handleExtractErrors(errorFiles);
 
 //##### Collects the files for modification out of the extracted files to be processed #####
-  var collectedFiles = collectFiles(input);
+  var collectedFiles = collectExtractedGameFiles(input);
 
 //##### Finds enemies within the input .xml files to be processed and modifies/randomizes them #####
   await modifyEnemiesInDirectory(
@@ -104,7 +104,7 @@ Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
 //##### Checks all modified files against the ignoreList or bossList etc. #####
 //##### If the inner shouldProcessDatFolder method returns true, dat files will get repacked #####
 //##### and output to the output path indicating successful modification *-* #####
-  await processCollectedFiles(
+  await repackModifiedGameFiles(
       input,
       collectedFiles,
       options,
@@ -118,7 +118,7 @@ Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
       args);
 
 //##### Delete any extracted folders to clean up, so the .exe does not read them (this would crash the game) #####
-  await deleteFolders(output);
+  await deleteExtractedGameFolders(output);
 
   ///####[_END_NEW_SEED_PROCCESS]###################################################################################################################
 

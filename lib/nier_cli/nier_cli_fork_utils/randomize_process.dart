@@ -29,7 +29,7 @@ import 'package:path/path.dart' as path;
 ///   - ignoreList: A list of files or folders to be ignored during processing.
 ///   - output: The output directory where processed files should be saved.
 ///   - args: Command-line arguments passed to the program.
-Future<void> processCollectedFiles(
+Future<void> repackModifiedGameFiles(
     String currentDir,
     Map<String, List<String>> collectedFiles,
     CliOptions options,
@@ -206,7 +206,7 @@ Future<void> processBossStats(
 /// This function scans the current directory (recursively if specified)
 /// and adds files to the pending files list.
 ///
-Future<void> processDirectory(String currentDir, CliOptions options,
+Future<void> getGameFilesForProcessing(String currentDir, CliOptions options,
     List<String> pendingFiles, Set<String> processedFiles) async {
   logAndPrint(
       "Starting processing in directory: $currentDir, recursive mode: ${options.recursiveMode}");
@@ -229,7 +229,7 @@ Future<void> processDirectory(String currentDir, CliOptions options,
 /// This function processes each file in the pending list and adds it to the
 /// processed files list upon successful processing.
 ///
-Future<List<String>> processFiles(
+Future<List<String>> extractGameFiles(
     List<String> pendingFiles,
     Set<String> processedFiles,
     CliOptions options,
