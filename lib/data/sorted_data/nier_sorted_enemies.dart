@@ -1,101 +1,108 @@
 const Map<String, List<String>> enemyData = {
   "Ground": [
-    "em0110",
-    "em0111",
-    "emb002",
-    "emb010",
-    "emb004",
-    "emb012",
-    "emb051",
-    "emb041",
-    "emb052",
-    "emb056",
-    "emb061",
-    "emb110",
-    "em3010",
-    "em004d",
-    "em002d",
-    "em0112",
-    "em8030",
-    "em200d",
-    "em5600",
-    "em6400",
-    "em005d",
-    "em1050",
-    "em1060",
-    "em1070",
-    "em1061",
-    "em0065",
-    "em1074",
-    "em1020",
-    "emb080",
-    "emb060",
-    "em1040",
-    "em1030",
-    "em0006",
-    "em0106",
-    "em0056",
-    "em0016",
-    "em0066",
-    "em0069",
-    "em0026",
-    "em0046",
-    "em0096",
-    "em0086",
-    "em2006",
-    "em005a",
-    "em2007",
-    "em0005",
-    "em000e",
-    "em000d",
-    "em0055",
-    "em0015",
-    "em0068",
-    "em0004",
-    "em0054",
-    "em0014",
-    "em0064",
-    "em0067",
-    "em0094",
-    "em0003",
-    "em0053",
-    "em0013",
-    "emb05a",
-    "emb015",
-    "em0002",
-    "em0052",
-    "em0012",
-    "em0042",
-    "em0000",
-    "em0100",
-    "em0050",
-    "em0010",
-    "emb016",
-    "em0060",
-    "em0061",
-    "em0020",
-    "em0040",
-    "emb05d",
-    "em0090",
-    "em0080",
-    "em005c",
-    "em001c",
-    "em2001",
-    "em2002",
-    "em0007",
-    "em0057",
-    "em0017",
-    'em9000',
-    "ema001",
-    'ema002',
-    'ema010',
-    'ema011',
-    'emb014',
+    "em0110", // Normal Goliath Tank
+    "em0111", // Amusement Park Goliath Tank
+    "emb002", // Father Servo Small Stubby
+    "emb010", // Father Servo Biped
+    "emb004", // Cowboy Small Stubby
+    "emb012", // Cowboy Biped
+    "emb051", // Father Servo Normal Machine
+    "emb041", // Father Servo Goliath Machine
+    "emb052", // Zombie Machine sparking
+    "emb056", // Murder Blooded Machine
+    "emb061", // Father Servo Humanoit Machine
+    "emb110", // Desert Goliath Tank
+    "em3010", // Shade Version Opera Boss
+    "em004d", // Shade Version Goliath Machine
+    "em002d", // Shade Version Multi-Leg Machine
+    "em0112", // Shade Goliath Tank
+    "em8030", // Shade Ro-Shi Goliath Boss
+    "em200d", // Shade Drill-Machine
+    "em5600", // Shade Eve Version
+    "em6400", // Shade Adam Version
+    "em005d", // Explosion Machine
+    "em1050", // YorHa Android Unit
+    "em1060", // YorHa Android Soldier Unit
+    "em1070", // YorHa Operator Unit
+    "em1061", // Deserted YorHa Unit
+    "em0065", // Religion Animal Machine
+    "em1074", // Operator 6O Boss
+    "em1020", // 2B Clone
+    "emb080", // Godzilla Machine
+    "emb060", // Animal Leader Machine
+    "em1040", // 9S
+    "em1030", // A2
+    "em0006", // Enhanced Stubby Machine
+    "em0106", // Enhanced Multi-Body Machine
+    "em0056", // Enhanced Normal Machine
+    "em0016", // Enhanced Biped
+    "em0066", // Enhanced Animal Machine
+    "em0069", // Enhanced Humanoid Machine
+    "em0026", // Enhanced Multi-Leg Machine
+    "em0046", // Enhanced Goliath Machine
+    "em0096", // Enhanced Goliath Legged Machine
+    "em0086", // Enhanced Dino Machine
+    "em2006", // Enhanced Drill Machine
+    "em005a", // Normal Machine with Explo Bomb
+    "em2007", // Long Drill Machine
+    "em0005", // Religion Small Stubby
+    "em000e", // Small Stubby with Explo Bomb
+    "em000d", // Religion Small Stubby with Explo Bomb
+    "em0055", // Religion Normal Machine
+    "em0015", // Religion Biped
+    "em0068", // Religion Humanoid Machine
+    "em0004", // Forest Small Stubby
+    "em0054", // Forest Normal Machine
+    "em0014", // Forest Biped
+    "em0064", // Forest Animal Machine
+    "em0067", // Forest Humanoid Machine
+    "em0094", // Forest Legged Goliath Machine
+    "em0003", // Amusement Park Small Stubby
+    "em0053", // Amusement Park Normal Machine
+    "em0013", // Amusment Park Biped
+    "emb05a", // Amusement Park Zombie Normal Machine
+    "emb015", // Amusement Park Zombie Biped
+    "em0002", // Desert Small Stubby
+    "em0052", // Desert Normal Machine
+    "em0012", // Desert Biped
+    "em0042", // Desert Goliath Machine
+    "em0000", // Default Stubby
+    "em0100", // Default multi-body stubby
+    "em0050", // Default Normal Machine
+    "em0010", // Default Biped
+    "emb016", // Colloseum Champion Biped
+    "em0060", // Default Animal Machine
+    "em0061", // Default Humanoid Machine
+    "em0020", // Default Multi-Leg Machine
+    "em0040", // Default Goliath
+    "emb05d", // Masamune Weapon Smith
+    "em0090", // Default Legged Goliath
+    "em0080", // Default Dino Goliath
+    "em005c", // Explosion Normal Machine
+    "em001c", // Explosion Biped Machine
+    "em2001", // Drill Machine
+    "em2002", // Drill Machine Long
+    "em0007", // Angry Stubby
+    "em0057", // Angry Normal Machine
+    "em0017", // Angry Biped
+    'em9000', // Goliath Ball
+    "ema001", // Animal Enhanced
+    'ema002', // Animal Default
+    'ema010', // Animal Default
+    'ema011', // Animal Enhanced
+    'emb014', // Gravekeeper Shield Biped
   ],
-  "Fly": ["em0030", "em0032", "em0033", "em0034", "em0035", "em0036", "emb031"],
+  "Fly": [
+    "em0030", // Default Flyer
+    "em0032", // Desert Flyer
+    "em0033", // Amusement Park Flyer
+    "em0034", // Forest Flyer
+    "em0035", // Religion Flyer
+    "em0036", // Enhanced Flyer
+    "emb031" // Cowboy Flyer
+  ],
   "Delete": [
     "emf000",
-    "em1030",
     "em9002",
     "em1090",
     "em4120",
@@ -148,10 +155,8 @@ const Map<String, List<String>> enemyData = {
     "em0075",
     "em8040",
     "em0071",
-    "em0036",
     "em0073",
     "em1071",
-    "em9000",
     "em007b",
     "em6012",
     "emb115",
@@ -163,7 +168,6 @@ const Map<String, List<String>> enemyData = {
     "em0019",
     "em1101",
     "em3003",
-    "emb05d",
     "em011a",
     "em5400",
     "emb070",
@@ -187,7 +191,6 @@ const Map<String, List<String>> enemyData = {
     "emb11b",
     "em0117",
     "em2101",
-    "ema002",
     "emb007",
     "em001d"
   ]

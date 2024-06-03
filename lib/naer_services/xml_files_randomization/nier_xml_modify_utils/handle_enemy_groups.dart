@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:NAER/data/boss_data/nier_boss_level_list.dart';
+import 'package:NAER/data/sorted_data/big_enemies_ids.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -120,6 +121,26 @@ bool isBoss(objId) {
   return bossData["Boss"]?.contains(objId) ?? false;
 }
 
+/// Checks if the given `objId` corresponds to a big enemy.
+///
+/// Takes an `objId` and checks if it exists within the "bigEnemies" list
+/// in the `bossEnemies` list. If the `objId` is found in the list, it returns `true`,
+/// indicating that the object is a big enemy. Otherwise, it returns `false`.
+///
+/// Parameters:
+/// - `objId`: The object ID to be checked.
+///
+/// Returns:
+/// A boolean value indicating whether the `objId` is a big enemy (`true`) or not (`false`).
+bool isBigEnemy(String objId) {
+  for (var enemy in bigEnemies) {
+    if (objId == enemy) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /// Checks if a given action ID is listed in a collection of important IDs and
 /// updates the importance status of the action.
 ///
@@ -157,6 +178,45 @@ bool checkImportantIds(
   }
   // Return the updated importance status
   return isActionImportant;
+}
+
+/// Checks if a given action ID is listed in a collection of bigSpawnEnemySkipIds and
+/// updates the status of the action.
+///
+/// This function iterates through the entries of the `bigSpawnEnemySkipIds` map, and
+/// checks if the `actionId` exists within the values of the map. If the `actionId`
+/// is found, it sets the `isSpawnActionTooSmall` flag to `true`.
+///
+/// Parameters:
+/// - `actionId`: A nullable string representing the current action ID to be checked.
+/// - `bigSpawnEnemySkipIds`: Containing a map of
+///   spawn IDs that are too small for big enemies.
+/// - `isSpawnActionTooSmall`: A boolean flag indicating if the action is too small for big enemies. This
+///   flag will be updated if the `actionId` is found within the bigSpawnEnemySkip IDs.
+///
+/// Returns:
+/// A boolean value indicating whether the action is important (`true`) or not (`false`).
+///
+/// Note:
+/// - The `isSpawnActionTooSmall` parameter is modified within the function. The initial
+///   value of this parameter should be passed as `false` unless it's already known to
+///   be important.
+bool checkTooSmallSpawnAction(
+    String? actionId, bigSpawnEnemySkipIds, bool isSpawnActionTooSmall) {
+  // Check if the actionId is not null
+  if (actionId != null) {
+    // Iterate through each entry in the big spawn enemies skip map
+    for (var entry in bigSpawnEnemySkipIds.entries) {
+      // Check if the entry's value contains the actionId
+      if (entry.value.contains(actionId)) {
+        // Set isSpawnActionTooSmall to true if actionId is found
+        isSpawnActionTooSmall = true;
+        break;
+      }
+    }
+  }
+  // Return the updated status
+  return isSpawnActionTooSmall;
 }
 
 /// NOTE that this labels are translated from the [japToEng map] and normally are japanese

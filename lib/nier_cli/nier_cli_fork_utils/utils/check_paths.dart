@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
@@ -58,4 +60,48 @@ Future<String> getMetaDataPath() async {
 
   // Return the constructed metadata path
   return metadataPath;
+}
+
+/// Checks if the specified directories exist.
+///
+/// This function checks if the three folders (`naer_onlylevel`, `naer_randomized`,
+/// `naer_randomized_and_level`) already exist in the given [baseDir].
+///
+/// [baseDir] is the base directory to check for the existence of the folders.
+///
+/// Returns `true` if all three folders exist, `false` otherwise.
+bool checkIfExtractedFoldersExist(String baseDir) {
+  final onlyLevelDir = Directory(path.join(baseDir, 'naer_onlylevel'));
+  final randomizedDir = Directory(path.join(baseDir, 'naer_randomized'));
+  final randomizedAndLevelDir =
+      Directory(path.join(baseDir, 'naer_randomized_and_level'));
+
+  return onlyLevelDir.existsSync() &&
+      randomizedDir.existsSync() &&
+      randomizedAndLevelDir.existsSync();
+}
+
+/// Returns the path of the target option directory based on the specified category.
+///
+/// This function takes the [baseDir] and a [category] and returns the path
+/// of the corresponding target directory. The category can be one of the
+/// following: "onlylevel", "randomized", or "randomized_and_level".
+///
+/// [baseDir] is the base directory where the target directories are located.
+/// [category] is the category specifying which target directory to return.
+///
+/// Returns the path of the target directory if the category is valid, otherwise
+/// throws an [ArgumentError].
+String getTargetOptionDirectoryPath(String baseDir, String category) {
+  switch (category) {
+    case 'onlylevel':
+      return path.join(baseDir, 'naer_onlylevel');
+    case 'default':
+      return path.join(baseDir, 'naer_randomized');
+    case 'allenemies':
+      return path.join(baseDir, 'naer_randomized_and_level');
+    default:
+      throw ArgumentError(
+          'Invalid category: $category. Valid categories are "onlylevel", "randomized", and "randomized_and_level".');
+  }
 }

@@ -1240,13 +1240,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
     ];
 
-    if (level["Only Selected Enemies"] == true) {
-      processArgs.add("--category=onlyselectedenemies");
-    }
+    // if (level["Only Selected Enemies"] == true) {
+    //   processArgs.add("--category=onlyselectedenemies");
+    // }
 
-    if (level["Only Bosses"] == true) {
-      processArgs.add("--category=onlybosses");
-    }
+    // if (level["Only Bosses"] == true) {
+    //   processArgs.add("--category=onlybosses");
+    // }
 
     if (level["All Enemies"] == true) {
       processArgs.add("--category=allenemies");

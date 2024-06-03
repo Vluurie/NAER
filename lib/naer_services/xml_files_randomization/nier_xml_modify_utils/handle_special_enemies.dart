@@ -14,6 +14,7 @@ import 'package:xml/xml.dart' as xml;
 /// - `filePath`: The file path where enemy data is located.
 /// - `enemyLevel`: The level of the enemy being processed.
 /// - `enemyCategory`: The category of the enemy (e.g., all enemies, only level).
+/// - `isSpawnActionTooSmall`: A boolean flag indicating if the action is too small for later big enemy randomization.
 ///
 /// Returns: A Future that completes when the processing is done.
 Future<void> handleSpecialCaseEnemies(
@@ -21,13 +22,14 @@ Future<void> handleSpecialCaseEnemies(
     Map<String, List<String>> sortedEnemyData,
     String filePath,
     String enemyLevel,
-    String enemyCategory) async {
+    String enemyCategory,
+    bool isSpawnActionTooSmall) async {
   // Check if the current element's name is 'objId'
   if (element.name.local == 'objId') {
     if (isBoss(element.innerText)) {
       // Modify the objId for bosses
-      modifyEnemyObjId(
-          element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
+      modifyEnemyObjId(element, sortedEnemyData, filePath, enemyLevel,
+          enemyCategory, isSpawnActionTooSmall);
     } else if (hasAliasAncestor(element)) {
       // Check if the enemy has an alias ancestor and belongs to specific categories
       if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
@@ -37,8 +39,8 @@ Future<void> handleSpecialCaseEnemies(
       }
     } else {
       // Modify the objId for other cases
-      modifyEnemyObjId(
-          element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
+      modifyEnemyObjId(element, sortedEnemyData, filePath, enemyLevel,
+          enemyCategory, isSpawnActionTooSmall);
     }
   } else {
     // Recursively process descendant elements that are of type 'objId'
@@ -46,8 +48,8 @@ Future<void> handleSpecialCaseEnemies(
       if (desc.name.local == 'objId') {
         if (isBoss(desc.innerText)) {
           // Modify the objId for boss descendants
-          modifyEnemyObjId(
-              desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
+          modifyEnemyObjId(desc, sortedEnemyData, filePath, enemyLevel,
+              enemyCategory, isSpawnActionTooSmall);
         } else if (hasAliasAncestor(desc)) {
           // Check if the descendant has an alias ancestor and belongs to specific categories
           if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
@@ -57,8 +59,8 @@ Future<void> handleSpecialCaseEnemies(
           }
         } else {
           // Modify the objId for other descendant cases
-          modifyEnemyObjId(
-              desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
+          modifyEnemyObjId(desc, sortedEnemyData, filePath, enemyLevel,
+              enemyCategory, isSpawnActionTooSmall);
         }
       }
     });

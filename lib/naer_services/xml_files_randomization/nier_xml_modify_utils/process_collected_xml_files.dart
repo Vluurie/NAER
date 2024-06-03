@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:NAER/data/sorted_data/big_enemies_ids.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_objid_processing.dart';
@@ -33,11 +34,15 @@ Future<void> processCollectedXmlFileForRandomization(
         : null;
 
     Iterable<xml.XmlElement> codeElements = getEnemyCodeElements(action);
+    bool isSpawnActionTooSmall = false;
     bool isActionImportant = false;
+
+    isSpawnActionTooSmall = checkTooSmallSpawnAction(
+        actionId, bigSpawnEnemySkipIds, isSpawnActionTooSmall);
     isActionImportant =
         checkImportantIds(actionId, importantIds, isActionImportant);
     handleObjIdProcessing(codeElements, isActionImportant, sortedEnemyData,
-        file, enemyLevel, enemyCategory);
+        file, enemyLevel, enemyCategory, isSpawnActionTooSmall);
   }
 
   file.writeAsStringSync(document.toPrettyString());
