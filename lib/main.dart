@@ -34,6 +34,7 @@ import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart' as enemy_data;
 
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 Future<void> main(List<String> arguments) async {
   if (arguments.isNotEmpty) {
@@ -348,7 +349,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           !lastMessage.contains("Error") &&
           !lastMessage.contains("Randomization") &&
           !lastMessage.contains("NieR CLI") &&
-          !lastMessage.contains("Last");
+          !lastMessage.contains("Last") &&
+          !lastMessage.contains("Total randomization");
 
       return isProcessing;
     }
@@ -651,10 +653,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       try {
         await FileChange.savePreRandomizationTime();
         log("Ignored mod files before starting: $ignoredModFiles");
+        final stopwatch = Stopwatch()..start();
         await startRandomizing();
         await FileChange.saveChanges();
-      } catch (e) {
-        log("Error during randomization: $e");
+        stopwatch.stop();
+        updateLog(
+            'Total randomization time: ${stopwatch.elapsed}', scrollController);
+      } catch (e, stackTrace) {
+        logAndPrint('Error during randomization $e');
+        logAndPrint('Stack trace: ${Trace.from(stackTrace)}');
       } finally {
         setState(() {
           isLoading = false;

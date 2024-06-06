@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_boss_stats.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/fileTypeHandler.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
 import 'package:args/args.dart';
@@ -42,14 +43,19 @@ Future<void> repackModifiedGameFiles(
     String? output,
     ArgResults args) async {
   // Prepare XML files by replacing .yax extension with .xml
-  var xmlFiles =
-      collectedFiles['yaxFiles']?.map((e) => e.replaceAll('.yax', '.xml'));
+  var xmlFiles = collectedFiles['yaxFiles']
+          ?.map((e) => e.replaceAll('.yax', '.xml'))
+          .toList() ??
+      <String>[];
 
   // Combine XML files and folders to process
-  var entitiesToProcess = xmlFiles?.followedBy(collectedFiles['pakFolders']!);
+  var entitiesToProcess = <String>[
+    ...xmlFiles,
+    ...?collectedFiles['pakFolders']
+  ];
 
-  if (entitiesToProcess != null) {
-    await processEntities(entitiesToProcess, options, pendingFiles,
+  if (entitiesToProcess.isNotEmpty) {
+    await processEntitiesInParallel(entitiesToProcess, options, pendingFiles,
         processedFiles, bossList, activeOptions, ismanagerFile);
 
     var fileManager = FileCategoryManager(args);
@@ -66,6 +72,29 @@ Future<void> repackModifiedGameFiles(
         activeOptions,
         ismanagerFile);
   }
+}
+
+/// This method processes all given entities in parallel,
+/// splitting the task into the amount of cores a device has for maximum computation time.
+/// See [IsolateService]
+Future<void> processEntitiesInParallel(
+    Iterable<String> entities,
+    CliOptions options,
+    List<String> pendingFiles,
+    Set<String> processedFiles,
+    List<String> bossList,
+    List<String> activeOptions,
+    bool? ismanagerFile) async {
+  final service = IsolateService();
+
+  final fileList = entities.toList();
+  final fileBatches = service.distributeFiles(fileList.cast<String>());
+  final tasks = fileBatches.values.map((files) {
+    return () => processEntities(files, options, pendingFiles, processedFiles,
+        bossList, activeOptions, ismanagerFile);
+  }).toList();
+
+  await service.runTasks(tasks);
 }
 
 /// Processes a list of entities such as files or folders.
@@ -87,7 +116,7 @@ Future<void> processEntities(
           bossList, activeOptions, ismanagerFile);
       processedFiles.add(file);
     } catch (e) {
-      logAndPrint("input error");
+      logAndPrint("input error: $e");
     }
   }
 }
@@ -228,6 +257,8 @@ Future<void> getGameFilesForProcessing(String currentDir, CliOptions options,
 ///
 /// This function processes each file in the pending list and adds it to the
 /// processed files list upon successful processing.
+///
+/// Recursevly extracts the child files after extracting the parent
 ///
 Future<List<String>> extractGameFiles(
     List<String> pendingFiles,

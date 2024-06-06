@@ -53,7 +53,7 @@ ArgParser allArguments() {
   argParser.addOption("ignore",
       help: "List of files to ignore during repacking");
 
-  // Add flags for quest, map, and phase options
+  // Add flags for quest, map, phase and enemy file options
   for (var option in questOptions) {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
@@ -61,6 +61,9 @@ ArgParser allArguments() {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
   for (var option in phaseOptions) {
+    argParser.addFlag(option, negatable: false, defaultsTo: false);
+  }
+  for (var option in enemyOptions) {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
 

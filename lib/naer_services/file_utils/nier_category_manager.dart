@@ -16,6 +16,9 @@ class FileCategoryManager {
   /// A set of phase logic file names to include for processing.
   final Set<String> includePhaseLogic;
 
+  /// A set of enemy file names to include for processing.
+  final Set<String> includeEnemies;
+
   /// Constructs a [FileCategoryManager] by extracting flags from command-line arguments.
   ///
   /// The constructor initializes the sets of included quests, maps, and phase logic files
@@ -26,7 +29,8 @@ class FileCategoryManager {
   FileCategoryManager(ArgResults args)
       : includeQuests = _extractFlags(args, questOptions),
         includeMaps = _extractFlags(args, mapOptions),
-        includePhaseLogic = _extractFlags(args, phaseOptions);
+        includePhaseLogic = _extractFlags(args, phaseOptions),
+        includeEnemies = _extractFlags(args, enemyOptions);
 
   /// Extracts flags from the command-line arguments.
   ///
@@ -57,11 +61,14 @@ class FileCategoryManager {
       return true; // If it's a map and it's included, process the file
     } else if (includePhaseLogic.contains(baseName)) {
       return true; // If it's a phase and it's included, process the file
+    } else if (includeEnemies.contains(baseName)) {
+      return true; // If it's a phase and it's included, process the file
     }
 
     // Process the file if all sets are empty
     return includeQuests.isEmpty &&
         includeMaps.isEmpty &&
-        includePhaseLogic.isEmpty;
+        includePhaseLogic.isEmpty &&
+        includeEnemies.isEmpty;
   }
 }

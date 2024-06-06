@@ -19,6 +19,7 @@ import 'package:path/path.dart' as path;
 ///
 Map<String, List<String>> collectExtractedGameFiles(String currentDir) {
   List<String> yaxFiles = [];
+  List<String> xmlFiles = [];
   List<String> pakFolders = [];
   List<String> datFolders = [];
   List<String> cpkExtractedFolders = [];
@@ -27,6 +28,9 @@ Map<String, List<String>> collectExtractedGameFiles(String currentDir) {
     if (entity is File) {
       if (entity.path.endsWith('.yax')) {
         yaxFiles.add(entity.path);
+      }
+      if (entity.path.endsWith('.xml')) {
+        xmlFiles.add(entity.path);
       }
     } else if (entity is Directory) {
       if (entity.path.endsWith('.pak')) {
@@ -41,6 +45,7 @@ Map<String, List<String>> collectExtractedGameFiles(String currentDir) {
 
   return {
     'yaxFiles': yaxFiles,
+    'xmlFiles': xmlFiles,
     'pakFolders': pakFolders,
     'datFolders': datFolders,
     'cpkExtractedFolders': cpkExtractedFolders,

@@ -37,11 +37,8 @@ Future<void> mainFuncProcessGameFiles(
   String inputDir = argument['input'];
   String outputDir = path.dirname(inputDir);
 
-// TODO: If the files get's the first time extracted, extract all enemies too
-// TODO: Steps for it: 1. Create a list of all enemies for the cli options and future development of enemy stats modification
-// TODO: 2. If extractGameFilesProcess gets started because targetOptions do not exist, add all enemies options forced to the argument options
-// TODO: 3. Test the results
-  await extractGameFilesProcess(argument, options, ismanagerFile, outputDir);
+  await extractGameFilesProcess(
+      argument, options, ismanagerFile, outputDir, output);
 
   final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
   final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
@@ -65,7 +62,7 @@ Future<void> mainFuncProcessGameFiles(
 
   // Finds enemies within the input .xml files to be processed and modifies/randomizes them based on the arguments
   await processEnemies(inputDir, sortedEnemiesPath, argument['enemyLevel'],
-      argument['enemyCategory']);
+      argument['enemyCategory'], collectedFiles);
 
   // Find and process bossStats for the specified bosses out of the bossList
   await processBossStats(inputDir, argument['bossList'], argument['bossStats']);
@@ -91,13 +88,18 @@ Future<void> mainFuncProcessGameFiles(
   await deleteExtractedGameFolders(output);
 }
 
-Future<void> extractGameFilesProcess(Map<String, dynamic> argument,
-    CliOptions options, bool? ismanagerFile, String outputDir) async {
+Future<void> extractGameFilesProcess(
+    Map<String, dynamic> argument,
+    CliOptions options,
+    bool? isManagerFile,
+    String outputDir,
+    String output) async {
   if (checkIfExtractedFoldersExist(outputDir)) {
     logAndPrint(
         'The folders "naer_onlylevel", "naer_randomized", and "naer_randomized_and_level" already exist.');
     return;
   }
+
   // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
   await getGameFilesForProcessing(argument['input'], options,
       argument['pendingFiles'], argument['processedFiles']);
@@ -109,7 +111,7 @@ Future<void> extractGameFilesProcess(Map<String, dynamic> argument,
     options,
     argument['bossList'],
     argument['activeOptions'],
-    ismanagerFile,
+    isManagerFile,
   );
 
   // Handles any errors that occurred during file extraction
