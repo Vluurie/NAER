@@ -1,4 +1,4 @@
-import 'package:NAER/naer_utils/handle_file_paths.dart';
+import 'package:NAER/data/sorted_data/file_paths_data.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';

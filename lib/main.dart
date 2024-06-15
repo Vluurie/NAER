@@ -16,6 +16,7 @@ import 'package:NAER/naer_ui/directory_ui/directory_selection_card.dart';
 import 'package:NAER/naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -43,8 +44,11 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   } else {
     runApp(
-      ChangeNotifierProvider(
-        create: (context) => LogState(),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => LogState()),
+          ChangeNotifierProvider(create: (context) => GlobalState()),
+        ],
         child: EnemyRandomizerApp(),
       ),
     );
@@ -83,41 +87,6 @@ class EnemyRandomizerAppState extends StatefulWidget {
 
 class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     with TickerProviderStateMixin {
-  GlobalKey setupDirectorySelectionKey = GlobalKey();
-  GlobalKey setupImageGridKey = GlobalKey();
-  GlobalKey setupCategorySelectionKey = GlobalKey();
-  GlobalKey setupLogOutputKey = GlobalKey();
-  GlobalKey<EnemyImageGridState> enemyImageGridKey = GlobalKey();
-  List<String> createdFiles = [];
-  List<String> createdDatFiles = [];
-  List<String> ignoredModFiles = [];
-  List<String> logMessages = [];
-  Set<String> loggedStages = {};
-  bool isLoading = false;
-  bool isButtonEnabled = true;
-  bool isLogIconBlinking = false;
-  bool hasError = false;
-  bool isProcessing = false;
-  bool selectAllQuests = true;
-  bool selectAllMaps = true;
-  bool selectAllPhases = true;
-  bool savePaths = false;
-  String input = '';
-  String scriptPath = '';
-  String specialDatOutputPath = '';
-  String? _lastLogProcessed;
-  int enemyLevel = 1;
-  int _selectedIndex = 0;
-  double enemyStats = 0.0;
-  Map<String, bool> stats = {"None": true, "Select All": false};
-  Map<String, bool> categories = {};
-  Map<String, bool> level = {
-    "All Enemies": false,
-    "All Enemies without Randomization": false,
-    // "Only Bosses": false,
-    // "Only Selected Enemies": false,
-    'None': true
-  };
   List<dynamic> getAllItems() {
     return [
       ...ScriptingPhase.scriptingPhases,
@@ -136,14 +105,19 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   late Future<bool> _loadPathsFuture;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadPathsFuture = loadPathsFromSharedPreferences();
+    updateItemsByType(SideQuest, true);
+    updateItemsByType(MapLocation, true);
+    updateItemsByType(ScriptingPhase, true);
+  }
+
+  @override
   void initState() {
     super.initState();
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles().then((_) {}).catchError((error) {});
-    updateItemsByType(SideQuest, true);
-    updateItemsByType(MapLocation, true);
-    updateItemsByType(ScriptingPhase, true);
-    _loadPathsFuture = loadPathsFromSharedPreferences();
     scrollController = ScrollController();
     _blinkController = AnimationController(
       vsync: this,
@@ -171,6 +145,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   @override
   Widget build(BuildContext context) {
+    final globalState = Provider.of<GlobalState>(context);
     return Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(70.0),
@@ -192,8 +167,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               children: <Widget>[
                 NaerAppBar(
                   blinkController: _blinkController,
-                  scrollToSetup: () => scrollToSetup(setupLogOutputKey),
-                  setupLogOutputKey: setupLogOutputKey,
+                  scrollToSetup: () =>
+                      scrollToSetup(globalState.setupLogOutputKey),
+                  setupLogOutputKey: globalState.setupLogOutputKey,
                   button: navigateButton(context),
                 ),
               ],
@@ -234,7 +210,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                 label: 'Modify',
               ),
             ],
-            currentIndex: _selectedIndex,
+            currentIndex: globalState.selectedIndex,
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white60,
             onTap: _onItemTapped,
@@ -262,23 +238,23 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       KeyedSubtree(
-                          key: setupDirectorySelectionKey,
+                          key: globalState.setupDirectorySelectionKey,
                           child: setupDirectorySelection()),
                     ],
                   ),
                 ),
                 KeyedSubtree(
-                  key: setupCategorySelectionKey,
+                  key: globalState.setupCategorySelectionKey,
                   child: setupAllCategorySelections(),
                 ),
                 KeyedSubtree(
-                  key: setupImageGridKey,
-                  child: EnemyImageGrid(key: enemyImageGridKey),
+                  key: globalState.setupImageGridKey,
+                  child: EnemyImageGrid(key: globalState.enemyImageGridKey),
                 ),
                 KeyedSubtree(
-                  key: setupLogOutputKey,
-                  child: setupLogOutput(
-                      logMessages, context, clearLogMessages, scrollController),
+                  key: globalState.setupLogOutputKey,
+                  child: setupLogOutput(globalState.logMessages, context,
+                      clearLogMessages, scrollController),
                 ),
               ],
             ),
@@ -287,19 +263,20 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   ElevatedButton navigateButton(BuildContext context) {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     return ElevatedButton(
       onPressed: () async {
         CLIArguments cliArgs = await gatherCLIArguments(
           scrollController: scrollController,
-          enemyImageGridKey: enemyImageGridKey,
-          categories: categories,
-          level: level,
-          ignoredModFiles: ignoredModFiles,
-          input: input,
-          specialDatOutputPath: specialDatOutputPath,
-          scriptPath: scriptPath,
-          enemyStats: enemyStats,
-          enemyLevel: enemyLevel,
+          enemyImageGridKey: globalState.enemyImageGridKey,
+          categories: globalState.categories,
+          level: globalState.level,
+          ignoredModFiles: globalState.ignoredModFiles,
+          input: globalState.input,
+          specialDatOutputPath: globalState.specialDatOutputPath,
+          scriptPath: globalState.scriptPath,
+          enemyStats: globalState.enemyStats,
+          enemyLevel: globalState.enemyLevel,
         );
 
         ModInstallHandler modInstallHandler =
@@ -341,8 +318,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   bool isLastMessageProcessing() {
-    if (logMessages.isNotEmpty) {
-      String lastMessage = logMessages.last;
+    final globalState = Provider.of<GlobalState>(context);
+    if (globalState.logMessages.isNotEmpty) {
+      String lastMessage = globalState.logMessages.last;
 
       bool isProcessing = lastMessage.isNotEmpty &&
           !lastMessage.contains("Completed") &&
@@ -359,6 +337,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Widget setupDirectorySelection() {
+    final globalState = Provider.of<GlobalState>(context);
     return Align(
       alignment: Alignment.topLeft,
       child: Container(
@@ -376,13 +355,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               children: [
                 DirectorySelectionCard(
                     title: "Input Directory:",
-                    path: input,
+                    path: globalState.input,
                     onBrowse: (updatePath) => openInputFileDialog(updatePath),
                     icon: Icons.folder_open,
                     hints: "Hints: Your Game data folder."),
                 DirectorySelectionCard(
                     title: "Output Directory:",
-                    path: specialDatOutputPath,
+                    path: globalState.specialDatOutputPath,
                     onBrowse: (updatePath) => openOutputFileDialog(updatePath),
                     icon: Icons.folder_open,
                     hints: "Hints: Also Game data folder."),
@@ -390,7 +369,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   icon: const Icon(Icons.open_in_full, size: 18),
                   label:
                       const Text('Open output', style: TextStyle(fontSize: 14)),
-                  onPressed: () => getOutputPath(context, specialDatOutputPath),
+                  onPressed: () =>
+                      getOutputPath(context, globalState.specialDatOutputPath),
                   style: ButtonStyle(
                     padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -425,26 +405,27 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Widget savePathCheckbox() {
+    final globalState = Provider.of<GlobalState>(context);
     return FutureBuilder<bool>(
       future: _loadPathsFuture,
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return SavePathsWidget(
-            input: input,
-            output: specialDatOutputPath,
-            scriptPath: scriptPath,
-            savePaths: savePaths,
+            input: globalState.input,
+            output: globalState.specialDatOutputPath,
+            scriptPath: globalState.scriptPath,
+            savePaths: globalState.savePaths,
             onCheckboxChanged: (bool value) async {
               if (!value) {
                 await clearPathsFromSharedPreferences();
                 setState(() {
-                  input = '';
-                  specialDatOutputPath = '';
-                  scriptPath = '';
+                  globalState.input = '';
+                  globalState.specialDatOutputPath = '';
+                  globalState.scriptPath = '';
                 });
               }
               setState(() {
-                savePaths = value;
+                globalState.savePaths = value;
               });
             },
           );
@@ -507,6 +488,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<void> openInputFileDialog(Function(String) updatePath) async {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (selectedDirectory != null) {
@@ -514,7 +496,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       if (containsValidFiles) {
         setState(() {
-          input = selectedDirectory.convertAndEscapePath();
+          globalState.input = selectedDirectory.convertAndEscapePath();
         });
         updatePath(selectedDirectory);
       } else {
@@ -564,11 +546,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<void> openOutputFileDialog(Function(String) updatePath) async {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (selectedDirectory != null) {
       setState(() {
-        specialDatOutputPath = selectedDirectory.convertAndEscapePath();
+        globalState.specialDatOutputPath =
+            selectedDirectory.convertAndEscapePath();
       });
       updatePath(selectedDirectory);
 
@@ -577,16 +561,16 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         showModsMessage(modFiles, (updatedModFiles) async {
           if (updatedModFiles.isEmpty) {
             setState(() {
-              ignoredModFiles = [];
+              globalState.ignoredModFiles = [];
             });
           } else {
             setState(() {
-              ignoredModFiles = updatedModFiles;
+              globalState.ignoredModFiles = updatedModFiles;
             });
           }
-          log("Updated ignoredModFiles after dialog: $ignoredModFiles");
+          log("Updated ignoredModFiles after dialog: ${globalState.ignoredModFiles}");
           final prefs = await SharedPreferences.getInstance();
-          String jsonData = jsonEncode(ignoredModFiles);
+          String jsonData = jsonEncode(globalState.ignoredModFiles);
           await prefs.setString('ignored_mod_files', jsonData);
         });
       } else {
@@ -621,16 +605,17 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void _onItemTapped(int index) {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     setState(() {
-      _selectedIndex = index;
+      globalState.selectedIndex = index;
     });
 
     switch (index) {
       case 0:
-        enemyImageGridKey.currentState?.selectAllImages();
+        globalState.enemyImageGridKey.currentState?.selectAllImages();
         break;
       case 1:
-        enemyImageGridKey.currentState?.unselectAllImages();
+        globalState.enemyImageGridKey.currentState?.unselectAllImages();
         break;
       case 2:
         showUndoConfirmation();
@@ -644,15 +629,16 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void handleStartRandomizing() async {
-    if (!isLoading) {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
+    if (!globalState.isLoading) {
       setState(() {
-        isLoading = true;
-        isButtonEnabled = false;
+        globalState.isLoading = true;
+        globalState.isButtonEnabled = false;
       });
 
       try {
         await FileChange.savePreRandomizationTime();
-        log("Ignored mod files before starting: $ignoredModFiles");
+        log("Ignored mod files before starting: ${globalState.ignoredModFiles}");
         final stopwatch = Stopwatch()..start();
         await startRandomizing();
         await FileChange.saveChanges();
@@ -664,23 +650,25 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         logAndPrint('Stack trace: ${Trace.from(stackTrace)}');
       } finally {
         setState(() {
-          isLoading = false;
-          isButtonEnabled = true;
+          globalState.isLoading = false;
+          globalState.isButtonEnabled = true;
         });
       }
     }
   }
 
   void onPressedAction() {
-    if (isButtonEnabled) {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
+    if (globalState.isButtonEnabled) {
       showModifyConfirmation();
     }
   }
 
   Future<Map<String, List<String>>> sortSelectedEnemies(
       List<String> selectedImages) async {
+    final globalState = Provider.of<GlobalState>(context);
     List<String>? selectedImages =
-        enemyImageGridKey.currentState?.selectedImages;
+        globalState.enemyImageGridKey.currentState?.selectedImages;
     var enemyGroups = await readEnemyData();
 
     var formattedSelectedImages =
@@ -709,13 +697,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
 // MAIN MODIFY BUTTON FUNCTIONALITY
   Future<void> startRandomizing() async {
-    hasError = true;
+    final globalState = Provider.of<GlobalState>(context, listen: false);
+    globalState.hasError = true;
     setState(() {
-      isLoading = true;
-      loggedStages.clear();
+      globalState.isLoading = true;
+      globalState.loggedStages.clear();
     });
 
-    if (input.isEmpty || specialDatOutputPath.isEmpty) {
+    if (globalState.input.isEmpty || globalState.specialDatOutputPath.isEmpty) {
       updateLog("Error: Please select both input and output directories. 💋 ",
           scrollController);
       return;
@@ -726,15 +715,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     try {
       CLIArguments cliArgs = await gatherCLIArguments(
         scrollController: scrollController,
-        enemyImageGridKey: enemyImageGridKey,
-        categories: categories,
-        level: level,
-        ignoredModFiles: ignoredModFiles,
-        input: input,
-        specialDatOutputPath: specialDatOutputPath,
-        scriptPath: scriptPath,
-        enemyStats: enemyStats,
-        enemyLevel: enemyLevel,
+        enemyImageGridKey: globalState.enemyImageGridKey,
+        categories: globalState.categories,
+        level: globalState.level,
+        ignoredModFiles: globalState.ignoredModFiles,
+        input: globalState.input,
+        specialDatOutputPath: globalState.specialDatOutputPath,
+        scriptPath: globalState.scriptPath,
+        enemyStats: globalState.enemyStats,
+        enemyLevel: globalState.enemyLevel,
       );
       bool isManagerFile = false;
       await nierCli(cliArgs.processArgs, isManagerFile);
@@ -745,7 +734,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       updateLog("Error occurred: $e", scrollController);
     } finally {
       setState(() {
-        isLoading = false;
+        globalState.isLoading = false;
       });
       updateLog(
           'Thank you for using the randomization tool.', scrollController);
@@ -805,11 +794,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void undoLastRandomization() async {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     await FileChange.loadChanges();
     await FileChange.undoChanges();
 
     try {
-      for (var filePath in createdFiles) {
+      for (var filePath in globalState.createdFiles) {
         var file = File(filePath);
 
         if (await file.exists()) {
@@ -819,36 +809,36 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           } catch (e) {
             log("Error deleting file $filePath: $e");
             setState(() {
-              logMessages.add("Error deleting file $filePath: $e");
+              globalState.logMessages.add("Error deleting file $filePath: $e");
               startBlinkAnimation();
             });
           }
         } else {
           log("File not found: $filePath");
           setState(() {
-            logMessages.add("File not found: $filePath");
+            globalState.logMessages.add("File not found: $filePath");
             startBlinkAnimation();
           });
         }
       }
 
       setState(() {
-        logMessages.add("Last randomization undone.");
+        globalState.logMessages.add("Last randomization undone.");
         setState(() {
           startBlinkAnimation();
-          isLoading = false;
-          isProcessing = false;
+          globalState.isLoading = false;
+          globalState.isProcessing = false;
         });
 
-        createdFiles.clear();
+        globalState.createdFiles.clear();
       });
     } catch (e) {
       log("An error occurred during undo: $e");
       setState(() {
-        logMessages.add("Error during undo: $e");
+        globalState.logMessages.add("Error during undo: $e");
         startBlinkAnimation();
-        isLoading = false;
-        isProcessing = false;
+        globalState.isLoading = false;
+        globalState.isProcessing = false;
       });
     }
   }
@@ -941,11 +931,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   String _generateModificationDetails() {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     List<String> details = [];
 
     String bossList = getSelectedBossesNames();
 
-    String categoryDetail = level.entries
+    String categoryDetail = globalState.level.entries
         .firstWhere((entry) => entry.value,
             orElse: () => const MapEntry("None", false))
         .key;
@@ -954,17 +945,18 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     if (categoryDetail == 'None') {
       details.add("• Change Level: None");
     } else {
-      details.add("• Change Level: $enemyLevel");
+      details.add("• Change Level: ${globalState.enemyLevel}");
     }
 
-    if (bossList.isNotEmpty && enemyStats != 0.0) {
-      details.add("• Change Boss Stats: x$enemyStats for $bossList");
+    if (bossList.isNotEmpty && globalState.enemyStats != 0.0) {
+      details
+          .add("• Change Boss Stats: x${globalState.enemyStats} for $bossList");
     } else {
       details.add("• Change Boss Stats: None");
     }
 
     List<String>? selectedImages =
-        enemyImageGridKey.currentState?.selectedImages;
+        globalState.enemyImageGridKey.currentState?.selectedImages;
     if (selectedImages != null && selectedImages.isNotEmpty) {
       details.add("• Selected Enemies: ${selectedImages.join(', ')}");
     } else {
@@ -994,7 +986,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         break;
     }
 
-    List<String> selectedCategories = categories.entries
+    List<String> selectedCategories = globalState.categories.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
@@ -1157,12 +1149,32 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void onnCopyArgsPressed() {
-    copyCLIArguments();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        copyCLIArguments();
+      }
+    });
   }
 
-  void copyCLIArguments() async {
+  void copyCLIArguments() {
+    // Log the context information
+    // Perform the Provider.of call synchronously
+    GlobalState globalState;
     try {
-      if (input.isEmpty || specialDatOutputPath.isEmpty) {
+      globalState = Provider.of<GlobalState>(context, listen: false);
+    } catch (e) {
+      logAndPrint('Error accessing Provider: $e');
+      return;
+    }
+
+    // Call the asynchronous method separately
+    _performCopyCLIArguments(globalState);
+  }
+
+  Future<void> _performCopyCLIArguments(GlobalState globalState) async {
+    try {
+      if (globalState.input.isEmpty ||
+          globalState.specialDatOutputPath.isEmpty) {
         updateLog("Error: Please select both input and output directories. 💋 ",
             scrollController);
         return;
@@ -1170,15 +1182,15 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
       CLIArguments cliArgs = await gatherCLIArguments(
         scrollController: scrollController,
-        enemyImageGridKey: enemyImageGridKey,
-        categories: categories,
-        level: level,
-        ignoredModFiles: ignoredModFiles,
-        input: input,
-        specialDatOutputPath: specialDatOutputPath,
-        scriptPath: scriptPath,
-        enemyStats: enemyStats,
-        enemyLevel: enemyLevel,
+        enemyImageGridKey: globalState.enemyImageGridKey,
+        categories: globalState.categories,
+        level: globalState.level,
+        ignoredModFiles: globalState.ignoredModFiles,
+        input: globalState.input,
+        specialDatOutputPath: globalState.specialDatOutputPath,
+        scriptPath: globalState.scriptPath,
+        enemyStats: globalState.enemyStats,
+        enemyLevel: globalState.enemyLevel,
       );
 
       updateLog(
@@ -1307,13 +1319,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void updateLog(String log, ScrollController scrollController) async {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     if (log.trim().isEmpty) {
       return;
     }
 
     final processedLog = LogState.processLog(log);
 
-    if (processedLog.isEmpty || processedLog == _lastLogProcessed) {
+    if (processedLog.isEmpty || processedLog == globalState.lastLogProcessed) {
       return;
     }
 
@@ -1328,20 +1341,21 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     });
 
     setState(() {
-      isProcessing = true;
-      logMessages.add(processedLog);
+      globalState.isProcessing = true;
+      globalState.logMessages.add(processedLog);
       startBlinkAnimation();
-      loggedStages.add(processedLog);
-      _lastLogProcessed = processedLog;
-      isProcessing = false;
+      globalState.loggedStages.add(processedLog);
+      globalState.lastLogProcessed = processedLog;
+      globalState.isProcessing = false;
     });
 
     onNewLogMessage(context, log);
   }
 
   void showCompletionDialog() {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     setState(() {
-      isLoading = false;
+      globalState.isLoading = false;
     });
     showDialog(
       context: context,
@@ -1490,19 +1504,22 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void clearLogMessages() {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     setState(() {
-      logMessages.clear();
+      globalState.logMessages.clear();
     });
   }
 
   void updateItemsByType(Type type, bool value) {
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     List<dynamic> allItems = getAllItems();
     for (var item in allItems.where((item) => item.runtimeType == type)) {
-      categories[item.id] = value;
+      globalState.categories[item.id] = value;
     }
   }
 
   Widget setupCategorySelection() {
+    final globalState = Provider.of<GlobalState>(context);
     Widget specialCheckbox(
         String title, bool value, void Function(bool?) onChanged) {
       return Padding(
@@ -1557,30 +1574,30 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           ),
           specialCheckbox(
             "All Quests",
-            selectAllQuests,
+            globalState.selectAllQuests,
             (newValue) {
               setState(() {
-                selectAllQuests = newValue!;
+                globalState.selectAllQuests = newValue!;
                 updateItemsByType(SideQuest, newValue);
               });
             },
           ),
           specialCheckbox(
             "All Maps",
-            selectAllMaps,
+            globalState.selectAllMaps,
             (newValue) {
               setState(() {
-                selectAllMaps = newValue!;
+                globalState.selectAllMaps = newValue!;
                 updateItemsByType(MapLocation, newValue);
               });
             },
           ),
           specialCheckbox(
             "All Phases",
-            selectAllPhases,
+            globalState.selectAllPhases,
             (newValue) {
               setState(() {
-                selectAllPhases = newValue!;
+                globalState.selectAllPhases = newValue!;
                 updateItemsByType(ScriptingPhase, newValue);
               });
             },
@@ -1606,12 +1623,12 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                       trailing: Transform.scale(
                         scale: 1.2,
                         child: Checkbox(
-                          value: categories[item.id] ?? false,
+                          value: globalState.categories[item.id] ?? false,
                           activeColor: Colors.blue,
                           checkColor: Colors.white,
                           onChanged: (bool? newValue) {
                             setState(() {
-                              categories[item.id] = newValue!;
+                              globalState.categories[item.id] = newValue!;
                             });
                           },
                         ),
@@ -1682,6 +1699,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Widget setupEnemyLevelSelection() {
+    final globalState = Provider.of<GlobalState>(context);
     return Align(
       alignment: Alignment.topRight,
       child: Container(
@@ -1718,32 +1736,32 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (level['None'] == false)
+                  if (globalState.level['None'] == false)
                     Text(
-                      "Enemy Level: $enemyLevel",
+                      "Enemy Level: ${globalState.enemyLevel}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                       ),
                     ),
-                  if (level['None'] == false)
+                  if (globalState.level['None'] == false)
                     Slider(
                       activeColor: const Color.fromRGBO(0, 255, 255, 1),
-                      value: enemyLevel.toDouble(),
+                      value: globalState.enemyLevel.toDouble(),
                       min: 1,
                       max: 99,
                       divisions: 98,
-                      label: enemyLevel.toString(),
+                      label: globalState.enemyLevel.toString(),
                       onChanged: (double newValue) {
                         setState(() {
-                          enemyLevel = newValue.round();
+                          globalState.enemyLevel = newValue.round();
                         });
                       },
                     ),
                 ],
               ),
             ),
-            ...level.keys.map((levelKey) {
+            ...globalState.level.keys.map((levelKey) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: CheckboxListTile(
@@ -1751,13 +1769,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     levelKey,
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
-                  value: level[levelKey],
+                  value: globalState.level[levelKey],
                   onChanged: (bool? newValue) {
                     setState(() {
                       if (newValue == true ||
-                          level.values.every((v) => v == false)) {
-                        level.updateAll((key, value) => false);
-                        level[levelKey] = newValue!;
+                          globalState.level.values.every((v) => v == false)) {
+                        globalState.level.updateAll((key, value) => false);
+                        globalState.level[levelKey] = newValue!;
                       }
                     });
                   },
@@ -1793,6 +1811,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Widget setupEnemyStatsSelection() {
+    final globalState = Provider.of<GlobalState>(context);
     return Container(
       padding: const EdgeInsets.all(30),
       margin: const EdgeInsets.only(top: 16),
@@ -1827,9 +1846,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                !stats["None"]!
+                !globalState.stats["None"]!
                     ? Text(
-                        "Boss Stats: ${enemyStats.toStringAsFixed(1)}",
+                        "Boss Stats: ${globalState.enemyStats.toStringAsFixed(1)}",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -1845,25 +1864,26 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             color: Color.lerp(
                                     const Color.fromARGB(0, 41, 39, 39),
                                     Colors.red,
-                                    enemyStats / 5.0)!
+                                    globalState.enemyStats / 5.0)!
                                 .withOpacity(0.1),
-                            blurRadius: 10.0 + (enemyStats / 5.0) * 10.0,
-                            spreadRadius: (enemyStats / 5.0) * 5.0,
+                            blurRadius:
+                                10.0 + (globalState.enemyStats / 5.0) * 10.0,
+                            spreadRadius: (globalState.enemyStats / 5.0) * 5.0,
                           ),
                         ],
                       ),
-                      child: !stats["None"]!
+                      child: !globalState.stats["None"]!
                           ? Slider(
-                              activeColor: Color.lerp(
-                                  Colors.cyan, Colors.red, enemyStats / 5.0),
-                              value: enemyStats,
+                              activeColor: Color.lerp(Colors.cyan, Colors.red,
+                                  globalState.enemyStats / 5.0),
+                              value: globalState.enemyStats,
                               min: 0.0,
                               max: 5.0,
                               divisions: 50,
-                              label: enemyStats.toStringAsFixed(1),
+                              label: globalState.enemyStats.toStringAsFixed(1),
                               onChanged: (double newValue) {
                                 setState(() {
-                                  enemyStats = newValue;
+                                  globalState.enemyStats = newValue;
                                 });
                               },
                             )
@@ -1882,11 +1902,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                     "Select All",
                     textScaler: TextScaler.linear(0.8),
                   ),
-                  value: stats["Select All"],
+                  value: globalState.stats["Select All"],
                   onChanged: (bool? value) {
                     setState(() {
-                      stats["Select All"] = value ?? false;
-                      stats["None"] = !value!;
+                      globalState.stats["Select All"] = value ?? false;
+                      globalState.stats["None"] = !value!;
                       for (var boss in bossList) {
                         boss.isSelected = value;
                       }
@@ -1900,17 +1920,17 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                   tristate: false,
                   activeColor: const Color.fromARGB(255, 209, 18, 18),
                   title: const Text("None", textScaler: TextScaler.linear(0.8)),
-                  value: stats["None"],
+                  value: globalState.stats["None"],
                   onChanged: (bool? value) {
                     setState(() {
-                      if (value == true || !stats["Select All"]!) {
-                        stats["None"] = true;
+                      if (value == true || !globalState.stats["Select All"]!) {
+                        globalState.stats["None"] = true;
                         for (var boss in bossList) {
                           boss.isSelected = false;
                         }
                         getSelectedBossesArgument();
                       }
-                      stats["Select All"] = false;
+                      globalState.stats["Select All"] = false;
                     });
                   },
                 ),
@@ -1936,7 +1956,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             GlobalKey<ShakeAnimationWidgetState>();
 
                         double scale = boss.isSelected
-                            ? 1.0 + 0.5 * (enemyStats / 5.0)
+                            ? 1.0 + 0.5 * (globalState.enemyStats / 5.0)
                             : 1.0;
 
                         return ListTile(
@@ -1964,9 +1984,9 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
                             onChanged: (bool? newValue) {
                               setState(() {
                                 boss.isSelected = newValue ?? false;
-                                stats["Select All"] =
+                                globalState.stats["Select All"] =
                                     bossList.every((b) => b.isSelected);
-                                stats["None"] =
+                                globalState.stats["None"] =
                                     bossList.every((b) => !b.isSelected);
                               });
                               getSelectedBossesArgument();
@@ -1988,6 +2008,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Future<bool> loadPathsFromSharedPreferences() async {
+    final globalState = Provider.of<GlobalState>(context);
     final prefs = await SharedPreferences.getInstance();
 
     String? input = prefs.getString('input');
@@ -1995,10 +2016,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     String? scriptPath = prefs.getString('scriptPath');
     bool savePaths = prefs.getBool('savePaths') ?? false;
     setState(() {
-      this.input = input ?? '';
-      this.specialDatOutputPath = specialDatOutputPath ?? '';
-      this.scriptPath = scriptPath ?? '';
-      this.savePaths = savePaths;
+      globalState.input = input ?? '';
+      globalState.specialDatOutputPath = specialDatOutputPath ?? '';
+      globalState.scriptPath = scriptPath ?? '';
+      globalState.savePaths = savePaths;
     });
 
     return input != null || specialDatOutputPath != null || scriptPath != null;
