@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_valid_gamefiles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/cpk/cpkExtractor.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/dat/datExtractor.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/pak/pakExtractor.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/yax/yaxToXml.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/cpk/cpkExtractor.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datExtractor.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/pak/pakExtractor.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/yax/yaxToXml.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 
 int conversionCounter = 0;
 

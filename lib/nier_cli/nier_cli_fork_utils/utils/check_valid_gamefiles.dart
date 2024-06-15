@@ -1,5 +1,5 @@
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
 

@@ -105,3 +105,27 @@ String getTargetOptionDirectoryPath(String baseDir, String category) {
           'Invalid category: $category. Valid categories are "onlylevel", "randomized", and "randomized_and_level".');
   }
 }
+
+/// Determines the input directory for extracted game files based on enemy category.
+///
+/// [outputDir] is the output directory where the extracted game files are stored.
+/// [argument] is a map containing various parameters including enemy category.
+/// [inputDir] is the directory containing the game files to be processed.
+///
+/// Returns the updated input directory based on the enemy category.
+String getExtractedOptionDirectories(
+    String outputDir, Map<String, dynamic> argument, String inputDir) {
+  final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
+  final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
+  final randomizedAndLevelPath =
+      getTargetOptionDirectoryPath(outputDir, 'allenemies');
+
+  if (argument['enemyCategory'] == 'onlylevel') {
+    inputDir = onlyLevelPath;
+  } else if (argument['enemyCategory'] == 'default') {
+    inputDir = randomizedPath;
+  } else if (argument['enemyCategory'] == 'allenemies') {
+    inputDir = randomizedAndLevelPath;
+  }
+  return inputDir;
+}

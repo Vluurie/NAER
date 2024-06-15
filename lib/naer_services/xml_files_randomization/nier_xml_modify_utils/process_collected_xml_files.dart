@@ -4,7 +4,7 @@ import 'package:NAER/data/sorted_data/big_enemies_ids.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_objid_processing.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/xml/xml_extension.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/xml/xml_extension.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// Processes a collected XML file for randomization.

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:xml/xml.dart';
 
-import '../../utils/utils.dart';
+import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 
 int _getTagId(XmlElement tag) {

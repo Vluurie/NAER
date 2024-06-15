@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/dat/datRepacker.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/pak/pakRepacker.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/yax/xmlToYax.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datRepacker.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/pak/pakRepacker.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/yax/xmlToYax.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 

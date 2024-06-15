@@ -38,13 +38,17 @@ Future<void> mainFuncProcessGameFiles(
   String outputDir = path.dirname(inputDir);
 
   if (ismanagerFile!) {
+    /// delete existing extracted folders in the mod package folder before randomization to start a fresh extract
     await deleteExtractedGameFolders(inputDir);
   }
 
+  /// Start extracting the game files if they where not already extracted and create copies of the extracted files
+  /// Only if they are a mod manager file skip copying extracted files
   await extractGameFilesProcess(
       argument, options, ismanagerFile, outputDir, output);
 
   if (!ismanagerFile) {
+    /// change the input directory to an already extracted folder for faster processing
     inputDir = getExtractedOptionDirectories(outputDir, argument, inputDir);
   }
 
@@ -53,8 +57,7 @@ Future<void> mainFuncProcessGameFiles(
     await getGameFilesForProcessing(inputDir, options, argument['pendingFiles'],
         argument['processedFiles']);
   }
-
-  logAndPrint(inputDir);
+// Collect the extracted game files from the input dir
   var collectedFiles = collectExtractedGameFiles(inputDir);
 
   // Finds enemies within the input .xml files to be processed and modifies/randomizes them based on the arguments
@@ -85,43 +88,18 @@ Future<void> mainFuncProcessGameFiles(
   await deleteExtractedGameFolders(output);
 }
 
-/// Determines the input directory for extracted game files based on enemy category.
+/// Extracts the game files with various checks beforehand.
+/// Creates after extracting three identical folders on the outer input path.
+/// If the three folders already exist, it skips extracting.
+/// If the bool [isManagerFile] is true, it skips the extracting.
 ///
-/// [outputDir] is the output directory where the extracted game files are stored.
-/// [argument] is a map containing various parameters including enemy category.
-/// [inputDir] is the directory containing the game files to be processed.
-///
-/// Returns the updated input directory based on the enemy category.
-String getExtractedOptionDirectories(
-    String outputDir, Map<String, dynamic> argument, String inputDir) {
-  final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
-  final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
-  final randomizedAndLevelPath =
-      getTargetOptionDirectoryPath(outputDir, 'allenemies');
-
-  if (argument['enemyCategory'] == 'onlylevel') {
-    inputDir = onlyLevelPath;
-  } else if (argument['enemyCategory'] == 'default') {
-    inputDir = randomizedPath;
-  } else if (argument['enemyCategory'] == 'allenemies') {
-    inputDir = randomizedAndLevelPath;
-  }
-  return inputDir;
-}
-
-/// Extracts the game files to be processed based on the given arguments and options.
-///
-/// [argument] is the map containing various parameters.
-/// [options] are the parsed command-line options.
-/// [isManagerFile] indicates if the file is from the mod manager.
-/// [outputDir] is the directory where the extracted files will be stored.
-/// [output] is the output path for the processed files.
 Future<void> extractGameFilesProcess(
     Map<String, dynamic> argument,
     CliOptions options,
     bool? isManagerFile,
     String outputDir,
     String output) async {
+  // Check the folders existent or if it's a manager file
   if (checkIfExtractedFoldersExist(outputDir) && !isManagerFile!) {
     logAndPrint(
         'The folders "naer_onlylevel", "naer_randomized", and "naer_randomized_and_level" already exist.');

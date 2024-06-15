@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
 
-import '../../utils/utils.dart';
+import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 import 'datHashGenerator.dart';
 

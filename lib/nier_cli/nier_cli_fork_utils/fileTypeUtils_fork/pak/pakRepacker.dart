@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 import 'dart:io';
 
-import '../../utils/utils.dart';
+import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 
 const ZLibEncoder _zLibEncoder = ZLibEncoder();

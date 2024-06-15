@@ -1,4 +1,4 @@
-import '../../utils/utils.dart';
+import '../../utils/utils_fork.dart';
 
 // From https://github.com/xxk-i/DATrepacker
 class HashInfo {

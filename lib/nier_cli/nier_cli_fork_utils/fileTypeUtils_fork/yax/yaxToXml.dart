@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:xml/xml.dart';
 
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/xml/xml_extension.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/xml/xml_extension.dart';
 import 'hashToStringMap.dart';
 import 'japToEng.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils/utils/ByteDataWrapper.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/utils/ByteDataWrapper.dart';
 
 class _YaxNode {
   late int indentation;

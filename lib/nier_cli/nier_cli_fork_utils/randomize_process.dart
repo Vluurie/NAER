@@ -8,9 +8,9 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:args/args.dart';
-import 'package:flutter/foundation.dart';
+//import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 /// Processes the collected files based on the given parameters.
