@@ -21,6 +21,7 @@ List<String> folderNames = [
   "ph1/nier2blender_extracted",
   "em/nier2blender_extracted",
   "core/nier2blender_extracted",
+  "nier2blender_extracted",
 ];
 
 /// Deletes specified folders from the given directory.
@@ -49,6 +50,7 @@ List<String> folderNames = [
 ///   "ph1/nier2blender_extracted",
 ///   "em/nier2blender_extracted",
 ///   "core/nier2blender_extracted",
+///   "nier2blender_extracted",
 /// ]);
 /// ```
 Future<void> deleteExtractedGameFolders(String directoryPath) async {

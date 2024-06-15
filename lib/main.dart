@@ -858,13 +858,13 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Confirm Undo"),
+          title: const Text("Confirm Undo Everything"),
           content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Are you sure you want to undo the last randomization?",
+                "Are you sure you want to undo every last modifications you did?",
               ),
               SizedBox(height: 10),
               Text(
@@ -874,6 +874,10 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               ),
               Text(
                 "• Avoid using this function while the game is running as it may cause issues.",
+                style: TextStyle(fontSize: 12),
+              ),
+              Text(
+                "• This will also undo the installed mod manager files so you need to reinstall them if they got affected.",
                 style: TextStyle(fontSize: 12),
               ),
             ],

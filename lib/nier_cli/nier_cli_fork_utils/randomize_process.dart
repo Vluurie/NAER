@@ -10,6 +10,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.da
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
 import 'package:args/args.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 /// Processes the collected files based on the given parameters.
@@ -57,21 +58,21 @@ Future<void> repackModifiedGameFiles(
   if (entitiesToProcess.isNotEmpty) {
     await processEntitiesInParallel(entitiesToProcess, options, pendingFiles,
         processedFiles, bossList, activeOptions, ismanagerFile);
-
-    var fileManager = FileCategoryManager(args);
-
-    // Process DAT folders if they exist
-    await processDatFolders(
-        collectedFiles['datFolders'],
-        fileManager,
-        bossList,
-        ignoreList,
-        output,
-        options,
-        processedFiles,
-        activeOptions,
-        ismanagerFile);
   }
+
+  var fileManager = FileCategoryManager(args);
+
+  // Process DAT folders if they exist
+  await processDatFolders(
+      collectedFiles['datFolders'],
+      fileManager,
+      bossList,
+      ignoreList,
+      output,
+      options,
+      processedFiles,
+      activeOptions,
+      ismanagerFile);
 }
 
 /// This method processes all given entities in parallel,
@@ -116,7 +117,7 @@ Future<void> processEntities(
           bossList, activeOptions, ismanagerFile);
       processedFiles.add(file);
     } catch (e) {
-      logAndPrint("input error: $e");
+      // debugPrint("input error: $e");
     }
   }
 }

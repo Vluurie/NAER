@@ -12,13 +12,13 @@ import 'package:args/args.dart';
 /// Processes the game files for modification.
 ///
 /// Handles:
-/// 1. get's the game files to be processed
-/// 2. extracts the game files that got added to the pending list
-/// 3. collects the extracted game files for processing
-/// 4. processes the enemies modification/randomization
-/// 5. processes the boss stats modification
-/// 6. repacks the modified game files and exports them
-/// 7. deletes the extracted game files that are not needed anymore
+/// 1. Gets the game files to be processed
+/// 2. Extracts the game files that got added to the pending list
+/// 3. Collects the extracted game files for processing
+/// 4. Processes the enemies modification/randomization
+/// 5. Processes the boss stats modification
+/// 6. Repackages the modified game files and exports them
+/// 7. Deletes the extracted game files that are not needed anymore
 ///
 /// [argument] is the map containing initialized variables.
 /// [sortedEnemiesPath] is the path for the sorted enemies file.
@@ -37,25 +37,22 @@ Future<void> mainFuncProcessGameFiles(
   String inputDir = argument['input'];
   String outputDir = path.dirname(inputDir);
 
+  if (ismanagerFile!) {
+    await deleteExtractedGameFolders(inputDir);
+  }
+
   await extractGameFilesProcess(
       argument, options, ismanagerFile, outputDir, output);
 
-  final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
-  final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
-  final randomizedAndLevelPath =
-      getTargetOptionDirectoryPath(outputDir, 'allenemies');
-
-  if (argument['enemyCategory'] == 'onlylevel') {
-    inputDir = onlyLevelPath;
-  } else if (argument['enemyCategory'] == 'default') {
-    inputDir = randomizedPath;
-  } else if (argument['enemyCategory'] == 'allenemies') {
-    inputDir = randomizedAndLevelPath;
+  if (!ismanagerFile) {
+    inputDir = getExtractedOptionDirectories(outputDir, argument, inputDir);
   }
 
   // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
-  await getGameFilesForProcessing(
-      inputDir, options, argument['pendingFiles'], argument['processedFiles']);
+  if (!ismanagerFile) {
+    await getGameFilesForProcessing(inputDir, options, argument['pendingFiles'],
+        argument['processedFiles']);
+  }
 
   logAndPrint(inputDir);
   var collectedFiles = collectExtractedGameFiles(inputDir);
@@ -88,13 +85,44 @@ Future<void> mainFuncProcessGameFiles(
   await deleteExtractedGameFolders(output);
 }
 
+/// Determines the input directory for extracted game files based on enemy category.
+///
+/// [outputDir] is the output directory where the extracted game files are stored.
+/// [argument] is a map containing various parameters including enemy category.
+/// [inputDir] is the directory containing the game files to be processed.
+///
+/// Returns the updated input directory based on the enemy category.
+String getExtractedOptionDirectories(
+    String outputDir, Map<String, dynamic> argument, String inputDir) {
+  final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
+  final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
+  final randomizedAndLevelPath =
+      getTargetOptionDirectoryPath(outputDir, 'allenemies');
+
+  if (argument['enemyCategory'] == 'onlylevel') {
+    inputDir = onlyLevelPath;
+  } else if (argument['enemyCategory'] == 'default') {
+    inputDir = randomizedPath;
+  } else if (argument['enemyCategory'] == 'allenemies') {
+    inputDir = randomizedAndLevelPath;
+  }
+  return inputDir;
+}
+
+/// Extracts the game files to be processed based on the given arguments and options.
+///
+/// [argument] is the map containing various parameters.
+/// [options] are the parsed command-line options.
+/// [isManagerFile] indicates if the file is from the mod manager.
+/// [outputDir] is the directory where the extracted files will be stored.
+/// [output] is the output path for the processed files.
 Future<void> extractGameFilesProcess(
     Map<String, dynamic> argument,
     CliOptions options,
     bool? isManagerFile,
     String outputDir,
     String output) async {
-  if (checkIfExtractedFoldersExist(outputDir)) {
+  if (checkIfExtractedFoldersExist(outputDir) && !isManagerFile!) {
     logAndPrint(
         'The folders "naer_onlylevel", "naer_randomized", and "naer_randomized_and_level" already exist.');
     return;
@@ -120,5 +148,7 @@ Future<void> extractGameFilesProcess(
   // Collects the files for modification out of the extracted files to be processed
   var collectedFiles = collectExtractedGameFiles(argument['input']);
   // Helper method to copy the collected files to the upper directory
-  await copyCollectedGameFiles(collectedFiles, argument['input']);
+  if (!isManagerFile!) {
+    await copyCollectedGameFiles(collectedFiles, argument['input']);
+  }
 }
