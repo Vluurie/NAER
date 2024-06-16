@@ -1,4 +1,7 @@
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:NAER/data/sorted_data/nier_maps.dart';
+import 'package:NAER/data/sorted_data/nier_script_phase.dart';
+import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:flutter/material.dart';
 
 class GlobalState extends ChangeNotifier {
@@ -35,4 +38,11 @@ class GlobalState extends ChangeNotifier {
     "All Enemies without Randomization": false,
     'None': true
   };
+  List<dynamic> getAllItems() {
+    return [
+      ...ScriptingPhase.scriptingPhases,
+      ...MapLocation.mapLocations,
+      ...SideQuest.sideQuests,
+    ];
+  }
 }

@@ -24,16 +24,18 @@ class DirectorySelectionCard extends StatefulWidget {
   });
 
   @override
-  _DirectorySelectionCardState createState() => _DirectorySelectionCardState();
+  DirectorySelectionCardState createState() => DirectorySelectionCardState();
 }
 
-class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
+class DirectorySelectionCardState extends State<DirectorySelectionCard> {
   bool isSelected = false;
+  String selectedPath = '';
 
   @override
   void initState() {
     super.initState();
     isSelected = widget.path.isNotEmpty;
+    selectedPath = widget.path;
   }
 
   @override
@@ -42,14 +44,16 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
     if (oldWidget.path != widget.path) {
       setState(() {
         isSelected = widget.path.isNotEmpty;
+        selectedPath = widget.path;
       });
     }
   }
 
   void handleBrowse() async {
-    await widget.onBrowse((selectedPath) {
+    await widget.onBrowse((newPath) {
       setState(() {
-        isSelected = selectedPath.isNotEmpty;
+        isSelected = newPath.isNotEmpty;
+        selectedPath = newPath;
       });
     });
   }
@@ -90,7 +94,7 @@ class _DirectorySelectionCardState extends State<DirectorySelectionCard> {
                     ?.copyWith(color: textColor)),
             const SizedBox(height: 5),
             Text(
-              isSelected ? widget.path : 'No directory selected',
+              isSelected ? selectedPath : 'No directory selected',
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium

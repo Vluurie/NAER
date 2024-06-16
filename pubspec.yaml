@@ -35,6 +35,9 @@ dependencies:
   intl: ^0.19.0
   url_launcher: ^6.0.20
   stack_trace: ^1.11.1
+  lottie: ^3.1.2
+  flutter_automato_theme:
+                  path: ../flutter_automato_theme
 
 
 
@@ -49,6 +52,7 @@ flutter:
     - assets/naer_backgrounds/error_background.png
     - assets/naer_backgrounds/naer_background.png
     - assets/mods/
+    - assets/animations/
   uses-material-design: true
   fonts:
     - family: MaterialIcons

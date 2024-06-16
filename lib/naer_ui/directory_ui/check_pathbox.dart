@@ -18,10 +18,10 @@ class SavePathsWidget extends StatefulWidget {
   });
 
   @override
-  _SavePathsWidgetState createState() => _SavePathsWidgetState();
+  SavePathsWidgetState createState() => SavePathsWidgetState();
 }
 
-class _SavePathsWidgetState extends State<SavePathsWidget> {
+class SavePathsWidgetState extends State<SavePathsWidget> {
   late bool checkboxValue;
 
   @override
@@ -39,6 +39,15 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
     await prefs.setBool('savePaths', checkboxValue);
   }
 
+  Future<void> clearPathsFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove('input');
+    await prefs.remove('output');
+    await prefs.remove('scriptPath');
+    await prefs.setBool('savePaths', false);
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isCheckboxEnabled =
@@ -48,7 +57,7 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Checkbox(
-          fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
+          fillColor: WidgetStateProperty.resolveWith<Color?>((states) {
             if (!isCheckboxEnabled) {
               return const Color.fromARGB(246, 78, 75, 75);
             }
@@ -58,14 +67,16 @@ class _SavePathsWidgetState extends State<SavePathsWidget> {
           }),
           value: checkboxValue,
           onChanged: isCheckboxEnabled
-              ? (bool? newValue) {
+              ? (bool? newValue) async {
                   setState(() {
                     checkboxValue = newValue ?? false;
                     widget.onCheckboxChanged(checkboxValue);
-                    if (checkboxValue) {
-                      savePathsToPreferences();
-                    }
                   });
+                  if (checkboxValue) {
+                    await savePathsToPreferences();
+                  } else {
+                    await clearPathsFromPreferences();
+                  }
                 }
               : null,
         ),
