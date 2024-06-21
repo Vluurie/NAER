@@ -1,9 +1,11 @@
 import 'package:NAER/naer_ui/dialog/input_output_file_dialog.dart';
 import 'package:NAER/naer_ui/directory_ui/directory_selection_card.dart';
-import 'package:NAER/naer_ui/setup/path_checkbox_widget.dart';
+import 'package:NAER/naer_utils/change_app_theme.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'path_checkbox_widget.dart';
 
 class DirectorySelection extends StatefulWidget {
   final Future<bool> loadPathsFuture;
@@ -21,6 +23,22 @@ class DirectorySelection extends StatefulWidget {
 
 class _DirectorySelectionState extends State<DirectorySelection> {
   @override
+  void initState() {
+    super.initState();
+    widget.globalState.addListener(_onGlobalStateChange);
+  }
+
+  @override
+  void dispose() {
+    widget.globalState.removeListener(_onGlobalStateChange);
+    super.dispose();
+  }
+
+  void _onGlobalStateChange() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topLeft,
@@ -30,9 +48,6 @@ class _DirectorySelectionState extends State<DirectorySelection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Directory Selection',
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
             Wrap(
               spacing: 16,
               runSpacing: 16,
@@ -55,39 +70,31 @@ class _DirectorySelectionState extends State<DirectorySelection> {
                   icon: Icons.folder_open,
                   hints: "Hints: Also Game data folder.",
                 ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.open_in_full, size: 18),
-                  label:
-                      const Text('Open output', style: TextStyle(fontSize: 14)),
+                AutomatoButton(
+                  label: "Open Output",
                   onPressed: () => getOutputPath(
                       context, widget.globalState.specialDatOutputPath),
-                  style: ButtonStyle(
-                    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                    backgroundColor: WidgetStateProperty.all<Color>(
-                        const Color.fromARGB(255, 25, 25, 26)),
-                    foregroundColor: WidgetStateProperty.all<Color>(
-                        const Color.fromARGB(255, 71, 192, 240)),
-                  ),
+                  uniqueId: "outputPath",
+                  maxScale: 0.8,
+                  showPointer: false,
                 ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.settings, size: 18),
-                  label: const Text('Settings', style: TextStyle(fontSize: 14)),
+                AutomatoButton(
+                  label: "Settings",
                   onPressed: () => getNaerSettings(context),
-                  style: ButtonStyle(
-                    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                    backgroundColor: WidgetStateProperty.all<Color>(
-                        const Color.fromARGB(255, 25, 25, 26)),
-                    foregroundColor: WidgetStateProperty.all<Color>(
-                        const Color.fromARGB(255, 71, 192, 240)),
-                  ),
+                  uniqueId: "settingsPath",
+                  maxScale: 0.8,
+                  showPointer: false,
                 ),
                 PathCheckBoxWidget(
                   loadPathsFuture: widget.loadPathsFuture,
                   globalState: widget.globalState,
+                ),
+                AutomatoButton(
+                  label: "Change App Theme",
+                  onPressed: () => changeAppThemePopup(context),
+                  uniqueId: "theme",
+                  maxScale: 0.8,
+                  showPointer: false,
                 ),
               ],
             ),

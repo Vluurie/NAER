@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
@@ -5,6 +7,7 @@ import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:flutter/material.dart';
 
 class GlobalState extends ChangeNotifier {
+  Completer<void> completer = Completer<void>();
   GlobalKey setupDirectorySelectionKey = GlobalKey();
   GlobalKey setupImageGridKey = GlobalKey();
   GlobalKey setupCategorySelectionKey = GlobalKey();
@@ -24,6 +27,10 @@ class GlobalState extends ChangeNotifier {
   bool selectAllMaps = true;
   bool selectAllPhases = true;
   bool savePaths = false;
+  bool isHoveringSelectAll = false;
+  bool isHoveringUnselectAll = false;
+  bool isHoveringUndo = false;
+  bool isHoveringModify = false;
   String input = '';
   String scriptPath = '';
   String specialDatOutputPath = '';
@@ -44,5 +51,19 @@ class GlobalState extends ChangeNotifier {
       ...MapLocation.mapLocations,
       ...SideQuest.sideQuests,
     ];
+  }
+
+  void clearPaths() {
+    input = '';
+    specialDatOutputPath = '';
+    scriptPath = '';
+    savePaths = false;
+    notifyListeners();
+  }
+
+  void complete() {
+    if (!completer.isCompleted) {
+      completer.complete();
+    }
   }
 }

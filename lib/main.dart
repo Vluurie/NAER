@@ -14,54 +14,54 @@ import 'package:NAER/naer_ui/setup/directory_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/enemy_level_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/enemy_stats_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/log_output_widget.dart';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
-
+import 'package:provider/provider.dart' as provider;
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-Future<void> main(List<String> arguments) async {
+void main(List<String> arguments) async {
   if (arguments.isNotEmpty) {
     bool isManagerFile = false;
     await nierCli(arguments, isManagerFile);
     exit(0);
   } else {
+    final themeNotifier = await AutomatoThemeNotifier.loadFromPreferences();
+
     runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => LogState()),
-          ChangeNotifierProvider(create: (context) => GlobalState()),
-        ],
-        child: EnemyRandomizerApp(),
+      riverpod.ProviderScope(
+        child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => GlobalState()),
+            ChangeNotifierProvider(create: (_) => themeNotifier),
+            ChangeNotifierProvider(create: (_) => LogState()),
+          ],
+          child: const EnemyRandomizerApp(),
+        ),
       ),
     );
   }
 }
 
 class EnemyRandomizerApp extends StatelessWidget {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-  EnemyRandomizerApp({super.key});
+  const EnemyRandomizerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey,
       title: 'NieR:Automata Enemy Randomizer Tool',
-      theme: ThemeData.dark().copyWith(
-        buttonTheme: const ButtonThemeData(
-          buttonColor: Color.fromARGB(255, 65, 21, 0),
-          textTheme: ButtonTextTheme.primary,
-        ),
-      ),
+      theme: Provider.of<AutomatoThemeNotifier>(context).currentTheme,
       home: const EnemyRandomizerAppState(),
     );
   }
@@ -71,15 +71,14 @@ class EnemyRandomizerAppState extends StatefulWidget {
   const EnemyRandomizerAppState({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _EnemyRandomizerAppState createState() => _EnemyRandomizerAppState();
 }
 
 class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     with TickerProviderStateMixin {
   final GlobalKey<LogOutputState> logOutputKey = GlobalKey<LogOutputState>();
-  void logAndprint(String message) {
-    // prin(message);
+  void logAndPrint(String message) {
+    // print(message);
     logState.addLog(message);
   }
 
@@ -128,125 +127,228 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
 
   @override
   Widget build(BuildContext context) {
-    final globalState = Provider.of<GlobalState>(context);
+    final globalState = provider.Provider.of<GlobalState>(context);
     return Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(70.0),
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromARGB(255, 28, 31, 32),
-                  Color.fromARGB(255, 45, 45, 48),
-                ],
-              ),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(16),
-              ),
-            ),
-            child: Stack(
-              children: <Widget>[
-                NaerAppBar(
-                  blinkController: _blinkController,
-                  scrollToSetup: () =>
-                      scrollToSetup(globalState.setupLogOutputKey),
-                  setupLogOutputKey: globalState.setupLogOutputKey,
-                  button: navigateButton(context, scrollController),
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70.0),
+        child: Container(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color.fromARGB(255, 28, 31, 32),
-                Color.fromARGB(255, 45, 45, 48),
+                AutomatoThemeColors.bright(context),
+                AutomatoThemeColors.primaryColor(context)
               ],
             ),
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(5),
-              topLeft: Radius.circular(5),
-            ),
           ),
-          child: BottomNavigationBar(
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.select_all, size: 32.0),
-                label: 'Select All',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.cancel, size: 32.0),
-                label: 'Unselect All',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.undo, size: 32.0, color: Colors.red),
-                label: 'Undo',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shuffle, size: 32.0, color: Colors.green),
-                label: 'Modify',
+          child: Stack(
+            children: <Widget>[
+              NaerAppBar(
+                blinkController: _blinkController,
+                scrollToSetup: () =>
+                    scrollToSetup(globalState.setupLogOutputKey),
+                setupLogOutputKey: globalState.setupLogOutputKey,
+                button: navigateButton(context, scrollController),
               ),
             ],
-            currentIndex: globalState.selectedIndex,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white60,
-            onTap: _onItemTapped,
-            backgroundColor: Colors.transparent,
-            type: BottomNavigationBarType.fixed,
-            elevation: 0,
           ),
         ),
-        body: Stack(children: [
-          Positioned.fill(
-              child: ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              const Color.fromARGB(255, 24, 23, 23).withOpacity(0.9),
-              BlendMode.srcOver,
-            ),
-            child: Image.asset('assets/naer_backgrounds/naer_background.png',
-                fit: BoxFit.cover),
-          )),
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      KeyedSubtree(
-                          key: globalState.setupDirectorySelectionKey,
-                          child: DirectorySelection(
-                            loadPathsFuture: _loadPathsFuture,
-                            globalState: globalState,
-                          )),
-                    ],
+      ),
+      bottomNavigationBar: Container(
+        height: 80, // Reduced height
+        color: AutomatoThemeColors.bright(context),
+        child: Stack(
+          children: [
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 15,
+                width: double.infinity,
+                color: AutomatoThemeColors.bright(context),
+                child: buildRepeatingBorderSVG(
+                  context,
+                  svgWidget: const AutomatoBorderSVG(
+                    svgString: AutomatoSvgStrings.automatoSvgStrBorder,
                   ),
+                  height: 50,
+                  width: 50,
+                  mirror: true,
                 ),
-                KeyedSubtree(
-                  key: globalState.setupCategorySelectionKey,
-                  child: setupAllSelections(),
-                ),
-                KeyedSubtree(
-                  key: globalState.setupImageGridKey,
-                  child: EnemyImageGrid(key: globalState.enemyImageGridKey),
-                ),
-                KeyedSubtree(
-                  key: globalState.setupLogOutputKey,
-                  child: LogOutput(
-                    key: logOutputKey,
-                  ),
-                ),
-              ],
+              ),
             ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 15),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AutomatoThemeColors.primaryColor(context),
+                    AutomatoThemeColors.bright(context)
+                  ],
+                ),
+              ),
+              child: BottomNavigationBar(
+                items: [
+                  BottomNavigationBarItem(
+                    icon: MouseRegion(
+                      onEnter: (_) => setState(
+                          () => globalState.isHoveringSelectAll = true),
+                      onExit: (_) => setState(
+                          () => globalState.isHoveringSelectAll = false),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: globalState.isHoveringSelectAll
+                              ? AutomatoThemeColors.brown15(context)
+                              : AutomatoThemeColors.transparentColor(context),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.select_all,
+                          size: 28.0,
+                          color: AutomatoThemeColors.darkBrown(context),
+                        ),
+                      ),
+                    ),
+                    label: 'Select All',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: MouseRegion(
+                      onEnter: (_) => setState(
+                          () => globalState.isHoveringUnselectAll = true),
+                      onExit: (_) => setState(
+                          () => globalState.isHoveringUnselectAll = false),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: globalState.isHoveringUnselectAll
+                              ? AutomatoThemeColors.brown15(context)
+                              : AutomatoThemeColors.transparentColor(context),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.cancel,
+                          size: 28.0,
+                          color: AutomatoThemeColors.darkBrown(context),
+                        ),
+                      ),
+                    ),
+                    label: 'Unselect All',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: MouseRegion(
+                      onEnter: (_) =>
+                          setState(() => globalState.isHoveringUndo = true),
+                      onExit: (_) =>
+                          setState(() => globalState.isHoveringUndo = false),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: globalState.isHoveringUndo
+                              ? AutomatoThemeColors.brown15(context)
+                              : AutomatoThemeColors.transparentColor(context),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.undo,
+                          size: 28.0, // Reduced icon size
+                          color: AutomatoThemeColors.dangerZone(context),
+                        ),
+                      ),
+                    ),
+                    label: 'Undo',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: MouseRegion(
+                      onEnter: (_) =>
+                          setState(() => globalState.isHoveringModify = true),
+                      onExit: (_) =>
+                          setState(() => globalState.isHoveringModify = false),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: globalState.isHoveringModify
+                              ? AutomatoThemeColors.brown15(context)
+                              : AutomatoThemeColors.transparentColor(context),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.shuffle,
+                          size: 28.0, // Reduced icon size
+                          color: AutomatoThemeColors.saveZone(context),
+                        ),
+                      ),
+                    ),
+                    label: 'Modify',
+                  ),
+                ],
+                currentIndex: globalState.selectedIndex,
+                selectedItemColor: AutomatoThemeColors.selected(context),
+                unselectedItemColor: AutomatoThemeColors.darkBrown(context),
+                onTap: _onItemTapped,
+                backgroundColor: Colors.transparent,
+                type: BottomNavigationBarType.fixed,
+                elevation: 0,
+                selectedLabelStyle: const TextStyle(fontSize: 12),
+                unselectedLabelStyle: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Stack(children: [
+        AutomatoBackground(
+          showRepeatingBorders: false,
+          gradientColor: AutomatoThemeColors.gradient(context),
+          linesConfig: LinesConfig(
+              lineColor: AutomatoThemeColors.darkBrown(context),
+              strokeWidth: 1.0,
+              spacing: 5.0,
+              flickerDuration: const Duration(milliseconds: 10000),
+              enableFlicker: true,
+              drawHorizontalLines: true,
+              drawVerticalLines: true),
+        ),
+        SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    KeyedSubtree(
+                        key: globalState.setupDirectorySelectionKey,
+                        child: DirectorySelection(
+                          loadPathsFuture: _loadPathsFuture,
+                          globalState: globalState,
+                        )),
+                  ],
+                ),
+              ),
+              KeyedSubtree(
+                key: globalState.setupCategorySelectionKey,
+                child: setupAllSelections(),
+              ),
+              KeyedSubtree(
+                key: globalState.setupImageGridKey,
+                child: EnemyImageGrid(key: globalState.enemyImageGridKey),
+              ),
+              KeyedSubtree(
+                key: globalState.setupLogOutputKey,
+                child: LogOutput(
+                  key: logOutputKey,
+                ),
+              ),
+            ],
           ),
-        ]));
+        ),
+      ]),
+    );
   }
 
   void scrollToSetup(GlobalKey key) {
@@ -257,7 +359,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void _onItemTapped(int index) {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     setState(() {
       globalState.selectedIndex = index;
     });
@@ -281,7 +384,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void handleStartRandomizing() async {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     if (!globalState.isLoading) {
       setState(() {
         globalState.isLoading = true;
@@ -296,7 +400,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         await FileChange.saveChanges();
         stopwatch.stop();
 
-        logOutputKey.currentState?.updateLog(
+        globalLog(
           'Total randomization time: ${stopwatch.elapsed}',
         );
       } catch (e, stackTrace) {
@@ -312,7 +416,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void onPressedAction() {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     if (globalState.isButtonEnabled) {
       showModifyConfirmation();
     }
@@ -328,14 +433,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     });
 
     if (globalState.input.isEmpty || globalState.specialDatOutputPath.isEmpty) {
-      logOutputKey.currentState?.updateLog(
-        "Error: Please select both input and output directories. 💋 ",
-      );
+      globalLog("Error: Please select both input and output directories. 💋 ");
+      setState(() {
+        globalState.isLoading = false;
+      });
       return;
     }
 
-    logOutputKey.currentState
-        ?.updateLog("Starting randomization process... 🏃‍➡️");
+    globalLog("Starting randomization process... 🏃‍➡️");
 
     try {
       CLIArguments cliArgs = await gatherCLIArguments(
@@ -354,27 +459,23 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       bool isManagerFile = false;
       await nierCli(cliArgs.processArgs, isManagerFile);
 
-      logOutputKey.currentState?.updateLog(
-        "Randomization process completed successfully.",
-      );
+      globalLog("Randomization process completed successfully.");
     } on Exception catch (e) {
-      logOutputKey.currentState?.updateLog("Error occurred: $e");
+      globalLog("Error occurred: $e");
     } finally {
       setState(() {
         globalState.isLoading = false;
       });
-      logOutputKey.currentState?.updateLog(
-        'Thank you for using the randomization tool.',
-      );
-      logOutputKey.currentState?.updateLog(asciiArt2B);
-      logOutputKey.currentState?.updateLog("Randomization process finished.");
+      globalLog('Thank you for using the randomization tool.');
+      globalLog(asciiArt2B);
+      globalLog("Randomization process finished.");
       showCompletionDialog();
     }
   }
 
   void logErrorDetails(dynamic e, StackTrace stackTrace) {
-    logOutputKey.currentState?.updateLog("Error: $e");
-    logOutputKey.currentState?.updateLog("Stack Trace: $stackTrace");
+    globalLog("Error: $e");
+    globalLog("Stack Trace: $stackTrace");
   }
 
   void undoLastRandomization() async {
@@ -389,37 +490,35 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         if (await file.exists()) {
           try {
             await file.delete();
-            log("Deleted file: $filePath");
+            globalLog("Deleted file: $filePath");
           } catch (e) {
-            log("Error deleting file $filePath: $e");
+            globalLog("Error deleting file $filePath: $e");
             setState(() {
               globalState.logMessages.add("Error deleting file $filePath: $e");
               startBlinkAnimation();
             });
           }
         } else {
-          log("File not found: $filePath");
+          globalLog("File not found: $filePath");
           setState(() {
-            globalState.logMessages.add("File not found: $filePath");
+            globalLog("File not found: $filePath");
             startBlinkAnimation();
           });
         }
       }
 
       setState(() {
-        globalState.logMessages.add("Last randomization undone.");
-        setState(() {
-          startBlinkAnimation();
-          globalState.isLoading = false;
-          globalState.isProcessing = false;
-        });
-
-        globalState.createdFiles.clear();
+        globalLog("Last randomization undone.");
+        startBlinkAnimation();
+        globalState.isLoading = false;
+        globalState.isProcessing = false;
       });
+
+      globalState.createdFiles.clear();
     } catch (e) {
-      log("An error occurred during undo: $e");
+      globalLog("An error occurred during undo: $e");
       setState(() {
-        globalState.logMessages.add("Error during undo: $e");
+        globalLog("Error during undo: $e");
         startBlinkAnimation();
         globalState.isLoading = false;
         globalState.isProcessing = false;
@@ -515,10 +614,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   String _generateModificationDetails() {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     List<String> details = [];
 
-    String bossList = getSelectedBossesNames();
+    String enemyList = getSelectedEnemiesNames();
 
     String categoryDetail = globalState.level.entries
         .firstWhere((entry) => entry.value,
@@ -532,11 +632,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       details.add("• Change Level: ${globalState.enemyLevel}");
     }
 
-    if (bossList.isNotEmpty && globalState.enemyStats != 0.0) {
-      details
-          .add("• Change Boss Stats: x${globalState.enemyStats} for $bossList");
+    if (enemyList.isNotEmpty && globalState.enemyStats != 0.0) {
+      details.add(
+          "• Change Enemy Stats: x${globalState.enemyStats} for $enemyList");
     } else {
-      details.add("• Change Boss Stats: None");
+      details.add("• Change Enemy Stats: None");
     }
 
     List<String>? selectedImages =
@@ -585,7 +685,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void showCompletionDialog() {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     setState(() {
       globalState.isLoading = false;
     });
@@ -609,7 +710,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void clearLogMessages() {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     setState(() {
       globalState.logMessages.clear();
     });
@@ -638,28 +740,79 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   Widget setupAllSelections() {
-    return const IntrinsicHeight(
-        child: SingleChildScrollView(
+    return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: EnemyLevelSelection(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AutomatoThemeColors.brown25(context),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        AutomatoThemeColors.darkBrown(context).withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const SingleChildScrollView(
+                child: EnemyLevelSelection(),
+              ),
+            ),
           ),
           Expanded(
-            child: CategorySelection(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AutomatoThemeColors.brown25(context),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        AutomatoThemeColors.darkBrown(context).withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const SingleChildScrollView(
+                child: CategorySelection(),
+              ),
+            ),
           ),
-          // if (Platform.isWindows)
           Expanded(
-            child: EnemyStatsSelection(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AutomatoThemeColors.brown25(context),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        AutomatoThemeColors.darkBrown(context).withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const SingleChildScrollView(
+                child: EnemyStatsSelection(),
+              ),
+            ),
           ),
         ],
       ),
-    ));
+    );
   }
 
   Future<bool> loadPathsFromSharedPreferences() async {
-    final globalState = Provider.of<GlobalState>(context);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     final prefs = await SharedPreferences.getInstance();
 
     String? input = prefs.getString('input');

@@ -1,8 +1,9 @@
-import 'package:NAER/data/boss_data/nier_boss_class_list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
 import 'package:NAER/naer_ui/animations/shacke_animation_widget.dart';
 import 'package:NAER/naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 
 class EnemyStatsSelection extends StatefulWidget {
@@ -13,12 +14,12 @@ class EnemyStatsSelection extends StatefulWidget {
 }
 
 class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
-  String getSelectedBossesArgument() {
-    List<List<String>> selectedBosses = bossList
-        .where((boss) => boss.isSelected)
-        .map((boss) => boss.emIdentifiers)
+  String getSelectedEnemiesArgument() {
+    List<List<String>> selectedEnemies = allEmForStatsChangeList
+        .where((enemy) => enemy.isSelected)
+        .map((enemy) => enemy.emIdentifiers)
         .toList();
-    return selectedBosses.join(',');
+    return selectedEnemies.join(',');
   }
 
   @override
@@ -26,26 +27,13 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
     final globalState = Provider.of<GlobalState>(context);
     return Container(
       padding: const EdgeInsets.all(30),
-      margin: const EdgeInsets.only(top: 16),
-      decoration: BoxDecoration(
-        color: Colors.deepPurpleAccent[800],
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
             padding: EdgeInsets.only(bottom: 10.0),
             child: Text(
-              "Adjust Boss Stats.",
+              "Adjust Enemy Stats.",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -60,7 +48,7 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
               children: [
                 !globalState.stats["None"]!
                     ? Text(
-                        "Boss Stats: ${globalState.enemyStats.toStringAsFixed(1)}",
+                        "Enemy Stats Multiplier - ${globalState.enemyStats.toStringAsFixed(1)}",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -84,12 +72,13 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                     ),
                     child: !globalState.stats["None"]!
                         ? Slider(
-                            activeColor: Color.lerp(Colors.cyan, Colors.red,
+                            activeColor: Color.lerp(
+                                AutomatoThemeColors.primaryColor(context),
+                                AutomatoThemeColors.dangerZone(context),
                                 globalState.enemyStats / 5.0),
                             value: globalState.enemyStats,
                             min: 0.0,
                             max: 5.0,
-                            divisions: 50,
                             label: globalState.enemyStats.toStringAsFixed(1),
                             onChanged: (double newValue) {
                               setState(() {
@@ -108,7 +97,7 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  activeColor: const Color.fromARGB(255, 18, 180, 209),
+                  activeColor: AutomatoThemeColors.primaryColor(context),
                   title: const Text(
                     "Select All",
                     textScaler: TextScaler.linear(0.8),
@@ -118,10 +107,10 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                     setState(() {
                       globalState.stats["Select All"] = value ?? false;
                       globalState.stats["None"] = !value!;
-                      for (var boss in bossList) {
-                        boss.isSelected = value;
+                      for (var enemy in allEmForStatsChangeList) {
+                        enemy.isSelected = value;
                       }
-                      getSelectedBossesArgument();
+                      getSelectedEnemiesArgument();
                     });
                   },
                 ),
@@ -136,10 +125,10 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                     setState(() {
                       if (value == true || !globalState.stats["Select All"]!) {
                         globalState.stats["None"] = true;
-                        for (var boss in bossList) {
-                          boss.isSelected = false;
+                        for (var enemy in allEmForStatsChangeList) {
+                          enemy.isSelected = false;
                         }
-                        getSelectedBossesArgument();
+                        getSelectedEnemiesArgument();
                       }
                       globalState.stats["Select All"] = false;
                     });
@@ -160,13 +149,14 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: Column(
-                      children: bossList.asMap().entries.map((entry) {
+                      children:
+                          allEmForStatsChangeList.asMap().entries.map((entry) {
                         int index = entry.key;
-                        var boss = entry.value;
+                        var enemy = entry.value;
                         final GlobalKey<ShakeAnimationWidgetState> shakeKey =
                             GlobalKey<ShakeAnimationWidgetState>();
 
-                        double scale = boss.isSelected
+                        double scale = enemy.isSelected
                             ? 1.0 + 0.5 * (globalState.enemyStats / 5.0)
                             : 1.0;
 
@@ -181,29 +171,32 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                                     ? messages[index]
                                     : "",
                                 onEnd: () {},
-                                child: Image.asset(boss.imageUrl),
+                                child: Image.asset(enemy.imageUrl),
                               ),
                             ),
                           ),
                           title: Text(
-                            boss.name,
+                            enemy.name,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 16),
                           ),
                           trailing: Checkbox(
-                            value: boss.isSelected,
+                            value: enemy.isSelected,
                             onChanged: (bool? newValue) {
                               setState(() {
-                                boss.isSelected = newValue ?? false;
+                                enemy.isSelected = newValue ?? false;
                                 globalState.stats["Select All"] =
-                                    bossList.every((b) => b.isSelected);
+                                    allEmForStatsChangeList
+                                        .every((b) => b.isSelected);
                                 globalState.stats["None"] =
-                                    bossList.every((b) => !b.isSelected);
+                                    allEmForStatsChangeList
+                                        .every((b) => !b.isSelected);
                               });
-                              getSelectedBossesArgument();
+                              getSelectedEnemiesArgument();
                             },
-                            activeColor: Colors.blue,
-                            checkColor: Colors.white,
+                            activeColor:
+                                AutomatoThemeColors.primaryColor(context),
+                            checkColor: AutomatoThemeColors.darkBrown(context),
                           ),
                         );
                       }).toList(),

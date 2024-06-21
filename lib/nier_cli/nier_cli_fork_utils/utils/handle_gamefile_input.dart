@@ -23,7 +23,7 @@ Future<void> handleInput(
     CliOptions args,
     List<String> pendingFiles,
     Set<String> processedFiles,
-    List<String> bossList,
+    List<String> enemyList,
     List<String> activeOptions,
     bool? ismanagerFile) async {
   bool isFile = await FileSystemEntity.isFile(input);
@@ -33,7 +33,7 @@ Future<void> handleInput(
         "Input file or directory does not exist ($input)");
   }
   await handleSingleCpkExtract(input, output, args, isFile, isDirectory,
-      pendingFiles, processedFiles, bossList, activeOptions, ismanagerFile);
+      pendingFiles, processedFiles, enemyList, activeOptions, ismanagerFile);
   for (var handler in _handlers) {
     String? currentOutput = output;
     if (handler == handleDatRepack && args.specialDatOutputPath != null) {

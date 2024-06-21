@@ -1,4 +1,4 @@
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 
 final logState = LogState();
 

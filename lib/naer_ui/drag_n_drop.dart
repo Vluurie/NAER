@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'package:NAER/naer_mod_manager/ui/log_output_widget.dart';
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
+import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class DragDropWidget extends StatefulWidget {
@@ -29,7 +30,9 @@ class _DragDropWidgetState extends State<DragDropWidget> {
     return Padding(
       padding: widget.padding,
       child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Lottie.asset('assets/animations/loading.json',
+                  width: 150, height: 150, fit: BoxFit.fill))
           : DropTarget(
               onDragEntered: (detail) => setState(() => _dragging = true),
               onDragExited: (detail) => setState(() => _dragging = false),

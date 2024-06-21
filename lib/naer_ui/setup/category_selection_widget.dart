@@ -1,9 +1,10 @@
-import 'package:NAER/data/boss_data/nier_boss_class_list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 
 class CategorySelection extends StatefulWidget {
@@ -32,8 +33,8 @@ class CategorySelectionState extends State<CategorySelection> {
             Checkbox(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.blue,
-              checkColor: Colors.white,
+              activeColor: AutomatoThemeColors.primaryColor(context),
+              checkColor: AutomatoThemeColors.darkBrown(context),
             ),
           ],
         ),
@@ -53,9 +54,8 @@ class CategorySelectionState extends State<CategorySelection> {
 
     return Container(
       padding: const EdgeInsets.all(30),
-      margin: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
-        color: Colors.deepPurpleAccent[800],
+        color: AutomatoThemeColors.brown25(context),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
@@ -111,7 +111,7 @@ class CategorySelectionState extends State<CategorySelection> {
             },
           ),
           SizedBox(
-            height: 320,
+            height: 375,
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
@@ -126,14 +126,15 @@ class CategorySelectionState extends State<CategorySelection> {
                       title: Text(
                         item.description,
                         style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
+                            const TextStyle(color: Colors.white, fontSize: 14),
                       ),
                       trailing: Transform.scale(
-                        scale: 1.2,
+                        scale: 1,
                         child: Checkbox(
                           value: globalState.categories[item.id] ?? false,
-                          activeColor: Colors.blue,
-                          checkColor: Colors.white,
+                          activeColor:
+                              AutomatoThemeColors.primaryColor(context),
+                          checkColor: AutomatoThemeColors.darkBrown(context),
                           onChanged: (bool? newValue) {
                             setState(() {
                               globalState.categories[item.id] = newValue!;
@@ -161,10 +162,10 @@ void updateItemsByType(Type type, bool value, BuildContext context) {
   }
 }
 
-String getSelectedBossesNames() {
-  List<String> selectedBosses = bossList
-      .where((boss) => boss.isSelected)
-      .map((boss) => boss.name)
+String getSelectedEnemiesNames() {
+  List<String> selectedEnemies = allEmForStatsChangeList
+      .where((enemy) => enemy.isSelected)
+      .map((enemy) => enemy.name)
       .toList();
-  return selectedBosses.join(',');
+  return selectedEnemies.join(',');
 }

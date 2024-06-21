@@ -3,6 +3,7 @@ import 'package:NAER/data/image_data/nier_enemy_image_names.dart';
 import 'package:NAER/data/image_data/nier_enemy_images_ingame_list.dart';
 import 'package:NAER/naer_ui/image_ui/levitating_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 
 class EnemyImageGrid extends StatefulWidget {
   @override
@@ -27,14 +28,14 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     double gridHeight;
     int crossAxisCount;
 
-    if (MediaQuery.of(context).size.width < 600) {
+    if (MediaQuery.of(context).size.width < 750) {
       crossAxisCount = 3;
       gridHeight = 350.0;
-    } else if (MediaQuery.of(context).size.width < 1100) {
-      crossAxisCount = 3;
+    } else if (MediaQuery.of(context).size.width < 950) {
+      crossAxisCount = 4;
       gridHeight = 450.0;
     } else if (MediaQuery.of(context).size.width < 1500) {
-      crossAxisCount = 5;
+      crossAxisCount = 6;
       gridHeight = 550.0;
     } else {
       crossAxisCount = 9;
@@ -55,8 +56,8 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.info_outline,
-                color: Color.fromARGB(255, 36, 201, 252)),
+            icon: Icon(Icons.info_outline,
+                color: AutomatoThemeColors.darkBrown(context)),
             onPressed: () {
               showEnemyInformation();
             },
@@ -68,15 +69,15 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     Widget gridSection = Container(
       height: gridHeight,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 26, 25, 25),
+        color: AutomatoThemeColors.darkBrown(context),
         border: Border.all(
-            color: const Color.fromARGB(255, 255, 255, 255), width: 1),
+            color: AutomatoThemeColors.primaryColor(context), width: 3),
         borderRadius: BorderRadius.circular(10),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width - 350.0,
+          width: MediaQuery.of(context).size.width - 100.0,
           child: GridView.builder(
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -89,6 +90,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Card(
+                  color: AutomatoThemeColors.hoverBrown(context),
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
@@ -184,39 +186,38 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                     transform: Matrix4.identity()
                       ..scale(isHovered.value ? 1.05 : 1.0),
                     decoration: BoxDecoration(
-                      color: isBuggyEnemy
-                          ? const Color.fromARGB(255, 50, 50, 50)
-                          : isSpecialEnemy
-                              ? const Color.fromARGB(255, 40, 40, 40)
-                              : const Color.fromARGB(255, 31, 30, 30),
+                      color: AutomatoThemeColors.transparentColor(context),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow:
-                          isHovered.value || isBuggyEnemy || isSpecialEnemy
-                              ? [
-                                  BoxShadow(
-                                    color: isBuggyEnemy
-                                        ? Colors.red.withOpacity(0.5)
-                                        : isSpecialEnemy
-                                            ? const Color.fromARGB(
-                                                    255, 54, 164, 255)
-                                                .withOpacity(0.5)
-                                            : const Color.fromARGB(
-                                                    255, 241, 241, 241)
-                                                .withOpacity(0.3),
-                                    spreadRadius: 1,
-                                    blurRadius: 50,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ]
-                              : [],
+                      boxShadow: isHovered.value ||
+                              isBuggyEnemy ||
+                              isSpecialEnemy
+                          ? [
+                              BoxShadow(
+                                color: isBuggyEnemy
+                                    ? AutomatoThemeColors.dangerZone(context)
+                                        .withOpacity(0.5)
+                                    : isSpecialEnemy
+                                        ? AutomatoThemeColors.primaryColor(
+                                                context)
+                                            .withOpacity(0.5)
+                                        : AutomatoThemeColors.primaryColor(
+                                                context)
+                                            .withOpacity(0.3),
+                                spreadRadius: 1,
+                                blurRadius: 50,
+                                offset: const Offset(0, 10),
+                              ),
+                            ]
+                          : [],
                       border: Border.all(
                         color: isSelected || isHovered.value
                             ? const Color.fromARGB(255, 255, 255, 255)
                             : isBuggyEnemy
-                                ? Colors.red
+                                ? AutomatoThemeColors.dangerZone(context)
                                 : isSpecialEnemy
-                                    ? Colors.blue
-                                    : Colors.transparent,
+                                    ? AutomatoThemeColors.primaryColor(context)
+                                    : AutomatoThemeColors.transparentColor(
+                                        context),
                         width: isBuggyEnemy || isSpecialEnemy ? 3 : 3,
                       ),
                     ),
@@ -287,61 +288,84 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
-          child: SingleChildScrollView(
-            child: Container(
-              width: 500,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 28, 31, 32),
-                    Color.fromARGB(255, 45, 45, 48),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Container(
+                width: 500,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MouseRegion(
-                    onEnter: (_) => isHovered.value = true,
-                    onExit: (_) => isHovered.value = false,
-                    child: LevitatingImage(
-                      imagePath:
-                          'assets/nier_image_folders/nier_enemies_ingame_images/$imageName',
-                      isHovered: isHovered.value,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Enemy Information",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    description,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      "Close",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.blue,
+                child: Stack(
+                  children: [
+                    const AutomatoBackground(
+                      showBackgroundSVG: false,
+                      showMenuLines: true,
+                      showRepeatingBorders: false,
+                      backgroundColor: Color.fromARGB(255, 99, 95, 80),
+                      linesConfig: LinesConfig(
+                        lineColor: Color.fromARGB(255, 65, 63, 53),
+                        strokeWidth: 2.5,
+                        spacing: 7.0,
+                        flickerDuration: Duration(milliseconds: 800),
+                        enableFlicker: false,
+                        drawHorizontalLines: true,
+                        drawVerticalLines: true,
                       ),
                     ),
-                  ),
-                ],
+                    SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            MouseRegion(
+                              onEnter: (_) => isHovered.value = true,
+                              onExit: (_) => isHovered.value = false,
+                              child: LevitatingImage(
+                                imagePath:
+                                    'assets/nier_image_folders/nier_enemies_ingame_images/$imageName',
+                                isHovered: isHovered.value,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              "Enemy Information",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              description,
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.white),
+                            ),
+                            const SizedBox(height: 20),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                "Close",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color:
+                                      AutomatoThemeColors.primaryColor(context),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

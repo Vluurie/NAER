@@ -10,7 +10,6 @@ class Navigation {
       BuildContext context, CLIArguments cliArguments) async {
     return ElevatedButton(
       onPressed: () {
-        print(cliArguments);
         ModInstallHandler modInstallHandler =
             ModInstallHandler(cliArguments: cliArguments);
         ModStateManager modStateManager = ModStateManager(modInstallHandler);
@@ -19,7 +18,9 @@ class Navigation {
           MaterialPageRoute(
             builder: (context) => ChangeNotifierProvider<ModStateManager>(
               create: (_) => modStateManager,
-              child: SecondPage(cliArguments: cliArguments),
+              child: SecondPage(
+                cliArguments: cliArguments,
+              ),
             ),
           ),
         );

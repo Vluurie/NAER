@@ -65,7 +65,8 @@ Future<void> mainFuncProcessGameFiles(
       argument['enemyCategory'], collectedFiles);
 
   // Find and process bossStats for the specified bosses out of the bossList
-  await processBossStats(inputDir, argument['bossList'], argument['bossStats']);
+  await processEnemyStats(
+      inputDir, argument['enemyList'], argument['enemyStats'], false);
 
   // Checks all modified files against the ignoreList or bossList etc.
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked
@@ -76,7 +77,7 @@ Future<void> mainFuncProcessGameFiles(
     options,
     argument['pendingFiles'],
     argument['processedFiles'],
-    argument['bossList'],
+    argument['enemyList'],
     argument['activeOptions'],
     ismanagerFile,
     argument['ignoreList'],
@@ -86,6 +87,10 @@ Future<void> mainFuncProcessGameFiles(
 
   // Delete any extracted folders to clean up, so the .exe does not read them (this would crash the game)
   await deleteExtractedGameFolders(output);
+// Reverse the extracted .csv files that where modified to original
+  logAndPrint('Reversing enemy stats back to normal on extracted files..');
+  await processEnemyStats(
+      inputDir, argument['enemyList'], argument['enemyStats'], true);
 }
 
 /// Extracts the game files with various checks beforehand.
@@ -102,13 +107,18 @@ Future<void> extractGameFilesProcess(
   // Check the folders existent or if it's a manager file
   if (checkIfExtractedFoldersExist(outputDir) && !isManagerFile!) {
     logAndPrint(
-        'The folders "naer_onlylevel", "naer_randomized", and "naer_randomized_and_level" already exist.');
+        'The copied "naer_onlylevel", "naer_randomized", and "naer_randomized_and_level" folders already exist.');
+    logAndPrint('Skipping extraction of game files.');
     return;
   }
 
   // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
   await getGameFilesForProcessing(argument['input'], options,
       argument['pendingFiles'], argument['processedFiles']);
+
+  logAndPrint('DETECTED FIRST TIME RANDOMIZATION - VERSION(3.5.0).');
+  logAndPrint(
+      'Extracting game files for the first time (can take up to ~ 1 mins)....');
 
   // Extracts the files to be processed specified by the activeOptions and capture any errors encountered
   List<String> errorFiles = await extractGameFiles(
@@ -122,11 +132,14 @@ Future<void> extractGameFilesProcess(
 
   // Handles any errors that occurred during file extraction
   handleExtractErrors(errorFiles);
-
+  logAndPrint(
+      'Creating three backup extracted game folders for randomization in upper directory...');
+  logAndPrint('(this reduces next randomization speed to ~ 10 seconds)');
   // Collects the files for modification out of the extracted files to be processed
   var collectedFiles = collectExtractedGameFiles(argument['input']);
   // Helper method to copy the collected files to the upper directory
   if (!isManagerFile!) {
     await copyCollectedGameFiles(collectedFiles, argument['input']);
+    logAndPrint('Copying finished.');
   }
 }

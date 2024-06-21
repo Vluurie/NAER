@@ -35,15 +35,9 @@ class _PathCheckBoxWidgetState extends State<PathCheckBoxWidget> {
                 onCheckboxChanged: (bool value) async {
                   if (!value) {
                     await clearPathsFromSharedPreferences();
-                    setState(() {
-                      globalState.input = '';
-                      globalState.specialDatOutputPath = '';
-                      globalState.scriptPath = '';
-                    });
+                    globalState.clearPaths();
                   }
-                  setState(() {
-                    globalState.savePaths = value;
-                  });
+                  globalState.savePaths = value;
                 },
               );
             },

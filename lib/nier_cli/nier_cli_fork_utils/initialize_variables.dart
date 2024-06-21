@@ -30,13 +30,13 @@ Map<String, dynamic> initializeArgumentVars(ArgResults args, String output) {
   /// Example category: 'allenemies'
   String enemyCategory = args["category"] ?? '';
 
-  /// Stats of the boss, parsed as a double from the provided arg
-  /// Example bossStat: 5.0
-  double bossStats = double.parse(args["bossStats"]);
+  /// Stats of the enemy, parsed as a double from the provided arg
+  /// Example enemyStats: 5.0
+  double enemyStats = double.parse(args["enemyStats"]);
 
-  /// List of the bosses, parsed from the comma-separated string arg array, with a default empty list
+  /// List of the enemies, parsed from the comma-separated string arg array, with a default empty list
   /// Example structure:  "[em1030],[em1040],[em1074],[em1100, em1101],....
-  List<String> bossList = (args["bosses"] as String?)?.split(',') ?? [];
+  List<String> enemyList = (args["enemies"] as String?)?.split(',') ?? [];
 
   /// List of active options, determined by getActiveOptionPaths()
   /// See the method for more information
@@ -49,8 +49,8 @@ Map<String, dynamic> initializeArgumentVars(ArgResults args, String output) {
     'ignoreList': ignoreList,
     'enemyLevel': enemyLevel,
     'enemyCategory': enemyCategory,
-    'bossStats': bossStats,
-    'bossList': bossList,
+    'enemyStats': enemyStats,
+    'enemyList': enemyList,
     'activeOptions': activeOptions
   };
 }

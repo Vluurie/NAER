@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SavePathsWidget extends StatefulWidget {
@@ -46,6 +47,10 @@ class SavePathsWidgetState extends State<SavePathsWidget> {
     await prefs.remove('output');
     await prefs.remove('scriptPath');
     await prefs.setBool('savePaths', false);
+    setState(() {
+      checkboxValue = false;
+      widget.onCheckboxChanged(checkboxValue);
+    });
   }
 
   @override
@@ -62,8 +67,8 @@ class SavePathsWidgetState extends State<SavePathsWidget> {
               return const Color.fromARGB(246, 78, 75, 75);
             }
             return checkboxValue
-                ? const Color.fromRGBO(0, 255, 0, 1.0)
-                : const Color.fromARGB(246, 0, 0, 0);
+                ? AutomatoThemeColors.saveZone(context)
+                : AutomatoThemeColors.darkBrown(context);
           }),
           value: checkboxValue,
           onChanged: isCheckboxEnabled

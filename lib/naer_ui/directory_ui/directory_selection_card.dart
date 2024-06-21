@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 
 class DirectorySelectionCard extends StatefulWidget {
   final String title;
@@ -60,8 +61,9 @@ class DirectorySelectionCardState extends State<DirectorySelectionCard> {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor =
-        isSelected ? Colors.green : const Color.fromARGB(255, 34, 34, 36);
+    Color backgroundColor = isSelected
+        ? AutomatoThemeColors.darkBrown(context)
+        : const Color.fromARGB(255, 34, 34, 36);
     Color textColor = isSelected ? Colors.white : Colors.grey;
     Color iconColor = isSelected
         ? Theme.of(context).indicatorColor

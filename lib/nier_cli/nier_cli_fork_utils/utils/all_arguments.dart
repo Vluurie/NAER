@@ -11,7 +11,7 @@ import 'package:args/args.dart';
 /// - Extraction options for folders and subfolders.
 /// - Auto extraction of children files.
 /// - Extraction filters for various file types.
-/// - Specification of bosses and their stats.
+/// - Specification of enemies and their stats.
 /// - Level and category of enemies.
 /// - Special output directories for DAT files.
 ///
@@ -67,13 +67,13 @@ ArgParser allArguments() {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
 
-  // Bosses option: specifies the list of selected bosses to change stats
-  argParser.addOption("bosses",
-      help: "List of Selected bosses to change stats");
+  // Enemies option: specifies the list of selected enemies to change stats
+  argParser.addOption("enemies",
+      help: "List of Selected enemies to change stats");
 
-  // Boss stats option: specifies the float stats value for the boss stats
-  argParser.addOption("bossStats",
-      help: "The float stats value for the boss stats");
+  // Enemy stats option: specifies the float stats value for the enemy stats
+  argParser.addOption("enemyStats",
+      help: "The float stats value for the enemy stats");
 
   // File type extraction flags
   argParser.addFlag("CPK", help: "Only extract CPK files", negatable: false);
@@ -100,7 +100,7 @@ ArgParser allArguments() {
 /// Retrieves active option paths based on the provided [ArgResults] and output directory.
 ///
 /// Combines quest options, map options, and phase options, and generates a list of paths
-/// for options that are active. Additionally, processes any specified bosses and their paths.
+/// for options that are active. Additionally, processes any specified enemies and their paths.
 ///
 /// [argResults] contains the parsed command-line arguments.
 /// [output] is the directory where the paths should be output.
@@ -116,23 +116,23 @@ List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
       .map((path) => '$output\\$path')
       .toList();
 
-  String? bossesArgument = argResults["bosses"] as String?;
-  List<String> bossList = [];
-  if (bossesArgument != null) {
+  String? enemiesArgument = argResults["enemies"] as String?;
+  List<String> enemyList = [];
+  if (enemiesArgument != null) {
     RegExp exp = RegExp(r'\[(.*?)\]');
-    var matches = exp.allMatches(bossesArgument);
+    var matches = exp.allMatches(enemiesArgument);
     for (var match in matches) {
-      bossList.addAll(match.group(1)!.split(',').map((s) => s.trim()));
+      enemyList.addAll(match.group(1)!.split(',').map((s) => s.trim()));
     }
   }
 
-  var bossPaths = bossList
-      .where((boss) => FilePaths.paths.containsKey(boss))
-      .map((boss) => FilePaths.paths[boss]!)
+  var enemyPaths = enemyList
+      .where((enemy) => FilePaths.paths.containsKey(enemy))
+      .map((enemy) => FilePaths.paths[enemy]!)
       .map((path) => '$output\\$path')
       .toList();
 
-  var fullPaths = (activePaths + bossPaths).toSet().toList();
+  var fullPaths = (activePaths + enemyPaths).toSet().toList();
   return fullPaths;
 }
 

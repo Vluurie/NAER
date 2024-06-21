@@ -56,7 +56,7 @@ Future<String> getMetaDataPath() async {
       path.join(settingsDirectoryPath, 'ModPackage', 'mod_metadata.json');
 
   // Log the found metadata path
-  logAndPrint("Found metadata at $metadataPath");
+  logAndPrint("Found metadata at $metadataPath for important Spawn ID's.");
 
   // Return the constructed metadata path
   return metadataPath;

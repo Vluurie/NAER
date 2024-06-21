@@ -38,6 +38,8 @@ dependencies:
   lottie: ^3.1.2
   flutter_automato_theme:
                   path: ../flutter_automato_theme
+  hooks_riverpod: ^2.5.1
+  flutter_riverpod: ^2.5.1
 
 
 

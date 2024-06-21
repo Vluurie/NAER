@@ -2,12 +2,12 @@
 
 import 'dart:io';
 
-import 'package:NAER/naer_mod_manager/ui/log_output_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
 import 'package:NAER/main.dart';
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_ui/drag_n_drop.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
@@ -19,7 +19,10 @@ import 'package:url_launcher/url_launcher.dart';
 class SecondPage extends StatefulWidget {
   final CLIArguments cliArguments;
 
-  const SecondPage({super.key, required this.cliArguments});
+  const SecondPage({
+    super.key,
+    required this.cliArguments,
+  });
 
   @override
   State<SecondPage> createState() => _SecondPageState();
@@ -116,7 +119,8 @@ class _SecondPageState extends State<SecondPage>
               final logState = Provider.of<LogState>(context, listen: false);
               logState.clearLogs();
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => EnemyRandomizerApp()),
+                MaterialPageRoute(
+                    builder: (context) => const EnemyRandomizerApp()),
                 (Route<dynamic> route) => false,
               );
             }

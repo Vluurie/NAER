@@ -1,16 +1,17 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
 import 'dart:io';
-import 'package:NAER/data/boss_data/nier_boss_class_list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -86,7 +87,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    print(widget.cliArguments.ignoreList);
     widget.modStateManager.fetchAndUpdateModsList();
     _animationController = AnimationController(
       vsync: this,
@@ -354,10 +354,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
     return IconButton(
       icon: isLoading
-          ? const CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-            )
+          ? Lottie.asset('assets/animations/loading.json',
+              width: 40, height: 40, fit: BoxFit.fill)
           : Icon(
               modIsInstalled ? Icons.check_circle_outline : Icons.download,
               color: modIsInstalled
@@ -417,9 +415,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (isInstalling)
-            const CircularProgressIndicator(
-              color: Color.fromARGB(255, 0, 183, 255),
-            )
+            Lottie.asset('assets/animations/loading.json',
+                width: 50, height: 50, fit: BoxFit.fill)
           else
             ElevatedButton(
               onPressed: () => installAndRandomize(modIndex, isInstalled),
@@ -522,7 +519,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
 
       bool shouldProcess = _shouldProcessFile(baseNameWithoutExtension,
-          questOptions, mapOptions, phaseOptions, bossList);
+          questOptions, mapOptions, phaseOptions, allEmForStatsChangeList);
 
       if (!shouldProcess) {
         bool copySuccess = await _copyFile(
@@ -579,7 +576,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       LogState logState, List<String> arguments) async {
     try {
       bool isManagerFile = true;
-      arguments.modifyArgumentsForForcedBossList();
+      arguments.modifyArgumentsForForcedEnemyList();
       await nierCli(arguments, isManagerFile);
       return true;
     } catch (e) {
@@ -593,17 +590,18 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       List<String> questOptions,
       List<String> mapOptions,
       List<String> phaseOptions,
-      List<Boss> bossList) {
-    // Check against quest, map, and phase options first
+      List<Enemy> enemyList) {
+    // Check against quest, map, enemy, and phase options first
     if (questOptions.contains(baseNameWithoutExtension) ||
         mapOptions.contains(baseNameWithoutExtension) ||
+        enemyOptions.contains(baseNameWithoutExtension) ||
         phaseOptions.contains(baseNameWithoutExtension)) {
       return true;
     }
 
     var allEmIdentifiers = <String>{};
-    for (var boss in bossList) {
-      allEmIdentifiers.addAll(boss.emIdentifiers
+    for (var enemy in enemyList) {
+      allEmIdentifiers.addAll(enemy.emIdentifiers
           .expand((id) => id.split(',').map((item) => item.trim())));
     }
 

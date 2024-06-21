@@ -4,12 +4,15 @@ import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 
-ElevatedButton navigateButton(
+AutomatoButton navigateButton(
     BuildContext context, ScrollController scrollController) {
   final globalState = Provider.of<GlobalState>(context, listen: false);
-  return ElevatedButton(
+  return AutomatoButton(
+    label: 'Mod Manager',
+    uniqueId: 'modManagerButton',
     onPressed: () async {
       CLIArguments cliArgs = await gatherCLIArguments(
         context: context,
@@ -40,20 +43,13 @@ ElevatedButton navigateButton(
         );
       }
     },
-    style: ElevatedButton.styleFrom(
-      foregroundColor: const Color.fromARGB(255, 45, 45, 48),
-      backgroundColor: const Color.fromARGB(255, 28, 31, 32),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      shadowColor: Colors.black.withOpacity(0.5),
-    ),
-    child: const Text(
-      'Mod Manager',
-      style: TextStyle(
-        fontSize: 16.0,
-        color: Color.fromRGBO(0, 255, 255, 1),
-      ),
-    ),
+    letterSpacing: 5.0,
+    startColor: AutomatoThemeColors.primaryColor(context),
+    activeFillColor: AutomatoThemeColors.darkBrown(context),
+    startFontWeight: FontWeight.normal,
+    endFontWeight: FontWeight.bold,
+    fillBehavior: FillBehavior.filled,
+    animationDuration: const Duration(milliseconds: 300),
+    hoverBlinkDuration: const Duration(milliseconds: 600),
   );
 }

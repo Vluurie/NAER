@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 
 class LogoutOutWidget extends StatefulWidget {
@@ -121,7 +121,7 @@ class RandomizeDraggedFile {
           FileSystemEntityType.directory) {
         List<String> arguments = List.from(baseArgs);
         arguments[0] = folderPath;
-        arguments.modifyArgumentsForForcedBossList();
+        arguments.modifyArgumentsForForcedEnemyList();
 
         try {
           bool isManagerFile = true;

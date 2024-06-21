@@ -4,18 +4,18 @@ import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
 
 bool isCpkExtractionValid(
-    String input, bool isFile, CliOptions args, List<String> bossList) {
+    String input, bool isFile, CliOptions args, List<String> enemyList) {
   if (args.fileTypeIsKnown && !args.isCpk) return false;
   if (!input.endsWith(".cpk")) return false;
   if (!isFile) return false;
 
   var fileName = basename(input).toLowerCase();
 
-  bool isBossListEffectivelyEmpty = bossList.isEmpty ||
-      bossList.every(
+  bool isEnemyListEffectivelyEmpty = enemyList.isEmpty ||
+      enemyList.every(
           (item) => item.trim().isEmpty || item.trim().toLowerCase() == 'none');
 
-  if (isBossListEffectivelyEmpty &&
+  if (isEnemyListEffectivelyEmpty &&
       (fileName == 'data006.cpk' || fileName == 'data016.cpk')) {
     return false;
   }

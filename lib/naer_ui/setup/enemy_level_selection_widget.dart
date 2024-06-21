@@ -1,5 +1,6 @@
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 
 class EnemyLevelSelection extends StatefulWidget {
@@ -35,19 +36,6 @@ class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
         child: Container(
           padding:
               const EdgeInsets.only(top: 30, bottom: 5, right: 30, left: 30),
-          margin: const EdgeInsets.only(top: 16),
-          decoration: BoxDecoration(
-            color: Colors.deepPurpleAccent[800],
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -77,7 +65,7 @@ class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
                       ),
                     if (globalState.level['None'] == false)
                       Slider(
-                        activeColor: const Color.fromRGBO(0, 255, 255, 1),
+                        activeColor: AutomatoThemeColors.primaryColor(context),
                         value: globalState.enemyLevel.toDouble(),
                         min: 1,
                         max: 99,
@@ -111,9 +99,9 @@ class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
                       });
                     },
                     secondary: Icon(getIconForLevel(levelKey),
-                        color: Colors.white, size: 28),
-                    activeColor: Colors.blue,
-                    checkColor: Colors.white,
+                        color: AutomatoThemeColors.bright(context), size: 28),
+                    activeColor: AutomatoThemeColors.primaryColor(context),
+                    checkColor: AutomatoThemeColors.darkBrown(context),
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 16.0),
                     controlAffinity: ListTileControlAffinity.leading,

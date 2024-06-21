@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:NAER/data/boss_data/nier_boss_level_list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_boss_level_list.dart';
 import 'package:NAER/data/sorted_data/big_enemies_ids.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart' as xml;

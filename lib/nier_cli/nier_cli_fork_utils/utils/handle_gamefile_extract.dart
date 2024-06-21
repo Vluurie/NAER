@@ -20,10 +20,10 @@ Future<bool> handleSingleCpkExtract(
     bool isDirectory,
     List<String> pendingFiles,
     Set<String> processedFiles,
-    List<String> bossList,
+    List<String> enemyList,
     List<String> activeOptions,
     bool? isManagerFile) async {
-  if (!isCpkExtractionValid(input, isFile, args, bossList)) return false;
+  if (!isCpkExtractionValid(input, isFile, args, enemyList)) return false;
   output ??= join(dirname(input), "${basename(input)}_extracted");
   debugPrint("Extracting CPK to $output...");
   await Directory(output).create(recursive: true);
