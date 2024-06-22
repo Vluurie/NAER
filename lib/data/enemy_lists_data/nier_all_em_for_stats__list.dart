@@ -117,10 +117,6 @@ List<Enemy> allEmForStatsChangeList = [
       imageUrl: 'assets/nier_image_folders/nier_boss_images/emb041.png',
       emIdentifiers: ['emb041']),
   Enemy(
-      name: 'Old Guardian',
-      imageUrl: 'assets/nier_image_folders/nier_boss_images/emb014.png',
-      emIdentifiers: ['emb014']),
-  Enemy(
       name: 'Shade',
       imageUrl: 'assets/nier_image_folders/nier_boss_images/em4100.png',
       emIdentifiers: ['em4100', 'em4110']),

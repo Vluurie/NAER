@@ -11,6 +11,7 @@ import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:path/path.dart' as p;
@@ -235,63 +236,81 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           Mod mod = mods[index];
           bool modIsInstalled = modStateManager.isModInstalled(mod.id);
           return Card(
+            color: AutomatoThemeColors.brown25(context),
+            shadowColor: AutomatoThemeColors.primaryColor(context),
             margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-            elevation: 10,
+            elevation: 15,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: mod.imagePath != null
-                        ? Image.file(
-                            File(mod.imagePath!),
-                            width: 90,
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/mods/mod${mod.id}.png',
-                                width: 150,
-                                height: 150,
-                                fit: BoxFit.cover,
-                                errorBuilder: (BuildContext context,
-                                    Object error, StackTrace? stackTrace) {
-                                  return Container(
-                                    width: 100,
-                                    height: 100,
-                                    color:
-                                        const Color.fromARGB(255, 54, 52, 52),
-                                    child: const Icon(
-                                      size: 80.0,
-                                      Icons.precision_manufacturing_outlined,
-                                      color: Color.fromARGB(255, 0, 174, 255),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          )
-                        : Image.asset(
-                            'assets/mods/mod${mod.id}.gif',
-                            width: 150,
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorBuilder: (BuildContext context, Object error,
-                                StackTrace? stackTrace) {
-                              return Container(
-                                width: 150,
-                                height: 150,
-                                color: const Color.fromARGB(255, 54, 52, 52),
-                                child: const Icon(
-                                  size: 80.0,
-                                  Icons.precision_manufacturing_outlined,
-                                  color: Color.fromARGB(255, 0, 174, 255),
-                                ),
-                              );
-                            },
-                          ),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AutomatoThemeColors.darkBrown(context)
+                              .withOpacity(0.80),
+                          spreadRadius: 3,
+                          blurRadius: 9,
+                          offset: const Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: mod.imagePath != null
+                          ? Image.file(
+                              File(mod.imagePath!),
+                              width: 90,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/mods/mod${mod.id}.png',
+                                  width: 150,
+                                  height: 150,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (BuildContext context,
+                                      Object error, StackTrace? stackTrace) {
+                                    return Container(
+                                      width: 100,
+                                      height: 100,
+                                      color: AutomatoThemeColors.darkBrown(
+                                          context),
+                                      child: Icon(
+                                        size: 80.0,
+                                        Icons.precision_manufacturing_outlined,
+                                        color: AutomatoThemeColors.primaryColor(
+                                            context),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            )
+                          : Image.asset(
+                              'assets/mods/mod${mod.id}.gif',
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              errorBuilder: (BuildContext context, Object error,
+                                  StackTrace? stackTrace) {
+                                return Container(
+                                  width: 150,
+                                  height: 150,
+                                  color: AutomatoThemeColors.darkBrown(context),
+                                  child: Icon(
+                                    size: 80.0,
+                                    Icons.precision_manufacturing_outlined,
+                                    color: AutomatoThemeColors.primaryColor(
+                                        context),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
@@ -357,10 +376,12 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           ? Lottie.asset('assets/animations/loading.json',
               width: 40, height: 40, fit: BoxFit.fill)
           : Icon(
-              modIsInstalled ? Icons.check_circle_outline : Icons.download,
+              modIsInstalled
+                  ? Icons.check_circle_outline
+                  : Icons.install_desktop,
               color: modIsInstalled
-                  ? const Color.fromARGB(255, 76, 163, 175)
-                  : Colors.grey,
+                  ? AutomatoThemeColors.primaryColor(context)
+                  : AutomatoThemeColors.darkBrown(context),
             ),
       onPressed: isLoading ? null : () => toggleInstallUninstallMod(index),
       tooltip: modIsInstalled ? 'Uninstall Mod' : 'Only Install Mod',
@@ -418,21 +439,23 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
             Lottie.asset('assets/animations/loading.json',
                 width: 50, height: 50, fit: BoxFit.fill)
           else
-            ElevatedButton(
+            AutomatoButton(
+              label:
+                  isInstalled ? "Uninstall Mod" : "Install and Randomize Mod",
               onPressed: () => installAndRandomize(modIndex, isInstalled),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: isInstalled
-                    ? Colors.grey
-                    : const Color.fromARGB(255, 76, 163, 175),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              ),
-              child: Text(
-                  isInstalled ? "Uninstall Mod" : "Install and Randomize Mod"),
+              uniqueId: 'install_$modIndex',
+              pointerColor: AutomatoThemeColors.bright(context),
+              startColor: isInstalled
+                  ? AutomatoThemeColors.darkBrown(context)
+                  : AutomatoThemeColors.primaryColor(context),
+              endColor: isInstalled
+                  ? AutomatoThemeColors.dangerZone(context)
+                  : AutomatoThemeColors.primaryColor(context),
+              baseColor: isInstalled
+                  ? Colors.grey
+                  : AutomatoThemeColors.darkBrown(context),
+              fontSize: 18,
+              fontFamily: 'Arial',
             ),
         ],
       ),

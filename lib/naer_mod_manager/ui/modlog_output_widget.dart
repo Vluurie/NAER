@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
@@ -60,13 +61,12 @@ class _LogoutOutWidgetState extends State<LogoutOutWidget> {
           height: containerHeight,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 31, 29, 29),
-            border: Border.all(color: Colors.grey),
+            color: AutomatoThemeColors.darkBrown(context),
+            border: Border.all(color: AutomatoThemeColors.bright(context)),
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color:
-                    const Color.fromARGB(255, 255, 255, 255).withOpacity(0.3),
+                color: AutomatoThemeColors.bright(context).withOpacity(0.3),
                 spreadRadius: 2,
                 blurRadius: 5,
                 offset: const Offset(0, 0),
@@ -78,12 +78,13 @@ class _LogoutOutWidgetState extends State<LogoutOutWidget> {
             itemCount: logs.isEmpty ? 1 : logs.length,
             itemBuilder: (context, index) {
               if (logs.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
-                    "⊂(◉‿◉)つ",
+                    "NAER ( ˘ ³˘)ノ°ﾟº❍｡",
                     style: TextStyle(
                         fontSize: 70,
-                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        color: AutomatoThemeColors.gradient(context),
                         fontStyle: FontStyle.normal),
                   ),
                 );

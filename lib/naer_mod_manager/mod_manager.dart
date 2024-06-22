@@ -11,6 +11,7 @@ import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
@@ -81,9 +82,8 @@ class _SecondPageState extends State<SecondPage>
     final actionButtons = <Widget>[
       Padding(
         padding: const EdgeInsets.only(right: 50),
-        child: TextButton.icon(
-          icon: const Icon(Icons.refresh),
-          label: const Text("Refresh all settings."),
+        child: AutomatoButton(
+          maxScale: 0.8,
           onPressed: () async {
             bool? confirm = await showDialog(
               context: context,
@@ -125,6 +125,9 @@ class _SecondPageState extends State<SecondPage>
               );
             }
           },
+          label: 'Reset Application Local State',
+          uniqueId: 'reset',
+          showPointer: false,
         ),
       ),
       Padding(
@@ -139,7 +142,7 @@ class _SecondPageState extends State<SecondPage>
             });
           },
           style: TextButton.styleFrom(
-            foregroundColor: const Color.fromARGB(255, 255, 0, 0),
+            foregroundColor: AutomatoThemeColors.darkBrown(context),
           ),
         ),
       ),
@@ -150,7 +153,7 @@ class _SecondPageState extends State<SecondPage>
           await openPaths(inputPath);
         },
         style: TextButton.styleFrom(
-          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
+          foregroundColor: AutomatoThemeColors.dangerZone(context),
         ),
       ),
       TextButton.icon(
@@ -160,7 +163,7 @@ class _SecondPageState extends State<SecondPage>
           await openPaths(outputPath);
         },
         style: TextButton.styleFrom(
-          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
+          foregroundColor: AutomatoThemeColors.darkBrown(context),
         ),
       ),
       TextButton.icon(
@@ -170,7 +173,7 @@ class _SecondPageState extends State<SecondPage>
           await openSettings();
         },
         style: TextButton.styleFrom(
-          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
+          foregroundColor: AutomatoThemeColors.darkBrown(context),
         ),
       ),
       TextButton.icon(
@@ -185,54 +188,85 @@ class _SecondPageState extends State<SecondPage>
           }
         },
         style: TextButton.styleFrom(
-          foregroundColor: const Color.fromARGB(255, 0, 217, 255),
+          foregroundColor: AutomatoThemeColors.darkBrown(context),
         ),
       ),
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Additional Features'),
-        backgroundColor: const Color.fromARGB(255, 49, 50, 51),
-        elevation: 0,
-        leading:
-            canPop ? null : (actionButtons.isNotEmpty ? Container() : null),
-        actions: canPop ? actionButtons : null,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: ModLoaderWidget(
-                  cliArguments: widget.cliArguments,
-                  modStateManager: modStateManager,
-                ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          foregroundColor: AutomatoThemeColors.darkBrown(context),
+          backgroundColor: AutomatoThemeColors.transparentColor(context),
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AutomatoThemeColors.primaryColor(context),
+                  AutomatoThemeColors.bright(context),
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
               ),
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: DragDropWidget(cliArguments: widget.cliArguments),
-              ),
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: LogoutOutWidget(cliArguments: widget.cliArguments),
+          leading:
+              canPop ? null : (actionButtons.isNotEmpty ? Container() : null),
+          actions: canPop ? actionButtons : null,
+        ),
+      ),
+      body: Stack(children: [
+        AutomatoBackground(
+          borderSvg: AutomatoSvgStrings.automatoSvgStrTriangle,
+          gradientColor: AutomatoThemeColors.gradient(context),
+          linesConfig: LinesConfig(
+              lineColor: AutomatoThemeColors.darkBrown(context),
+              strokeWidth: 1.0,
+              spacing: 5.0,
+              flickerDuration: const Duration(milliseconds: 10000),
+              enableFlicker: false,
+              drawHorizontalLines: true,
+              drawVerticalLines: true),
+        ),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 40),
+              child: Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: ModLoaderWidget(
+                    cliArguments: widget.cliArguments,
+                    modStateManager: modStateManager,
+                  ),
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: DragDropWidget(cliArguments: widget.cliArguments),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LogoutOutWidget(cliArguments: widget.cliArguments),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        )
+      ]),
       floatingActionButton: FloatingActionButton(
         onPressed: _showMetadataFormPopup,
+        foregroundColor: AutomatoThemeColors.primaryColor(context),
+        backgroundColor: AutomatoThemeColors.darkBrown(context),
         tooltip: 'Add Metadata',
         child: const Icon(Icons.add),
       ),

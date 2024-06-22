@@ -4,6 +4,7 @@ import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:flutter_automato_theme/flutter_automato_theme.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
@@ -17,10 +18,10 @@ class DragDropWidget extends StatefulWidget {
       this.padding = const EdgeInsets.only(top: 40, right: 20, left: 80)});
 
   @override
-  _DragDropWidgetState createState() => _DragDropWidgetState();
+  DragDropWidgetState createState() => DragDropWidgetState();
 }
 
-class _DragDropWidgetState extends State<DragDropWidget> {
+class DragDropWidgetState extends State<DragDropWidget> {
   bool _dragging = false;
   final List<String> _files = [];
   bool _isLoading = false;
@@ -86,7 +87,7 @@ class _DragDropWidgetState extends State<DragDropWidget> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: const Color.fromARGB(255, 255, 255, 255)
+                          color: AutomatoThemeColors.bright(context)
                               .withOpacity(0.3),
                           spreadRadius: 2,
                           blurRadius: 5,
@@ -94,13 +95,14 @@ class _DragDropWidgetState extends State<DragDropWidget> {
                         ),
                       ],
                       color: _dragging
-                          ? Colors.blue.withOpacity(0.4)
-                          : const Color.fromARGB(255, 31, 29, 29),
+                          ? AutomatoThemeColors.primaryColor(context)
+                              .withOpacity(0.4)
+                          : AutomatoThemeColors.darkBrown(context),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _dragging
-                            ? Colors.blue
-                            : const Color.fromARGB(255, 255, 255, 255),
+                            ? AutomatoThemeColors.primaryColor(context)
+                            : AutomatoThemeColors.bright(context),
                         width: 1,
                       ),
                     ),
@@ -111,8 +113,8 @@ class _DragDropWidgetState extends State<DragDropWidget> {
                           Icons.file_copy,
                           size: 50,
                           color: _dragging
-                              ? Colors.green
-                              : const Color.fromARGB(255, 1, 215, 253),
+                              ? AutomatoThemeColors.saveZone(context)
+                              : AutomatoThemeColors.primaryColor(context),
                         ),
                         const SizedBox(height: 20),
                         Center(
@@ -154,12 +156,12 @@ class _DragDropWidgetState extends State<DragDropWidget> {
         await random.randomizeDraggedFile([path]);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
               'Please drop folders only, not files.',
               style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: AutomatoThemeColors.dangerZone(context),
           ),
         );
         return setState(() => _isLoading = false);
@@ -167,15 +169,17 @@ class _DragDropWidgetState extends State<DragDropWidget> {
     }
 
     setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 5),
-        content: Text(
-          'Dragged folders randomized successfully and send to output path: ${widget.cliArguments.specialDatOutputPath}',
-          style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 5),
+          content: Text(
+            'Dragged folders randomized successfully and send to output path: ${widget.cliArguments.specialDatOutputPath}',
+            style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+          ),
+          backgroundColor: AutomatoThemeColors.saveZone(context),
         ),
-        backgroundColor: const Color.fromARGB(255, 2, 103, 9),
-      ),
-    );
+      );
+    }
   }
 }
