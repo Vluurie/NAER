@@ -37,7 +37,8 @@ Future<void> handleEnemyEntityObject(
   bool randomizeAndSetValues = false,
 }) async {
   // Find the group corresponding to the enemy number in the XML element
-  String? group = findGroupForEmNumber(objIdElement.innerText, enemyData);
+  String? group =
+      findGroupForEmNumber(objIdElement.innerText, SortedEnemyGroup.enemyData);
 
   // Proceed if a valid group is found, it is not excluded, and there are user-selected data
   if (group != null &&
@@ -67,7 +68,7 @@ Future<void> handleEnemyEntityObject(
 
     // Handle enemy levels if requested
     if (handleLevels) {
-      await handleLevel(objIdElement, enemyLevel, enemyData);
+      await handleLevel(objIdElement, enemyLevel, SortedEnemyGroup.enemyData);
     }
   }
 }

@@ -1,7 +1,6 @@
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 
 void globalLog(String message) {
-  final logState = LogState();
   if (message.trim().isEmpty) {
     return;
   }
@@ -11,5 +10,5 @@ void globalLog(String message) {
     return;
   }
 
-  logState.addLog(processedLog);
+  LogState().addLog(processedLog);
 }

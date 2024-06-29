@@ -1,8 +1,7 @@
 import 'dart:math';
+import 'package:NAER/data/values_data/nier_enemy_set_value_map.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
-import 'package:NAER/data/values_data/nier_enemy_setType_map.dart'
-    as em_number_values_map;
 
 /// Sets specific values for an XML element based on the provided EM number.
 ///
@@ -15,7 +14,7 @@ import 'package:NAER/data/values_data/nier_enemy_setType_map.dart'
 ///   - objIdElement: The XML element to update.
 ///   - newEmNumber: The EM number used to retrieve specific values.
 void setSpecificValues(xml.XmlElement objIdElement, String newEmNumber) {
-  var values = em_number_values_map.emNumberValues[newEmNumber];
+  var values = EnemyValues.emNumberValues[newEmNumber];
   if (values == null) {
     _removeSetTypeAndSetRtnAndSetFlag(objIdElement);
     return;
@@ -117,7 +116,7 @@ void _updateElement(
       ['setRtn', selection.key == 'setType' ? 'setFlag' : 'setType']);
 
   XmlElementHandler.updateOrCreateElement(parentValueElement, selection.key,
-      null, paramElementIndex, selection.value);
+      null, paramElementIndex - 1, selection.value);
 }
 
 /// Finds the parent 'value' element starting from the given XML element.

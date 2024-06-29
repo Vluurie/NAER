@@ -1,19 +1,22 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
-import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
+import 'package:NAER/nier_cli/nier_cli_isolation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:path/path.dart' as p;
 
 class Mod {
@@ -58,7 +61,7 @@ class Mod {
 }
 
 // ignore: must_be_immutable
-class ModsList extends StatefulWidget {
+class ModsList extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
   final ModStateManager modStateManager;
   List<Mod> mods;
@@ -73,10 +76,11 @@ class ModsList extends StatefulWidget {
   });
 
   @override
-  State<ModsList> createState() => _ModsListState();
+  ConsumerState<ModsList> createState() => _ModsListState();
 }
 
-class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
+class _ModsListState extends ConsumerState<ModsList>
+    with TickerProviderStateMixin {
   final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   late AnimationController _animationController;
@@ -226,9 +230,9 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       modStateManager: widget.modStateManager,
     );
 
-    return Consumer<ModStateManager>(
+    return provider.Consumer<ModStateManager>(
         builder: (context, modStateManager, child) {
-      final modStateManager = Provider.of<ModStateManager>(context);
+      final modStateManager = provider.Provider.of<ModStateManager>(context);
       final mods = modStateManager.mods;
       return ListView.builder(
         itemCount: mods.length,
@@ -236,8 +240,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           Mod mod = mods[index];
           bool modIsInstalled = modStateManager.isModInstalled(mod.id);
           return Card(
-            color: AutomatoThemeColors.brown25(context),
-            shadowColor: AutomatoThemeColors.primaryColor(context),
+            color: AutomatoThemeColors.brown25(ref),
+            shadowColor: AutomatoThemeColors.primaryColor(ref),
             margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             elevation: 15,
             child: Padding(
@@ -250,7 +254,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: AutomatoThemeColors.darkBrown(context)
+                          color: AutomatoThemeColors.darkBrown(ref)
                               .withOpacity(0.80),
                           spreadRadius: 3,
                           blurRadius: 9,
@@ -277,13 +281,12 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                                     return Container(
                                       width: 100,
                                       height: 100,
-                                      color: AutomatoThemeColors.darkBrown(
-                                          context),
+                                      color: AutomatoThemeColors.darkBrown(ref),
                                       child: Icon(
                                         size: 80.0,
                                         Icons.precision_manufacturing_outlined,
                                         color: AutomatoThemeColors.primaryColor(
-                                            context),
+                                            ref),
                                       ),
                                     );
                                   },
@@ -300,12 +303,12 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                                 return Container(
                                   width: 150,
                                   height: 150,
-                                  color: AutomatoThemeColors.darkBrown(context),
+                                  color: AutomatoThemeColors.darkBrown(ref),
                                   child: Icon(
                                     size: 80.0,
                                     Icons.precision_manufacturing_outlined,
-                                    color: AutomatoThemeColors.primaryColor(
-                                        context),
+                                    color:
+                                        AutomatoThemeColors.primaryColor(ref),
                                   ),
                                 );
                               },
@@ -351,7 +354,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                                 mods.removeWhere((item) => item.id == mod.id);
                               });
                             } else {
-                              print("Failed to delete mod metadata.");
+                              //  print("Failed to delete mod metadata.");
                             }
                           }
                         },
@@ -380,8 +383,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                   ? Icons.check_circle_outline
                   : Icons.install_desktop,
               color: modIsInstalled
-                  ? AutomatoThemeColors.primaryColor(context)
-                  : AutomatoThemeColors.darkBrown(context),
+                  ? AutomatoThemeColors.primaryColor(ref)
+                  : AutomatoThemeColors.darkBrown(ref),
             ),
       onPressed: isLoading ? null : () => toggleInstallUninstallMod(index),
       tooltip: modIsInstalled ? 'Uninstall Mod' : 'Only Install Mod',
@@ -426,7 +429,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
   Widget installRandomizeButton(int modIndex) {
     final mods = widget.modStateManager.mods;
-    final modStateManager = Provider.of<ModStateManager>(context, listen: true);
+    final modStateManager =
+        provider.Provider.of<ModStateManager>(context, listen: true);
     final bool isInstalled = modStateManager.isModInstalled(mods[modIndex].id);
     final bool isInstalling = _installingMods[mods[modIndex].id] ?? false;
 
@@ -444,16 +448,16 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                   isInstalled ? "Uninstall Mod" : "Install and Randomize Mod",
               onPressed: () => installAndRandomize(modIndex, isInstalled),
               uniqueId: 'install_$modIndex',
-              pointerColor: AutomatoThemeColors.bright(context),
+              pointerColor: AutomatoThemeColors.bright(ref),
               startColor: isInstalled
-                  ? AutomatoThemeColors.darkBrown(context)
-                  : AutomatoThemeColors.primaryColor(context),
+                  ? AutomatoThemeColors.darkBrown(ref)
+                  : AutomatoThemeColors.primaryColor(ref),
               endColor: isInstalled
-                  ? AutomatoThemeColors.dangerZone(context)
-                  : AutomatoThemeColors.primaryColor(context),
+                  ? AutomatoThemeColors.dangerZone(ref)
+                  : AutomatoThemeColors.primaryColor(ref),
               baseColor: isInstalled
                   ? Colors.grey
-                  : AutomatoThemeColors.darkBrown(context),
+                  : AutomatoThemeColors.darkBrown(ref),
               fontSize: 18,
               fontFamily: 'Arial',
             ),
@@ -463,9 +467,9 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   }
 
   Future<void> installAndRandomize(int modIndex, bool isInstalled) async {
-    final logState = Provider.of<LogState>(context, listen: false);
+    final logState = provider.Provider.of<LogState>(context, listen: false);
     final modStateManager =
-        Provider.of<ModStateManager>(context, listen: false);
+        provider.Provider.of<ModStateManager>(context, listen: false);
     var mods = widget.modStateManager.mods;
     final ModInstallHandler modInstallHandler = ModInstallHandler(
       cliArguments: widget.cliArguments,
@@ -541,8 +545,13 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           "${await FileChange.ensureSettingsDirectory()}/Modpackage/$filePath";
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
 
-      bool shouldProcess = _shouldProcessFile(baseNameWithoutExtension,
-          questOptions, mapOptions, phaseOptions, allEmForStatsChangeList);
+      bool shouldProcess = _shouldProcessFile(
+          baseNameWithoutExtension,
+          GameFileOptions.questOptions,
+          GameFileOptions.mapOptions,
+          GameFileOptions.enemyOptions,
+          GameFileOptions.phaseOptions,
+          allEmForStatsChangeList);
 
       if (!shouldProcess) {
         bool copySuccess = await _copyFile(
@@ -598,9 +607,14 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   Future<bool> _executeCLICommand(
       LogState logState, List<String> arguments) async {
     try {
-      bool isManagerFile = true;
       arguments.modifyArgumentsForForcedEnemyList();
-      await nierCli(arguments, isManagerFile);
+      final receivePort = ReceivePort();
+      Map<String, dynamic> args = {
+        'processArgs': arguments,
+        'isManagerFile': true,
+        'sendPort': receivePort.sendPort,
+      };
+      await compute(runNierCliIsolated, args);
       return true;
     } catch (e) {
       logState.addLog("Error executing CLI command: $e");
@@ -612,6 +626,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       String baseNameWithoutExtension,
       List<String> questOptions,
       List<String> mapOptions,
+      List<String> enemyOptions,
       List<String> phaseOptions,
       List<Enemy> enemyList) {
     // Check against quest, map, enemy, and phase options first

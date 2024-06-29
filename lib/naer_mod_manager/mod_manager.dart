@@ -11,13 +11,13 @@ import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
-import 'package:provider/provider.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-class SecondPage extends StatefulWidget {
+class SecondPage extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
 
   const SecondPage({
@@ -26,10 +26,10 @@ class SecondPage extends StatefulWidget {
   });
 
   @override
-  State<SecondPage> createState() => _SecondPageState();
+  ConsumerState<SecondPage> createState() => _SecondPageState();
 }
 
-class _SecondPageState extends State<SecondPage>
+class _SecondPageState extends ConsumerState<SecondPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   double modLoaderWidgetOpacity = 0.0;
@@ -57,7 +57,7 @@ class _SecondPageState extends State<SecondPage>
 
   void _showMetadataFormPopup() {
     final modStateManager =
-        Provider.of<ModStateManager>(context, listen: false);
+        provider.Provider.of<ModStateManager>(context, listen: false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -75,120 +75,90 @@ class _SecondPageState extends State<SecondPage>
   Widget build(BuildContext context) {
     final canPop = Navigator.of(context).canPop();
     final modStateManager =
-        Provider.of<ModStateManager>(context, listen: false);
+        provider.Provider.of<ModStateManager>(context, listen: false);
     final outputPath = widget.cliArguments.specialDatOutputPath;
     final inputPath = widget.cliArguments.input;
 
     final actionButtons = <Widget>[
       Padding(
-        padding: const EdgeInsets.only(right: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: AutomatoButton(
           maxScale: 0.8,
           onPressed: () async {
-            bool? confirm = await showDialog(
+            AutomatoDialogManager().showYesNoDialog(
               context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Are you sure?'),
-                  content: const Text(
-                      'This will reset the app and clear all data of the local app settings. Do you want to proceed?'),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                    ),
-                    TextButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                    ),
-                  ],
+              ref: ref,
+              title: 'Are you sure?',
+              content: Text(
+                'This will reset the app and clear all data of the local app settings. Do you want to proceed?',
+                style: TextStyle(
+                    color: AutomatoThemeColors.textDialogColor(ref),
+                    fontSize: 20),
+              ),
+              onYesPressed: () async {
+                final ModInstallHandler modInstallHandler = ModInstallHandler(
+                  cliArguments: widget.cliArguments,
+                  modStateManager: modStateManager,
+                );
+                await modInstallHandler.deleteAllSharedPreferences();
+                final logState =
+                    provider.Provider.of<LogState>(context, listen: false);
+                logState.clearLogs();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (context) => const EnemyRandomizerApp()),
+                  (Route<dynamic> route) => false,
                 );
               },
+              onNoPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              yesLabel: 'OK',
+              noLabel: 'Cancel',
+              activeHoverColorNo: AutomatoThemeColors.darkBrown(ref),
+              activeHoverColorYes: AutomatoThemeColors.dangerZone(ref),
+              yesButtonColor: AutomatoThemeColors.darkBrown(ref),
+              noButtonColor: AutomatoThemeColors.darkBrown(ref),
             );
-
-            if (confirm == true) {
-              final ModInstallHandler modInstallHandler = ModInstallHandler(
-                cliArguments: widget.cliArguments,
-                modStateManager: modStateManager,
-              );
-              await modInstallHandler.deleteAllSharedPreferences();
-              final logState = Provider.of<LogState>(context, listen: false);
-              logState.clearLogs();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => const EnemyRandomizerApp()),
-                (Route<dynamic> route) => false,
-              );
-            }
           },
           label: 'Reset Application Local State',
           uniqueId: 'reset',
+          activeHoverColor: AutomatoThemeColors.dangerZone(ref),
           showPointer: false,
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(right: 50),
-        child: TextButton.icon(
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear Logs"),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: AutomatoButton(
+          label: "Clear Logs",
           onPressed: () async {
             setState(() {
-              final logState = Provider.of<LogState>(context, listen: false);
+              final logState =
+                  provider.Provider.of<LogState>(context, listen: false);
               logState.clearLogs();
             });
           },
-          style: TextButton.styleFrom(
-            foregroundColor: AutomatoThemeColors.darkBrown(context),
-          ),
+          uniqueId: "theme",
+          maxScale: 0.8,
+          showPointer: false,
         ),
       ),
-      TextButton.icon(
-        icon: const Icon(Icons.input),
-        label: const Text("Open Input Path"),
-        onPressed: () async {
-          await openPaths(inputPath);
-        },
-        style: TextButton.styleFrom(
-          foregroundColor: AutomatoThemeColors.dangerZone(context),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: IconButton(
+          icon: const Icon(Icons.input, size: 32.0),
+          color: AutomatoThemeColors.darkBrown(ref),
+          tooltip: "Open Input Path",
+          onPressed: () async => await openPaths(inputPath),
         ),
       ),
-      TextButton.icon(
-        icon: const Icon(Icons.output),
-        label: const Text("Open Output Path"),
-        onPressed: () async {
-          await openPaths(outputPath);
-        },
-        style: TextButton.styleFrom(
-          foregroundColor: AutomatoThemeColors.darkBrown(context),
-        ),
-      ),
-      TextButton.icon(
-        icon: const Icon(Icons.settings),
-        label: const Text("Settings"),
-        onPressed: () async {
-          await openSettings();
-        },
-        style: TextButton.styleFrom(
-          foregroundColor: AutomatoThemeColors.darkBrown(context),
-        ),
-      ),
-      TextButton.icon(
-        icon: const Icon(Icons.discord),
-        label: const Text("Help"),
-        onPressed: () async {
-          final Uri url = Uri.parse('https://discord.gg/RTax46x94J');
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url);
-          } else {
-            throw 'Could not launch $url';
-          }
-        },
-        style: TextButton.styleFrom(
-          foregroundColor: AutomatoThemeColors.darkBrown(context),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: IconButton(
+          icon: const Icon(Icons.output, size: 32.0),
+          color: AutomatoThemeColors.darkBrown(ref),
+          onPressed: () => openPaths(outputPath),
+          tooltip: "Open Output Path",
         ),
       ),
     ];
@@ -197,15 +167,15 @@ class _SecondPageState extends State<SecondPage>
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: AppBar(
-          foregroundColor: AutomatoThemeColors.darkBrown(context),
-          backgroundColor: AutomatoThemeColors.transparentColor(context),
+          foregroundColor: AutomatoThemeColors.darkBrown(ref),
+          backgroundColor: AutomatoThemeColors.transparentColor(ref),
           elevation: 0,
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AutomatoThemeColors.primaryColor(context),
-                  AutomatoThemeColors.bright(context),
+                  AutomatoThemeColors.primaryColor(ref),
+                  AutomatoThemeColors.bright(ref),
                 ],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
@@ -219,16 +189,17 @@ class _SecondPageState extends State<SecondPage>
       ),
       body: Stack(children: [
         AutomatoBackground(
-          borderSvg: AutomatoSvgStrings.automatoSvgStrTriangle,
-          gradientColor: AutomatoThemeColors.gradient(context),
+          showRepeatingBorders: false,
+          gradientColor: AutomatoThemeColors.gradient(ref),
           linesConfig: LinesConfig(
-              lineColor: AutomatoThemeColors.darkBrown(context),
+              lineColor: AutomatoThemeColors.darkBrown(ref),
               strokeWidth: 1.0,
               spacing: 5.0,
               flickerDuration: const Duration(milliseconds: 10000),
               enableFlicker: false,
               drawHorizontalLines: true,
               drawVerticalLines: true),
+          ref: ref,
         ),
         Column(
           children: [
@@ -265,8 +236,8 @@ class _SecondPageState extends State<SecondPage>
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: _showMetadataFormPopup,
-        foregroundColor: AutomatoThemeColors.primaryColor(context),
-        backgroundColor: AutomatoThemeColors.darkBrown(context),
+        foregroundColor: AutomatoThemeColors.primaryColor(ref),
+        backgroundColor: AutomatoThemeColors.darkBrown(ref),
         tooltip: 'Add Metadata',
         child: const Icon(Icons.add),
       ),

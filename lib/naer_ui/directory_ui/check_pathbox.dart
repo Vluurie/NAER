@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SavePathsWidget extends StatefulWidget {
+class SavePathsWidget extends ConsumerStatefulWidget {
   final String? input;
   final String? output;
   final String? scriptPath;
@@ -22,7 +23,7 @@ class SavePathsWidget extends StatefulWidget {
   SavePathsWidgetState createState() => SavePathsWidgetState();
 }
 
-class SavePathsWidgetState extends State<SavePathsWidget> {
+class SavePathsWidgetState extends ConsumerState<SavePathsWidget> {
   late bool checkboxValue;
 
   @override
@@ -67,8 +68,8 @@ class SavePathsWidgetState extends State<SavePathsWidget> {
               return const Color.fromARGB(246, 78, 75, 75);
             }
             return checkboxValue
-                ? AutomatoThemeColors.saveZone(context)
-                : AutomatoThemeColors.darkBrown(context);
+                ? AutomatoThemeColors.saveZone(ref)
+                : AutomatoThemeColors.darkBrown(ref);
           }),
           value: checkboxValue,
           onChanged: isCheckboxEnabled

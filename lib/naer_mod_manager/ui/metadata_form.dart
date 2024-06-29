@@ -6,20 +6,25 @@ import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
-class MetadataForm extends StatefulWidget {
-  const MetadataForm(
-      {super.key, required this.cliArguments, required this.modStateManager});
+class MetadataForm extends ConsumerStatefulWidget {
+  const MetadataForm({
+    super.key,
+    required this.cliArguments,
+    required this.modStateManager,
+  });
+
   final CLIArguments cliArguments;
   final ModStateManager modStateManager;
 
   @override
-  _MetadataFormState createState() => _MetadataFormState();
+  MetadataFormState createState() => MetadataFormState();
 }
 
-class _MetadataFormState extends State<MetadataForm> {
+class MetadataFormState extends ConsumerState<MetadataForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -75,21 +80,22 @@ class _MetadataFormState extends State<MetadataForm> {
         body: Stack(children: [
       AutomatoBackground(
         showRepeatingBorders: false,
-        gradientColor: AutomatoThemeColors.gradient(context),
+        gradientColor: AutomatoThemeColors.gradient(ref),
         linesConfig: LinesConfig(
-            lineColor: AutomatoThemeColors.darkBrown(context),
+            lineColor: AutomatoThemeColors.darkBrown(ref),
             strokeWidth: 1.0,
             spacing: 5.0,
             flickerDuration: const Duration(milliseconds: 10000),
             enableFlicker: false,
             drawHorizontalLines: true,
             drawVerticalLines: true),
+        ref: ref,
       ),
       Scaffold(
-        backgroundColor: AutomatoThemeColors.transparentColor(context),
+        backgroundColor: AutomatoThemeColors.transparentColor(ref),
         appBar: AppBar(
           title: const Text("Metadata Form"),
-          backgroundColor: AutomatoThemeColors.transparentColor(context),
+          backgroundColor: AutomatoThemeColors.transparentColor(ref),
           elevation: 0,
           actions: [
             IconButton(
@@ -111,7 +117,7 @@ class _MetadataFormState extends State<MetadataForm> {
                     style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: AutomatoThemeColors.darkBrown(context)),
+                        color: AutomatoThemeColors.darkBrown(ref)),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
@@ -228,13 +234,12 @@ class _MetadataFormState extends State<MetadataForm> {
                               width: 200,
                               height: 200,
                               decoration: BoxDecoration(
-                                color: AutomatoThemeColors.darkBrown(context),
+                                color: AutomatoThemeColors.darkBrown(ref),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.image,
-                                color:
-                                    AutomatoThemeColors.primaryColor(context),
+                                color: AutomatoThemeColors.primaryColor(ref),
                                 size: 50,
                               ),
                             ),
@@ -267,14 +272,14 @@ class _MetadataFormState extends State<MetadataForm> {
                                 onPressed: _addFileField,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      AutomatoThemeColors.primaryColor(context),
+                                      AutomatoThemeColors.primaryColor(ref),
                                   padding: const EdgeInsets.all(20),
                                 ),
                                 child: Text(
                                   'Add Modfolder',
                                   style: TextStyle(
-                                      color: AutomatoThemeColors.darkBrown(
-                                          context)),
+                                      color:
+                                          AutomatoThemeColors.darkBrown(ref)),
                                 ),
                               ))),
                     ],
@@ -305,7 +310,7 @@ class _MetadataFormState extends State<MetadataForm> {
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  AutomatoThemeColors.saveZone(context),
+                                  AutomatoThemeColors.saveZone(ref),
                               padding: const EdgeInsets.all(20),
                             ),
                             child: const Text('Save Metadata'),
@@ -319,10 +324,10 @@ class _MetadataFormState extends State<MetadataForm> {
                             margin: const EdgeInsets.only(left: 20),
                             padding: const EdgeInsets.all(10.0),
                             decoration: BoxDecoration(
-                              color: AutomatoThemeColors.darkBrown(context),
+                              color: AutomatoThemeColors.darkBrown(ref),
                               borderRadius: BorderRadius.circular(5.0),
                               border: Border.all(
-                                color: AutomatoThemeColors.dangerZone(context),
+                                color: AutomatoThemeColors.dangerZone(ref),
                                 width: 1.0,
                               ),
                             ),
@@ -331,16 +336,14 @@ class _MetadataFormState extends State<MetadataForm> {
                               children: [
                                 Icon(
                                   Icons.warning_amber_rounded,
-                                  color:
-                                      AutomatoThemeColors.dangerZone(context),
+                                  color: AutomatoThemeColors.dangerZone(ref),
                                   size: 24.0,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
                                   "Please add a mod folder or check your input again before saving.",
                                   style: TextStyle(
-                                    color:
-                                        AutomatoThemeColors.dangerZone(context),
+                                    color: AutomatoThemeColors.dangerZone(ref),
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -488,7 +491,7 @@ class _MetadataFormState extends State<MetadataForm> {
         border: const OutlineInputBorder(),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
-              color: AutomatoThemeColors.primaryColor(context), width: 2.0),
+              color: AutomatoThemeColors.primaryColor(ref), width: 2.0),
         ),
       ),
       validator: validator,

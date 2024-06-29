@@ -1,28 +1,31 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
+import 'package:NAER/nier_cli/nier_cli_isolation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
-import 'package:provider/provider.dart';
-import 'package:NAER/nier_cli/nier_cli.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_utils/cli_arguments.dart';
 
-class LogoutOutWidget extends StatefulWidget {
+class LogoutOutWidget extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
   const LogoutOutWidget({super.key, required this.cliArguments});
 
   @override
-  State<LogoutOutWidget> createState() => _LogoutOutWidgetState();
+  ConsumerState<LogoutOutWidget> createState() => _LogoutOutWidgetState();
 }
 
-class _LogoutOutWidgetState extends State<LogoutOutWidget> {
+class _LogoutOutWidgetState extends ConsumerState<LogoutOutWidget> {
   final ScrollController _scrollController = ScrollController();
   LogState? logState;
 
   @override
   void initState() {
     super.initState();
-    logState = Provider.of<LogState>(context, listen: false);
+    logState = provider.Provider.of<LogState>(context, listen: false);
     logState?.addListener(_onLogUpdated);
   }
 
@@ -47,7 +50,7 @@ class _LogoutOutWidgetState extends State<LogoutOutWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final logs = Provider.of<LogState>(context).logs;
+    final logs = provider.Provider.of<LogState>(context).logs;
     final screenSize = MediaQuery.of(context).size;
     final containerWidth = screenSize.width * 0.8;
     final containerHeight = screenSize.height * 0.25;
@@ -61,12 +64,12 @@ class _LogoutOutWidgetState extends State<LogoutOutWidget> {
           height: containerHeight,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: AutomatoThemeColors.darkBrown(context),
-            border: Border.all(color: AutomatoThemeColors.bright(context)),
+            color: AutomatoThemeColors.darkBrown(ref),
+            border: Border.all(color: AutomatoThemeColors.bright(ref)),
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: AutomatoThemeColors.bright(context).withOpacity(0.3),
+                color: AutomatoThemeColors.bright(ref).withOpacity(0.3),
                 spreadRadius: 2,
                 blurRadius: 5,
                 offset: const Offset(0, 0),
@@ -82,9 +85,9 @@ class _LogoutOutWidgetState extends State<LogoutOutWidget> {
                   child: Text(
                     "NAER ( ˘ ³˘)ノ°ﾟº❍｡",
                     style: TextStyle(
-                        fontSize: 70,
+                        fontSize: 50,
                         fontWeight: FontWeight.bold,
-                        color: AutomatoThemeColors.gradient(context),
+                        color: AutomatoThemeColors.gradient(ref),
                         fontStyle: FontStyle.normal),
                   ),
                 );
@@ -108,7 +111,7 @@ class RandomizeDraggedFile {
   RandomizeDraggedFile({required this.cliArguments, required this.context});
 
   Future<void> randomizeDraggedFile(List<String> droppedFolders) async {
-    final logState = Provider.of<LogState>(context, listen: false);
+    final logState = provider.Provider.of<LogState>(context, listen: false);
     if (cliArguments.input.isEmpty ||
         cliArguments.specialDatOutputPath.isEmpty ||
         !Platform.isWindows) {
@@ -125,8 +128,13 @@ class RandomizeDraggedFile {
         arguments.modifyArgumentsForForcedEnemyList();
 
         try {
-          bool isManagerFile = true;
-          await nierCli(arguments, isManagerFile);
+          final receivePort = ReceivePort();
+          Map<String, dynamic> args = {
+            'processArgs': arguments,
+            'isManagerFile': true,
+            'sendPort': receivePort.sendPort,
+          };
+          await compute(runNierCliIsolated, args);
         } catch (e) {
           logState.addLog("Failed to process folder $folderPath: $e");
         }

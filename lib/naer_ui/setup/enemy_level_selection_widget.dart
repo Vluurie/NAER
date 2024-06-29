@@ -1,16 +1,18 @@
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
-import 'package:provider/provider.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
-class EnemyLevelSelection extends StatefulWidget {
+class EnemyLevelSelection extends ConsumerStatefulWidget {
   const EnemyLevelSelection({super.key});
 
   @override
-  State<EnemyLevelSelection> createState() => _EnemyLevelSelectionState();
+  ConsumerState<EnemyLevelSelection> createState() =>
+      _EnemyLevelSelectionState();
 }
 
-class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
+class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
   IconData getIconForLevel(String levelEnemy) {
     switch (levelEnemy) {
       case "All Enemies":
@@ -30,7 +32,7 @@ class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final globalState = Provider.of<GlobalState>(context);
+    final globalState = provider.Provider.of<GlobalState>(context);
     return Align(
         alignment: Alignment.topRight,
         child: Container(
@@ -65,7 +67,7 @@ class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
                       ),
                     if (globalState.level['None'] == false)
                       Slider(
-                        activeColor: AutomatoThemeColors.primaryColor(context),
+                        activeColor: AutomatoThemeColors.primaryColor(ref),
                         value: globalState.enemyLevel.toDouble(),
                         min: 1,
                         max: 99,
@@ -99,9 +101,9 @@ class _EnemyLevelSelectionState extends State<EnemyLevelSelection> {
                       });
                     },
                     secondary: Icon(getIconForLevel(levelKey),
-                        color: AutomatoThemeColors.bright(context), size: 28),
-                    activeColor: AutomatoThemeColors.primaryColor(context),
-                    checkColor: AutomatoThemeColors.darkBrown(context),
+                        color: AutomatoThemeColors.bright(ref), size: 28),
+                    activeColor: AutomatoThemeColors.primaryColor(ref),
+                    checkColor: AutomatoThemeColors.darkBrown(ref),
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 16.0),
                     controlAffinity: ListTileControlAffinity.leading,

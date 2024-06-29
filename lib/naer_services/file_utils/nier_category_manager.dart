@@ -27,10 +27,10 @@ class FileCategoryManager {
   /// - Parameters:
   ///   - args: The command-line arguments containing the flags for each category.
   FileCategoryManager(ArgResults args)
-      : includeQuests = _extractFlags(args, questOptions),
-        includeMaps = _extractFlags(args, mapOptions),
-        includePhaseLogic = _extractFlags(args, phaseOptions),
-        includeEnemies = _extractFlags(args, enemyOptions);
+      : includeQuests = _extractFlags(args, GameFileOptions.questOptions),
+        includeMaps = _extractFlags(args, GameFileOptions.mapOptions),
+        includePhaseLogic = _extractFlags(args, GameFileOptions.phaseOptions),
+        includeEnemies = _extractFlags(args, GameFileOptions.enemyOptions);
 
   /// Extracts flags from the command-line arguments.
   ///

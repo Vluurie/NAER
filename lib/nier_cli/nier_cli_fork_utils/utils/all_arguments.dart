@@ -54,16 +54,16 @@ ArgParser allArguments() {
       help: "List of files to ignore during repacking");
 
   // Add flags for quest, map, phase and enemy file options
-  for (var option in questOptions) {
+  for (var option in GameFileOptions.questOptions) {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
-  for (var option in mapOptions) {
+  for (var option in GameFileOptions.mapOptions) {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
-  for (var option in phaseOptions) {
+  for (var option in GameFileOptions.phaseOptions) {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
-  for (var option in enemyOptions) {
+  for (var option in GameFileOptions.enemyOptions) {
     argParser.addFlag(option, negatable: false, defaultsTo: false);
   }
 
@@ -107,7 +107,12 @@ ArgParser allArguments() {
 ///
 /// Returns a list of active option paths.
 List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
-  List<String> allOptions = [...questOptions, ...mapOptions, ...phaseOptions];
+  List<String> allOptions = [
+    ...GameFileOptions.questOptions,
+    ...GameFileOptions.mapOptions,
+    ...GameFileOptions.phaseOptions,
+    ...GameFileOptions.enemyOptions
+  ];
 
   var activePaths = allOptions
       .where((option) =>

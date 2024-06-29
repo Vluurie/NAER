@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +37,6 @@ class FileChange {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(ignoredFiles);
     await prefs.setString('ignored_files', jsonData);
-    print('Saved ignoredFiles: $jsonData');
   }
 
   static Future<void> loadIgnoredFiles() async {
@@ -50,7 +50,7 @@ class FileChange {
     await loadIgnoredFiles();
     ignoredFiles.removeWhere((file) => filesToRemove.contains(file));
     await saveIgnoredFiles();
-    print('Removed files and updated ignoredFiles');
+    LogState().addLog('Removed files and updated ignoredFiles');
   }
 
   static Future<void> undoChanges() async {
@@ -71,7 +71,8 @@ class FileChange {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('Error during undoing change for ${change.filePath}: $e');
+          LogState()
+              .addLog('Error during undoing change for ${change.filePath}: $e');
         }
       }
     }
@@ -82,6 +83,7 @@ class FileChange {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(changes.map((c) => c.toJson()).toList());
     await prefs.setString('file_changes', jsonData);
+    print("Saved changed $changes");
   }
 
   static Future<void> loadChanges() async {
@@ -113,7 +115,7 @@ class FileChange {
         DateFormat('yyyy-MM-dd HH:mm:ss').format(preRandomizationTime);
     await prefs.setString('pre_randomization_time', formattedTime);
     if (kDebugMode) {
-      print("Pre-randomization time saved: $formattedTime");
+      LogState().addLog("Pre-randomization time saved: $formattedTime");
     }
   }
 
@@ -124,7 +126,7 @@ class FileChange {
         DateFormat('yyyy-MM-dd HH:mm:ss').format(lastRandomizationTime);
     await prefs.setString('last_randomization_time', formattedTime);
     if (kDebugMode) {
-      print("Last randomization time saved: $formattedTime");
+      LogState().addLog("Last randomization time saved: $formattedTime");
     }
   }
 
@@ -136,13 +138,13 @@ class FileChange {
       DateTime parsedTime =
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(formattedTime);
       if (kDebugMode) {
-        print(
+        LogState().addLog(
             "Loaded pre-randomization time from SharedPreferences: $parsedTime");
       }
       return parsedTime;
     } catch (e) {
       if (kDebugMode) {
-        print('Error parsing pre-randomization time: $e');
+        LogState().addLog('Error parsing pre-randomization time: $e');
       }
       return DateTime.now();
     }

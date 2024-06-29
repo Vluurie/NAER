@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:NAER/nier_cli/nier_cli_fork_utils/initialize_variables.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_process_game_files.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
@@ -11,7 +13,8 @@ import 'package:args/args.dart';
 ///
 /// [arguments] is a list of command-line arguments provided, see at all_arguments.dart.
 /// [ismanagerFile] is a boolean flag indicating that a file is coming from the mod manager, this modifies the argument with the modify_arguments.dart method.
-Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
+Future<void> nierCli(
+    List<String> arguments, bool? ismanagerFile, SendPort sendPort) async {
   // Record start of the start time for processing
   var t1 = DateTime.now();
 
@@ -43,14 +46,8 @@ Future<void> nierCli(List<String> arguments, bool? ismanagerFile) async {
   ///#######################################[_FOR THE GLORY OF MANKIND_]#######################################################################
   ///#######[_START_NEW_SEED_PROCCESS]#########################################################################################################
 
-  await mainFuncProcessGameFiles(
-    argument,
-    sortedEnemiesPath!,
-    options,
-    ismanagerFile,
-    output,
-    args,
-  );
+  await mainFuncProcessGameFiles(argument, sortedEnemiesPath!, options,
+      ismanagerFile, output, args, sendPort);
 
   ///####[_END_NEW_SEED_PROCCESS]###################################################################################################################
 

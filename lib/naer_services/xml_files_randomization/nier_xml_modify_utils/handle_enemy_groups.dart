@@ -87,6 +87,40 @@ Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
   }
 }
 
+/// Checks if the given XML element has an ancestor with an alias and removes the alias if it is randomizable.
+///
+/// This function traverses the ancestors of the provided XML element to determine
+/// if any ancestor contains an 'alias' element. If an alias is found and it is
+/// present in the provided `aliasList`, the alias element is removed. Aliases not in the list are not modified.
+/// This is important to avoid randomness in behavior for enemies that are tagged with an alias and may have
+/// hardcoded behavior.
+///
+/// Parameters:
+/// - `objIdElement`: The XML element to check for alias ancestors.
+/// - `aliasList`: The list of alias texts to compare against.
+///
+/// Returns:
+/// A boolean value indicating whether the element has an ancestor with an alias
+/// that is not in the list (`true`) or if it can be randomized (`false`).
+// bool hasAliasAncestor(xml.XmlElement objIdElement, List<String> aliasList) {
+//   bool hasAliasAncestor = false;
+
+//   // Check if any ancestor of objIdElement contains an 'alias' element
+//   for (var ancestor in objIdElement.ancestors) {
+//     bool aliasElements = ancestor.findElements('alias').isNotEmpty;
+//       hasAliasAncestor = true;
+//       for (var aliasElement in aliasElements) {
+//         if (aliasList.contains(aliasElement.innerText)) {
+//           ancestor.children.remove(aliasElement);
+//           return false;
+//         }
+//       }
+//   }
+
+//   // Return true if there was an alias ancestor that was not in the aliasList
+//   return hasAliasAncestor;
+// }
+
 /// Checks if the given XML element has an ancestor with an alias.
 ///
 /// This function traverses the ancestors of the provided XML element to determine
@@ -99,10 +133,47 @@ Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
 ///
 /// Returns:
 /// A boolean value indicating whether the element has an ancestor with an alias (`true`) or not (`false`).
-bool hasAliasAncestor(xml.XmlElement objIdElement) {
-  // Check if any ancestor of objIdElement contains an 'alias' element
-  return objIdElement.ancestors
-      .any((element) => element.findElements('alias').isNotEmpty);
+
+/// Checks if any ancestor of the given element contains an 'alias' element
+/// with text not in the [aliasList]. If an 'alias' element's text matches an
+/// item in the [aliasList], the alias is removed and the function returns false.
+/// If no alias elements are found at all, the function returns false.
+
+/// Checks if any ancestor of the given element contains an 'alias' element
+/// with text not in the [aliasList]. If an 'alias' element's text matches an
+/// item in the [aliasList], the alias is removed and the function returns false.
+/// If no alias elements are found at all, the function returns false.
+
+/// Checks if any ancestor of the given element contains an 'alias' element
+/// with text not in the [aliasList]. If an 'alias' element's text matches an
+/// item in the [aliasList], the alias is removed and the function returns false.
+/// If no alias elements are found at all, the function returns false.
+bool hasAliasAncestor(xml.XmlElement objIdElement, List<String> aliasList) {
+  bool hasNonMatchingAlias = false;
+
+  // Iterate through each ancestor of objIdElement
+  for (final ancestor in objIdElement.ancestors) {
+    // Find all 'alias' elements in the current ancestor
+    final aliasElements = ancestor.findElements('alias').toList();
+
+    // Process each 'alias' element
+    for (final alias in aliasElements) {
+      final aliasText = alias.text.trim();
+
+      // Check if the alias text matches any item in aliasList
+      if (aliasList.contains(aliasText)) {
+        // Remove the alias element and return false immediately
+        alias.parent?.children.remove(alias);
+        return false;
+      }
+
+      // Indicate that there is at least one non-matching alias element
+      hasNonMatchingAlias = true;
+    }
+  }
+
+  // Return true if any non-matching alias elements were found, otherwise false
+  return hasNonMatchingAlias;
 }
 
 /// Checks if the given `objId` corresponds to a boss.
@@ -133,7 +204,7 @@ bool isBoss(objId) {
 /// Returns:
 /// A boolean value indicating whether the `objId` is a big enemy (`true`) or not (`false`).
 bool isBigEnemy(String objId) {
-  for (var enemy in bigEnemies) {
+  for (var enemy in EntitySkipIDs.bigEnemies) {
     if (objId == enemy) {
       return true;
     }

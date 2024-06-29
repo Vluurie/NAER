@@ -44,7 +44,7 @@ Future<void> modifyEnemyObjId(
   bool isBossObj = isBoss(objIdValue);
   try {
     if (isImportantId && enemyCategory == 'allenemies') {
-      await handleLevel(objIdElement, enemyLevel, enemyData);
+      await handleLevel(objIdElement, enemyLevel, SortedEnemyGroup.enemyData);
       return;
     }
     switch (enemyCategory) {

@@ -44,7 +44,7 @@ Future<void> processEnemies(
 Future<Map<String, List<String>>> getSortedEnemyData(
     String sortedEnemiesPath) async {
   if (sortedEnemiesPath == 'ALL') {
-    return enemyData; // If "ALL", use the entire enemyData map
+    return SortedEnemyGroup.enemyData; // If "ALL", use the entire enemyData map
   } else {
     return readSortedEnemyDataGroups(
         sortedEnemiesPath); // Otherwise, read from the file

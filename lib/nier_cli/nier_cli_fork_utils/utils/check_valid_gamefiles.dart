@@ -10,16 +10,6 @@ bool isCpkExtractionValid(
   if (!isFile) return false;
 
   var fileName = basename(input).toLowerCase();
-
-  bool isEnemyListEffectivelyEmpty = enemyList.isEmpty ||
-      enemyList.every(
-          (item) => item.trim().isEmpty || item.trim().toLowerCase() == 'none');
-
-  if (isEnemyListEffectivelyEmpty &&
-      (fileName == 'data006.cpk' || fileName == 'data016.cpk')) {
-    return false;
-  }
-
   if (!(fileName == 'data002.cpk' ||
       fileName == 'data012.cpk' ||
       fileName == 'data100.cpk' ||

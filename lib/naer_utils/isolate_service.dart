@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 /// A service for managing and executing tasks using Dart isolates.
 class IsolateService {
-  /// The number of isolates to be created, based on the number of available processors.
+  /// The number of isolates to be created, based on the number of physical processors.
   late final int numberOfIsolates;
 
   /// A map storing statistics for each isolate.
@@ -14,7 +14,8 @@ class IsolateService {
 
   /// Constructs an [IsolateService] and initializes the number of isolates.
   IsolateService() {
-    numberOfIsolates = Platform.numberOfProcessors;
+    numberOfIsolates = (Platform.numberOfProcessors / 2)
+        .ceil(); // Adjusted to use only physical cores
     for (var i = 0; i < numberOfIsolates; i++) {
       isolateStats[i] = IsolateStatistics();
     }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
@@ -42,7 +43,8 @@ Future<void> repackModifiedGameFiles(
     bool? ismanagerFile,
     List<String> ignoreList,
     String? output,
-    ArgResults args) async {
+    ArgResults args,
+    SendPort sendPort) async {
   // Prepare XML files by replacing .yax extension with .xml
   var xmlFiles = collectedFiles['yaxFiles']
           ?.map((e) => e.replaceAll('.yax', '.xml'))
@@ -72,7 +74,8 @@ Future<void> repackModifiedGameFiles(
       options,
       processedFiles,
       activeOptions,
-      ismanagerFile);
+      ismanagerFile,
+      sendPort);
 }
 
 /// This method processes all given entities in parallel,
@@ -138,7 +141,8 @@ Future<void> processDatFolders(
     CliOptions options,
     Set<String> processedFiles,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   if (datFolders != null) {
     for (var datFolder in datFolders) {
       var baseNameWithExtension = path.basename(datFolder);
@@ -153,13 +157,26 @@ Future<void> processDatFolders(
                 path.join(output, datSubFolder, baseNameWithExtension);
             await handleInput(datFolder, datOutput, options, [], processedFiles,
                 enemyList, activeOptions, ismanagerFile);
-            FileChange change = FileChange(datOutput, 'create');
-            FileChange.changes.add(change);
+
+            // Log the file change and send it to the main isolate
+            FileChange.logChange(datOutput, 'create');
             logState.addLog("Folder created: $datOutput");
+            sendPort.send({
+              'event': 'file_change',
+              'filePath': datOutput,
+              'action': 'create'
+            });
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           logAndPrint("Failed to process DAT folder");
           logAndPrint(e.toString());
+
+          // Send error message to the main isolate
+          sendPort.send({
+            'event': 'error',
+            'details': "Failed to process DAT folder: ${e.toString()}",
+            'stackTrace': stackTrace.toString()
+          });
         }
       }
     }
@@ -224,12 +241,12 @@ bool shouldProcessDatFolder(
 ///   - enemyList: A list of enemies to be considered during processing.
 ///   - enemyStats: The stats to be applied to the enemies.
 Future<void> processEnemyStats(String currentDir, List<String> enemyList,
-    double enemyStats, bool reverseStats) async {
+    double enemyStats, bool reverseStats, SendPort sendPort) async {
   if (enemyList.isNotEmpty && !enemyList.contains('None')) {
-    logAndPrint("Started changing enemy stats...");
+    sendPort.send("Started changing enemy stats...");
     await findEnemyStatFiles(currentDir, enemyList, enemyStats, reverseStats);
   } else {
-    logAndPrint("No enemy Stats modified as argument is 'None'");
+    sendPort.send("No enemy Stats modified as argument is 'None'");
   }
 }
 
@@ -238,9 +255,13 @@ Future<void> processEnemyStats(String currentDir, List<String> enemyList,
 /// This function scans the current directory (recursively if specified)
 /// and adds files to the pending files list.
 ///
-Future<void> getGameFilesForProcessing(String currentDir, CliOptions options,
-    List<String> pendingFiles, Set<String> processedFiles) async {
-  logAndPrint(
+Future<void> getGameFilesForProcessing(
+    String currentDir,
+    CliOptions options,
+    List<String> pendingFiles,
+    Set<String> processedFiles,
+    SendPort sendPort) async {
+  sendPort.send(
       "Starting processing in directory: $currentDir, recursive mode: ${options.recursiveMode}");
 
   if (options.recursiveMode) {

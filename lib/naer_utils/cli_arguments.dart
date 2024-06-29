@@ -45,12 +45,10 @@ Future<CLIArguments> gatherCLIArguments({
 }) async {
   String tempFilePath;
   List<String>? selectedImages = enemyImageGridKey.currentState?.selectedImages;
-  print('Selected images: $selectedImages');
 
   try {
     if (selectedImages != null && selectedImages.isNotEmpty) {
       var sortedEnemies = await sortSelectedEnemies(selectedImages, context);
-      print('Sorted enemies: $sortedEnemies');
       var tempFile = await File(
               '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
           .create();
@@ -118,8 +116,6 @@ Future<CLIArguments> gatherCLIArguments({
   }
 
   List<String> fullCommand = [command] + processArgs;
-
-  print('CLI Command: $fullCommand');
 
   return CLIArguments(
     input: input,

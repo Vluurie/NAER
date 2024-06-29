@@ -4,20 +4,21 @@ import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
-import 'package:provider/provider.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
-class CategorySelection extends StatefulWidget {
+class CategorySelection extends ConsumerStatefulWidget {
   const CategorySelection({super.key});
 
   @override
-  State<CategorySelection> createState() => CategorySelectionState();
+  ConsumerState<CategorySelection> createState() => CategorySelectionState();
 }
 
-class CategorySelectionState extends State<CategorySelection> {
+class CategorySelectionState extends ConsumerState<CategorySelection> {
   @override
   Widget build(BuildContext context) {
-    final globalState = Provider.of<GlobalState>(context);
+    final globalState = provider.Provider.of<GlobalState>(context);
     Widget specialCheckbox(
         String title, bool value, void Function(bool?) onChanged) {
       return Padding(
@@ -33,8 +34,8 @@ class CategorySelectionState extends State<CategorySelection> {
             Checkbox(
               value: value,
               onChanged: onChanged,
-              activeColor: AutomatoThemeColors.primaryColor(context),
-              checkColor: AutomatoThemeColors.darkBrown(context),
+              activeColor: AutomatoThemeColors.primaryColor(ref),
+              checkColor: AutomatoThemeColors.darkBrown(ref),
             ),
           ],
         ),
@@ -55,7 +56,7 @@ class CategorySelectionState extends State<CategorySelection> {
     return Container(
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
-        color: AutomatoThemeColors.brown25(context),
+        color: AutomatoThemeColors.brown25(ref),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
@@ -132,9 +133,8 @@ class CategorySelectionState extends State<CategorySelection> {
                         scale: 1,
                         child: Checkbox(
                           value: globalState.categories[item.id] ?? false,
-                          activeColor:
-                              AutomatoThemeColors.primaryColor(context),
-                          checkColor: AutomatoThemeColors.darkBrown(context),
+                          activeColor: AutomatoThemeColors.primaryColor(ref),
+                          checkColor: AutomatoThemeColors.darkBrown(ref),
                           onChanged: (bool? newValue) {
                             setState(() {
                               globalState.categories[item.id] = newValue!;
@@ -155,7 +155,7 @@ class CategorySelectionState extends State<CategorySelection> {
 }
 
 void updateItemsByType(Type type, bool value, BuildContext context) {
-  final globalState = Provider.of<GlobalState>(context, listen: false);
+  final globalState = provider.Provider.of<GlobalState>(context, listen: false);
   List<dynamic> allItems = GlobalState().getAllItems();
   for (var item in allItems.where((item) => item.runtimeType == type)) {
     globalState.categories[item.id] = value;

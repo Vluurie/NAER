@@ -4,11 +4,12 @@ import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 
-class DragDropWidget extends StatefulWidget {
+class DragDropWidget extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
   final EdgeInsetsGeometry padding;
 
@@ -21,7 +22,7 @@ class DragDropWidget extends StatefulWidget {
   DragDropWidgetState createState() => DragDropWidgetState();
 }
 
-class DragDropWidgetState extends State<DragDropWidget> {
+class DragDropWidgetState extends ConsumerState<DragDropWidget> {
   bool _dragging = false;
   final List<String> _files = [];
   bool _isLoading = false;
@@ -87,22 +88,22 @@ class DragDropWidgetState extends State<DragDropWidget> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: AutomatoThemeColors.bright(context)
-                              .withOpacity(0.3),
+                          color:
+                              AutomatoThemeColors.bright(ref).withOpacity(0.3),
                           spreadRadius: 2,
                           blurRadius: 5,
                           offset: const Offset(0, 0),
                         ),
                       ],
                       color: _dragging
-                          ? AutomatoThemeColors.primaryColor(context)
+                          ? AutomatoThemeColors.primaryColor(ref)
                               .withOpacity(0.4)
-                          : AutomatoThemeColors.darkBrown(context),
+                          : AutomatoThemeColors.darkBrown(ref),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _dragging
-                            ? AutomatoThemeColors.primaryColor(context)
-                            : AutomatoThemeColors.bright(context),
+                            ? AutomatoThemeColors.primaryColor(ref)
+                            : AutomatoThemeColors.bright(ref),
                         width: 1,
                       ),
                     ),
@@ -113,8 +114,8 @@ class DragDropWidgetState extends State<DragDropWidget> {
                           Icons.file_copy,
                           size: 50,
                           color: _dragging
-                              ? AutomatoThemeColors.saveZone(context)
-                              : AutomatoThemeColors.primaryColor(context),
+                              ? AutomatoThemeColors.saveZone(ref)
+                              : AutomatoThemeColors.primaryColor(ref),
                         ),
                         const SizedBox(height: 20),
                         Center(
@@ -139,7 +140,7 @@ class DragDropWidgetState extends State<DragDropWidget> {
 
     final RandomizeDraggedFile random = RandomizeDraggedFile(
         cliArguments: widget.cliArguments, context: context);
-    final logState = Provider.of<LogState>(context, listen: false);
+    final logState = provider.Provider.of<LogState>(context, listen: false);
 
     setState(() {
       logState.clearLogs();
@@ -161,7 +162,7 @@ class DragDropWidgetState extends State<DragDropWidget> {
               'Please drop folders only, not files.',
               style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
             ),
-            backgroundColor: AutomatoThemeColors.dangerZone(context),
+            backgroundColor: AutomatoThemeColors.dangerZone(ref),
           ),
         );
         return setState(() => _isLoading = false);
@@ -177,7 +178,7 @@ class DragDropWidgetState extends State<DragDropWidget> {
             'Dragged folders randomized successfully and send to output path: ${widget.cliArguments.specialDatOutputPath}',
             style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
           ),
-          backgroundColor: AutomatoThemeColors.saveZone(context),
+          backgroundColor: AutomatoThemeColors.saveZone(ref),
         ),
       );
     }

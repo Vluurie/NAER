@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_ui/appbar/appbar_icon.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
+class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final AnimationController blinkController;
   final VoidCallback scrollToSetup;
   final GlobalKey setupLogOutputKey;
@@ -19,7 +20,7 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
   bool isScreenLarge(double maxWidth) => maxWidth > 600;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Stack(
       children: [
         Positioned(
@@ -37,7 +38,7 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         AppBar(
           toolbarHeight: 70.0,
-          backgroundColor: AutomatoThemeColors.transparentColor(context),
+          backgroundColor: Colors.transparent,
           elevation: 0,
           title: SizedBox(
             height: 70,
@@ -55,9 +56,10 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            logoText(isLargeScreen, context),
-                            AppIcons.informationIcon(context),
-                            AppIcons.logIcon(blinkController, scrollToSetup),
+                            logoText(isLargeScreen, context, ref),
+                            AppIcons.informationIcon(context, ref),
+                            AppIcons.logIcon(
+                                blinkController, scrollToSetup, ref),
                             Container(
                               height: 50, // Adjust height to match icons
                               alignment: Alignment.center, // Center alignment
@@ -88,13 +90,18 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Text logoText(bool isLargeScreen, BuildContext context) {
+  Text logoText(bool isLargeScreen, BuildContext context, WidgetRef ref) {
     return Text(
-      'NAER',
+      'NAER v3.5a',
       style: TextStyle(
         fontSize: isLargeScreen ? 48.0 : 24.0,
-        color: AutomatoThemeColors.darkBrown(context),
+        color: AutomatoThemeColors.darkBrown(ref),
         fontWeight: FontWeight.w700,
+        shadows: [
+          Shadow(
+              offset: const Offset(5.0, 5),
+              color: AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5)),
+        ],
       ),
     );
   }

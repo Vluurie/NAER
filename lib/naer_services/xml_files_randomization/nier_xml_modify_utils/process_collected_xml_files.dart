@@ -38,7 +38,7 @@ Future<void> processCollectedXmlFileForRandomization(
     bool isActionImportant = false;
 
     isSpawnActionTooSmall = checkTooSmallSpawnAction(
-        actionId, bigSpawnEnemySkipIds, isSpawnActionTooSmall);
+        actionId, EntitySkipIDs.bigSpawnEnemySkipIds, isSpawnActionTooSmall);
     isActionImportant =
         checkImportantIds(actionId, importantIds, isActionImportant);
     handleObjIdProcessing(codeElements, isActionImportant, sortedEnemyData,

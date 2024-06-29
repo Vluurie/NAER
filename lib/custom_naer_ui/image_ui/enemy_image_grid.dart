@@ -3,15 +3,16 @@ import 'package:NAER/data/image_data/nier_enemy_image_names.dart';
 import 'package:NAER/data/image_data/nier_enemy_images_ingame_list.dart';
 import 'package:NAER/naer_ui/image_ui/levitating_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EnemyImageGrid extends StatefulWidget {
+class EnemyImageGrid extends ConsumerStatefulWidget {
   @override
   EnemyImageGridState createState() => EnemyImageGridState();
   const EnemyImageGrid({super.key});
 }
 
-class EnemyImageGridState extends State<EnemyImageGrid> {
+class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
   List<String> selectedImages = [];
   String clickedImage = '';
   bool isImageClicked = false;
@@ -57,7 +58,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
           ),
           IconButton(
             icon: Icon(Icons.info_outline,
-                color: AutomatoThemeColors.darkBrown(context)),
+                color: AutomatoThemeColors.darkBrown(ref)),
             onPressed: () {
               showEnemyInformation();
             },
@@ -69,9 +70,9 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
     Widget gridSection = Container(
       height: gridHeight,
       decoration: BoxDecoration(
-        color: AutomatoThemeColors.darkBrown(context),
-        border: Border.all(
-            color: AutomatoThemeColors.primaryColor(context), width: 3),
+        color: AutomatoThemeColors.darkBrown(ref),
+        border:
+            Border.all(color: AutomatoThemeColors.primaryColor(ref), width: 3),
         borderRadius: BorderRadius.circular(10),
       ),
       child: SingleChildScrollView(
@@ -90,7 +91,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Card(
-                  color: AutomatoThemeColors.hoverBrown(context),
+                  color: AutomatoThemeColors.hoverBrown(ref),
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
@@ -186,7 +187,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                     transform: Matrix4.identity()
                       ..scale(isHovered.value ? 1.05 : 1.0),
                     decoration: BoxDecoration(
-                      color: AutomatoThemeColors.transparentColor(context),
+                      color: AutomatoThemeColors.transparentColor(ref),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: isHovered.value ||
                               isBuggyEnemy ||
@@ -194,14 +195,12 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                           ? [
                               BoxShadow(
                                 color: isBuggyEnemy
-                                    ? AutomatoThemeColors.dangerZone(context)
+                                    ? AutomatoThemeColors.dangerZone(ref)
                                         .withOpacity(0.5)
                                     : isSpecialEnemy
-                                        ? AutomatoThemeColors.primaryColor(
-                                                context)
+                                        ? AutomatoThemeColors.primaryColor(ref)
                                             .withOpacity(0.5)
-                                        : AutomatoThemeColors.primaryColor(
-                                                context)
+                                        : AutomatoThemeColors.primaryColor(ref)
                                             .withOpacity(0.3),
                                 spreadRadius: 1,
                                 blurRadius: 50,
@@ -213,11 +212,10 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                         color: isSelected || isHovered.value
                             ? const Color.fromARGB(255, 255, 255, 255)
                             : isBuggyEnemy
-                                ? AutomatoThemeColors.dangerZone(context)
+                                ? AutomatoThemeColors.dangerZone(ref)
                                 : isSpecialEnemy
-                                    ? AutomatoThemeColors.primaryColor(context)
-                                    : AutomatoThemeColors.transparentColor(
-                                        context),
+                                    ? AutomatoThemeColors.primaryColor(ref)
+                                    : AutomatoThemeColors.transparentColor(ref),
                         width: isBuggyEnemy || isSpecialEnemy ? 3 : 3,
                       ),
                     ),
@@ -301,12 +299,12 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                 ),
                 child: Stack(
                   children: [
-                    const AutomatoBackground(
+                    AutomatoBackground(
                       showBackgroundSVG: false,
                       showMenuLines: true,
                       showRepeatingBorders: false,
-                      backgroundColor: Color.fromARGB(255, 99, 95, 80),
-                      linesConfig: LinesConfig(
+                      backgroundColor: const Color.fromARGB(255, 99, 95, 80),
+                      linesConfig: const LinesConfig(
                         lineColor: Color.fromARGB(255, 65, 63, 53),
                         strokeWidth: 2.5,
                         spacing: 7.0,
@@ -315,6 +313,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                         drawHorizontalLines: true,
                         drawVerticalLines: true,
                       ),
+                      ref: ref,
                     ),
                     SingleChildScrollView(
                       child: Padding(
@@ -355,8 +354,7 @@ class EnemyImageGridState extends State<EnemyImageGrid> {
                                 "Close",
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color:
-                                      AutomatoThemeColors.primaryColor(context),
+                                  color: AutomatoThemeColors.primaryColor(ref),
                                 ),
                               ),
                             ),

@@ -1,21 +1,22 @@
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 
-class LogOutput extends StatefulWidget {
+class LogOutput extends ConsumerStatefulWidget {
   const LogOutput({super.key});
 
   @override
   LogOutputState createState() => LogOutputState();
 }
 
-class LogOutputState extends State<LogOutput> {
+class LogOutputState extends ConsumerState<LogOutput> {
   final ScrollController scrollController = ScrollController();
 
   @override
@@ -56,7 +57,7 @@ class LogOutputState extends State<LogOutput> {
   void copyCLIArguments(BuildContext context) {
     GlobalState globalState;
     try {
-      globalState = Provider.of<GlobalState>(context, listen: false);
+      globalState = provider.Provider.of<GlobalState>(context, listen: false);
     } catch (e) {
       globalLog('Error accessing Provider: $e');
       return;
@@ -150,29 +151,27 @@ class LogOutputState extends State<LogOutput> {
     }
   }
 
-  bool isLastMessageProcessing(BuildContext context) {
-    final logState = LogState();
-    if (logState.logs.isNotEmpty) {
-      String lastMessage = logState.logs.last;
+  bool isLastMessageProcessing() {
+    final globalLogs = LogState.getGlobalLogs();
+    if (globalLogs.isNotEmpty) {
+      String lastMessage = globalLogs.last;
 
       bool isProcessing = lastMessage.isNotEmpty &&
           !lastMessage.contains("Completed") &&
           !lastMessage.contains("Error") &&
-          !lastMessage.contains("Randomization") &&
-          !lastMessage.contains("Randomizing") &&
+          !lastMessage.contains("Randomization process finished") &&
+          !lastMessage.contains("Thank you for using the randomization tool") &&
           !lastMessage.contains("NieR CLI") &&
           !lastMessage.contains("Last") &&
           !lastMessage.contains("Total randomization");
-
       return isProcessing;
     }
-
     return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
+    return provider.ChangeNotifierProvider.value(
       value: LogState(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,7 +183,7 @@ class LogOutputState extends State<LogOutput> {
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: AutomatoThemeColors.darkBrown(context),
+                color: AutomatoThemeColors.darkBrown(ref),
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [
@@ -207,71 +206,76 @@ class LogOutputState extends State<LogOutput> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Consumer<LogState>(
+                      provider.Consumer<LogState>(
                         builder: (context, logState, _) {
-                          return RichText(
-                            text: TextSpan(
-                              children: logState.logs.isNotEmpty
-                                  ? buildLogMessageSpans(context)
-                                  : [
-                                      const TextSpan(
-                                          style: TextStyle(fontSize: 30),
-                                          text:
-                                              "Hey there! It's quiet for now... 🤫\n\n"),
-                                    ],
-                            ),
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: logState.logs.isNotEmpty
+                                      ? buildLogMessageSpans(context)
+                                      : [
+                                          const TextSpan(
+                                              style: TextStyle(fontSize: 30),
+                                              text:
+                                                  "Hey there! It's quiet for now... 🤫\n\n"),
+                                        ],
+                                ),
+                              ),
+                              if (isLastMessageProcessing())
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 10.0),
+                                        child: Lottie.asset(
+                                            'assets/animations/loading.json',
+                                            width: 150,
+                                            height: 150,
+                                            fit: BoxFit.fill),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 10.0),
+                                        child: Lottie.asset(
+                                            'assets/animations/loading.json',
+                                            width: 150,
+                                            height: 150,
+                                            fit: BoxFit.fill),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 10.0),
+                                        child: Lottie.asset(
+                                            'assets/animations/loading.json',
+                                            width: 150,
+                                            height: 150,
+                                            fit: BoxFit.fill),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 10.0),
+                                        child: Lottie.asset(
+                                            'assets/animations/loading.json',
+                                            width: 150,
+                                            height: 150,
+                                            fit: BoxFit.fill),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                            ],
                           );
                         },
                       ),
-                      if (isLastMessageProcessing(context))
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10.0),
-                                child: Lottie.asset(
-                                    'assets/animations/loading.json',
-                                    width: 150,
-                                    height: 150,
-                                    fit: BoxFit.fill),
-                              ),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10.0),
-                                child: Lottie.asset(
-                                    'assets/animations/loading.json',
-                                    width: 150,
-                                    height: 150,
-                                    fit: BoxFit.fill),
-                              ),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10.0),
-                                child: Lottie.asset(
-                                    'assets/animations/loading.json',
-                                    width: 150,
-                                    height: 150,
-                                    fit: BoxFit.fill),
-                              ),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10.0),
-                                child: Lottie.asset(
-                                    'assets/animations/loading.json',
-                                    width: 150,
-                                    height: 150,
-                                    fit: BoxFit.fill),
-                              ),
-                            ),
-                          ],
-                        )
                     ],
                   ),
                 ),

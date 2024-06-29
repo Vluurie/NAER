@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
+import 'dart:isolate';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
@@ -18,33 +19,43 @@ import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
+import 'package:NAER/nier_cli/nier_cli_isolation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:NAER/nier_cli/nier_cli.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 void main(List<String> arguments) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (arguments.isNotEmpty) {
-    bool isManagerFile = false;
-    await nierCli(arguments, isManagerFile);
+    final receivePort = ReceivePort();
+    Map<String, dynamic> args = {
+      'processArgs': arguments,
+      'isManagerFile': false,
+      'sendPort': receivePort.sendPort,
+    };
+    await compute(runNierCliIsolated, args);
     exit(0);
   } else {
     final themeNotifier = await AutomatoThemeNotifier.loadFromPreferences();
 
     runApp(
-      riverpod.ProviderScope(
+      ProviderScope(
+        overrides: [
+          automatoThemeNotifierProvider.overrideWith((ref) => themeNotifier),
+        ],
         child: MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => GlobalState()),
-            ChangeNotifierProvider(create: (_) => themeNotifier),
-            ChangeNotifierProvider(create: (_) => LogState()),
+            provider.ChangeNotifierProvider(create: (_) => GlobalState()),
+            provider.ChangeNotifierProvider(create: (_) => LogState()),
           ],
           child: const EnemyRandomizerApp(),
         ),
@@ -53,34 +64,31 @@ void main(List<String> arguments) async {
   }
 }
 
-class EnemyRandomizerApp extends StatelessWidget {
+class EnemyRandomizerApp extends ConsumerWidget {
   const EnemyRandomizerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(automatoThemeNotifierProvider).theme;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'NieR:Automata Enemy Randomizer Tool',
-      theme: Provider.of<AutomatoThemeNotifier>(context).currentTheme,
+      theme: theme,
       home: const EnemyRandomizerAppState(),
     );
   }
 }
 
-class EnemyRandomizerAppState extends StatefulWidget {
+class EnemyRandomizerAppState extends ConsumerStatefulWidget {
   const EnemyRandomizerAppState({super.key});
 
   @override
   _EnemyRandomizerAppState createState() => _EnemyRandomizerAppState();
 }
 
-class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
+class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     with TickerProviderStateMixin {
   final GlobalKey<LogOutputState> logOutputKey = GlobalKey<LogOutputState>();
-  void logAndPrint(String message) {
-    // print(message);
-    logState.addLog(message);
-  }
 
   late ScrollController scrollController;
   late AnimationController _blinkController;
@@ -121,43 +129,53 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   @override
   void dispose() {
     scrollController.dispose();
+    _blinkController.dispose();
     super.dispose();
     log('dispose called');
   }
 
   @override
   Widget build(BuildContext context) {
-    final globalState = provider.Provider.of<GlobalState>(context);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AutomatoThemeColors.bright(context),
-                AutomatoThemeColors.primaryColor(context)
-              ],
-            ),
-          ),
-          child: Stack(
-            children: <Widget>[
-              NaerAppBar(
+        child: Stack(
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    AutomatoThemeColors.primaryColor(ref),
+                    AutomatoThemeColors.bright(ref),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AutomatoThemeColors.darkBrown(ref),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: NaerAppBar(
                 blinkController: _blinkController,
                 scrollToSetup: () =>
                     scrollToSetup(globalState.setupLogOutputKey),
                 setupLogOutputKey: globalState.setupLogOutputKey,
-                button: navigateButton(context, scrollController),
+                button: navigateButton(context, scrollController, ref),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: Container(
         height: 80, // Reduced height
-        color: AutomatoThemeColors.bright(context),
+        color: AutomatoThemeColors.bright(ref),
         child: Stack(
           children: [
             Positioned(
@@ -167,7 +185,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               child: Container(
                 height: 15,
                 width: double.infinity,
-                color: AutomatoThemeColors.bright(context),
+                color: AutomatoThemeColors.bright(ref),
                 child: buildRepeatingBorderSVG(
                   context,
                   svgWidget: const AutomatoBorderSVG(
@@ -180,121 +198,133 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
               ),
             ),
             Container(
-              margin: const EdgeInsets.only(bottom: 15),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AutomatoThemeColors.primaryColor(context),
-                    AutomatoThemeColors.bright(context)
-                  ],
-                ),
-              ),
-              child: BottomNavigationBar(
-                items: [
-                  BottomNavigationBarItem(
-                    icon: MouseRegion(
-                      onEnter: (_) => setState(
-                          () => globalState.isHoveringSelectAll = true),
-                      onExit: (_) => setState(
-                          () => globalState.isHoveringSelectAll = false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: globalState.isHoveringSelectAll
-                              ? AutomatoThemeColors.brown15(context)
-                              : AutomatoThemeColors.transparentColor(context),
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(4.0),
-                        child: Icon(
-                          Icons.select_all,
-                          size: 28.0,
-                          color: AutomatoThemeColors.darkBrown(context),
-                        ),
-                      ),
-                    ),
-                    label: 'Select All',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: MouseRegion(
-                      onEnter: (_) => setState(
-                          () => globalState.isHoveringUnselectAll = true),
-                      onExit: (_) => setState(
-                          () => globalState.isHoveringUnselectAll = false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: globalState.isHoveringUnselectAll
-                              ? AutomatoThemeColors.brown15(context)
-                              : AutomatoThemeColors.transparentColor(context),
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(4.0),
-                        child: Icon(
-                          Icons.cancel,
-                          size: 28.0,
-                          color: AutomatoThemeColors.darkBrown(context),
-                        ),
-                      ),
-                    ),
-                    label: 'Unselect All',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: MouseRegion(
-                      onEnter: (_) =>
-                          setState(() => globalState.isHoveringUndo = true),
-                      onExit: (_) =>
-                          setState(() => globalState.isHoveringUndo = false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: globalState.isHoveringUndo
-                              ? AutomatoThemeColors.brown15(context)
-                              : AutomatoThemeColors.transparentColor(context),
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(4.0),
-                        child: Icon(
-                          Icons.undo,
-                          size: 28.0, // Reduced icon size
-                          color: AutomatoThemeColors.dangerZone(context),
-                        ),
-                      ),
-                    ),
-                    label: 'Undo',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: MouseRegion(
-                      onEnter: (_) =>
-                          setState(() => globalState.isHoveringModify = true),
-                      onExit: (_) =>
-                          setState(() => globalState.isHoveringModify = false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: globalState.isHoveringModify
-                              ? AutomatoThemeColors.brown15(context)
-                              : AutomatoThemeColors.transparentColor(context),
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(4.0),
-                        child: Icon(
-                          Icons.shuffle,
-                          size: 28.0, // Reduced icon size
-                          color: AutomatoThemeColors.saveZone(context),
-                        ),
-                      ),
-                    ),
-                    label: 'Modify',
+                boxShadow: [
+                  BoxShadow(
+                    color: AutomatoThemeColors.darkBrown(ref),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, -4),
                   ),
                 ],
-                currentIndex: globalState.selectedIndex,
-                selectedItemColor: AutomatoThemeColors.selected(context),
-                unselectedItemColor: AutomatoThemeColors.darkBrown(context),
-                onTap: _onItemTapped,
-                backgroundColor: Colors.transparent,
-                type: BottomNavigationBarType.fixed,
-                elevation: 0,
-                selectedLabelStyle: const TextStyle(fontSize: 12),
-                unselectedLabelStyle: const TextStyle(fontSize: 12),
+              ),
+              margin: const EdgeInsets.only(bottom: 15),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AutomatoThemeColors.primaryColor(ref),
+                      AutomatoThemeColors.bright(ref)
+                    ],
+                  ),
+                ),
+                child: BottomNavigationBar(
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: MouseRegion(
+                        onEnter: (_) => setState(
+                            () => globalState.isHoveringSelectAll = true),
+                        onExit: (_) => setState(
+                            () => globalState.isHoveringSelectAll = false),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: globalState.isHoveringSelectAll
+                                ? AutomatoThemeColors.brown15(ref)
+                                : AutomatoThemeColors.transparentColor(ref),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.select_all,
+                            size: 28.0,
+                            color: AutomatoThemeColors.darkBrown(ref),
+                          ),
+                        ),
+                      ),
+                      label: 'Select All',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: MouseRegion(
+                        onEnter: (_) => setState(
+                            () => globalState.isHoveringUnselectAll = true),
+                        onExit: (_) => setState(
+                            () => globalState.isHoveringUnselectAll = false),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: globalState.isHoveringUnselectAll
+                                ? AutomatoThemeColors.brown15(ref)
+                                : AutomatoThemeColors.transparentColor(ref),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.cancel,
+                            size: 28.0,
+                            color: AutomatoThemeColors.darkBrown(ref),
+                          ),
+                        ),
+                      ),
+                      label: 'Unselect All',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: MouseRegion(
+                        onEnter: (_) =>
+                            setState(() => globalState.isHoveringUndo = true),
+                        onExit: (_) =>
+                            setState(() => globalState.isHoveringUndo = false),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: globalState.isHoveringUndo
+                                ? AutomatoThemeColors.brown15(ref)
+                                : AutomatoThemeColors.transparentColor(ref),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.undo,
+                            size: 28.0, // Reduced icon size
+                            color: AutomatoThemeColors.dangerZone(ref),
+                          ),
+                        ),
+                      ),
+                      label: 'Undo',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: MouseRegion(
+                        onEnter: (_) =>
+                            setState(() => globalState.isHoveringModify = true),
+                        onExit: (_) => setState(
+                            () => globalState.isHoveringModify = false),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: globalState.isHoveringModify
+                                ? AutomatoThemeColors.brown15(ref)
+                                : AutomatoThemeColors.transparentColor(ref),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.shuffle,
+                            size: 28.0, // Reduced icon size
+                            color: AutomatoThemeColors.saveZone(ref),
+                          ),
+                        ),
+                      ),
+                      label: 'Modify',
+                    ),
+                  ],
+                  currentIndex: globalState.selectedIndex,
+                  selectedItemColor: AutomatoThemeColors.selected(ref),
+                  unselectedItemColor: AutomatoThemeColors.darkBrown(ref),
+                  onTap: _onItemTapped,
+                  backgroundColor: Colors.transparent,
+                  type: BottomNavigationBarType.fixed,
+                  elevation: 0,
+                  selectedLabelStyle: const TextStyle(fontSize: 12),
+                  unselectedLabelStyle: const TextStyle(fontSize: 12),
+                ),
               ),
             ),
           ],
@@ -302,13 +332,14 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
       ),
       body: Stack(children: [
         AutomatoBackground(
+          ref: ref,
           showRepeatingBorders: false,
-          gradientColor: AutomatoThemeColors.gradient(context),
+          gradientColor: AutomatoThemeColors.gradient(ref),
           linesConfig: LinesConfig(
-              lineColor: AutomatoThemeColors.darkBrown(context),
-              strokeWidth: 1.0,
+              lineColor: AutomatoThemeColors.bright(ref),
+              strokeWidth: 2.5,
               spacing: 5.0,
-              flickerDuration: const Duration(milliseconds: 10000),
+              flickerDuration: const Duration(milliseconds: 5000),
               enableFlicker: true,
               drawHorizontalLines: true,
               drawVerticalLines: true),
@@ -373,7 +404,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         globalState.enemyImageGridKey.currentState?.unselectAllImages();
         break;
       case 2:
-        showUndoConfirmation();
+        showUndoConfirmation(context, ref);
         break;
       case 3:
         onPressedAction();
@@ -396,7 +427,7 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         await FileChange.savePreRandomizationTime();
         log("Ignored mod files before starting: ${globalState.ignoredModFiles}");
         final stopwatch = Stopwatch()..start();
-        await startRandomizing();
+        await startRandomizing(context);
         await FileChange.saveChanges();
         stopwatch.stop();
 
@@ -419,26 +450,27 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
     if (globalState.isButtonEnabled) {
-      showModifyConfirmation();
+      showModifyConfirmation(context, ref);
     }
   }
 
 // MAIN MODIFY BUTTON FUNCTIONALITY
-  Future<void> startRandomizing() async {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+  Future<void> startRandomizing(BuildContext context) async {
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     globalState.hasError = true;
-    setState(() {
-      globalState.isLoading = true;
-      globalState.loggedStages.clear();
-    });
+    globalState.isLoading = true;
+    globalState.loggedStages.clear();
 
     if (globalState.input.isEmpty || globalState.specialDatOutputPath.isEmpty) {
       globalLog("Error: Please select both input and output directories. 💋 ");
-      setState(() {
-        globalState.isLoading = false;
-      });
+      globalState.isLoading = false;
       return;
     }
+
+    scrollToSetup(globalState.setupLogOutputKey);
+
+    await Future.delayed(const Duration(milliseconds: 800));
 
     globalLog("Starting randomization process... 🏃‍➡️");
 
@@ -456,20 +488,45 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
         enemyStats: globalState.enemyStats,
         enemyLevel: globalState.enemyLevel,
       );
+
       bool isManagerFile = false;
-      await nierCli(cliArgs.processArgs, isManagerFile);
+      final receivePort = ReceivePort();
+
+      receivePort.listen((message) {
+        if (message is Map<String, dynamic>) {
+          if (message['event'] == 'file_change') {
+            logState.addLog("File created: ${message['filePath']}");
+            FileChange.changes.add(FileChange(
+              message['filePath'],
+              message['action'],
+            ));
+          } else if (message['event'] == 'error') {
+            logState.addLog(
+                "Error: ${message['details']}\nStack Trace: ${message['stackTrace']}");
+          }
+        } else if (message is String) {
+          logState.addLog(message);
+        }
+      });
+
+      Map<String, dynamic> args = {
+        'processArgs': cliArgs.processArgs,
+        'isManagerFile': isManagerFile,
+        'sendPort': receivePort.sendPort,
+      };
+
+      // Run nierCli in a separate isolate
+      await compute(runNierCliIsolated, args);
 
       globalLog("Randomization process completed successfully.");
     } on Exception catch (e) {
       globalLog("Error occurred: $e");
     } finally {
-      setState(() {
-        globalState.isLoading = false;
-      });
+      globalState.isLoading = false;
       globalLog('Thank you for using the randomization tool.');
       globalLog(asciiArt2B);
       globalLog("Randomization process finished.");
-      showCompletionDialog();
+      showCompletionDialog(context, ref);
     }
   }
 
@@ -479,7 +536,8 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
   }
 
   void undoLastRandomization() async {
-    final globalState = Provider.of<GlobalState>(context, listen: false);
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     await FileChange.loadChanges();
     await FileChange.undoChanges();
 
@@ -526,90 +584,104 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     }
   }
 
-  void showUndoConfirmation() {
-    showDialog(
+  void showUndoConfirmation(BuildContext context, WidgetRef ref) {
+    AutomatoDialogManager().showYesNoDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm Undo Everything"),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Are you sure you want to undo every last modifications you did?",
-              ),
-              SizedBox(height: 10),
-              Text(
-                "Important:",
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-              ),
-              Text(
-                "• Avoid using this function while the game is running as it may cause issues.",
-                style: TextStyle(fontSize: 12),
-              ),
-              Text(
-                "• This will also undo the installed mod manager files so you need to reinstall them if they got affected.",
-                style: TextStyle(fontSize: 12),
-              ),
-            ],
+      title: 'Confirm Undo Everything',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Are you sure you want to undo every last modification you did?',
+            style: TextStyle(
+                color: AutomatoThemeColors.textDialogColor(ref), fontSize: 22),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+          const SizedBox(height: 10),
+          const Text(
+            'Important:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Colors.red,
             ),
-            TextButton(
-              child: const Text("Yes, Undo"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                undoLastRandomization();
-              },
+          ),
+          Text(
+            '• Avoid using this function while the game is running as it may cause issues.',
+            style: TextStyle(
+              fontSize: 18,
+              color: AutomatoThemeColors.textDialogColor(ref),
             ),
-          ],
-        );
+          ),
+          Text(
+            '• This will also undo the installed mod manager files so you need to reinstall them if they got affected.',
+            style: TextStyle(
+              fontSize: 18,
+              color: AutomatoThemeColors.textDialogColor(ref),
+            ),
+          ),
+        ],
+      ),
+      onYesPressed: () {
+        Navigator.of(context).pop();
+        undoLastRandomization();
       },
+      onNoPressed: () {
+        Navigator.of(context).pop();
+      },
+      ref: ref,
     );
   }
 
-  void showModifyConfirmation() {
+  void showModifyConfirmation(BuildContext context, WidgetRef ref) {
     String modificationDetails = _generateModificationDetails();
 
-    showDialog(
+    AutomatoDialogManager().showYesNoDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm Modification"),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: [
-                const Text(
-                    "Are you sure you want to start modification? Below are the selected settings:"),
-                const SizedBox(height: 10),
-                Text(modificationDetails),
-              ],
-            ),
+      ref: ref,
+      title: 'Confirm Modification',
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height *
+              0.5, // Adjust the height as needed
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Are you sure you want to start modification? Below are the selected settings:",
+                style: TextStyle(
+                  color: AutomatoThemeColors.textDialogColor(ref),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                modificationDetails,
+                style: TextStyle(
+                  color: AutomatoThemeColors.textDialogColor(ref),
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("No, I still have work to do."),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text("Yes, Modify"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                handleStartRandomizing();
-              },
-            ),
-          ],
-        );
+        ),
+      ),
+      onYesPressed: () {
+        Navigator.of(context).pop();
+        handleStartRandomizing();
       },
+      onNoPressed: () {
+        Navigator.of(context).pop();
+      },
+      yesLabel: 'Yes, Modify',
+      noLabel: 'No, I still have work to do.',
+      activeHoverColorNo: AutomatoThemeColors.darkBrown(ref),
+      activeHoverColorYes: AutomatoThemeColors.saveZone(ref),
+      yesButtonColor: AutomatoThemeColors.darkBrown(ref),
+      noButtonColor: AutomatoThemeColors.darkBrown(ref),
     );
   }
 
@@ -684,29 +756,26 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
     return details.join('\n\n');
   }
 
-  void showCompletionDialog() {
+  void showCompletionDialog(BuildContext context, WidgetRef ref) {
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
-    setState(() {
-      globalState.isLoading = false;
-    });
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Randomization Complete"),
-          content: const Text("Randomization process completed successfully."),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    globalState.isLoading = false;
+
+    AutomatoDialogManager().showInfoDialog(
+        context: context,
+        ref: ref,
+        title: 'Randomization Complete',
+        content: Text(
+          'Randomization process completed successfully.',
+          style: TextStyle(
+            color: AutomatoThemeColors.textDialogColor(ref),
+            fontSize: 18,
+          ),
+        ),
+        onOkPressed: () {
+          Navigator.of(context).pop();
+        },
+        okLabel: "Ok");
   }
 
   void clearLogMessages() {
@@ -748,12 +817,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AutomatoThemeColors.brown25(context),
+                color: AutomatoThemeColors.brown25(ref),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        AutomatoThemeColors.darkBrown(context).withOpacity(0.2),
+                    color: AutomatoThemeColors.darkBrown(ref).withOpacity(0.2),
                     spreadRadius: 2,
                     blurRadius: 6,
                     offset: const Offset(0, 3),
@@ -768,12 +836,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AutomatoThemeColors.brown25(context),
+                color: AutomatoThemeColors.brown25(ref),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        AutomatoThemeColors.darkBrown(context).withOpacity(0.2),
+                    color: AutomatoThemeColors.darkBrown(ref).withOpacity(0.2),
                     spreadRadius: 2,
                     blurRadius: 6,
                     offset: const Offset(0, 3),
@@ -788,12 +855,11 @@ class _EnemyRandomizerAppState extends State<EnemyRandomizerAppState>
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AutomatoThemeColors.brown25(context),
+                color: AutomatoThemeColors.brown25(ref),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        AutomatoThemeColors.darkBrown(context).withOpacity(0.2),
+                    color: AutomatoThemeColors.darkBrown(ref).withOpacity(0.2),
                     spreadRadius: 2,
                     blurRadius: 6,
                     offset: const Offset(0, 3),

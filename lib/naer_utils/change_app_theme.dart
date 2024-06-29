@@ -1,156 +1,250 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:automato_theme/automato_theme.dart';
 
-void changeAppThemePopup(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Change App Theme'),
-        content: SingleChildScrollView(
+class HoverTextIcon extends ConsumerStatefulWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final Color textColor;
+
+  const HoverTextIcon({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    required this.textColor,
+  });
+
+  @override
+  HoverTextIconState createState() => HoverTextIconState();
+}
+
+class HoverTextIconState extends ConsumerState<HoverTextIcon> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          color: _isHovered
+              ? AutomatoThemeColors.darkBrown(ref)
+              : Colors.transparent,
+          child: ListTile(
+            leading: Icon(
+              widget.icon,
+              color: _isHovered
+                  ? AutomatoThemeColors.bright(ref)
+                  : widget.textColor,
+            ),
+            title: Text(
+              widget.title,
+              style: TextStyle(
+                color: _isHovered
+                    ? AutomatoThemeColors.primaryColor(ref)
+                    : widget.textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void changeAppThemePopup(BuildContext context, WidgetRef ref) {
+  final textColor = AutomatoThemeColors.textDialogColor(ref);
+
+  AutomatoDialogManager().showInfoDialog(
+      context: context,
+      ref: ref,
+      title: 'Change App Theme',
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height *
+              0.5, // Adjust the height as needed
+        ),
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('NieR Theme (Default)'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'NieR Theme (Default)',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToDefaultTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Angel Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Angel Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToAngelTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Cyberpunk Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Cyberpunk Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToCyberpunkTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Danger Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Danger Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToDangerTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Desert Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Desert Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToDesertTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Floral Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Floral Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToFloralTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Futuristic Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Futuristic Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToFuturisticTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Ice Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Ice Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToIceTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Lava Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Lava Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToLavaTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Neon Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Neon Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToNeonTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Nightmare Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Nightmare Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToNightmareTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Pastel Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Pastel Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToPastelTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Retro Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Retro Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToRetroTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Steampunk Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Steampunk Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToSteampunkTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Sunset Theme'),
+              HoverTextIcon(
+                icon: Icons.color_lens_outlined,
+                title: 'Sunset Theme',
                 onTap: () {
-                  Provider.of<AutomatoThemeNotifier>(context, listen: false)
+                  ref
+                      .read(automatoThemeNotifierProvider.notifier)
                       .switchToSunsetTheme();
                   Navigator.of(context).pop();
                 },
+                textColor: textColor,
               ),
             ],
           ),
         ),
-      );
-    },
-  );
+      ),
+      onOkPressed: () {
+        Navigator.of(context).pop();
+      },
+      okLabel: "Close");
 }

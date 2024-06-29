@@ -3,17 +3,18 @@ import 'package:NAER/naer_ui/animations/shacke_animation_widget.dart';
 import 'package:NAER/naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
-import 'package:provider/provider.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
-class EnemyStatsSelection extends StatefulWidget {
+class EnemyStatsSelection extends ConsumerStatefulWidget {
   const EnemyStatsSelection({super.key});
 
   @override
   EnemyStatsSelectionState createState() => EnemyStatsSelectionState();
 }
 
-class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
+class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
   String getSelectedEnemiesArgument() {
     List<List<String>> selectedEnemies = allEmForStatsChangeList
         .where((enemy) => enemy.isSelected)
@@ -24,7 +25,7 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final globalState = Provider.of<GlobalState>(context);
+    final globalState = provider.Provider.of<GlobalState>(context);
     return Container(
       padding: const EdgeInsets.all(30),
       child: Column(
@@ -73,8 +74,8 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                     child: !globalState.stats["None"]!
                         ? Slider(
                             activeColor: Color.lerp(
-                                AutomatoThemeColors.primaryColor(context),
-                                AutomatoThemeColors.dangerZone(context),
+                                AutomatoThemeColors.primaryColor(ref),
+                                AutomatoThemeColors.dangerZone(ref),
                                 globalState.enemyStats / 5.0),
                             value: globalState.enemyStats,
                             min: 0.0,
@@ -97,7 +98,7 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
             children: [
               Expanded(
                 child: CheckboxListTile(
-                  activeColor: AutomatoThemeColors.primaryColor(context),
+                  activeColor: AutomatoThemeColors.primaryColor(ref),
                   title: const Text(
                     "Select All",
                     textScaler: TextScaler.linear(0.8),
@@ -194,9 +195,8 @@ class EnemyStatsSelectionState extends State<EnemyStatsSelection> {
                               });
                               getSelectedEnemiesArgument();
                             },
-                            activeColor:
-                                AutomatoThemeColors.primaryColor(context),
-                            checkColor: AutomatoThemeColors.darkBrown(context),
+                            activeColor: AutomatoThemeColors.primaryColor(ref),
+                            checkColor: AutomatoThemeColors.darkBrown(ref),
                           ),
                         );
                       }).toList(),

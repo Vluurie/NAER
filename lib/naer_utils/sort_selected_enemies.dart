@@ -1,11 +1,11 @@
 import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
-import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart' as enemy_data;
+import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 Future<Map<String, List<String>>> readEnemyData() async {
-  return enemy_data.enemyData;
+  return SortedEnemyGroup.enemyData;
 }
 
 Future<Map<String, List<String>>> sortSelectedEnemies(

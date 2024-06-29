@@ -4,10 +4,11 @@ import 'package:NAER/naer_utils/change_app_theme.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_automato_theme/flutter_automato_theme.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'path_checkbox_widget.dart';
 
-class DirectorySelection extends StatefulWidget {
+class DirectorySelection extends ConsumerStatefulWidget {
   final Future<bool> loadPathsFuture;
   final GlobalState globalState;
 
@@ -18,10 +19,10 @@ class DirectorySelection extends StatefulWidget {
   });
 
   @override
-  State<DirectorySelection> createState() => _DirectorySelectionState();
+  ConsumerState<DirectorySelection> createState() => _DirectorySelectionState();
 }
 
-class _DirectorySelectionState extends State<DirectorySelection> {
+class _DirectorySelectionState extends ConsumerState<DirectorySelection> {
   @override
   void initState() {
     super.initState();
@@ -78,23 +79,23 @@ class _DirectorySelectionState extends State<DirectorySelection> {
                   maxScale: 0.8,
                   showPointer: false,
                 ),
+                // AutomatoButton(
+                //   label: "Settings",
+                //   onPressed: () => getNaerSettings(context),
+                //   uniqueId: "settingsPath",
+                //   maxScale: 0.8,
+                //   showPointer: false,
+                // ),
                 AutomatoButton(
-                  label: "Settings",
-                  onPressed: () => getNaerSettings(context),
-                  uniqueId: "settingsPath",
+                  label: "Change App Theme",
+                  onPressed: () => changeAppThemePopup(context, ref),
+                  uniqueId: "theme",
                   maxScale: 0.8,
                   showPointer: false,
                 ),
                 PathCheckBoxWidget(
                   loadPathsFuture: widget.loadPathsFuture,
                   globalState: widget.globalState,
-                ),
-                AutomatoButton(
-                  label: "Change App Theme",
-                  onPressed: () => changeAppThemePopup(context),
-                  uniqueId: "theme",
-                  maxScale: 0.8,
-                  showPointer: false,
                 ),
               ],
             ),
