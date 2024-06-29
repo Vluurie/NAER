@@ -51,7 +51,7 @@ String getRandomEmNumberFromGroup(
   return groupList[random.nextInt(groupList.length)];
 }
 
-/// Reads sorted enemy data groups from the created temp_sorted_enemies.dart file.
+/// Reads sorted enemy data groups from the created [temp_sorted_enemies.dart} file.
 ///
 /// Parameters:
 /// - [filePath]: The path to the file containing the sorted enemy data.
@@ -87,63 +87,6 @@ Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
   }
 }
 
-/// Checks if the given XML element has an ancestor with an alias and removes the alias if it is randomizable.
-///
-/// This function traverses the ancestors of the provided XML element to determine
-/// if any ancestor contains an 'alias' element. If an alias is found and it is
-/// present in the provided `aliasList`, the alias element is removed. Aliases not in the list are not modified.
-/// This is important to avoid randomness in behavior for enemies that are tagged with an alias and may have
-/// hardcoded behavior.
-///
-/// Parameters:
-/// - `objIdElement`: The XML element to check for alias ancestors.
-/// - `aliasList`: The list of alias texts to compare against.
-///
-/// Returns:
-/// A boolean value indicating whether the element has an ancestor with an alias
-/// that is not in the list (`true`) or if it can be randomized (`false`).
-// bool hasAliasAncestor(xml.XmlElement objIdElement, List<String> aliasList) {
-//   bool hasAliasAncestor = false;
-
-//   // Check if any ancestor of objIdElement contains an 'alias' element
-//   for (var ancestor in objIdElement.ancestors) {
-//     bool aliasElements = ancestor.findElements('alias').isNotEmpty;
-//       hasAliasAncestor = true;
-//       for (var aliasElement in aliasElements) {
-//         if (aliasList.contains(aliasElement.innerText)) {
-//           ancestor.children.remove(aliasElement);
-//           return false;
-//         }
-//       }
-//   }
-
-//   // Return true if there was an alias ancestor that was not in the aliasList
-//   return hasAliasAncestor;
-// }
-
-/// Checks if the given XML element has an ancestor with an alias.
-///
-/// This function traverses the ancestors of the provided XML element to determine
-/// if any ancestor contains an 'alias' element. This is important to avoid
-/// randomness in behavior for enemies that are tagged with an alias and may have
-/// hardcoded behavior.
-///
-/// Parameters:
-/// - `objIdElement`: The XML element to check for alias ancestors.
-///
-/// Returns:
-/// A boolean value indicating whether the element has an ancestor with an alias (`true`) or not (`false`).
-
-/// Checks if any ancestor of the given element contains an 'alias' element
-/// with text not in the [aliasList]. If an 'alias' element's text matches an
-/// item in the [aliasList], the alias is removed and the function returns false.
-/// If no alias elements are found at all, the function returns false.
-
-/// Checks if any ancestor of the given element contains an 'alias' element
-/// with text not in the [aliasList]. If an 'alias' element's text matches an
-/// item in the [aliasList], the alias is removed and the function returns false.
-/// If no alias elements are found at all, the function returns false.
-
 /// Checks if any ancestor of the given element contains an 'alias' element
 /// with text not in the [aliasList]. If an 'alias' element's text matches an
 /// item in the [aliasList], the alias is removed and the function returns false.
@@ -158,7 +101,7 @@ bool hasAliasAncestor(xml.XmlElement objIdElement, List<String> aliasList) {
 
     // Process each 'alias' element
     for (final alias in aliasElements) {
-      final aliasText = alias.text.trim();
+      final aliasText = alias.innerText.trim();
 
       // Check if the alias text matches any item in aliasList
       if (aliasList.contains(aliasText)) {
@@ -177,32 +120,12 @@ bool hasAliasAncestor(xml.XmlElement objIdElement, List<String> aliasList) {
 }
 
 /// Checks if the given `objId` corresponds to a boss.
-///
-/// Takes an `objId` and checks if it exists within the "Boss" list
-/// in the `bossData` map. If the `objId` is found in the list, it returns `true`,
-/// indicating that the object is a boss. Otherwise, it returns `false`.
-///
-/// Parameters:
-/// - `objId`: The object ID to be checked.
-///
-/// Returns:
-/// A boolean value indicating whether the `objId` is a boss (`true`) or not (`false`).
 bool isBoss(objId) {
   // Check if the bossData map contains a "Boss" key and if it includes the objId
   return bossData["Boss"]?.contains(objId) ?? false;
 }
 
 /// Checks if the given `objId` corresponds to a big enemy.
-///
-/// Takes an `objId` and checks if it exists within the "bigEnemies" list
-/// in the `bossEnemies` list. If the `objId` is found in the list, it returns `true`,
-/// indicating that the object is a big enemy. Otherwise, it returns `false`.
-///
-/// Parameters:
-/// - `objId`: The object ID to be checked.
-///
-/// Returns:
-/// A boolean value indicating whether the `objId` is a big enemy (`true`) or not (`false`).
 bool isBigEnemy(String objId) {
   for (var enemy in EntitySkipIDs.bigEnemies) {
     if (objId == enemy) {
@@ -214,25 +137,6 @@ bool isBigEnemy(String objId) {
 
 /// Checks if a given action ID is listed in a collection of important IDs and
 /// updates the importance status of the action.
-///
-/// This function iterates through the entries of the `importantIds` map, and
-/// checks if the `actionId` exists within the values of the map. If the `actionId`
-/// is found, it sets the `isActionImportant` flag to `true`.
-///
-/// Parameters:
-/// - `actionId`: A nullable string representing the current action ID to be checked.
-/// - `importantIds`: An instance of the `ImportantIDs` class containing a map of
-///   important IDs.
-/// - `isActionImportant`: A boolean flag indicating if the action is important. This
-///   flag will be updated if the `actionId` is found within the important IDs.
-///
-/// Returns:
-/// A boolean value indicating whether the action is important (`true`) or not (`false`).
-///
-/// Note:
-/// - The `isActionImportant` parameter is modified within the function. The initial
-///   value of this parameter should be passed as `false` unless it's already known to
-///   be important.
 bool checkImportantIds(
     String? actionId, ImportantIDs importantIds, bool isActionImportant) {
   // Check if the actionId is not null
@@ -253,25 +157,6 @@ bool checkImportantIds(
 
 /// Checks if a given action ID is listed in a collection of bigSpawnEnemySkipIds and
 /// updates the status of the action.
-///
-/// This function iterates through the entries of the `bigSpawnEnemySkipIds` map, and
-/// checks if the `actionId` exists within the values of the map. If the `actionId`
-/// is found, it sets the `isSpawnActionTooSmall` flag to `true`.
-///
-/// Parameters:
-/// - `actionId`: A nullable string representing the current action ID to be checked.
-/// - `bigSpawnEnemySkipIds`: Containing a map of
-///   spawn IDs that are too small for big enemies.
-/// - `isSpawnActionTooSmall`: A boolean flag indicating if the action is too small for big enemies. This
-///   flag will be updated if the `actionId` is found within the bigSpawnEnemySkip IDs.
-///
-/// Returns:
-/// A boolean value indicating whether the action is important (`true`) or not (`false`).
-///
-/// Note:
-/// - The `isSpawnActionTooSmall` parameter is modified within the function. The initial
-///   value of this parameter should be passed as `false` unless it's already known to
-///   be important.
 bool checkTooSmallSpawnAction(
     String? actionId, bigSpawnEnemySkipIds, bool isSpawnActionTooSmall) {
   // Check if the actionId is not null
