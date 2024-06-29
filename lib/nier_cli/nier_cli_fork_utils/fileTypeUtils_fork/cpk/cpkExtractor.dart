@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:path/path.dart';
 
 import '../utils/ByteDataWrapper.dart';
 import 'cpk.dart';
 
-Future<List<String>> extractCpk(String cpkPath, String extractDir) async {
-  var cpk = Cpk.read(await ByteDataWrapper.fromFile(cpkPath));
+Future<List<String>> extractCpk(
+    String cpkPath, String extractDir, SendPort sendPort) async {
+  var cpk = Cpk.read(await ByteDataWrapper.fromFile(cpkPath, sendPort));
   for (var file in cpk.files) {
     // print("Extracting ${file.name}");
     var folder = join(extractDir, file.path);

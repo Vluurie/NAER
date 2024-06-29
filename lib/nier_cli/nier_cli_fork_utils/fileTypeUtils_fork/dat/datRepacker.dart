@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
@@ -7,9 +8,10 @@ import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 import 'datHashGenerator.dart';
 
-Future<void> repackDat(String datDir, String exportPath) async {
+Future<void> repackDat(
+    String datDir, String exportPath, SendPort sendPort) async {
   try {
-    var fileList = await getDatFileList(datDir);
+    var fileList = await getDatFileList(datDir, sendPort);
     var fileNames = fileList.map((e) => path.basename(e)).toList();
     var fileSizes =
         (await Future.wait(fileList.map((e) => File(e).length()))).toList();

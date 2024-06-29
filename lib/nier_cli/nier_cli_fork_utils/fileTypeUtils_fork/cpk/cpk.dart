@@ -324,7 +324,7 @@ class CpkFileCompressed extends CpkFile {
   }
 
   Uint8List decompress() {
-    print("Decompressing $name...");
+    ("Decompressing $name...");
     var result = Uint8List(uncompressedSize + 0x100);
 
     result.buffer.asUint8List().setRange(0, 0x100, uncompressedHeader);

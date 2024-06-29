@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:xml/xml.dart';
 
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
@@ -88,8 +89,9 @@ XmlElement yaxToXml(ByteDataWrapper bytes, {includeAnnotations = true}) {
       XmlName("root"), [], root.map((e) => e.toXml(includeAnnotations)));
 }
 
-Future<void> yaxFileToXmlFile(String yaxFilePath, String xmlFilePath) async {
-  var bytes = await ByteDataWrapper.fromFile(yaxFilePath);
+Future<void> yaxFileToXmlFile(
+    String yaxFilePath, String xmlFilePath, SendPort sendPort) async {
+  var bytes = await ByteDataWrapper.fromFile(yaxFilePath, sendPort);
   var xml = yaxToXml(bytes);
   var xmlString = xml.toPrettyString();
   var xmlFile = File(xmlFilePath);

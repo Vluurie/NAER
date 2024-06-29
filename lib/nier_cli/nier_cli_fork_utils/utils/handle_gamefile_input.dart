@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
@@ -7,8 +8,17 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_repack.d
 import 'package:flutter/foundation.dart';
 
 const List<
-    Future<bool> Function(String, String?, CliOptions, bool, bool, List<String>,
-        Set<String>, List<String>, bool? ismanagerFile)> _handlers = [
+    Future<bool> Function(
+        String,
+        String?,
+        CliOptions,
+        bool,
+        bool,
+        List<String>,
+        Set<String>,
+        List<String>,
+        bool? ismanagerFile,
+        SendPort sendPort)> _handlers = [
   handleSingleDatExtract,
   handleDatRepack,
   handleSinglePakExtract,
@@ -25,15 +35,26 @@ Future<void> handleInput(
     Set<String> processedFiles,
     List<String> enemyList,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   bool isFile = await FileSystemEntity.isFile(input);
   bool isDirectory = await FileSystemEntity.isDirectory(input);
   if (!isFile && !isDirectory) {
     throw FileHandlingException(
         "Input file or directory does not exist ($input)");
   }
-  await handleSingleCpkExtract(input, output, args, isFile, isDirectory,
-      pendingFiles, processedFiles, enemyList, activeOptions, ismanagerFile);
+  await handleSingleCpkExtract(
+      input,
+      output,
+      args,
+      isFile,
+      isDirectory,
+      pendingFiles,
+      processedFiles,
+      enemyList,
+      activeOptions,
+      ismanagerFile,
+      sendPort);
   for (var handler in _handlers) {
     String? currentOutput = output;
     if (handler == handleDatRepack && args.specialDatOutputPath != null) {
@@ -43,7 +64,7 @@ Future<void> handleInput(
     }
 
     if (await handler(input, currentOutput, args, isFile, isDirectory,
-        pendingFiles, processedFiles, activeOptions, ismanagerFile)) {
+        pendingFiles, processedFiles, activeOptions, ismanagerFile, sendPort)) {
       return;
     }
   }

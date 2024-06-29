@@ -435,8 +435,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
           'Total randomization time: ${stopwatch.elapsed}',
         );
       } catch (e, stackTrace) {
-        logAndPrint('Error during randomization $e');
-        logAndPrint('Stack trace: ${Trace.from(stackTrace)}');
+        LogState.logError(
+            'Error during randomization $e', Trace.from(stackTrace));
       } finally {
         setState(() {
           globalState.isLoading = false;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:path/path.dart' as path;
 
 import '../../utils/utils_fork.dart';
@@ -26,9 +27,10 @@ class _DatHeader {
   }
 }
 
-Future<List<String>> extractDatFiles(String datPath, String extractDir,
+Future<List<String>> extractDatFiles(
+    String datPath, String extractDir, SendPort sendPort,
     {bool shouldExtractPakFiles = false}) async {
-  var bytes = await ByteDataWrapper.fromFile(datPath);
+  var bytes = await ByteDataWrapper.fromFile(datPath, sendPort);
   if (bytes.length == 0) {
     print("Warning: Empty DAT file");
     return [];
@@ -74,7 +76,7 @@ Future<List<String>> extractDatFiles(String datPath, String extractDir,
       var pakPath = path.join(extractDir, pakFile);
       var pakExtractDir =
           path.join(extractDir, pakExtractSubDir, path.basename(pakFile));
-      await extractPakFiles(pakPath, pakExtractDir, yaxToXml: true);
+      await extractPakFiles(pakPath, pakExtractDir, sendPort, yaxToXml: true);
     }));
   }
 

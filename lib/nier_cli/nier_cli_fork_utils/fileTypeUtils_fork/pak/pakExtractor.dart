@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:path/path.dart' as path;
 
 import '../yax/yaxToXml.dart';
@@ -44,9 +45,10 @@ Future<void> _extractPakYax(_HeaderEntry meta, int size, ByteDataWrapper bytes,
   await extractedFile.writeAsBytes(fileBytes);
 }
 
-Future<List<String>> extractPakFiles(String pakPath, String extractDir,
+Future<List<String>> extractPakFiles(
+    String pakPath, String extractDir, SendPort sendPort,
     {bool yaxToXml = true}) async {
-  var bytes = await ByteDataWrapper.fromFile(pakPath);
+  var bytes = await ByteDataWrapper.fromFile(pakPath, sendPort);
 
   bytes.position = 8;
   var firstOffset = bytes.readUint32();
@@ -85,7 +87,7 @@ Future<List<String>> extractPakFiles(String pakPath, String extractDir,
         Iterable<int>.generate(fileCount).map<Future<void>>((i) async {
       var yaxPath = path.join(extractDir, "$i.yax");
       var xmlPath = path.setExtension(yaxPath, ".xml");
-      await yaxFileToXmlFile(yaxPath, xmlPath);
+      await yaxFileToXmlFile(yaxPath, xmlPath, sendPort);
     }));
   }
 

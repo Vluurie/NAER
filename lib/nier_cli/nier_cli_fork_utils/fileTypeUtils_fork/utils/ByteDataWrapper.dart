@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:euc/jis.dart';
@@ -37,14 +38,15 @@ class ByteDataWrapper {
     _data = buffer.asByteData(0, buffer.lengthInBytes);
   }
 
-  static Future<ByteDataWrapper> fromFile(String path) async {
+  static Future<ByteDataWrapper> fromFile(
+      String path, SendPort sendPort) async {
     const twoGB = 2 * 1024 * 1024 * 1024;
     var fileSize = await File(path).length();
     if (fileSize < twoGB) {
       var buffer = await File(path).readAsBytes();
       return ByteDataWrapper(buffer.buffer);
     } else {
-      print("File is over 2GB, loading in chunks");
+      sendPort.send("File is over 2GB, loading in chunks");
       var buffer = Uint8List(fileSize).buffer;
       var file = File(path).openRead();
       int position = 0;
@@ -54,14 +56,14 @@ class ByteDataWrapper {
         position += bytes.length;
         int currentProgress = ((position / fileSize) * 100).round();
         if (currentProgress >= lastReportedProgress + 10) {
-          stdout.write("$currentProgress%\r cooking..");
+          sendPort.send("$currentProgress%\r cooking..");
           lastReportedProgress = currentProgress;
         }
       }
-      print("\nRead $position bytes");
-      print("Continue processing");
-      print(
-          "Note: This can take some time, a fast computer takes approximately 2min with all arguments.");
+      sendPort.send("\nRead $position bytes");
+      sendPort.send("Continue processing");
+      sendPort.send(
+          "Note: This can take some time, a fast computer takes approximately 1:30 min with all arguments.");
       return ByteDataWrapper(buffer);
     }
   }

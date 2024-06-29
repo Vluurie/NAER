@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 // import 'dart:math';
 
 import 'package:crclib/catalog.dart';
@@ -88,7 +89,7 @@ bool isInt(String str) {
 //   return int == d ? int.toString() : d.toString();
 // }
 
-Future<List<String>> getDatFiles(String extractedDir) async {
+Future<List<String>> getDatFiles(String extractedDir, SendPort sendPort) async {
   var pakInfo = path.join(extractedDir, "dat_info.json");
   if (await File(pakInfo).exists()) {
     var datInfoJson = jsonDecode(await File(pakInfo).readAsString());
@@ -96,7 +97,8 @@ Future<List<String>> getDatFiles(String extractedDir) async {
   }
   var fileOrderMetadata = path.join(extractedDir, "file_order.metadata");
   if (await File(fileOrderMetadata).exists()) {
-    var filesBytes = await ByteDataWrapper.fromFile(fileOrderMetadata);
+    var filesBytes =
+        await ByteDataWrapper.fromFile(fileOrderMetadata, sendPort);
     var numFiles = filesBytes.readUint32();
     var nameLength = filesBytes.readUint32();
     List<String> datFiles = List.generate(
@@ -244,14 +246,14 @@ String getDatFolder(String datName) {
   return path.withoutExtension(datName);
 }
 
-Future<List<String>> getDatFileList(String datDir) async {
+Future<List<String>> getDatFileList(String datDir, SendPort sendPort) async {
   var datInfoPath = path.join(datDir, "dat_info.json");
   if (await File(datInfoPath).exists()) {
     return _getDatFileListFromJson(datInfoPath);
   }
   var metadataPath = path.join(datDir, "file_order.metadata");
   if (await File(metadataPath).exists()) {
-    return _getDatFileListFromMetadata(metadataPath);
+    return _getDatFileListFromMetadata(metadataPath, sendPort);
   }
 
   throw Exception("No dat_info.json or file_order.metadata found in $datDir");
@@ -270,8 +272,9 @@ Future<List<String>> _getDatFileListFromJson(String datInfoPath) async {
   return files;
 }
 
-Future<List<String>> _getDatFileListFromMetadata(String metadataPath) async {
-  var metadataBytes = await ByteDataWrapper.fromFile(metadataPath);
+Future<List<String>> _getDatFileListFromMetadata(
+    String metadataPath, SendPort sendPort) async {
+  var metadataBytes = await ByteDataWrapper.fromFile(metadataPath, sendPort);
   var numFiles = metadataBytes.readUint32();
   var nameLength = metadataBytes.readUint32();
   List<String> files = [];

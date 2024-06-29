@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datRepacker.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/pak/pakRepacker.dart';
@@ -19,7 +20,8 @@ Future<bool> handleXmlToYax(
     List<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".xml")) return false;
   if (!isFile) return false;
@@ -44,7 +46,8 @@ Future<bool> handlePakRepack(
     List<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isDirectory) return false;
@@ -62,7 +65,8 @@ Future<bool> handleDatRepack(
     List<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   if (args.fileTypeIsKnown && !args.isDat) return false;
   if (!strEndsWithDat(input)) return false;
   if (!isDirectory) return false;
@@ -81,7 +85,7 @@ Future<bool> handleDatRepack(
 
   debugPrint("Repacking DAT file to $output...");
 
-  await repackDat(input, output);
+  await repackDat(input, output, sendPort);
 
   return true;
 }

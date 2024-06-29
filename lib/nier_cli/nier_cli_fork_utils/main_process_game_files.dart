@@ -128,13 +128,13 @@ Future<void> extractGameFilesProcess(
 
   // Extracts the files to be processed specified by the activeOptions and capture any errors encountered
   List<String> errorFiles = await extractGameFiles(
-    argument['pendingFiles'],
-    argument['processedFiles'],
-    options,
-    argument['enemyList'],
-    argument['activeOptions'],
-    isManagerFile,
-  );
+      argument['pendingFiles'],
+      argument['processedFiles'],
+      options,
+      argument['enemyList'],
+      argument['activeOptions'],
+      isManagerFile,
+      sendPort);
 
   // Handles any errors that occurred during file extraction
   handleExtractErrors(errorFiles);

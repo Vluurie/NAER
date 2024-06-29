@@ -59,7 +59,7 @@ Future<void> repackModifiedGameFiles(
 
   if (entitiesToProcess.isNotEmpty) {
     await processEntitiesInParallel(entitiesToProcess, options, pendingFiles,
-        processedFiles, enemyList, activeOptions, ismanagerFile);
+        processedFiles, enemyList, activeOptions, ismanagerFile, sendPort);
   }
 
   var fileManager = FileCategoryManager(args);
@@ -88,14 +88,15 @@ Future<void> processEntitiesInParallel(
     Set<String> processedFiles,
     List<String> enemyList,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   final service = IsolateService();
 
   final fileList = entities.toList();
   final fileBatches = service.distributeFiles(fileList.cast<String>());
   final tasks = fileBatches.values.map((files) {
     return () => processEntities(files, options, pendingFiles, processedFiles,
-        enemyList, activeOptions, ismanagerFile);
+        enemyList, activeOptions, ismanagerFile, sendPort);
   }).toList();
 
   await service.runTasks(tasks);
@@ -113,11 +114,12 @@ Future<void> processEntities(
     Set<String> processedFiles,
     List<String> enemyList,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   for (var file in entities) {
     try {
       await handleInput(file, null, options, pendingFiles, processedFiles,
-          enemyList, activeOptions, ismanagerFile);
+          enemyList, activeOptions, ismanagerFile, sendPort);
       processedFiles.add(file);
     } catch (e) {
       // debugPrint("input error: $e");
@@ -156,7 +158,7 @@ Future<void> processDatFolders(
             var datOutput =
                 path.join(output, datSubFolder, baseNameWithExtension);
             await handleInput(datFolder, datOutput, options, [], processedFiles,
-                enemyList, activeOptions, ismanagerFile);
+                enemyList, activeOptions, ismanagerFile, sendPort);
 
             // Log the file change and send it to the main isolate
             FileChange.logChange(datOutput, 'create');
@@ -290,7 +292,8 @@ Future<List<String>> extractGameFiles(
     CliOptions options,
     List<String> enemyList,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   List<String> errorFiles = [];
 
   while (pendingFiles.isNotEmpty) {
@@ -302,7 +305,7 @@ Future<List<String>> extractGameFiles(
 
     try {
       await handleInput(input, null, options, pendingFiles, processedFiles,
-          enemyList, activeOptions, ismanagerFile);
+          enemyList, activeOptions, ismanagerFile, sendPort);
       processedFiles.add(input);
       //  logAndPrint("Successfully processed file: $input, File type: $fileType");
     } on FileHandlingException catch (e) {
