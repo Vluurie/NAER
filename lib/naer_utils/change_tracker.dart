@@ -50,7 +50,7 @@ class FileChange {
     await loadIgnoredFiles();
     ignoredFiles.removeWhere((file) => filesToRemove.contains(file));
     await saveIgnoredFiles();
-    LogState().addLog('Removed files and updated ignoredFiles');
+    print('Removed files and updated ignoredFiles');
   }
 
   static Future<void> undoChanges() async {
@@ -138,7 +138,7 @@ class FileChange {
       DateTime parsedTime =
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(formattedTime);
       if (kDebugMode) {
-        LogState().addLog(
+        print(
             "Loaded pre-randomization time from SharedPreferences: $parsedTime");
       }
       return parsedTime;

@@ -58,7 +58,7 @@ class _DirectorySelectionState extends ConsumerState<DirectorySelection> {
                   path: widget.globalState.input,
                   onBrowse: (updatePath) => InputFileDialog()
                       .openInputFileDialog(updatePath, context,
-                          widget.globalState, () => setState(() {})),
+                          widget.globalState, () => setState(() {}), ref),
                   icon: Icons.folder_open,
                   hints: "Hints: Your Game data folder.",
                 ),
@@ -67,7 +67,7 @@ class _DirectorySelectionState extends ConsumerState<DirectorySelection> {
                   path: widget.globalState.specialDatOutputPath,
                   onBrowse: (updatePath) => OutputFileDialog()
                       .openOutputFileDialog(updatePath, context,
-                          widget.globalState, () => setState(() {})),
+                          widget.globalState, () => setState(() {}), ref),
                   icon: Icons.folder_open,
                   hints: "Hints: Also Game data folder.",
                 ),

@@ -106,25 +106,27 @@ Future<void> extractGameFilesProcess(
     String outputDir,
     String output,
     SendPort sendPort) async {
-  // Check the folders existent or if it's a manager file
-  if (checkIfExtractedFoldersExist(outputDir) && !isManagerFile!) {
+  // Check the folders existence
+  bool extractedFoldersExist = checkIfExtractedFoldersExist(outputDir);
+  if (extractedFoldersExist && (!isManagerFile!)) {
     sendPort.send(
         'The copied "naer_onlylevel", "naer_randomized", and "naer_randomized_and_level" folders already exist.');
     sendPort.send('Skipping extraction of game files.');
     return;
   }
 
-  // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
-  await getGameFilesForProcessing(argument['input'], options,
-      argument['pendingFiles'], argument['processedFiles'], sendPort);
-
+  // If either isManagerFile or isInGameDataDirectory is false, send initial messages
   if (!isManagerFile!) {
     sendPort.send('DETECTED FIRST TIME RANDOMIZATION - VERSION(3.5.0).');
     sendPort.send('DO NOT CLOSE THE TOOL TILL FINISHED!');
 
     sendPort.send(
-        'Extracting game files for the first time (can take up to ~ 1 mins)....');
+        'Extracting game files for the first time (can take up to ~ 1 min)....');
   }
+
+  // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
+  await getGameFilesForProcessing(argument['input'], options,
+      argument['pendingFiles'], argument['processedFiles'], sendPort);
 
   // Extracts the files to be processed specified by the activeOptions and capture any errors encountered
   List<String> errorFiles = await extractGameFiles(
@@ -138,15 +140,17 @@ Future<void> extractGameFilesProcess(
 
   // Handles any errors that occurred during file extraction
   handleExtractErrors(errorFiles);
+
+  // Additional steps that are skipped if either condition is false
   if (!isManagerFile) {
     sendPort.send(
         'Creating three backup extracted game folders for randomization in upper directory...');
     sendPort.send('(this reduces next randomization speed to ~ 10 seconds)');
-  }
-  // Collects the files for modification out of the extracted files to be processed
-  var collectedFiles = collectExtractedGameFiles(argument['input']);
-  // Helper method to copy the collected files to the upper directory
-  if (!isManagerFile) {
+
+    // Collects the files for modification out of the extracted files to be processed
+    var collectedFiles = collectExtractedGameFiles(argument['input']);
+
+    // Helper method to copy the collected files to the upper directory
     await copyCollectedGameFiles(collectedFiles, argument['input']);
     sendPort.send('Copying finished.');
   }

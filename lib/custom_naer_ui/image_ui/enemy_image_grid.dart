@@ -60,7 +60,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
             icon: Icon(Icons.info_outline,
                 color: AutomatoThemeColors.darkBrown(ref)),
             onPressed: () {
-              showEnemyInformation();
+              showEnemyInformation(context, ref);
             },
           ),
         ],
@@ -372,50 +372,54 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  void showEnemyInformation() {
-    showDialog(
+  void showEnemyInformation(BuildContext context, WidgetRef ref) {
+    AutomatoDialogManager().showInfoDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Enemy Randomizer Information"),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: [
-                Text(
-                  "This tool allows you to customize the enemy selection process in the game. Please note:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                    "• Single Enemy Selection: Choosing a single enemy will replace all enemies in the game with your selected enemy."),
-                SizedBox(height: 5),
-                Text(
-                    "• Multiple Enemies Selection: Selecting multiple enemies will randomize the game's enemies, limiting them to your chosen selections."),
-                SizedBox(height: 5),
-                Text(
-                    "• Full Randomization: For a completely unpredictable experience, simply hit 'Modify' without making any specific selections. This option includes all enemies in the randomization process."),
-                SizedBox(height: 10),
-                Text(
-                  "Important Notes:",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.redAccent),
-                ),
-                SizedBox(height: 5),
-                Text(
-                    "• Bosses and enemies with alias tags remain unchanged to preserve game logic. Altering these can disrupt the game's fundamental mechanics, leading to potential issues during gameplay."),
-              ],
+      ref: ref,
+      title: "Enemy Randomizer Information",
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: [
+            Text(
+              "This tool allows you to customize the enemy selection process in the game. Please note:",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AutomatoThemeColors.textDialogColor(ref)),
             ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
+            const SizedBox(height: 10),
+            Text(
+                "• Single Enemy Selection: Choosing a single enemy will replace all enemies in the game with your selected enemy.",
+                style:
+                    TextStyle(color: AutomatoThemeColors.textDialogColor(ref))),
+            const SizedBox(height: 5),
+            Text(
+                "• Multiple Enemies Selection: Selecting multiple enemies will randomize the game's enemies, limiting them to your chosen selections.",
+                style:
+                    TextStyle(color: AutomatoThemeColors.textDialogColor(ref))),
+            const SizedBox(height: 5),
+            Text(
+                "• Full Randomization: For a completely unpredictable experience, simply hit 'Modify' without making any specific selections. This option includes all enemies in the randomization process.",
+                style:
+                    TextStyle(color: AutomatoThemeColors.textDialogColor(ref))),
+            const SizedBox(height: 10),
+            Text(
+              "Important Notes:",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AutomatoThemeColors.dangerZone(ref)),
             ),
+            const SizedBox(height: 5),
+            Text(
+                "• Bosses and enemies with alias tags remain unchanged to preserve game logic. Altering these can disrupt the game's fundamental mechanics, leading to potential issues during gameplay.",
+                style:
+                    TextStyle(color: AutomatoThemeColors.textDialogColor(ref))),
           ],
-        );
+        ),
+      ),
+      onOkPressed: () {
+        Navigator.of(context).pop();
       },
+      okLabel: "OK",
     );
   }
 }

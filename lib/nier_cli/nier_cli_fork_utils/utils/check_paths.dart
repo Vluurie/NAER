@@ -129,3 +129,31 @@ String getExtractedOptionDirectories(
   }
   return inputDir;
 }
+
+/// Checks if all specified .cpk files exist in the directory.
+///
+/// This function takes the [directory] and checks if the following .cpk files exist:
+/// 'data100.cpk', 'data006.cpk', 'data016.cpk', 'data002.cpk', 'data012.cpk'.
+///
+/// Returns `true` if all files exist, `false` otherwise.
+Future<bool> checkNotAllCpkFilesExist(String directory) async {
+  // Define the list of required file names
+  final requiredFiles = [
+    'data006.cpk',
+    'data016.cpk',
+    'data002.cpk',
+    'data012.cpk',
+  ];
+
+  // Check if each file exists in the directory
+  for (var fileName in requiredFiles) {
+    final filePath = path.join(directory, fileName);
+    final file = File(filePath);
+
+    if (!await file.exists()) {
+      return true;
+    }
+  }
+
+  return false;
+}
