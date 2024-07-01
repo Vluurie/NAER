@@ -141,6 +141,20 @@ List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
   return fullPaths;
 }
 
+/// Get all possible options of the GameFileOptions with the [input] + [GameFileOptions] + [FilePaths.paths] combined path toList.
+/// Can be used to extract everything from the data input directory that can be modified (Stats or Randomization).
+List<String> getAllPossibleOptions(String input) {
+  return [
+    ...GameFileOptions.questOptions,
+    ...GameFileOptions.mapOptions,
+    ...GameFileOptions.phaseOptions,
+    ...GameFileOptions.enemyOptions,
+  ]
+      .where((option) => FilePaths.paths.containsKey(option))
+      .map((option) => '$input/${FilePaths.paths[option]!}')
+      .toList();
+}
+
 /// Parses command-line arguments into a [CliOptions] object.
 ///
 /// This function extracts relevant options from the provided [ArgResults] and

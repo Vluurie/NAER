@@ -115,8 +115,11 @@ void _updateElement(
   XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
       ['setRtn', selection.key == 'setType' ? 'setFlag' : 'setType']);
 
+  // Insert the new element before the first param element or at the start
+  paramElementIndex = paramElementIndex < 0 ? 0 : paramElementIndex;
+
   XmlElementHandler.updateOrCreateElement(parentValueElement, selection.key,
-      null, paramElementIndex - 1, selection.value);
+      null, paramElementIndex, selection.value);
 }
 
 /// Finds the parent 'value' element starting from the given XML element.

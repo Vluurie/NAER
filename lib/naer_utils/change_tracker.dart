@@ -43,14 +43,14 @@ class FileChange {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = prefs.getString('ignored_files') ?? '[]';
     ignoredFiles = List<String>.from(jsonDecode(jsonData));
-    print('Loaded ignoredFiles: $ignoredFiles');
+    // print('Loaded ignoredFiles: $ignoredFiles');
   }
 
   static Future<void> removeIgnoreFiles(List<String> filesToRemove) async {
     await loadIgnoredFiles();
     ignoredFiles.removeWhere((file) => filesToRemove.contains(file));
     await saveIgnoredFiles();
-    print('Removed files and updated ignoredFiles');
+    //print('Removed files and updated ignoredFiles');
   }
 
   static Future<void> undoChanges() async {
@@ -83,7 +83,7 @@ class FileChange {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(changes.map((c) => c.toJson()).toList());
     await prefs.setString('file_changes', jsonData);
-    print("Saved changed $changes");
+    //print("Saved changed $changes");
   }
 
   static Future<void> loadChanges() async {
@@ -138,8 +138,8 @@ class FileChange {
       DateTime parsedTime =
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(formattedTime);
       if (kDebugMode) {
-        print(
-            "Loaded pre-randomization time from SharedPreferences: $parsedTime");
+        // print(
+        //     "Loaded pre-randomization time from SharedPreferences: $parsedTime");
       }
       return parsedTime;
     } catch (e) {

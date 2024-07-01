@@ -18,6 +18,7 @@ import 'package:NAER/naer_ui/setup/log_output_widget.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,7 @@ import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -415,6 +417,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   void handleStartRandomizing() async {
+    bool backUp = await showBackupDialog(context, ref);
+
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
     if (!globalState.isLoading) {
@@ -427,7 +431,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         await FileChange.savePreRandomizationTime();
         log("Ignored mod files before starting: ${globalState.ignoredModFiles}");
         final stopwatch = Stopwatch()..start();
-        await startRandomizing(context);
+        await startRandomizing(context, backUp);
         await FileChange.saveChanges();
         stopwatch.stop();
 
@@ -454,8 +458,51 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     }
   }
 
+  Future<bool> showBackupDialog(BuildContext context, WidgetRef ref) async {
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
+    String outputDir = path.dirname(globalState.input);
+
+    bool extractionExist = checkIfExtractedFoldersExist(outputDir);
+
+    if (!extractionExist) {
+      final globalState =
+          provider.Provider.of<GlobalState>(context, listen: false);
+      final Completer<bool> completer = Completer<bool>();
+
+      AutomatoDialogManager().showYesNoDialog(
+        context: context,
+        ref: ref,
+        title: "Backup extracted files",
+        content: Text(
+          "Do you want to backup the extracted files, so you don't need to extract them a second time? This will take around 6GB of disk space.",
+          style: TextStyle(
+            color: AutomatoThemeColors.textDialogColor(ref),
+            fontSize: 20,
+          ),
+        ),
+        onYesPressed: () {
+          globalState.isExtractCopyEnabled = true;
+          completer.complete(true);
+          Navigator.of(context).pop();
+        },
+        onNoPressed: () {
+          globalState.isExtractCopyEnabled = false;
+          completer.complete(false);
+          Navigator.of(context).pop();
+        },
+        yesLabel: "Yes",
+        noLabel: "No",
+      );
+
+      return completer.future;
+    } else {
+      return Future.value(false);
+    }
+  }
+
 // MAIN MODIFY BUTTON FUNCTIONALITY
-  Future<void> startRandomizing(BuildContext context) async {
+  Future<void> startRandomizing(BuildContext context, bool backUp) async {
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
     globalState.hasError = true;
@@ -513,6 +560,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         'processArgs': cliArgs.processArgs,
         'isManagerFile': isManagerFile,
         'sendPort': receivePort.sendPort,
+        'backUp': backUp
       };
 
       // Run nierCli in a separate isolate

@@ -13,8 +13,8 @@ import 'package:args/args.dart';
 ///
 /// [arguments] is a list of command-line arguments provided, see at all_arguments.dart.
 /// [ismanagerFile] is a boolean flag indicating that a file is coming from the mod manager, this modifies the argument with the modify_arguments.dart method.
-Future<void> nierCli(
-    List<String> arguments, bool? ismanagerFile, SendPort sendPort) async {
+Future<void> nierCli(List<String> arguments, bool? ismanagerFile,
+    SendPort sendPort, bool? backUp) async {
   // Record start of the start time for processing
   var t1 = DateTime.now();
 
@@ -47,7 +47,7 @@ Future<void> nierCli(
   ///#######[_START_NEW_SEED_PROCCESS]#########################################################################################################
 
   await mainFuncProcessGameFiles(argument, sortedEnemiesPath!, options,
-      ismanagerFile, output, args, sendPort);
+      ismanagerFile, output, args, sendPort, backUp);
 
   ///####[_END_NEW_SEED_PROCCESS]###################################################################################################################
 

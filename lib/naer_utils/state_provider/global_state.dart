@@ -31,6 +31,7 @@ class GlobalState extends ChangeNotifier {
   bool isHoveringUnselectAll = false;
   bool isHoveringUndo = false;
   bool isHoveringModify = false;
+  bool isExtractCopyEnabled = false;
   String input = '';
   String scriptPath = '';
   String specialDatOutputPath = '';

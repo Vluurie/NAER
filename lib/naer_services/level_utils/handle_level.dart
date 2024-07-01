@@ -21,13 +21,19 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
     var paramElement = parentValueElement.findElements('param').firstOrNull;
     if (paramElement == null) {
       paramElement = createParamElement();
+      // Ensure paramElement is the last child
       parentValueElement.children.add(paramElement);
     }
 
     updateOrCreateLevelValue(paramElement, 'Lv', enemyLevel);
+    updateLevelValueIfExists(paramElement, 'LV', enemyLevel);
     updateLevelValueIfExists(paramElement, 'Lv_B', enemyLevel);
     updateLevelValueIfExists(paramElement, 'Lv_C', enemyLevel);
     updateOrCreateCountElement(paramElement);
+
+    // Ensure paramElement is the last child (in case it was already present)
+    parentValueElement.children.remove(paramElement);
+    parentValueElement.children.add(paramElement);
   }
 
   // Update levelRange for 'EnemyGenerator' actions
@@ -52,17 +58,6 @@ bool isEnemyGenerator(xml.XmlElement actionElement) {
   var codeElement = actionElement.findElements('code').firstOrNull;
   return codeElement != null &&
       codeElement.getAttribute('str') == 'EnemyGenerator';
-}
-
-xml.XmlElement? findParentActionElement(xml.XmlElement element) {
-  var current = element.parent;
-  while (current != null) {
-    if (current is xml.XmlElement && current.name.local == 'action') {
-      return current;
-    }
-    current = current.parent;
-  }
-  return null;
 }
 
 void updateGeneratorLevelRange(
@@ -146,15 +141,6 @@ void updateOrCreateCountElement(xml.XmlElement paramElement) {
   }
 }
 
-void moveLevelValueToParam(
-    xml.XmlElement levelValueElement, xml.XmlElement paramElement) {
-  var parentOfLevel = levelValueElement.parent;
-  if (parentOfLevel != null) {
-    parentOfLevel.children.remove(levelValueElement);
-  }
-  paramElement.children.add(levelValueElement);
-}
-
 xml.XmlElement? findParentValueElement(xml.XmlNode node) {
   while (node.parent != null) {
     if (node is xml.XmlElement && node.name.local == 'value') {
@@ -165,28 +151,9 @@ xml.XmlElement? findParentValueElement(xml.XmlNode node) {
   return null;
 }
 
-bool isDirectChildOfParam(
-    xml.XmlElement valueElement, xml.XmlElement paramElement) {
-  return valueElement.parent == paramElement;
-}
-
-xml.XmlElement? findLevelValueElement(xml.XmlElement paramElement) {
-  // Checks for the level element at any depth within the param element
-  var valueElements = paramElement.descendants
-      .whereType<xml.XmlElement>()
-      .where((element) => element.name.local == 'value');
-  for (var valueElement in valueElements) {
-    var nameElement = valueElement.findElements('name').firstOrNull;
-    if (nameElement != null && nameElement.text == 'Lv') {
-      return valueElement;
-    }
-  }
-  return null;
-}
-
 xml.XmlElement createLevelValueElement(String levelName, String enemyLevel) {
   return xml.XmlElement(xml.XmlName('value'), [], [
-    xml.XmlElement(xml.XmlName('name'), [], [xml.XmlText('Lv')]),
+    xml.XmlElement(xml.XmlName('name'), [], [xml.XmlText(levelName)]),
     xml.XmlElement(
         xml.XmlName('code'),
         [xml.XmlAttribute(xml.XmlName('str'), 'int')],

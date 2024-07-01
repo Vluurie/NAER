@@ -21,40 +21,15 @@ Future<void> findEnemyStatFiles(String directoryPath, List<dynamic> enemyList,
     return;
   }
 
-  var flattenedEnemyList = flattenList(enemyList);
-
   String directoryPattern = '\\nier2blender_extracted\\';
 
   await for (var entity in directory.list(recursive: true)) {
     if (entity is File &&
         entity.path.contains(directoryPattern) &&
         entity.path.contains('ExpInfo')) {
-      await processCsvFile(
-          entity, flattenedEnemyList, enemyStats, reverseStats);
+      await processCsvFile(entity, enemyStats, reverseStats);
     }
   }
-}
-
-/// Flattens a nested list of enemy names or identifiers into a single list.
-///
-/// This helper function recursively flattens the provided [list], ensuring that all
-/// nested lists are merged into a single list of strings.
-///
-/// - Parameters:
-///   - list: A list which may contain nested lists of strings.
-/// - Returns: A flattened list of strings.
-List<String> flattenList(List<dynamic> list) {
-  var flattenedList = <String>[];
-  for (var element in list) {
-    if (element is List) {
-      flattenedList.addAll(flattenList(element));
-    } else if (element is String) {
-      flattenedList.add(element);
-    } else {
-      flattenedList.add(element.toString());
-    }
-  }
-  return flattenedList;
 }
 
 /// Processes a CSV file by modifying its contents based on the enemy stats.
@@ -67,8 +42,8 @@ List<String> flattenList(List<dynamic> list) {
 ///   - file: The file to process.
 ///   - enemyList: A list of enemy names or identifiers, not used in this function but retained for possible future use.
 ///   - enemyStats: A value representing the enemy stats to be used for modifying file contents.
-Future<void> processCsvFile(File file, List<String> enemyList,
-    double enemyStats, bool reverseStats) async {
+Future<void> processCsvFile(
+    File file, double enemyStats, bool reverseStats) async {
   try {
     if (enemyStats == 0.0) {
       print("Enemy stats are 0.0, skipping file ${file.path}");

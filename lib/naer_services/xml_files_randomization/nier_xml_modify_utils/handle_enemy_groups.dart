@@ -87,36 +87,26 @@ Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
   }
 }
 
-/// Checks if any ancestor of the given element contains an 'alias' element
-/// with text not in the [aliasList]. If an 'alias' element's text matches an
-/// item in the [aliasList], the alias is removed and the function returns false.
-/// If no alias elements are found at all, the function returns false.
-bool hasAliasAncestor(xml.XmlElement objIdElement, List<String> aliasList) {
-  bool hasNonMatchingAlias = false;
+bool hasAliasAncestor(xml.XmlElement objIdElement) {
+  // Check if any ancestor of objIdElement contains an 'alias' element
+  return objIdElement.ancestors
+      .any((element) => element.findElements('alias').isNotEmpty);
+}
 
-  // Iterate through each ancestor of objIdElement
-  for (final ancestor in objIdElement.ancestors) {
-    // Find all 'alias' elements in the current ancestor
-    final aliasElements = ancestor.findElements('alias').toList();
+void removeAliases(xml.XmlElement element, List<String> aliasList) {
+  // Find all alias elements in the current element and its descendants
+  final aliasElements = element.findAllElements('alias').toList();
 
-    // Process each 'alias' element
-    for (final alias in aliasElements) {
-      final aliasText = alias.innerText.trim();
+  // Process each alias element
+  for (var alias in aliasElements) {
+    final aliasText = alias.innerText.trim();
 
-      // Check if the alias text matches any item in aliasList
-      if (aliasList.contains(aliasText)) {
-        // Remove the alias element and return false immediately
-        alias.parent?.children.remove(alias);
-        return false;
-      }
-
-      // Indicate that there is at least one non-matching alias element
-      hasNonMatchingAlias = true;
+    // Check if the alias text matches any item in aliasList
+    if (aliasList.contains(aliasText)) {
+      // Remove the alias element
+      alias.parent?.children.remove(alias);
     }
   }
-
-  // Return true if any non-matching alias elements were found, otherwise false
-  return hasNonMatchingAlias;
 }
 
 /// Checks if the given `objId` corresponds to a boss.

@@ -17,9 +17,10 @@ Future<void> runNierCliIsolated(Map<String, dynamic> arguments) async {
   List<String> processArgs = arguments['processArgs'];
   bool isManagerFile = arguments['isManagerFile'];
   SendPort sendPort = arguments['sendPort'];
+  bool? backUp = arguments['backUp'];
 
   try {
-    await nierCli(processArgs, isManagerFile, sendPort);
+    await nierCli(processArgs, isManagerFile, sendPort, backUp);
   } catch (e, stackTrace) {
     sendPort.send(
         "An error has occured while processing, check the log.txt for more information.");

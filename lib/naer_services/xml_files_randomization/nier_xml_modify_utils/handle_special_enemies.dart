@@ -17,37 +17,49 @@ Future<void> handleSpecialCaseEnemies(
   String enemyCategory,
   bool isSpawnActionTooSmall,
 ) async {
-  // Get all objId elements in the current element and its descendants
-  final objIdElements = element.findAllElements('objId').toList();
+  // Remove aliases before processing objId elements
+  removeAliases(element, RandomizableAliases.aliases);
 
-  // Process each objId element
-  for (var objIdElement in objIdElements) {
-    if (isBoss(objIdElement.innerText)) {
-      // Modify the objId for bosses
-      modifyEnemyObjId(
-        objIdElement,
-        sortedEnemyData,
-        filePath,
-        enemyLevel,
-        enemyCategory,
-        isSpawnActionTooSmall,
-      );
-    } else if (hasAliasAncestor(objIdElement, RandomizableAliases.aliases)) {
-      // Check if the enemy has an alias ancestor and belongs to specific categories
-      if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
-        // Handle leveled enemies with aliases
-        await handleLeveledForAlias(objIdElement, enemyLevel, sortedEnemyData);
+  // Recursive function to find and process all objId elements in the current element and its descendants
+  void processObjIdElements(xml.XmlElement elem) {
+    final objIdElements = elem.findAllElements('objId').toList();
+
+    for (var objIdElement in objIdElements) {
+      if (isBoss(objIdElement.innerText)) {
+        // Modify the objId for bosses
+        modifyEnemyObjId(
+          objIdElement,
+          sortedEnemyData,
+          filePath,
+          enemyLevel,
+          enemyCategory,
+          isSpawnActionTooSmall,
+        );
+      } else if (hasAliasAncestor(objIdElement)) {
+        // Check if the enemy has an alias ancestor and belongs to specific categories
+        if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
+          // Handle leveled enemies with aliases
+          handleLeveledForAlias(objIdElement, enemyLevel, sortedEnemyData);
+        }
+      } else {
+        // Modify the objId for other cases
+        modifyEnemyObjId(
+          objIdElement,
+          sortedEnemyData,
+          filePath,
+          enemyLevel,
+          enemyCategory,
+          isSpawnActionTooSmall,
+        );
       }
-    } else {
-      // Modify the objId for other cases
-      modifyEnemyObjId(
-        objIdElement,
-        sortedEnemyData,
-        filePath,
-        enemyLevel,
-        enemyCategory,
-        isSpawnActionTooSmall,
-      );
+    }
+
+    // Recursively process child elements
+    for (var child in elem.children.whereType<xml.XmlElement>()) {
+      processObjIdElements(child);
     }
   }
+
+  // Start processing from the root element
+  processObjIdElements(element);
 }

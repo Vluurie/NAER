@@ -10,6 +10,7 @@ handleBossLevel(xml.XmlElement objIdElement, String enemyLevel) {
     if (paramElement != null) {
       // Update existing 'Lv', 'Lv_B', 'Lv_C' if they exist
       updateLevelValueIfExists(paramElement, 'Lv', enemyLevel);
+      updateLevelValueIfExists(paramElement, 'LV', enemyLevel);
       updateLevelValueIfExists(paramElement, 'Lv_B', enemyLevel);
       updateLevelValueIfExists(paramElement, 'Lv_C', enemyLevel);
     }
