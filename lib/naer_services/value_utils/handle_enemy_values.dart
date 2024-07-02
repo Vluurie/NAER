@@ -110,16 +110,16 @@ void _updateElement(
   var parentValueElement = _findParentValueElement(objIdElement);
   if (parentValueElement == null) return;
 
-  int paramElementIndex = _findInsertionPosition(parentValueElement);
+  // add the value unterneath the objid element or enemies do not load
+  int objIdIndex = _findObjIdIndex(parentValueElement);
+
+  int insertIndex = objIdIndex + 1;
 
   XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
       ['setRtn', selection.key == 'setType' ? 'setFlag' : 'setType']);
 
-  // Insert the new element before the first param element or at the start
-  paramElementIndex = paramElementIndex < 0 ? 0 : paramElementIndex;
-
-  XmlElementHandler.updateOrCreateElement(parentValueElement, selection.key,
-      null, paramElementIndex, selection.value);
+  XmlElementHandler.updateOrCreateElement(
+      parentValueElement, selection.key, null, insertIndex, selection.value);
 }
 
 /// Finds the parent 'value' element starting from the given XML element.
@@ -141,17 +141,16 @@ xml.XmlElement? _findParentValueElement(xml.XmlElement startingElement) {
   return null;
 }
 
-/// Finds the insertion position for new elements within the parent 'value' element.
+/// Finds the index of the 'objId' element within the parent 'value' element.
 ///
-/// This function searches for the first 'param' element within the children of the
-/// provided parent element and returns its index.
+/// This function searches for the 'objId' element and returns its index.
 ///
 /// - Parameters:
 ///   - parentValueElement: The parent 'value' element to search within.
-/// - Returns: The index where the new element should be inserted.
-int _findInsertionPosition(xml.XmlElement parentValueElement) {
+/// - Returns: The index of the 'objId' element.
+int _findObjIdIndex(xml.XmlElement parentValueElement) {
   return parentValueElement.children.indexWhere(
-      (element) => element is xml.XmlElement && element.name.local == 'param');
+      (element) => element is xml.XmlElement && element.name.local == 'objId');
 }
 
 /// Removes 'setType', 'setRtn', and 'setFlag' elements from the XML element.

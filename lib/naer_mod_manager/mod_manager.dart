@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
 import 'package:NAER/main.dart';
-import 'package:NAER/naer_ui/drag_n_drop.dart';
+import 'package:NAER/naer_mod_manager/ui/drag_n_drop.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
