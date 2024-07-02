@@ -30,7 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:path/path.dart' as path;
 

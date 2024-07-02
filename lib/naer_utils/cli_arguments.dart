@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/sort_selected_enemies.dart';

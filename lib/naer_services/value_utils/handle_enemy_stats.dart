@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 
 /// Finds and processes enemy CSV files containing bosenemys stats in the specified directory.
@@ -17,7 +15,7 @@ Future<void> findEnemyStatFiles(String directoryPath, List<dynamic> enemyList,
   var directory = Directory(directoryPath);
 
   if (!await directory.exists()) {
-    print("Directory does not exist: $directoryPath");
+    //print("Directory does not exist: $directoryPath");
     return;
   }
 
@@ -46,7 +44,7 @@ Future<void> processCsvFile(
     File file, double enemyStats, bool reverseStats) async {
   try {
     if (enemyStats == 0.0) {
-      print("Enemy stats are 0.0, skipping file ${file.path}");
+      // print("Enemy stats are 0.0, skipping file ${file.path}");
       return;
     }
     final lines = await file.readAsLines();
@@ -64,7 +62,7 @@ Future<void> processCsvFile(
 
     await file.writeAsString(modifiedLines.join('\r\n'));
   } catch (e) {
-    print("Error processing file ${file.path}: $e");
+    //print("Error processing file ${file.path}: $e");
   }
 }
 

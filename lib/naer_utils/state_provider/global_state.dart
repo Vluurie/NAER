@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:NAER/custom_naer_ui/image_ui/enemy_image_grid.dart';
+import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
