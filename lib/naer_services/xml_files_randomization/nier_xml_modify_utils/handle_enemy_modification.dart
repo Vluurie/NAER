@@ -1,7 +1,7 @@
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
-import 'package:NAER/naer_services/level_utils/handle_level.dart';
-import 'package:NAER/naer_services/value_utils/handle_set_type_rtn_flag.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_values.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -68,7 +68,8 @@ Future<void> handleEnemyEntityObject(
 
     // Handle enemy levels if requested
     if (handleLevels) {
-      await handleLevel(objIdElement, enemyLevel, SortedEnemyGroup.enemyData);
+      await handleLevel(
+          objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
     }
   }
 }

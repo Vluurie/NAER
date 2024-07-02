@@ -1,5 +1,5 @@
 import 'package:NAER/data/values_data/nier_randomizable_aliases.dart';
-import 'package:NAER/naer_services/level_utils/handle_alias_level.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/modify_enemy_objid.dart';
 import 'package:xml/xml.dart' as xml;
@@ -17,8 +17,11 @@ Future<void> handleSpecialCaseEnemies(
   String enemyCategory,
   bool isSpawnActionTooSmall,
 ) async {
-  // Remove aliases before processing objId elements
-  removeAliases(element, RandomizableAliases.aliases);
+  if (enemyCategory != 'onlylevel') {
+    // Remove randomizable aliases before processing objId elements for all enemies
+    // skip if only level need to be changed since then the alias does not matter
+    removeAliases(element, RandomizableAliases.aliases);
+  }
 
   // Recursive function to find and process all objId elements in the current element and its descendants
   void processObjIdElements(xml.XmlElement elem) {
@@ -38,11 +41,11 @@ Future<void> handleSpecialCaseEnemies(
       } else if (hasAliasAncestor(objIdElement)) {
         // Check if the enemy has an alias ancestor and belongs to specific categories
         if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
-          // Handle leveled enemies with aliases
-          handleLeveledForAlias(objIdElement, enemyLevel, sortedEnemyData);
+          // Handle the level for enemies with alias
+          handleLevel(objIdElement, enemyLevel, sortedEnemyData, false);
         }
       } else {
-        // Modify the objId for other cases
+        // Modify the objId for no boss or alias enemy
         modifyEnemyObjId(
           objIdElement,
           sortedEnemyData,
@@ -54,12 +57,12 @@ Future<void> handleSpecialCaseEnemies(
       }
     }
 
-    // Recursively process child elements
+    // Recursively process again child elements since all is sooo damn nested
     for (var child in elem.children.whereType<xml.XmlElement>()) {
       processObjIdElements(child);
     }
   }
 
-  // Start processing from the root element
+  // Start processing from the root element (love recursiv)
   processObjIdElements(element);
 }

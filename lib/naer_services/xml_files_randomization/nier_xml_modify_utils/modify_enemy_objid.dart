@@ -1,6 +1,5 @@
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
-import 'package:NAER/naer_services/level_utils/handle_boss_level.dart';
-import 'package:NAER/naer_services/level_utils/handle_level.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_modification.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
@@ -44,19 +43,20 @@ Future<void> modifyEnemyObjId(
   bool isBossObj = isBoss(objIdValue);
   try {
     if (isImportantId && enemyCategory == 'allenemies') {
-      await handleLevel(objIdElement, enemyLevel, SortedEnemyGroup.enemyData);
+      await handleLevel(
+          objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
       return;
     }
     switch (enemyCategory) {
       case 'allenemies':
         await (isBossObj
-            ? handleBossLevel(objIdElement, enemyLevel)
+            ? handleLevel(objIdElement, enemyLevel, userSelectedEnemyData, true)
             : handleSelectedObjectIdEnemies(objIdElement, userSelectedEnemyData,
                 enemyLevel, isSpawnActionTooSmall));
         break;
       case 'onlylevel':
         await (isBossObj
-            ? handleBossLevel(objIdElement, enemyLevel)
+            ? handleLevel(objIdElement, enemyLevel, userSelectedEnemyData, true)
             : handleOnlyObjectIdLevel(
                 objIdElement, userSelectedEnemyData, enemyLevel));
         break;

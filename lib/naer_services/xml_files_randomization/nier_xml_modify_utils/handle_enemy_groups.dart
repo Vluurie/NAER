@@ -87,12 +87,13 @@ Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
   }
 }
 
+// Check if any ancestor of objIdElement contains an 'alias' element
 bool hasAliasAncestor(xml.XmlElement objIdElement) {
-  // Check if any ancestor of objIdElement contains an 'alias' element
   return objIdElement.ancestors
       .any((element) => element.findElements('alias').isNotEmpty);
 }
 
+// Remove alias elements that are in the  RandomizableAliases.aliases
 void removeAliases(xml.XmlElement element, List<String> aliasList) {
   // Find all alias elements in the current element and its descendants
   final aliasElements = element.findAllElements('alias').toList();
@@ -123,6 +124,13 @@ bool isBigEnemy(String objId) {
     }
   }
   return false;
+}
+
+/// Checks if an enemy with a given `emNumber` is marked for deletion in the `enemyData`.
+///
+/// Returns `true` if the enemy is in the "Delete" group, `false` otherwise.
+bool isDeletedEnemy(String emNumber, Map<String, List<String>> enemyData) {
+  return findGroupForEmNumber(emNumber, enemyData) == "Delete";
 }
 
 /// Checks if a given action ID is listed in a collection of important IDs and
@@ -195,4 +203,13 @@ Iterable<xml.XmlElement> getEnemyCodeElements(xml.XmlElement action) {
   return action.descendants.whereType<xml.XmlElement>().where((e) =>
       e.name.local == 'code' &&
       prefixes.any((p) => e.getAttribute('str')?.startsWith(p) ?? false));
+}
+
+/// Checks if the given `actionElement` represents an 'EnemyGenerator'.
+///
+/// Returns `true` if the 'code' element has the attribute `str` set to 'EnemyGenerator', `false` otherwise.
+bool isEnemyGenerator(xml.XmlElement actionElement) {
+  var codeElement = actionElement.findElements('code').firstOrNull;
+  return codeElement != null &&
+      codeElement.getAttribute('str') == 'EnemyGenerator';
 }
