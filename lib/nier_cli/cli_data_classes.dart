@@ -34,7 +34,7 @@ class GamePackData {
 
   @override
   String toString() {
-    return 'FileManager {\n'
+    return 'GamePackData {\n'
         '  currentDir: $currentDir,\n'
         '  collectedFiles: $collectedFiles,\n'
         '  options: $options,\n'
