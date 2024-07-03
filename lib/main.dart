@@ -475,7 +475,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         ref: ref,
         title: "Backup extracted files",
         content: Text(
-          "Do you want to backup the extracted files, so you don't need to extract them a second time? This will take around 6GB of disk space.",
+          "Do you want to backup the extracted files, so you don't need to extract them a second time? This will take around 9GB of disk space.",
           style: TextStyle(
             color: AutomatoThemeColors.textDialogColor(ref),
             fontSize: 20,

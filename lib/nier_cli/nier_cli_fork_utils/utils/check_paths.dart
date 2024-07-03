@@ -114,7 +114,7 @@ String getTargetOptionDirectoryPath(String baseDir, String category) {
 ///
 /// Returns the updated input directory based on the enemy category.
 String getExtractedOptionDirectories(
-    String outputDir, Map<String, dynamic> argument, String inputDir) {
+    String outputDir, String inputDir, Map<String, dynamic> argument) {
   final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
   final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
   final randomizedAndLevelPath =

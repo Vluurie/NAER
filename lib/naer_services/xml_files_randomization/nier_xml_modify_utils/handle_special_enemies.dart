@@ -2,6 +2,7 @@ import 'package:NAER/data/values_data/nier_randomizable_aliases.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/modify_enemy_objid.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// This function handles special cases for enemies within an XML element. It processes
@@ -13,11 +14,12 @@ Future<void> handleSpecialCaseEnemies(
   xml.XmlElement element,
   Map<String, List<String>> sortedEnemyData,
   String filePath,
-  String enemyLevel,
-  String enemyCategory,
+  MainData mainData,
   bool isSpawnActionTooSmall,
 ) async {
-  if (enemyCategory != 'onlylevel') {
+  String category = mainData.argument['enemyCategory'];
+  String level = mainData.argument['enemyLevel'];
+  if (category != 'onlylevel') {
     // Remove randomizable aliases before processing objId elements for all enemies
     // skip if only level need to be changed since then the alias does not matter
     removeAliases(element, RandomizableAliases.aliases);
@@ -34,15 +36,14 @@ Future<void> handleSpecialCaseEnemies(
           objIdElement,
           sortedEnemyData,
           filePath,
-          enemyLevel,
-          enemyCategory,
+          mainData,
           isSpawnActionTooSmall,
         );
       } else if (hasAliasAncestor(objIdElement)) {
         // Check if the enemy has an alias ancestor and belongs to specific categories
-        if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
+        if (category == 'allenemies' || category == 'onlylevel') {
           // Handle the level for enemies with alias
-          handleLevel(objIdElement, enemyLevel, sortedEnemyData, false);
+          handleLevel(objIdElement, level, sortedEnemyData, false);
         }
       } else {
         // Modify the objId for no boss or alias enemy
@@ -50,8 +51,7 @@ Future<void> handleSpecialCaseEnemies(
           objIdElement,
           sortedEnemyData,
           filePath,
-          enemyLevel,
-          enemyCategory,
+          mainData,
           isSpawnActionTooSmall,
         );
       }

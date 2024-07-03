@@ -1,5 +1,6 @@
 import 'dart:isolate';
 
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/initialize_variables.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_process_game_files.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
@@ -46,8 +47,17 @@ Future<void> nierCli(List<String> arguments, bool? ismanagerFile,
   ///#######################################[_FOR THE GLORY OF MANKIND_]#######################################################################
   ///#######[_START_NEW_SEED_PROCCESS]#########################################################################################################
 
-  await mainFuncProcessGameFiles(argument, sortedEnemiesPath!, options,
-      ismanagerFile, output, args, sendPort, backUp);
+  MainData mainData = MainData(
+      argument: argument,
+      sortedEnemiesPath: sortedEnemiesPath,
+      options: options,
+      isManagerFile: ismanagerFile,
+      output: output,
+      args: args,
+      sendPort: sendPort,
+      backUp: backUp);
+
+  await mainFuncProcessGameFiles(mainData);
 
   ///####[_END_NEW_SEED_PROCCESS]###################################################################################################################
 

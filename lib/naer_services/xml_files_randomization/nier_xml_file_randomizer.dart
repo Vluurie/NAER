@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/process_collected_xml_files.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 
 /// Counter for processed files
 int fileCount = 0;
@@ -21,16 +21,12 @@ int fileCount = 0;
 /// [sortedEnemiesPath] is the path to the sorted enemies data file.
 /// [enemyLevel] specifies the level of enemies to be modified.
 /// [enemyCategory] specifies the category of enemies to be modified.
-Future<void> processEnemies(
-    String directoryPath,
-    String sortedEnemiesPath,
-    String enemyLevel,
-    String enemyCategory,
-    Map<String, List<String>> collectedFiles) async {
+Future<void> processEnemies(MainData mainData,
+    Map<String, List<String>> collectedFiles, String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
-      await getSortedEnemyData(sortedEnemiesPath);
-  await findEnemiesAndModify(directoryPath, sortedEnemyData, enemyLevel,
-      enemyCategory, collectedFiles);
+      await getSortedEnemyData(mainData.sortedEnemiesPath!);
+  await findEnemiesAndModify(
+      collectedFiles, currentDir, sortedEnemyData, mainData);
 }
 
 /// Retrieves the sorted enemy data either from the provided path or the entire enemy data.
@@ -61,11 +57,10 @@ Future<Map<String, List<String>>> getSortedEnemyData(
 /// [enemyLevel] specifies the level of enemies to be modified.
 /// [enemyCategory] specifies the category of enemies to be modified.
 Future<void> findEnemiesAndModify(
+    Map<String, List<String>> collectedFiles,
     String directoryPath,
     Map<String, List<String>> sortedEnemyData,
-    String enemyLevel,
-    String enemyCategory,
-    Map<String, List<String>> collectedFiles) async {
+    MainData mainData) async {
   // Start the timer
   final stopwatch = Stopwatch()..start();
 
@@ -77,13 +72,14 @@ Future<void> findEnemiesAndModify(
     return;
   }
 
-  fileCount = await traverseDirectory(directory, sortedEnemyData, enemyLevel,
-      enemyCategory, ids, collectedFiles);
+  fileCount = await traverseDirectory(
+      collectedFiles, directory, sortedEnemyData, ids, mainData);
 
   // Stop the timer
   stopwatch.stop();
-  logAndPrint('Traversal complete. Randomizer processed $fileCount files.');
-  logAndPrint(
+  mainData.sendPort
+      .send('Traversal complete. Randomizer processed $fileCount files.');
+  mainData.sendPort.send(
       'Time taken to find and modify enemies: ${stopwatch.elapsedMilliseconds} ms');
 }
 
@@ -101,12 +97,11 @@ Future<void> findEnemiesAndModify(
 /// Returns the count of processed files.
 ///
 Future<int> traverseDirectory(
+    Map<String, List<String>> collectedFiles,
     Directory directory,
     Map<String, List<String>> sortedEnemyData,
-    String enemyLevel,
-    String enemyCategory,
     ImportantIDs ids,
-    Map<String, List<String>> collectedFiles) async {
+    MainData mainData) async {
   int localFileCount = 0;
 
   // Use IsolateService for processing XML files in parallel
@@ -126,7 +121,7 @@ Future<int> traverseDirectory(
     tasks.add(() async {
       for (var file in files) {
         await processCollectedXmlFileForRandomization(
-            File(file), sortedEnemyData, enemyLevel, enemyCategory, ids);
+            File(file), sortedEnemyData, ids, mainData);
       }
     });
   });

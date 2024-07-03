@@ -2,6 +2,7 @@ import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_modification.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:xml/xml.dart' as xml;
@@ -32,8 +33,7 @@ Future<void> modifyEnemyObjId(
   xml.XmlElement objIdElement,
   Map<String, List<String>> userSelectedEnemyData,
   String filePath,
-  String enemyLevel,
-  String enemyCategory,
+  MainData mainData,
   bool isSpawnActionTooSmall, {
   bool isImportantId = false,
 }) async {
@@ -41,28 +41,29 @@ Future<void> modifyEnemyObjId(
   if (objIdValue.isEmpty) return;
 
   bool isBossObj = isBoss(objIdValue);
+  String level = mainData.argument['enemyLevel'];
+  String category = mainData.argument['enemyCategory'];
   try {
-    if (isImportantId && enemyCategory == 'allenemies') {
-      await handleLevel(
-          objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
+    if (isImportantId && category == 'allenemies') {
+      await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData, false);
       return;
     }
-    switch (enemyCategory) {
+    switch (category) {
       case 'allenemies':
         await (isBossObj
-            ? handleLevel(objIdElement, enemyLevel, userSelectedEnemyData, true)
+            ? handleLevel(objIdElement, level, userSelectedEnemyData, true)
             : handleSelectedObjectIdEnemies(objIdElement, userSelectedEnemyData,
-                enemyLevel, isSpawnActionTooSmall));
+                level, isSpawnActionTooSmall));
         break;
       case 'onlylevel':
         await (isBossObj
-            ? handleLevel(objIdElement, enemyLevel, userSelectedEnemyData, true)
+            ? handleLevel(objIdElement, level, userSelectedEnemyData, true)
             : handleOnlyObjectIdLevel(
-                objIdElement, userSelectedEnemyData, enemyLevel));
+                objIdElement, userSelectedEnemyData, level));
         break;
       default:
         if (isImportantId) return;
-        if (enemyCategory != 'onlylevel') {
+        if (category != 'onlylevel') {
           await handleDefaultObjectId(
               objIdElement, userSelectedEnemyData, isSpawnActionTooSmall);
         }
