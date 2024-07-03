@@ -5,13 +5,12 @@ import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
+import 'package:NAER/nier_cli/cli_data_classes.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
-import 'package:args/args.dart';
-//import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 /// Processes the collected files based on the given parameters.
@@ -20,6 +19,7 @@ import 'package:path/path.dart' as path;
 /// `collectedFiles` map. It uses various options and file lists to determine
 /// how the files should be processed.
 ///
+/// Inizialize GamePackData with the following
 /// - Parameters:
 ///   - currentDir: The current directory where the processing starts.
 ///   - collectedFiles: A map of collected files and folders with specific keys.
@@ -32,21 +32,9 @@ import 'package:path/path.dart' as path;
 ///   - ignoreList: A list of files or folders to be ignored during processing.
 ///   - output: The output directory where processed files should be saved.
 ///   - args: Command-line arguments passed to the program.
-Future<void> repackModifiedGameFiles(
-    String currentDir,
-    Map<String, List<String>> collectedFiles,
-    CliOptions options,
-    List<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> enemyList,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    List<String> ignoreList,
-    String? output,
-    ArgResults args,
-    SendPort sendPort) async {
+Future<void> repackModifiedGameFiles(GamePackData packData) async {
   // Prepare XML files by replacing .yax extension with .xml
-  var xmlFiles = collectedFiles['yaxFiles']
+  var xmlFiles = packData.collectedFiles['yaxFiles']
           ?.map((e) => e.replaceAll('.yax', '.xml'))
           .toList() ??
       <String>[];
@@ -54,49 +42,31 @@ Future<void> repackModifiedGameFiles(
   // Combine XML files and folders to process
   var entitiesToProcess = <String>[
     ...xmlFiles,
-    ...?collectedFiles['pakFolders']
+    ...?packData.collectedFiles['pakFolders']
   ];
 
   if (entitiesToProcess.isNotEmpty) {
-    await processEntitiesInParallel(entitiesToProcess, options, pendingFiles,
-        processedFiles, enemyList, activeOptions, ismanagerFile, sendPort);
+    await processEntitiesInParallel(entitiesToProcess, packData);
   }
 
-  var fileManager = FileCategoryManager(args);
+  var fileManager = FileCategoryManager(packData.args);
 
   // Process DAT folders if they exist
   await processDatFolders(
-      collectedFiles['datFolders'],
-      fileManager,
-      enemyList,
-      ignoreList,
-      output,
-      options,
-      processedFiles,
-      activeOptions,
-      ismanagerFile,
-      sendPort);
+      fileManager, packData.collectedFiles['datFolders'], packData);
 }
 
 /// This method processes all given entities in parallel,
 /// splitting the task into the amount of cores a device has for maximum computation time.
 /// See [IsolateService]
 Future<void> processEntitiesInParallel(
-    Iterable<String> entities,
-    CliOptions options,
-    List<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> enemyList,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+    Iterable<String> entities, GamePackData packData) async {
   final service = IsolateService();
 
   final fileList = entities.toList();
   final fileBatches = service.distributeFiles(fileList.cast<String>());
   final tasks = fileBatches.values.map((files) {
-    return () => processEntities(files, options, pendingFiles, processedFiles,
-        enemyList, activeOptions, ismanagerFile, sendPort);
+    return () => processEntities(files, packData);
   }).toList();
 
   await service.runTasks(tasks);
@@ -108,19 +78,20 @@ Future<void> processEntitiesInParallel(
 /// using the provided files to process
 ///
 Future<void> processEntities(
-    Iterable<String> entities,
-    CliOptions options,
-    List<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> enemyList,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+    Iterable<String> entities, GamePackData packData) async {
   for (var file in entities) {
     try {
-      await handleInput(file, null, options, pendingFiles, processedFiles,
-          enemyList, activeOptions, ismanagerFile, sendPort);
-      processedFiles.add(file);
+      await handleInput(
+          file,
+          null,
+          packData.options,
+          packData.pendingFiles,
+          packData.processedFiles,
+          packData.enemyList,
+          packData.activeOptions,
+          packData.isManagerFile,
+          packData.sendPort);
+      packData.processedFiles.add(file);
     } catch (e) {
       // debugPrint("input error: $e");
     }
@@ -134,36 +105,35 @@ Future<void> processEntities(
 ///
 /// logState adds all created files to the last randomized shared preference list that can be undone with the undo button
 ///
-Future<void> processDatFolders(
-    List<String>? datFolders,
-    FileCategoryManager fileManager,
-    List<String> enemyList,
-    List<String> ignoreList,
-    String? output,
-    CliOptions options,
-    Set<String> processedFiles,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+Future<void> processDatFolders(FileCategoryManager fileManager,
+    List<String>? datFolders, GamePackData packData) async {
   if (datFolders != null) {
     for (var datFolder in datFolders) {
       var baseNameWithExtension = path.basename(datFolder);
 
       // Check if the DAT folder should be processed
-      if (shouldProcessDatFolder(
-          baseNameWithExtension, enemyList, fileManager, ignoreList)) {
+      if (shouldProcessDatFolder(baseNameWithExtension, packData.enemyList,
+          fileManager, packData.ignoreList)) {
         try {
           var datSubFolder = getDatFolder(baseNameWithExtension);
-          if (output != null) {
-            var datOutput =
-                path.join(output, datSubFolder, baseNameWithExtension);
-            await handleInput(datFolder, datOutput, options, [], processedFiles,
-                enemyList, activeOptions, ismanagerFile, sendPort);
+          if (packData.output != null) {
+            var datOutput = path.join(
+                packData.output!, datSubFolder, baseNameWithExtension);
+            await handleInput(
+                datFolder,
+                datOutput,
+                packData.options,
+                [],
+                packData.processedFiles,
+                packData.enemyList,
+                packData.activeOptions,
+                packData.isManagerFile,
+                packData.sendPort);
 
             // Log the file change and send it to the main isolate
             FileChange.logChange(datOutput, 'create');
             logState.addLog("Folder created: $datOutput");
-            sendPort.send({
+            packData.sendPort.send({
               'event': 'file_change',
               'filePath': datOutput,
               'action': 'create'
@@ -174,7 +144,7 @@ Future<void> processDatFolders(
           logAndPrint(e.toString());
 
           // Send error message to the main isolate
-          sendPort.send({
+          packData.sendPort.send({
             'event': 'error',
             'details': "Failed to process DAT folder: ${e.toString()}",
             'stackTrace': stackTrace.toString()

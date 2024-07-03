@@ -1,6 +1,7 @@
 import 'dart:isolate';
 
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_file_randomizer.dart';
+import 'package:NAER/nier_cli/cli_data_classes.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/randomize_process.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/all_arguments.dart';
@@ -73,22 +74,26 @@ Future<void> mainFuncProcessGameFiles(
   await processEnemyStats(
       inputDir, argument['enemyList'], argument['enemyStats'], false, sendPort);
 
+  GamePackData packData = GamePackData(
+    currentDir: inputDir,
+    collectedFiles: collectedFiles,
+    options: options,
+    pendingFiles: List<String>.from(argument['pendingFiles']),
+    processedFiles: Set<String>.from(argument['processedFiles']),
+    enemyList: List<String>.from(argument['enemyList']),
+    activeOptions: List<String>.from(argument['activeOptions']),
+    isManagerFile: ismanagerFile,
+    ignoreList: List<String>.from(argument['ignoreList']),
+    output: output,
+    args: args,
+    sendPort: sendPort,
+  );
+
   // Checks all modified files against the ignoreList or bossList etc.
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked
   // and output to the output path indicating successful modification *-*
-  await repackModifiedGameFiles(
-      inputDir,
-      collectedFiles,
-      options,
-      argument['pendingFiles'],
-      argument['processedFiles'],
-      argument['enemyList'],
-      argument['activeOptions'],
-      ismanagerFile,
-      argument['ignoreList'],
-      output,
-      args,
-      sendPort);
+
+  await repackModifiedGameFiles(packData);
 
   // Delete any extracted folders to clean up, so the .exe does not read them (this would crash the game)
   await deleteExtractedGameFolders(output);
