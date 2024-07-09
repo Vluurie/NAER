@@ -42,8 +42,10 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
     }
   }
 
-  // Identify files to be processed and add them to the pending or processed files list.
+  // Identify files to be processed and add them to the pending files list.
   if (mainData.isManagerFile!) {
+    // init pending files
+    //  mainData.argument['pendingFiles'];
     await getGameFilesForProcessing(inputDir, mainData);
   }
 
@@ -54,7 +56,8 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   await processEnemies(mainData, collectedFiles, inputDir);
 
   // Process enemy stats for the specified enemies from the enemy list.
-  await processEnemyStats(inputDir, mainData, false);
+  bool reverseStats = false;
+  await processEnemyStats(inputDir, mainData, reverseStats);
 
   // Check all modified files against the ignore list or enemy list, etc.
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked.
@@ -64,5 +67,5 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   await deleteExtractedGameFolders(mainData.output);
 
   // Reverse the modified .csv files to their original state.
-  await processEnemyStats(inputDir, mainData, true);
+  await processEnemyStats(inputDir, mainData, reverseStats = true);
 }

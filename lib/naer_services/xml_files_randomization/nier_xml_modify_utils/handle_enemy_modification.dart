@@ -58,7 +58,8 @@ Future<void> handleEnemyEntityObject(
           newEmNumber = objIdElement.innerText;
           break;
         }
-      } while (isBigEnemy(newEmNumber) && isSpawnActionTooSmall);
+      } while (newEmNumber == 'em3004' ||
+          (isBigEnemy(newEmNumber) && isSpawnActionTooSmall));
 
       // Replace the text in the XML element with the new enemy number
       XmlElementHandler.replaceTextInXmlElement(objIdElement, newEmNumber);

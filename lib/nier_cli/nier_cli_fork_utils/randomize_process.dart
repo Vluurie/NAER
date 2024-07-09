@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
@@ -211,18 +212,39 @@ bool shouldProcessDatFolder(
 ///
 /// - Parameters:
 ///   - currentDir: The current directory where the processing starts.
-///   - enemyList: A list of enemies to be considered during processing.
-///   - enemyStats: The stats to be applied to the enemies.
+///   - mainData: The main data containing arguments and configurations.
+///   - reverseStats: A boolean indicating whether to reverse the stats modification.
+///
 Future<void> processEnemyStats(
   String currentDir,
   MainData mainData,
   bool reverseStats,
 ) async {
   List<String> enemyList = mainData.argument['enemyList'];
+  List<String> enemiesToBalance = SpecialEntities.enemiesToBalance;
+  double balanceFactor = 0.1;
+
+  List<File> enemyFiles = await findEnemyStatFiles(currentDir);
+  List<File> filteredFiles =
+      await filterEnemyFiles(enemyFiles, enemiesToBalance);
+
+  if (mainData.isBalanceMode! && reverseStats != true) {
+    for (var file in filteredFiles) {
+      await balanceEnemyToBalanceCsvFiles(file, balanceFactor);
+    }
+  }
+
   if (enemyList.isNotEmpty && !enemyList.contains('None')) {
     mainData.sendPort.send("Started changing enemy stats...");
-    await findEnemyStatFiles(
-        currentDir, enemyList, mainData.argument['enemyStats'], reverseStats);
+    for (var file in enemyFiles) {
+      await processCsvFile(file, mainData.argument['enemyStats'], reverseStats);
+    }
+
+    if (reverseStats && mainData.isBalanceMode == true) {
+      for (var filteredFile in filteredFiles) {
+        await normalizeEnemyToBalanceCsvFiles(filteredFile, balanceFactor);
+      }
+    }
   } else {
     mainData.sendPort.send("No enemy Stats modified as argument is 'None'");
   }

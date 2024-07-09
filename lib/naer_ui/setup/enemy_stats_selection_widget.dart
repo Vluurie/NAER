@@ -119,7 +119,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
               Expanded(
                 child: CheckboxListTile(
                   tristate: false,
-                  activeColor: const Color.fromARGB(255, 209, 18, 18),
+                  activeColor: AutomatoThemeColors.dangerZone(ref),
                   title: const Text("None", textScaler: TextScaler.linear(0.8)),
                   value: globalState.stats["None"],
                   onChanged: (bool? value) {

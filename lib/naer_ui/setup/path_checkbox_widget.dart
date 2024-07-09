@@ -1,4 +1,4 @@
-import 'package:NAER/naer_ui/directory_ui/check_pathbox.dart';
+import 'package:NAER/naer_ui/directory_ui/savepath_checkbox.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -7,6 +7,8 @@ import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:path/path.dart' as p;
+import 'package:stack_trace/stack_trace.dart';
 
 class Mod {
   final String id;
@@ -606,18 +609,34 @@ class _ModsListState extends ConsumerState<ModsList>
 
   Future<bool> _executeCLICommand(
       LogState logState, List<String> arguments) async {
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     try {
       arguments.modifyArgumentsForForcedEnemyList();
       final receivePort = ReceivePort();
+
+      receivePort.listen((message) {
+        if (message is String) {
+          logState.addLog(message);
+        }
+      });
+
       Map<String, dynamic> args = {
         'processArgs': arguments,
         'isManagerFile': true,
         'sendPort': receivePort.sendPort,
+        'backUp': false,
+        'isBalanceMode': globalState.isBalanceMode
       };
+      globalState.isModManagerPageProcessing = true;
       await compute(runNierCliIsolated, args);
+      globalLog("Randomization process finished the mod file successfully.");
+      globalState.isModManagerPageProcessing = false;
       return true;
-    } catch (e) {
+    } catch (e, stacktrace) {
       logState.addLog("Error executing CLI command: $e");
+      globalState.isModManagerPageProcessing = false;
+      globalLog(Trace.from(stacktrace).toString());
       return false;
     }
   }

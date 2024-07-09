@@ -92,6 +92,7 @@ class SortedEnemyGroup {
       'ema010', // Animal Default
       'ema011', // Animal Enhanced
       'emb014', // Gravekeeper Shield Biped
+      'em3004', // Androids from Opera Boss
     ],
     "Fly": [
       "em0030", // Default Flyer
@@ -139,7 +140,6 @@ class SortedEnemyGroup {
       "em6011",
       "em6010",
       "em9003",
-      "em3004",
       "em3002",
       "em1031",
       "emb057",

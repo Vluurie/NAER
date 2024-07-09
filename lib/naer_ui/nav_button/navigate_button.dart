@@ -14,6 +14,11 @@ AutomatoButton navigateButton(
   return AutomatoButton(
     label: 'Mod Manager',
     uniqueId: 'modManagerButton',
+    showPointer: false,
+    maxScale: 0.9,
+    baseColor: AutomatoThemeColors.darkBrown(ref),
+    activeFillColor: AutomatoThemeColors.primaryColor(ref),
+    fillBehavior: FillBehavior.filledRightToLeft,
     onPressed: () async {
       CLIArguments cliArgs = await gatherCLIArguments(
         context: context,
@@ -45,14 +50,6 @@ AutomatoButton navigateButton(
         );
       }
     },
-    letterSpacing: 5.0,
-    startColor: AutomatoThemeColors.primaryColor(ref),
-    activeFillColor: AutomatoThemeColors.darkBrown(ref),
-    startFontWeight: FontWeight.normal,
-    endFontWeight: FontWeight.bold,
-    fillBehavior: FillBehavior.filled,
-    animationDuration: const Duration(milliseconds: 300),
-    hoverBlinkDuration: const Duration(milliseconds: 600),
   );
 }
 

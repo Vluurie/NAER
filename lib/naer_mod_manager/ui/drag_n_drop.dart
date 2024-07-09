@@ -26,7 +26,6 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
   bool _dragging = false;
   final List<String> _files = [];
   bool _isLoading = false;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -39,40 +38,27 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
               onDragEntered: (detail) => setState(() => _dragging = true),
               onDragExited: (detail) => setState(() => _dragging = false),
               onDragDone: (details) {
-                showDialog(
+                AutomatoDialogManager().showYesNoDialog(
                   context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Are You Sure?'),
-                      content: const SingleChildScrollView(
-                        child: ListBody(
-                          children: <Widget>[
-                            Text(
-                                'This feature is more advanced. It randomizes any folder with the settings from the main page, but be warned:'),
-                            Text(
-                                'The modified files will not be added to the ignore list and will get overwritten on next randomization with other files if they are the same.'),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('Cancel'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: const Text('Proceed'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _processDraggedItems(details.files
-                                .map((file) => file.path)
-                                .toList());
-                          },
-                        ),
-                      ],
-                    );
+                  ref: ref,
+                  title: "Are You Sure?",
+                  content: Text(
+                    "This feature randomizes any folder with the settings from the main page. The modified files will not be added to the ignore list and will get overwritten on next randomization with other files if they are the same. You can undo them also with the main page undo button",
+                    style: TextStyle(
+                      color: AutomatoThemeColors.textDialogColor(ref),
+                      fontSize: 20,
+                    ),
+                  ),
+                  onYesPressed: () {
+                    Navigator.of(context).pop();
+                    _processDraggedItems(
+                        details.files.map((file) => file.path).toList());
                   },
+                  onNoPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  yesLabel: "Proceed",
+                  noLabel: "Cancel",
                 );
               },
               child: LayoutBuilder(
@@ -122,7 +108,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
                           child: Text(
                             _dragging
                                 ? 'Release to process'
-                                : 'Advanced: Drag folders to randomize',
+                                : 'Drag folders to randomize them.',
                             style: const TextStyle(fontSize: 16),
                           ),
                         ),
@@ -178,7 +164,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
             'Dragged folders randomized successfully and send to output path: ${widget.cliArguments.specialDatOutputPath}',
             style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
           ),
-          backgroundColor: AutomatoThemeColors.saveZone(ref),
+          backgroundColor: AutomatoThemeColors.darkBrown(ref),
         ),
       );
     }

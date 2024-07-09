@@ -1,4 +1,4 @@
-class EntitySkipIDs {
+class SpecialEntities {
   static const Map<String, List<String>> bigSpawnEnemySkipIds = {
     "EnemySetAction": [
       '0x15a6e4d9', // Bunker attack - commander room enemies
@@ -123,5 +123,38 @@ class EntitySkipIDs {
     "em0040", // Default Goliath
     "em0090", // Default Legged Goliath
     'em9000', // Goliath Ball
+  ];
+
+  static const List<String> enemiesToBalance = [
+    "em3010",
+    "em004d",
+    "em1040",
+    "em1030",
+    "em1061",
+    "em1074",
+    "em5600",
+    "em6400",
+    "em8030",
+    "emb05d",
+    "emb016",
+    "emb014",
+    "emb060",
+    "emb080",
+    "em9000",
+    "ema001",
+    "ema011",
+    "emb002",
+    "emb010",
+    "emb061",
+    "emb041",
+    "emb004",
+    "emb031",
+    "emb012",
+    "emb052",
+    "emb056",
+    "emb110",
+    "em0111",
+    "em0112",
+    "em0110"
   ];
 }

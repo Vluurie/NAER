@@ -32,6 +32,9 @@ class GlobalState extends ChangeNotifier {
   bool isHoveringUndo = false;
   bool isHoveringModify = false;
   bool isExtractCopyEnabled = false;
+  bool isModManagerPageProcessing = false;
+  bool? isBalanceMode = false;
+  bool balanceModeCheckBoxValue = false;
   String input = '';
   String scriptPath = '';
   String specialDatOutputPath = '';

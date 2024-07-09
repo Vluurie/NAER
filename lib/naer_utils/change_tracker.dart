@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
@@ -148,5 +149,14 @@ class FileChange {
       }
       return DateTime.now();
     }
+  }
+
+  static Future<void> deleteAllSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    // print('All Shared Preferences:');
+    prefs.getKeys().forEach((key) {
+      var value = prefs.clear();
+      globalLog('$key: $value');
+    });
   }
 }

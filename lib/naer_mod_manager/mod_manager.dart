@@ -1,21 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
-
-import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
-import 'package:NAER/main.dart';
-import 'package:NAER/naer_mod_manager/ui/drag_n_drop.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
-import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
-import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
-import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
+import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/drag_n_drop.dart';
+import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
-import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
-import 'package:NAER/naer_utils/cli_arguments.dart';
 
 class SecondPage extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
@@ -83,53 +78,6 @@ class _SecondPageState extends ConsumerState<SecondPage>
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: AutomatoButton(
-          maxScale: 0.8,
-          onPressed: () async {
-            AutomatoDialogManager().showYesNoDialog(
-              context: context,
-              ref: ref,
-              title: 'Are you sure?',
-              content: Text(
-                'This will reset the app and clear all data of the local app settings. Do you want to proceed?',
-                style: TextStyle(
-                    color: AutomatoThemeColors.textDialogColor(ref),
-                    fontSize: 20),
-              ),
-              onYesPressed: () async {
-                final ModInstallHandler modInstallHandler = ModInstallHandler(
-                  cliArguments: widget.cliArguments,
-                  modStateManager: modStateManager,
-                );
-                await modInstallHandler.deleteAllSharedPreferences();
-                final logState =
-                    provider.Provider.of<LogState>(context, listen: false);
-                logState.clearLogs();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (context) => const EnemyRandomizerApp()),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              onNoPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              yesLabel: 'OK',
-              noLabel: 'Cancel',
-              activeHoverColorNo: AutomatoThemeColors.darkBrown(ref),
-              activeHoverColorYes: AutomatoThemeColors.dangerZone(ref),
-              yesButtonColor: AutomatoThemeColors.darkBrown(ref),
-              noButtonColor: AutomatoThemeColors.darkBrown(ref),
-            );
-          },
-          label: 'Reset Application Local State',
-          uniqueId: 'reset',
-          activeHoverColor: AutomatoThemeColors.dangerZone(ref),
-          showPointer: false,
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: AutomatoButton(
           label: "Clear Logs",
           onPressed: () async {
             setState(() {
@@ -163,83 +111,101 @@ class _SecondPageState extends ConsumerState<SecondPage>
       ),
     ];
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: AppBar(
-          foregroundColor: AutomatoThemeColors.darkBrown(ref),
-          backgroundColor: AutomatoThemeColors.transparentColor(ref),
-          elevation: 0,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AutomatoThemeColors.primaryColor(ref),
-                  AutomatoThemeColors.bright(ref),
-                ],
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
+
+    return WillPopScope(
+      onWillPop: () async {
+        if (globalState.isModManagerPageProcessing) {
+          // Prevent navigation if the page is processing
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: AppBar(
+            foregroundColor: AutomatoThemeColors.darkBrown(ref),
+            backgroundColor: AutomatoThemeColors.transparentColor(ref),
+            elevation: 0,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AutomatoThemeColors.primaryColor(ref),
+                    AutomatoThemeColors.bright(ref),
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
               ),
             ),
+            leading:
+                canPop ? null : (actionButtons.isNotEmpty ? Container() : null),
+            actions: globalState.isModManagerPageProcessing
+                ? null
+                : (canPop ? actionButtons : null),
           ),
-          leading:
-              canPop ? null : (actionButtons.isNotEmpty ? Container() : null),
-          actions: canPop ? actionButtons : null,
         ),
-      ),
-      body: Stack(children: [
-        AutomatoBackground(
-          showRepeatingBorders: false,
-          gradientColor: AutomatoThemeColors.gradient(ref),
-          linesConfig: LinesConfig(
-              lineColor: AutomatoThemeColors.darkBrown(ref),
-              strokeWidth: 1.0,
-              spacing: 5.0,
-              flickerDuration: const Duration(milliseconds: 10000),
-              enableFlicker: false,
-              drawHorizontalLines: true,
-              drawVerticalLines: true),
-          ref: ref,
-        ),
-        Column(
+        body: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  child: ModLoaderWidget(
-                    cliArguments: widget.cliArguments,
-                    modStateManager: modStateManager,
-                  ),
-                ),
+            AutomatoBackground(
+              showRepeatingBorders: false,
+              gradientColor: AutomatoThemeColors.gradient(ref),
+              linesConfig: LinesConfig(
+                lineColor: AutomatoThemeColors.darkBrown(ref),
+                strokeWidth: 1.0,
+                spacing: 5.0,
+                flickerDuration: const Duration(milliseconds: 10000),
+                enableFlicker: false,
+                drawHorizontalLines: true,
+                drawVerticalLines: true,
               ),
+              ref: ref,
             ),
-            Row(
+            Column(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: DragDropWidget(cliArguments: widget.cliArguments),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LogoutOutWidget(cliArguments: widget.cliArguments),
+                Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: Center(
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: ModLoaderWidget(
+                        cliArguments: widget.cliArguments,
+                        modStateManager: modStateManager,
+                      ),
+                    ),
                   ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: DragDropWidget(cliArguments: widget.cliArguments),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child:
+                            LogoutOutWidget(cliArguments: widget.cliArguments),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
-        )
-      ]),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showMetadataFormPopup,
-        foregroundColor: AutomatoThemeColors.primaryColor(ref),
-        backgroundColor: AutomatoThemeColors.darkBrown(ref),
-        tooltip: 'Add Metadata',
-        child: const Icon(Icons.add),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _showMetadataFormPopup,
+          foregroundColor: AutomatoThemeColors.primaryColor(ref),
+          backgroundColor: AutomatoThemeColors.darkBrown(ref),
+          tooltip: 'Add Metadata',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -257,21 +223,6 @@ class _SecondPageState extends ConsumerState<SecondPage>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Opening paths is not supported on this platform.')),
-      );
-    }
-  }
-
-  Future<void> openSettings() async {
-    String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
-
-    if (Platform.isWindows) {
-      await Process.run('cmd', ['/c', 'start', '', settingsDirectoryPath]);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('Opening settings path is not supported on this platform.'),
-        ),
       );
     }
   }

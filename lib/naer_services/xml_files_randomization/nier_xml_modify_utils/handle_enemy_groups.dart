@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:NAER/data/enemy_lists_data/nier_boss_level_list.dart';
-import 'package:NAER/data/sorted_data/big_enemies_ids.dart';
+import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -118,7 +118,7 @@ bool isBoss(objId) {
 
 /// Checks if the given `objId` corresponds to a big enemy.
 bool isBigEnemy(String objId) {
-  for (var enemy in EntitySkipIDs.bigEnemies) {
+  for (var enemy in SpecialEntities.bigEnemies) {
     if (objId == enemy) {
       return true;
     }

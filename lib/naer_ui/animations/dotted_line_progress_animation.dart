@@ -5,18 +5,19 @@ class DottedLineProgressIndicator extends StatefulWidget {
   final double dotSize;
   final double height;
 
-  const DottedLineProgressIndicator({super.key, 
+  const DottedLineProgressIndicator({
+    super.key,
     this.color = const Color.fromARGB(255, 86, 94, 84),
     this.dotSize = 3.0,
     this.height = 5.0,
   });
 
   @override
-  _DottedLineProgressIndicatorState createState() =>
-      _DottedLineProgressIndicatorState();
+  DottedLineProgressIndicatorState createState() =>
+      DottedLineProgressIndicatorState();
 }
 
-class _DottedLineProgressIndicatorState
+class DottedLineProgressIndicatorState
     extends State<DottedLineProgressIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;

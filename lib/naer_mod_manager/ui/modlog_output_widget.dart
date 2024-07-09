@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
@@ -111,6 +113,8 @@ class RandomizeDraggedFile {
   RandomizeDraggedFile({required this.cliArguments, required this.context});
 
   Future<void> randomizeDraggedFile(List<String> droppedFolders) async {
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     final logState = provider.Provider.of<LogState>(context, listen: false);
     if (cliArguments.input.isEmpty ||
         cliArguments.specialDatOutputPath.isEmpty ||
@@ -129,13 +133,27 @@ class RandomizeDraggedFile {
 
         try {
           final receivePort = ReceivePort();
+
+          receivePort.listen((message) {
+            if (message is String) {
+              logState.addLog(message);
+            }
+          });
+
           Map<String, dynamic> args = {
             'processArgs': arguments,
             'isManagerFile': true,
             'sendPort': receivePort.sendPort,
+            'backUp': false,
+            'isBalanceMode': globalState.isBalanceMode
           };
+          globalState.isModManagerPageProcessing = true;
           await compute(runNierCliIsolated, args);
+          globalState.isModManagerPageProcessing = false;
+          globalLog(
+              "Randomization process finished the dragged file successfully.");
         } catch (e) {
+          globalState.isModManagerPageProcessing = false;
           logState.addLog("Failed to process folder $folderPath: $e");
         }
       }

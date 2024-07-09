@@ -8,13 +8,13 @@ import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_ui/appbar/appbar.dart';
-import 'package:NAER/naer_ui/nav_button/navigate_button.dart';
 import 'package:NAER/naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_ui/setup/category_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/directory_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/enemy_level_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/enemy_stats_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/log_output_widget.dart';
+import 'package:NAER/naer_ui/setup/options_panel.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
@@ -96,6 +96,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   late AnimationController _blinkController;
   late Future<bool> _loadPathsFuture;
 
+  bool _isPanelVisible = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -128,6 +130,12 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     }
   }
 
+  void _togglePanel() {
+    setState(() {
+      _isPanelVisible = !_isPanelVisible;
+    });
+  }
+
   @override
   void dispose() {
     scrollController.dispose();
@@ -138,8 +146,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
 
   @override
   Widget build(BuildContext context) {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
+    final globalState = provider.Provider.of<GlobalState>(context);
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70.0),
@@ -169,14 +177,27 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
                 scrollToSetup: () =>
                     scrollToSetup(globalState.setupLogOutputKey),
                 setupLogOutputKey: globalState.setupLogOutputKey,
-                button: navigateButton(context, scrollController, ref),
+                button: AutomatoButton(
+                  label: _isPanelVisible ? "Hide Action Panel" : "Action Panel",
+                  onPressed: _togglePanel,
+                  uniqueId: "togglePanelButton",
+                  showPointer: false,
+                  letterSpacing: 5.0,
+                  startColor: AutomatoThemeColors.primaryColor(ref),
+                  activeFillColor: AutomatoThemeColors.darkBrown(ref),
+                  startFontWeight: FontWeight.normal,
+                  endFontWeight: FontWeight.bold,
+                  fillBehavior: FillBehavior.filled,
+                  animationDuration: const Duration(milliseconds: 300),
+                  hoverBlinkDuration: const Duration(milliseconds: 600),
+                ),
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: Container(
-        height: 80, // Reduced height
+        height: 80,
         color: AutomatoThemeColors.bright(ref),
         child: Stack(
           children: [
@@ -332,55 +353,64 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
           ],
         ),
       ),
-      body: Stack(children: [
-        AutomatoBackground(
-          ref: ref,
-          showRepeatingBorders: false,
-          gradientColor: AutomatoThemeColors.gradient(ref),
-          linesConfig: LinesConfig(
+      body: Stack(
+        children: [
+          AutomatoBackground(
+            ref: ref,
+            showRepeatingBorders: false,
+            gradientColor: AutomatoThemeColors.gradient(ref),
+            linesConfig: LinesConfig(
               lineColor: AutomatoThemeColors.bright(ref),
               strokeWidth: 2.5,
               spacing: 5.0,
               flickerDuration: const Duration(milliseconds: 5000),
               enableFlicker: true,
               drawHorizontalLines: true,
-              drawVerticalLines: true),
-        ),
-        SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    KeyedSubtree(
+              drawVerticalLines: true,
+            ),
+          ),
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      KeyedSubtree(
                         key: globalState.setupDirectorySelectionKey,
                         child: DirectorySelection(
                           loadPathsFuture: _loadPathsFuture,
                           globalState: globalState,
-                        )),
-                  ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              KeyedSubtree(
-                key: globalState.setupCategorySelectionKey,
-                child: setupAllSelections(),
-              ),
-              KeyedSubtree(
-                key: globalState.setupImageGridKey,
-                child: EnemyImageGrid(key: globalState.enemyImageGridKey),
-              ),
-              KeyedSubtree(
-                key: globalState.setupLogOutputKey,
-                child: LogOutput(
-                  key: logOutputKey,
+                KeyedSubtree(
+                  key: globalState.setupCategorySelectionKey,
+                  child: setupAllSelections(),
                 ),
-              ),
-            ],
+                KeyedSubtree(
+                  key: globalState.setupImageGridKey,
+                  child: EnemyImageGrid(key: globalState.enemyImageGridKey),
+                ),
+                KeyedSubtree(
+                  key: globalState.setupLogOutputKey,
+                  child: LogOutput(
+                    key: logOutputKey,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ]),
+          OptionsPanel(
+            isVisible: _isPanelVisible,
+            onToggle: _togglePanel,
+            scrollController: scrollController,
+          ),
+        ],
+      ),
     );
   }
 
@@ -560,7 +590,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         'processArgs': cliArgs.processArgs,
         'isManagerFile': isManagerFile,
         'sendPort': receivePort.sendPort,
-        'backUp': backUp
+        'backUp': backUp,
+        'isBalanceMode': globalState.isBalanceMode
       };
 
       // Run nierCli in a separate isolate

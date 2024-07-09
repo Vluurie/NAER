@@ -484,4 +484,8 @@ List<Enemy> allEmForStatsChangeList = [
       name: 'Cowboy Flyer',
       imageUrl: 'assets/nier_image_folders/nier_boss_images/emb031.png',
       emIdentifiers: ['emb031']),
+  Enemy(
+      name: 'Android Hack Scarecrow',
+      imageUrl: 'assets/nier_image_folders/nier_boss_images/em3004.png',
+      emIdentifiers: ['em3004']),
 ];

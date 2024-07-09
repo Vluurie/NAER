@@ -7,5 +7,16 @@ class RandomizableAliases {
     "00_60_A_5",
     "00_60_A_6",
     "gun1",
+    "shield",
+    "shield2",
+    "chorus_1",
+    "chorus_2",
+    "chorus_3",
+    "chorus_4",
+    "chorus_5",
+    "chorus_6",
+    "chorus_7",
+    "chorus_8",
+    "chorus_9",
   ];
 }

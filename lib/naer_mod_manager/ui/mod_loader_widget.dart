@@ -155,7 +155,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
     );
   }
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {

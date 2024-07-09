@@ -141,6 +141,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
     } else if (message.toLowerCase().contains('no selected') ||
         message.toLowerCase().contains('processed') ||
         message.toLowerCase().contains('found') ||
+        message.toLowerCase().contains('balance mode') ||
         message.toLowerCase().contains('temporary')) {
       return Colors.yellow;
     } else if (message.toLowerCase().contains('completed') ||
@@ -163,7 +164,13 @@ class LogOutputState extends ConsumerState<LogOutput> {
           !lastMessage.contains("Thank you for using the randomization tool") &&
           !lastMessage.contains("NieR CLI") &&
           !lastMessage.contains("Last") &&
-          !lastMessage.contains("Total randomization");
+          !lastMessage.contains("Total randomization") &&
+          !lastMessage.contains("Copied") &&
+          !lastMessage.contains("Balance Mode") &&
+          !lastMessage.contains("Failed") &&
+          !lastMessage.contains("Ignore") &&
+          !lastMessage.contains("Deleted file");
+
       return isProcessing;
     }
     return false;

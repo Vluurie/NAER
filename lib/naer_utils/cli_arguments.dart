@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
@@ -52,7 +53,7 @@ Future<CLIArguments> gatherCLIArguments({
       var tempFile = await File(
               '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
           .create();
-      print('Temporary file created at: ${tempFile.path}');
+      // print('Temporary file created at: ${tempFile.path}');
       var buffer = StringBuffer();
       buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
       sortedEnemies.forEach((group, enemies) {
@@ -62,13 +63,13 @@ Future<CLIArguments> gatherCLIArguments({
       buffer.writeln("};");
       await tempFile.writeAsString(buffer.toString());
       tempFilePath = tempFile.path.convertAndEscapePath();
-      print('Temporary file path: $tempFilePath');
+      //  print('Temporary file path: $tempFilePath');
     } else {
       tempFilePath = "ALL";
     }
   } catch (e, stacktrace) {
-    print('Error creating temporary file: $e');
-    print(Trace.from(stacktrace).toString());
+    //  print('Error creating temporary file: $e');
+    globalLog(Trace.from(stacktrace).toString());
     throw ArgumentError("Error creating temporary file");
   }
 
@@ -103,7 +104,7 @@ Future<CLIArguments> gatherCLIArguments({
   if (ignoredModFiles.isNotEmpty) {
     String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
     processArgs.add(ignoreArgs);
-    print('Ignore arguments added: $ignoreArgs');
+    globalLog('Ignore arguments added: $ignoreArgs');
   }
 
   String command = scriptPath;

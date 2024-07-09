@@ -11,10 +11,10 @@ class LevitatingImage extends StatefulWidget {
   });
 
   @override
-  _LevitatingImageState createState() => _LevitatingImageState();
+  LevitatingImageState createState() => LevitatingImageState();
 }
 
-class _LevitatingImageState extends State<LevitatingImage>
+class LevitatingImageState extends State<LevitatingImage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;

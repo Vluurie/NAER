@@ -136,7 +136,11 @@ Map<String, List<String>> importantIds = {
     '0xd6bda69e', // Big ball before Eve fight
     '0x7d5e581d', // Big ball and Snake befor Eve fight
     '0xd716220a', // Masamune set action
-    '0x312571f1' // Resource Recovery Unit survived machine 9S top
+    '0x312571f1', // Resource Recovery Unit survived machine 9S top
+    '0xdb7601d5', // Opera Boss battle androids that do nothing
+    '0x9f0ac707', // Opera Boss battle androids that do nothing
+    '0x67f8d83d', // Opera Boss battle androids that do nothing
+    '0x93e648a6' // Opera Boss battle androids that do nothing
   ],
   "EnemySetArea": [
     '0x47e03801', // Complex City front enemies before house complex entry

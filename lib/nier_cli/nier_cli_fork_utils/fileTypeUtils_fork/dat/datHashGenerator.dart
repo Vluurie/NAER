@@ -32,7 +32,7 @@ class HashInfo {
     bucketOffsets = List<int>.filled(1 << 31 - preHashShift, -1);
 
     if (preHashShift == 0) {
-      print("Hash shift is 0; does directory have more than 1 << 31 files?");
+      // print("Hash shift is 0; does directory have more than 1 << 31 files?");
     }
 
     List<List<dynamic>> namesIndicesHashes = [];
