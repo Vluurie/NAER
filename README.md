@@ -4,8 +4,7 @@
 
 NAER, the ultimate enemy randomization tool designed to enhance your gaming experience in the critically acclaimed action RPG. With NAER, you have the power to breathe new life into the game by introducing a variety of randomization options. Whether you seek to intensify the challenge or simply wish to explore the game from a fresh perspective, NAER is here to cater to your desires.
 
-![grafik](https://github.com/Vluurie/NAER/assets/145698737/daa0572f-87c1-421d-986c-799dc4403c15)
-
+![grafik](https://github.com/Vluurie/NAER/assets/145698737/7b2efabd-175d-43f7-83bd-1c79e7374ed7)
 
 ## Features
 
