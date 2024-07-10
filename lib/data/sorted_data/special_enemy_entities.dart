@@ -84,6 +84,7 @@ class SpecialEntities {
       '0x599b6f09', // Forest audience
       '0x1f6e6fb8', // Resistence Camp Attack last entity
       '0xd0649628', // Resistance Camp Attack first set area
+      '0x51d90bd3' // First Prologue wave if all are tanks, one will bug out of map
     ],
     "EnemyGenerator": [
       '0x10ec25b3', // Forest Castle Passage part C, D route
