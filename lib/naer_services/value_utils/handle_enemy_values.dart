@@ -9,6 +9,8 @@ import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 /// If the values are null, it removes 'setType', 'setRtn', and 'setFlag' elements
 /// from the XML. Otherwise, it randomly chooses between setting 'setType' or 'setFlag'
 /// based on the [em_number_values_map] and updates the XML accordingly.
+/// Additionally, it ensures the 'rate' element is always positioned immediately
+/// after the 'objId' element.
 ///
 /// - Parameters:
 ///   - objIdElement: The XML element to update.
@@ -27,6 +29,7 @@ void setSpecificValues(xml.XmlElement objIdElement, String newEmNumber) {
   }
 
   _updateElement(objIdElement, selection);
+  _ensureRateIsCorrectlyPositioned(objIdElement);
 }
 
 /// Chooses which element to set based on the provided values.
@@ -110,16 +113,35 @@ void _updateElement(
   var parentValueElement = _findParentValueElement(objIdElement);
   if (parentValueElement == null) return;
 
-  // add the value unterneath the objid element or enemies do not load
   int objIdIndex = _findObjIdIndex(parentValueElement);
-
-  int insertIndex = objIdIndex + 1;
+  int rateIndex = _findRateIndex(parentValueElement);
+  int insertIndex = rateIndex != -1 ? rateIndex + 1 : objIdIndex + 1;
 
   XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
       ['setRtn', selection.key == 'setType' ? 'setFlag' : 'setType']);
 
   XmlElementHandler.updateOrCreateElement(
       parentValueElement, selection.key, null, insertIndex, selection.value);
+}
+
+/// Ensures the 'rate' element is correctly positioned immediately after the 'objId' element.
+///
+/// This function finds the 'rate' element and repositions it if necessary.
+///
+/// - Parameters:
+///   - objIdElement: The XML element to check and adjust.
+void _ensureRateIsCorrectlyPositioned(xml.XmlElement objIdElement) {
+  var parentValueElement = _findParentValueElement(objIdElement);
+  if (parentValueElement == null) return;
+
+  int objIdIndex = _findObjIdIndex(parentValueElement);
+  int rateIndex = _findRateIndex(parentValueElement);
+
+  if (rateIndex > objIdIndex + 1) {
+    var rateElement = parentValueElement.children[rateIndex] as xml.XmlElement;
+    parentValueElement.children.removeAt(rateIndex);
+    parentValueElement.children.insert(objIdIndex + 1, rateElement);
+  }
 }
 
 /// Finds the parent 'value' element starting from the given XML element.
@@ -151,6 +173,18 @@ xml.XmlElement? _findParentValueElement(xml.XmlElement startingElement) {
 int _findObjIdIndex(xml.XmlElement parentValueElement) {
   return parentValueElement.children.indexWhere(
       (element) => element is xml.XmlElement && element.name.local == 'objId');
+}
+
+/// Finds the index of the 'rate' element within the parent 'value' element.
+///
+/// This function searches for the 'rate' element and returns its index.
+///
+/// - Parameters:
+///   - parentValueElement: The parent 'value' element to search within.
+/// - Returns: The index of the 'rate' element.
+int _findRateIndex(xml.XmlElement parentValueElement) {
+  return parentValueElement.children.indexWhere(
+      (element) => element is xml.XmlElement && element.name.local == 'rate');
 }
 
 /// Removes 'setType', 'setRtn', and 'setFlag' elements from the XML element.
