@@ -64,7 +64,12 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   await repackModifiedGameFiles(collectedFiles, mainData);
 
   // Delete any extracted folders to clean up, so the .exe does not read them (this would crash the game).
+
+  // clean the dynamic output
   await deleteExtractedGameFolders(mainData.output);
+
+  // clean the original input (not the extracted folder input)
+  await deleteExtractedGameFolders(mainData.argument['input']);
 
   // Reverse the modified .csv files to their original state.
   await processEnemyStats(inputDir, mainData, reverseStats = true);

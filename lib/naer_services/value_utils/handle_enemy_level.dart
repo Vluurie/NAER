@@ -45,6 +45,9 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
     // Ensure paramElement is the last child (in case it was already present)
     parentValueElement.children.remove(paramElement);
     parentValueElement.children.add(paramElement);
+
+    // Move delay element to the end if it exists
+    moveDelayElementToEnd(parentValueElement);
   }
 
   // Only update levelRange for 'EnemyGenerator' actions if not a boss
@@ -53,6 +56,15 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
     if (rootActionElement != null && isEnemyGenerator(rootActionElement)) {
       updateGeneratorLevelRange(rootActionElement, enemyLevel);
     }
+  }
+}
+
+/// Moves the <delay> element to the end of its parent element's children list.
+void moveDelayElementToEnd(xml.XmlElement parentElement) {
+  var delayElement = parentElement.findElements('delay').firstOrNull;
+  if (delayElement != null) {
+    parentElement.children.remove(delayElement);
+    parentElement.children.add(delayElement);
   }
 }
 
