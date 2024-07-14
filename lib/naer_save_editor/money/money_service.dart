@@ -40,9 +40,6 @@ class MoneyService {
       throw ArgumentError("Money cannot be negative.");
     }
 
-    // Assuming the game has a maximum money limit, adjust accordingly.
-    // For this example, we'll not enforce a maximum limit.
-
     var byteData = ByteData(4);
     byteData.setInt32(0, newMoney, Endian.little);
     Uint8List bytes = byteData.buffer.asUint8List();
