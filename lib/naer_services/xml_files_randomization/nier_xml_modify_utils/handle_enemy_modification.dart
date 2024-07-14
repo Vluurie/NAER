@@ -41,48 +41,62 @@ Future<void> handleEnemyEntityObject(
 }) async {
   // Check if part of ShootingEnemyCurveAction
   var actionElement = findRootActionElement(objIdElement);
-  if (actionElement != null && isShootingEnemyCurveAction(actionElement)) {
-    await handleShootingEnemyCurveAction(
-        objIdElement, enemyLevel, handleLevels);
-  }
-
-  // Proceed with the regular processing
   // Find the group corresponding to the enemy number in the XML element
   String? group =
       findGroupForEmNumber(objIdElement.innerText, SortedEnemyGroup.enemyData);
+  if (actionElement != null && isShootingEnemyCurveAction(actionElement)) {
+    await handleShootingEnemyCurveAction(
+        objIdElement,
+        enemyLevel,
+        handleLevels,
+        randomizeAndSetValues,
+        userSelectedEnemyData,
+        group,
+        isSpawnActionTooSmall);
+  }
 
   // Proceed if a valid group is found, it is not excluded, and there are user-selected data
   if (group != null &&
       !isExcludedGroup(group) &&
       userSelectedEnemyData[group]?.isNotEmpty == true) {
     // Handle randomization and setting of new enemy number if requested
-    if (randomizeAndSetValues) {
-      String newEmNumber;
-      int iterationCount = 0;
-      do {
-        // Select a random new enemy number from the user-selected data group
-        newEmNumber = userSelectedEnemyData[group]![
-            random.nextInt(userSelectedEnemyData[group]!.length)];
-        iterationCount++;
-        // Break the loop if it iterates more than 10 times to avoid infinite loops
-        if (iterationCount > 10) {
-          newEmNumber = objIdElement.innerText;
-          break;
-        }
-      } while (newEmNumber == 'em3004' ||
-          (isBigEnemy(newEmNumber) && isSpawnActionTooSmall));
-
-      // Replace the text in the XML element with the new enemy number
-      XmlElementHandler.replaceTextInXmlElement(objIdElement, newEmNumber);
-      // Set specific values for the new enemy number
-      setSpecificValues(objIdElement, newEmNumber);
-    }
+    randomizeEnemyNumber(randomizeAndSetValues, userSelectedEnemyData, group,
+        objIdElement, isSpawnActionTooSmall);
 
     // Handle enemy levels if requested
     if (handleLevels) {
       await handleLevel(
           objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
     }
+  }
+}
+
+void randomizeEnemyNumber(
+    bool randomizeAndSetValues,
+    Map<String, List<String>> userSelectedEnemyData,
+    String group,
+    xml.XmlElement objIdElement,
+    bool isSpawnActionTooSmall) {
+  if (randomizeAndSetValues) {
+    String newEmNumber;
+    int iterationCount = 0;
+    do {
+      // Select a random new enemy number from the user-selected data group
+      newEmNumber = userSelectedEnemyData[group]![
+          random.nextInt(userSelectedEnemyData[group]!.length)];
+      iterationCount++;
+      // Break the loop if it iterates more than 10 times to avoid infinite loops
+      if (iterationCount > 10) {
+        newEmNumber = objIdElement.innerText;
+        break;
+      }
+    } while (newEmNumber == 'em3004' ||
+        (isBigEnemy(newEmNumber) && isSpawnActionTooSmall));
+
+    // Replace the text in the XML element with the new enemy number
+    XmlElementHandler.replaceTextInXmlElement(objIdElement, newEmNumber);
+    // Set specific values for the new enemy number
+    setSpecificValues(objIdElement, newEmNumber);
   }
 }
 
@@ -150,24 +164,38 @@ Future<void> handleDefaultObjectId(
 /// Handles the processing if the element is part of a ShootingEnemyCurveAction.
 ///
 /// This function performs the following tasks:
-/// - Handles the level using [handleLevel] if [handleLevels] is true,
-///   sets specific values with [setSpecificValues].
+/// - If [handleLevels] is true, it handles the level using [handleLevel] and randomizes the enemy number if [randomizeAndSetValues] is true.
+/// - By default, it sets specific values with [setSpecificValues].
 ///
-/// Parameters:
-/// - [objIdElement]: The XML element containing the enemy object ID.
-/// - [enemyLevel]: The level of the enemy.
-/// - [handleLevels]: A boolean flag indicating if enemy levels should be handled.
-///
-/// Returns:
-/// - A Future that completes when the processing is done.
 Future<void> handleShootingEnemyCurveAction(
   xml.XmlElement objIdElement,
   String enemyLevel,
   bool handleLevels,
+  bool randomizeAndSetValues,
+  Map<String, List<String>> userSelectedEnemyData,
+  String? group,
+  bool isSpawnActionTooSmall,
 ) async {
   if (handleLevels) {
-    await handleLevel(
-        objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
+    if (group != null &&
+        !isExcludedGroup(group) &&
+        userSelectedEnemyData[group]?.isNotEmpty == true) {
+      // Handle randomization and setting of new enemy number if requested
+      randomizeEnemyNumber(
+        randomizeAndSetValues,
+        userSelectedEnemyData,
+        group,
+        objIdElement,
+        isSpawnActionTooSmall,
+      );
+
+      await handleLevel(
+        objIdElement,
+        enemyLevel,
+        SortedEnemyGroup.enemyData,
+        false,
+      );
+    }
   }
   setSpecificValues(objIdElement, objIdElement.innerText);
 }
