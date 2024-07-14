@@ -1,6 +1,6 @@
 # NAER - N:A Enemy Randomizer Tool
 
-Note: The automato theme and the assets are yet not public. The automato theme library will be public when the most stable version is released. Teh assets will be in the next release .zip folder.
+Note: The automato theme and the assets are yet not public. The automato theme library will be public when the most stable version is released. The assets will be always in the lastrelease .zip folder and not directly in the repository.
 
 ## Overview
 
