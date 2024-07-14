@@ -6,19 +6,25 @@ import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:flutter/material.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
-class MetadataForm extends StatefulWidget {
-  const MetadataForm(
-      {super.key, required this.cliArguments, required this.modStateManager});
+class MetadataForm extends ConsumerStatefulWidget {
+  const MetadataForm({
+    super.key,
+    required this.cliArguments,
+    required this.modStateManager,
+  });
+
   final CLIArguments cliArguments;
   final ModStateManager modStateManager;
 
   @override
-  _MetadataFormState createState() => _MetadataFormState();
+  MetadataFormState createState() => MetadataFormState();
 }
 
-class _MetadataFormState extends State<MetadataForm> {
+class MetadataFormState extends ConsumerState<MetadataForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -71,265 +77,290 @@ class _MetadataFormState extends State<MetadataForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Metadata Form"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
+        body: Stack(children: [
+      AutomatoBackground(
+        showRepeatingBorders: false,
+        gradientColor: AutomatoThemeColors.gradient(ref),
+        linesConfig: LinesConfig(
+            lineColor: AutomatoThemeColors.darkBrown(ref),
+            strokeWidth: 1.0,
+            spacing: 5.0,
+            flickerDuration: const Duration(milliseconds: 10000),
+            enableFlicker: false,
+            drawHorizontalLines: true,
+            drawVerticalLines: true),
+        ref: ref,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const Text(
-                  "Add custom mods to the mod list.",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                Padding(
-                    padding: const EdgeInsets.only(right: 20, left: 20),
-                    child: _buildTextFormField(
-                        controller: _idController,
-                        label: 'ID',
-                        validator: (value) => value?.validateId(value))),
-                const SizedBox(height: 10),
-                Padding(
-                    padding: const EdgeInsets.only(right: 20, left: 20),
-                    child: _buildTextFormField(
-                        controller: _nameController,
-                        label: 'Name',
-                        validator: (value) => value?.validateText(
-                              value,
-                              fieldName: 'Name',
-                            ))),
-                const SizedBox(height: 10),
-                Padding(
-                    padding: const EdgeInsets.only(right: 20, left: 20),
-                    child: _buildTextFormField(
-                        controller: _versionController,
-                        label: 'Version',
-                        validator: (value) => value?.validateVersion(value))),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(right: 20, left: 20),
-                  child: _buildTextFormField(
-                    controller: _authorController,
-                    label: 'Author',
-                    validator: (value) =>
-                        value?.validateText(value, fieldName: 'Author'),
+      Scaffold(
+        backgroundColor: AutomatoThemeColors.transparentColor(ref),
+        appBar: AppBar(
+          title: const Text("Metadata Form"),
+          backgroundColor: AutomatoThemeColors.transparentColor(ref),
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    "Add custom mods to the mod list.",
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AutomatoThemeColors.darkBrown(ref)),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(right: 20, left: 20),
-                  child: _buildTextFormField(
-                    controller: _descriptionController,
-                    label: 'Description',
-                    validator: (value) =>
-                        value?.validateText(value, fieldName: 'Description'),
+                  const SizedBox(height: 20),
+                  Padding(
+                      padding: const EdgeInsets.only(right: 20, left: 20),
+                      child: _buildTextFormField(
+                          controller: _idController,
+                          label: 'ID',
+                          validator: (value) => value?.validateId(value))),
+                  const SizedBox(height: 10),
+                  Padding(
+                      padding: const EdgeInsets.only(right: 20, left: 20),
+                      child: _buildTextFormField(
+                          controller: _nameController,
+                          label: 'Name',
+                          validator: (value) => value?.validateText(
+                                value,
+                                fieldName: 'Name',
+                              ))),
+                  const SizedBox(height: 10),
+                  Padding(
+                      padding: const EdgeInsets.only(right: 20, left: 20),
+                      child: _buildTextFormField(
+                          controller: _versionController,
+                          label: 'Version',
+                          validator: (value) => value?.validateVersion(value))),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20, left: 20),
+                    child: _buildTextFormField(
+                      controller: _authorController,
+                      label: 'Author',
+                      validator: (value) =>
+                          value?.validateText(value, fieldName: 'Author'),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Column(
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20, left: 20),
+                    child: _buildTextFormField(
+                      controller: _descriptionController,
+                      label: 'Description',
+                      validator: (value) =>
+                          value?.validateText(value, fieldName: 'Description'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Column(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                              textScaler: TextScaler.linear(1.5),
+                              "Extra: Advanced for ignoring enemies from modifying in this entities: (example: 0x864ec3e4)"),
+                        ),
+                        _buildIdList(
+                            "Enemy Set Action ID", _enemySetActionControllers,
+                            () {
+                          setState(() {
+                            _enemySetActionControllers
+                                .add(TextEditingController());
+                          });
+                        }),
+                        _buildIdList(
+                            "Enemy Set Area ID", _enemySetAreaControllers, () {
+                          setState(() {
+                            _enemySetAreaControllers
+                                .add(TextEditingController());
+                          });
+                        }),
+                        _buildIdList(
+                            "Enemy Generator ID", _enemyGeneratorControllers,
+                            () {
+                          setState(() {
+                            _enemyGeneratorControllers
+                                .add(TextEditingController());
+                          });
+                        }),
+                        _buildIdList("Enemy Layout Action ID",
+                            _enemyLayoutActionControllers, () {
+                          setState(() {
+                            _enemyLayoutActionControllers
+                                .add(TextEditingController());
+                          });
+                        }),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                            textScaler: TextScaler.linear(1.5),
-                            "Extra: Advanced for ignoring enemies from modifying in this entities: (example: 0x864ec3e4)"),
-                      ),
-                      _buildIdList(
-                          "Enemy Set Action ID", _enemySetActionControllers,
-                          () {
-                        setState(() {
-                          _enemySetActionControllers
-                              .add(TextEditingController());
-                        });
-                      }),
-                      _buildIdList(
-                          "Enemy Set Area ID", _enemySetAreaControllers, () {
-                        setState(() {
-                          _enemySetAreaControllers.add(TextEditingController());
-                        });
-                      }),
-                      _buildIdList(
-                          "Enemy Generator ID", _enemyGeneratorControllers, () {
-                        setState(() {
-                          _enemyGeneratorControllers
-                              .add(TextEditingController());
-                        });
-                      }),
-                      _buildIdList("Enemy Layout Action ID",
-                          _enemyLayoutActionControllers, () {
-                        setState(() {
-                          _enemyLayoutActionControllers
-                              .add(TextEditingController());
-                        });
-                      }),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_selectedImagePath != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              File(_selectedImagePath!),
+                      if (_selectedImagePath != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(_selectedImagePath!),
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Center(
+                            child: Container(
                               width: 200,
                               height: 200,
-                              fit: BoxFit.cover,
+                              decoration: BoxDecoration(
+                                color: AutomatoThemeColors.darkBrown(ref),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.image,
+                                color: AutomatoThemeColors.primaryColor(ref),
+                                size: 50,
+                              ),
                             ),
                           ),
                         ),
-                      )
-                    else
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Center(
-                          child: Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 48, 46, 46),
-                              borderRadius: BorderRadius.circular(8),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ElevatedButton(
+                            onPressed: _pickImage,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
                             ),
-                            child: const Icon(
-                              Icons.image,
-                              color: Color.fromARGB(255, 255, 255, 255),
-                              size: 50,
-                            ),
+                            child: Text(_selectedImagePath == null
+                                ? 'Select Image/GIF'
+                                : 'Change Image/GIF'),
                           ),
                         ),
                       ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ElevatedButton(
-                          onPressed: _pickImage,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
-                          ),
-                          child: Text(_selectedImagePath == null
-                              ? 'Select Image/GIF'
-                              : 'Change Image/GIF'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Align(
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Align(
+                          alignment: Alignment.center,
+                          child: ButtonTheme(
+                              minWidth: 300,
+                              child: ElevatedButton(
+                                onPressed: _addFileField,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      AutomatoThemeColors.primaryColor(ref),
+                                  padding: const EdgeInsets.all(20),
+                                ),
+                                child: Text(
+                                  'Add Modfolder',
+                                  style: TextStyle(
+                                      color:
+                                          AutomatoThemeColors.darkBrown(ref)),
+                                ),
+                              ))),
+                    ],
+                  ),
+                  _buildDirectoryStructure(),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Align(
                         alignment: Alignment.center,
                         child: ButtonTheme(
-                            minWidth: 300,
-                            child: ElevatedButton(
-                              onPressed: _addFileField,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 52, 54, 54),
-                                padding: const EdgeInsets.all(20),
-                              ),
-                              child: const Text(
-                                'Add Modfolder',
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 255, 255, 255)),
-                              ),
-                            ))),
-                  ],
-                ),
-                _buildDirectoryStructure(),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: ButtonTheme(
-                        minWidth: 100,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            bool formIsValid =
-                                _formKey.currentState?.validate() ?? false;
-                            bool directoryHasContents =
-                                _directoryContentsInfo.isNotEmpty;
+                          minWidth: 100,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              bool formIsValid =
+                                  _formKey.currentState?.validate() ?? false;
+                              bool directoryHasContents =
+                                  _directoryContentsInfo.isNotEmpty;
 
-                            if (formIsValid && directoryHasContents) {
-                              _saveMetadata();
-                              Navigator.of(context).pop();
-                            } else {
-                              setState(() {
-                                _showModFolderWarning = !directoryHasContents;
-                              });
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 12, 109, 15),
-                            padding: const EdgeInsets.all(20),
+                              if (formIsValid && directoryHasContents) {
+                                _saveMetadata();
+                                Navigator.of(context).pop();
+                              } else {
+                                setState(() {
+                                  _showModFolderWarning = !directoryHasContents;
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  AutomatoThemeColors.saveZone(ref),
+                              padding: const EdgeInsets.all(20),
+                            ),
+                            child: const Text('Save Metadata'),
                           ),
-                          child: const Text('Save Metadata'),
                         ),
                       ),
-                    ),
-                    if (_showModFolderWarning)
-                      Visibility(
-                        visible: _showModFolderWarning,
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          padding: const EdgeInsets.all(10.0),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 41, 39, 39),
-                            borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                              color: Colors.red,
-                              width: 1.0,
+                      if (_showModFolderWarning)
+                        Visibility(
+                          visible: _showModFolderWarning,
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 20),
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: AutomatoThemeColors.darkBrown(ref),
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                color: AutomatoThemeColors.dangerZone(ref),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: AutomatoThemeColors.dangerZone(ref),
+                                  size: 24.0,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "Please add a mod folder or check your input again before saving.",
+                                  style: TextStyle(
+                                    color: AutomatoThemeColors.dangerZone(ref),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.warning_amber_rounded,
-                                color: Colors.red,
-                                size: 24.0,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                "Please add a mod folder or check your input again before saving.",
-                                style: TextStyle(
-                                  color: Colors.red[800],
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                  ],
-                )
-              ],
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      )
+    ]));
   }
 
   Widget _buildIdInputField(
@@ -458,8 +489,9 @@ class _MetadataFormState extends State<MetadataForm> {
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue, width: 2.0),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: AutomatoThemeColors.primaryColor(ref), width: 2.0),
         ),
       ),
       validator: validator,

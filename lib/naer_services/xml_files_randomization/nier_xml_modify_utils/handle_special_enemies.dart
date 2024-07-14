@@ -1,66 +1,68 @@
-import 'package:NAER/naer_services/level_utils/handle_alias_level.dart';
+import 'package:NAER/data/values_data/nier_randomizable_aliases.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/modify_enemy_objid.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// This function handles special cases for enemies within an XML element. It processes
 /// 'objId' elements and modifies them based as whether the
 /// enemy is a boss or has an alias ancestor. Depending on the enemy category, it also
 /// handles leveled enemies with aliases.
-///
-/// Parameters:
-/// - `element`: The XML element to be processed.
-/// - `sortedEnemyData`: A map containing sorted enemy data.
-/// - `filePath`: The file path where enemy data is located.
-/// - `enemyLevel`: The level of the enemy being processed.
-/// - `enemyCategory`: The category of the enemy (e.g., all enemies, only level).
-///
-/// Returns: A Future that completes when the processing is done.
+
 Future<void> handleSpecialCaseEnemies(
-    xml.XmlElement element,
-    Map<String, List<String>> sortedEnemyData,
-    String filePath,
-    String enemyLevel,
-    String enemyCategory) async {
-  // Check if the current element's name is 'objId'
-  if (element.name.local == 'objId') {
-    if (isBoss(element.innerText)) {
-      // Modify the objId for bosses
-      modifyEnemyObjId(
-          element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
-    } else if (hasAliasAncestor(element)) {
-      // Check if the enemy has an alias ancestor and belongs to specific categories
-      if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
-        // Handle leveled enemies with aliases
-        await handleLeveledForAlias(element, enemyLevel, sortedEnemyData);
-        return;
-      }
-    } else {
-      // Modify the objId for other cases
-      modifyEnemyObjId(
-          element, sortedEnemyData, filePath, enemyLevel, enemyCategory);
-    }
-  } else {
-    // Recursively process descendant elements that are of type 'objId'
-    element.descendants.whereType<xml.XmlElement>().forEach((desc) async {
-      if (desc.name.local == 'objId') {
-        if (isBoss(desc.innerText)) {
-          // Modify the objId for boss descendants
-          modifyEnemyObjId(
-              desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
-        } else if (hasAliasAncestor(desc)) {
-          // Check if the descendant has an alias ancestor and belongs to specific categories
-          if (enemyCategory == 'allenemies' || enemyCategory == 'onlylevel') {
-            // Handle leveled enemies with aliases for descendants
-            await handleLeveledForAlias(desc, enemyLevel, sortedEnemyData);
-            return;
-          }
-        } else {
-          // Modify the objId for other descendant cases
-          modifyEnemyObjId(
-              desc, sortedEnemyData, filePath, enemyLevel, enemyCategory);
-        }
-      }
-    });
+  xml.XmlElement element,
+  Map<String, List<String>> sortedEnemyData,
+  String filePath,
+  MainData mainData,
+  bool isSpawnActionTooSmall,
+) async {
+  String category = mainData.argument['enemyCategory'];
+  String level = mainData.argument['enemyLevel'];
+  if (category != 'onlylevel') {
+    // Remove randomizable aliases before processing objId elements for all enemies
+    // skip if only level need to be changed since then the alias does not matter
+    removeAliases(element, RandomizableAliases.aliases);
   }
+
+  // Recursive function to find and process all objId elements in the current element and its descendants
+  void processObjIdElements(xml.XmlElement elem) {
+    final objIdElements = elem.findAllElements('objId').toList();
+
+    for (var objIdElement in objIdElements) {
+      if (isBoss(objIdElement.innerText)) {
+        // Modify the objId for bosses
+        modifyEnemyObjId(
+          objIdElement,
+          sortedEnemyData,
+          filePath,
+          mainData,
+          isSpawnActionTooSmall,
+        );
+      } else if (hasAliasAncestor(objIdElement)) {
+        // Check if the enemy has an alias ancestor and belongs to specific categories
+        if (category == 'allenemies' || category == 'onlylevel') {
+          // Handle the level for enemies with alias
+          handleLevel(objIdElement, level, sortedEnemyData, false);
+        }
+      } else {
+        // Modify the objId for no boss or alias enemy
+        modifyEnemyObjId(
+          objIdElement,
+          sortedEnemyData,
+          filePath,
+          mainData,
+          isSpawnActionTooSmall,
+        );
+      }
+    }
+
+    // Recursively process again child elements since all is sooo damn nested
+    for (var child in elem.children.whereType<xml.XmlElement>()) {
+      processObjIdElements(child);
+    }
+  }
+
+  // Start processing from the root element (love recursiv)
+  processObjIdElements(element);
 }

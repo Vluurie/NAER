@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:NAER/data/boss_data/nier_boss_level_list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_boss_level_list.dart';
+import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -50,7 +51,7 @@ String getRandomEmNumberFromGroup(
   return groupList[random.nextInt(groupList.length)];
 }
 
-/// Reads sorted enemy data groups from the created temp_sorted_enemies.dart file.
+/// Reads sorted enemy data groups from the created [temp_sorted_enemies.dart} file.
 ///
 /// Parameters:
 /// - [filePath]: The path to the file containing the sorted enemy data.
@@ -86,61 +87,54 @@ Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
   }
 }
 
-/// Checks if the given XML element has an ancestor with an alias.
-///
-/// This function traverses the ancestors of the provided XML element to determine
-/// if any ancestor contains an 'alias' element. This is important to avoid
-/// randomness in behavior for enemies that are tagged with an alias and may have
-/// hardcoded behavior.
-///
-/// Parameters:
-/// - `objIdElement`: The XML element to check for alias ancestors.
-///
-/// Returns:
-/// A boolean value indicating whether the element has an ancestor with an alias (`true`) or not (`false`).
+// Check if any ancestor of objIdElement contains an 'alias' element
 bool hasAliasAncestor(xml.XmlElement objIdElement) {
-  // Check if any ancestor of objIdElement contains an 'alias' element
   return objIdElement.ancestors
       .any((element) => element.findElements('alias').isNotEmpty);
 }
 
+// Remove alias elements that are in the  RandomizableAliases.aliases
+void removeAliases(xml.XmlElement element, List<String> aliasList) {
+  // Find all alias elements in the current element and its descendants
+  final aliasElements = element.findAllElements('alias').toList();
+
+  // Process each alias element
+  for (var alias in aliasElements) {
+    final aliasText = alias.innerText.trim();
+
+    // Check if the alias text matches any item in aliasList
+    if (aliasList.contains(aliasText)) {
+      // Remove the alias element
+      alias.parent?.children.remove(alias);
+    }
+  }
+}
+
 /// Checks if the given `objId` corresponds to a boss.
-///
-/// Takes an `objId` and checks if it exists within the "Boss" list
-/// in the `bossData` map. If the `objId` is found in the list, it returns `true`,
-/// indicating that the object is a boss. Otherwise, it returns `false`.
-///
-/// Parameters:
-/// - `objId`: The object ID to be checked.
-///
-/// Returns:
-/// A boolean value indicating whether the `objId` is a boss (`true`) or not (`false`).
 bool isBoss(objId) {
   // Check if the bossData map contains a "Boss" key and if it includes the objId
   return bossData["Boss"]?.contains(objId) ?? false;
 }
 
+/// Checks if the given `objId` corresponds to a big enemy.
+bool isBigEnemy(String objId) {
+  for (var enemy in SpecialEntities.bigEnemies) {
+    if (objId == enemy) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// Checks if an enemy with a given `emNumber` is marked for deletion in the `enemyData`.
+///
+/// Returns `true` if the enemy is in the "Delete" group, `false` otherwise.
+bool isDeletedEnemy(String emNumber, Map<String, List<String>> enemyData) {
+  return findGroupForEmNumber(emNumber, enemyData) == "Delete";
+}
+
 /// Checks if a given action ID is listed in a collection of important IDs and
 /// updates the importance status of the action.
-///
-/// This function iterates through the entries of the `importantIds` map, and
-/// checks if the `actionId` exists within the values of the map. If the `actionId`
-/// is found, it sets the `isActionImportant` flag to `true`.
-///
-/// Parameters:
-/// - `actionId`: A nullable string representing the current action ID to be checked.
-/// - `importantIds`: An instance of the `ImportantIDs` class containing a map of
-///   important IDs.
-/// - `isActionImportant`: A boolean flag indicating if the action is important. This
-///   flag will be updated if the `actionId` is found within the important IDs.
-///
-/// Returns:
-/// A boolean value indicating whether the action is important (`true`) or not (`false`).
-///
-/// Note:
-/// - The `isActionImportant` parameter is modified within the function. The initial
-///   value of this parameter should be passed as `false` unless it's already known to
-///   be important.
 bool checkImportantIds(
     String? actionId, ImportantIDs importantIds, bool isActionImportant) {
   // Check if the actionId is not null
@@ -157,6 +151,26 @@ bool checkImportantIds(
   }
   // Return the updated importance status
   return isActionImportant;
+}
+
+/// Checks if a given action ID is listed in a collection of bigSpawnEnemySkipIds and
+/// updates the status of the action.
+bool checkTooSmallSpawnAction(
+    String? actionId, bigSpawnEnemySkipIds, bool isSpawnActionTooSmall) {
+  // Check if the actionId is not null
+  if (actionId != null) {
+    // Iterate through each entry in the big spawn enemies skip map
+    for (var entry in bigSpawnEnemySkipIds.entries) {
+      // Check if the entry's value contains the actionId
+      if (entry.value.contains(actionId)) {
+        // Set isSpawnActionTooSmall to true if actionId is found
+        isSpawnActionTooSmall = true;
+        break;
+      }
+    }
+  }
+  // Return the updated status
+  return isSpawnActionTooSmall;
 }
 
 /// NOTE that this labels are translated from the [japToEng map] and normally are japanese
@@ -189,4 +203,13 @@ Iterable<xml.XmlElement> getEnemyCodeElements(xml.XmlElement action) {
   return action.descendants.whereType<xml.XmlElement>().where((e) =>
       e.name.local == 'code' &&
       prefixes.any((p) => e.getAttribute('str')?.startsWith(p) ?? false));
+}
+
+/// Checks if the given `actionElement` represents an 'EnemyGenerator'.
+///
+/// Returns `true` if the 'code' element has the attribute `str` set to 'EnemyGenerator', `false` otherwise.
+bool isEnemyGenerator(xml.XmlElement actionElement) {
+  var codeElement = actionElement.findElements('code').firstOrNull;
+  return codeElement != null &&
+      codeElement.getAttribute('str') == 'EnemyGenerator';
 }

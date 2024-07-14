@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_ui/appbar/appbar_icon.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
+class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final AnimationController blinkController;
   final VoidCallback scrollToSetup;
   final GlobalKey setupLogOutputKey;
-  final ElevatedButton button;
+  final AutomatoButton button;
 
   const NaerAppBar({
     super.key,
@@ -18,40 +20,62 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
   bool isScreenLarge(double maxWidth) => maxWidth > 600;
 
   @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      toolbarHeight: 70.0,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      title: SizedBox(
-        height: 70,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            bool isLargeScreen = isScreenLarge(constraints.maxWidth);
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                logoPadding(isLargeScreen),
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: SizedBox(
-                    height: 100,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        logoText(isLargeScreen, context),
-                        AppIcons.informationIcon(context),
-                        AppIcons.logIcon(blinkController, scrollToSetup),
-                        button,
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Stack(
+      children: [
+        Positioned(
+          top: -15,
+          left: 0,
+          right: 0,
+          child: buildRepeatingBorderSVG(
+            context,
+            svgWidget: const AutomatoBorderSVG(
+              svgString: AutomatoSvgStrings.automatoSvgStrBorder,
+            ),
+            height: 50,
+            width: 50,
+          ),
         ),
-      ),
+        AppBar(
+          toolbarHeight: 70.0,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: SizedBox(
+            height: 70,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                bool isLargeScreen = isScreenLarge(constraints.maxWidth);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    logoPadding(isLargeScreen),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: SizedBox(
+                        height: 70,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            logoText(isLargeScreen, context, ref),
+                            AppIcons.informationIcon(context, ref),
+                            AppIcons.logIcon(
+                                blinkController, scrollToSetup, ref),
+                            Container(
+                              height: 50, // Adjust height to match icons
+                              alignment: Alignment.center, // Center alignment
+                              child: button,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -66,17 +90,22 @@ class NaerAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Text logoText(bool isLargeScreen, BuildContext context) {
+  Text logoText(bool isLargeScreen, BuildContext context, WidgetRef ref) {
     return Text(
-      'NAER',
+      'NAER v3.5a',
       style: TextStyle(
-        fontSize: isLargeScreen ? 36.0 : 24.0,
-        color: const Color.fromRGBO(0, 255, 255, 1),
+        fontSize: isLargeScreen ? 48.0 : 24.0,
+        color: AutomatoThemeColors.darkBrown(ref),
         fontWeight: FontWeight.w700,
+        shadows: [
+          Shadow(
+              offset: const Offset(5.0, 5),
+              color: AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5)),
+        ],
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(100.0);
+  Size get preferredSize => const Size.fromHeight(70.0);
 }

@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 /// Converts a [Duration] to a human-readable string format.
 ///
 /// This function takes a [Duration] and returns a string representation of
@@ -30,20 +32,20 @@ String timeStr(Duration d) {
 ///   - t1: The start time when the processing began.
 ///   - processedFiles: A set of files that have been successfully processed.
 ///   - errorFiles: A list of files that encountered errors during processing.
-void processTime(
-    DateTime t1, Set<String> processedFiles, List<String> errorFiles) {
+void processTime(DateTime t1, Set<String> processedFiles,
+    List<String> errorFiles, SendPort sendPort) {
   var tD = DateTime.now().difference(t1);
   if (processedFiles.length == 1) {
-    print("Done (${timeStr(tD)}) :D");
+    sendPort.send("Done (${timeStr(tD)}) :D");
   } else {
     if (errorFiles.isNotEmpty) {
-      print("Failed to process ${errorFiles.length} files:");
+      sendPort.send("Failed to process ${errorFiles.length} files:");
       for (var f in errorFiles) {
-        print("- $f");
+        sendPort.send("- $f");
       }
     }
   }
-  print("Processed ${processedFiles.length} files "
+  sendPort.send("Processed ${processedFiles.length} files "
       "in ${timeStr(tD)} "
       ":D");
 }

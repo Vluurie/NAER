@@ -1,14 +1,17 @@
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
-import 'package:NAER/naer_services/value_utils/handle_boss_stats.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/isolate_service.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/fileTypeHandler.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils.dart';
-import 'package:args/args.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:path/path.dart' as path;
 
 /// Processes the collected files based on the given parameters.
@@ -17,55 +20,57 @@ import 'package:path/path.dart' as path;
 /// `collectedFiles` map. It uses various options and file lists to determine
 /// how the files should be processed.
 ///
+/// MainData container data to use are:
 /// - Parameters:
 ///   - currentDir: The current directory where the processing starts.
 ///   - collectedFiles: A map of collected files and folders with specific keys.
 ///   - options: CLI options that influence the processing behavior.
 ///   - pendingFiles: A list of files that are pending to be processed.
 ///   - processedFiles: A set of files that have already been processed.
-///   - bossList: A list of boss criteria to be considered during processing.
+///   - enemyList: A list of enemy criteria to be considered during processing.
 ///   - activeOptions: A list of active options for file processing.
 ///   - ismanagerFile: A flag indicating if a mod manager file is involved.
 ///   - ignoreList: A list of files or folders to be ignored during processing.
 ///   - output: The output directory where processed files should be saved.
 ///   - args: Command-line arguments passed to the program.
-Future<void> processCollectedFiles(
-    String currentDir,
-    Map<String, List<String>> collectedFiles,
-    CliOptions options,
-    List<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> bossList,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    List<String> ignoreList,
-    String? output,
-    ArgResults args) async {
+Future<void> repackModifiedGameFiles(
+    Map<String, List<String>> collectedFiles, MainData mainData) async {
   // Prepare XML files by replacing .yax extension with .xml
-  var xmlFiles =
-      collectedFiles['yaxFiles']?.map((e) => e.replaceAll('.yax', '.xml'));
+  var xmlFiles = collectedFiles['yaxFiles']
+          ?.map((e) => e.replaceAll('.yax', '.xml'))
+          .toList() ??
+      <String>[];
 
   // Combine XML files and folders to process
-  var entitiesToProcess = xmlFiles?.followedBy(collectedFiles['pakFolders']!);
+  var entitiesToProcess = <String>[
+    ...xmlFiles,
+    ...?collectedFiles['pakFolders']
+  ];
 
-  if (entitiesToProcess != null) {
-    await processEntities(entitiesToProcess, options, pendingFiles,
-        processedFiles, bossList, activeOptions, ismanagerFile);
-
-    var fileManager = FileCategoryManager(args);
-
-    // Process DAT folders if they exist
-    await processDatFolders(
-        collectedFiles['datFolders'],
-        fileManager,
-        bossList,
-        ignoreList,
-        output,
-        options,
-        processedFiles,
-        activeOptions,
-        ismanagerFile);
+  if (entitiesToProcess.isNotEmpty) {
+    await processEntitiesInParallel(entitiesToProcess, mainData);
   }
+
+  var fileManager = FileCategoryManager(mainData.args);
+
+  // Process DAT folders if they exist
+  await processDatFolders(fileManager, collectedFiles['datFolders'], mainData);
+}
+
+/// This method processes all given entities in parallel,
+/// splitting the task into the amount of cores a device has for maximum computation time.
+/// See [IsolateService]
+Future<void> processEntitiesInParallel(
+    Iterable<String> entities, MainData mainData) async {
+  final service = IsolateService();
+
+  final fileList = entities.toList();
+  final fileBatches = service.distributeFiles(fileList.cast<String>());
+  final tasks = fileBatches.values.map((files) {
+    return () => processEntities(files, mainData);
+  }).toList();
+
+  await service.runTasks(tasks);
 }
 
 /// Processes a list of entities such as files or folders.
@@ -74,20 +79,22 @@ Future<void> processCollectedFiles(
 /// using the provided files to process
 ///
 Future<void> processEntities(
-    Iterable<String> entities,
-    CliOptions options,
-    List<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> bossList,
-    List<String> activeOptions,
-    bool? ismanagerFile) async {
+    Iterable<String> entities, MainData mainData) async {
   for (var file in entities) {
     try {
-      await handleInput(file, null, options, pendingFiles, processedFiles,
-          bossList, activeOptions, ismanagerFile);
-      processedFiles.add(file);
+      await handleInput(
+          file,
+          null,
+          mainData.options,
+          mainData.argument['pendingFiles'],
+          mainData.argument['processedFiles'],
+          mainData.argument['enemyList'],
+          mainData.argument['activeOptions'],
+          mainData.isManagerFile,
+          mainData.sendPort);
+      mainData.argument['processedFiles'].add(file);
     } catch (e) {
-      logAndPrint("input error");
+      // debugPrint("input error: $e");
     }
   }
 }
@@ -99,37 +106,51 @@ Future<void> processEntities(
 ///
 /// logState adds all created files to the last randomized shared preference list that can be undone with the undo button
 ///
-Future<void> processDatFolders(
-    List<String>? datFolders,
-    FileCategoryManager fileManager,
-    List<String> bossList,
-    List<String> ignoreList,
-    String? output,
-    CliOptions options,
-    Set<String> processedFiles,
-    List<String> activeOptions,
-    bool? ismanagerFile) async {
+Future<void> processDatFolders(FileCategoryManager fileManager,
+    List<String>? datFolders, MainData mainData) async {
   if (datFolders != null) {
     for (var datFolder in datFolders) {
       var baseNameWithExtension = path.basename(datFolder);
 
       // Check if the DAT folder should be processed
       if (shouldProcessDatFolder(
-          baseNameWithExtension, bossList, fileManager, ignoreList)) {
+          baseNameWithExtension,
+          mainData.argument['enemyList'],
+          fileManager,
+          mainData.argument['ignoreList'])) {
         try {
           var datSubFolder = getDatFolder(baseNameWithExtension);
-          if (output != null) {
-            var datOutput =
-                path.join(output, datSubFolder, baseNameWithExtension);
-            await handleInput(datFolder, datOutput, options, [], processedFiles,
-                bossList, activeOptions, ismanagerFile);
-            FileChange change = FileChange(datOutput, 'create');
-            FileChange.changes.add(change);
-            logState.addLog("Folder created: $datOutput");
-          }
-        } catch (e) {
+          var datOutput =
+              path.join(mainData.output, datSubFolder, baseNameWithExtension);
+          await handleInput(
+              datFolder,
+              datOutput,
+              mainData.options,
+              [],
+              mainData.argument['processedFiles'],
+              mainData.argument['enemyList'],
+              mainData.argument['activeOptions'],
+              mainData.isManagerFile,
+              mainData.sendPort);
+
+          // Log the file change and send it to the main isolate
+          FileChange.logChange(datOutput, 'create');
+          logState.addLog("Folder created: $datOutput");
+          mainData.sendPort.send({
+            'event': 'file_change',
+            'filePath': datOutput,
+            'action': 'create'
+          });
+        } catch (e, stackTrace) {
           logAndPrint("Failed to process DAT folder");
           logAndPrint(e.toString());
+
+          // Send error message to the main isolate
+          mainData.sendPort.send({
+            'event': 'error',
+            'details': "Failed to process DAT folder: ${e.toString()}",
+            'stackTrace': stackTrace.toString()
+          });
         }
       }
     }
@@ -138,31 +159,34 @@ Future<void> processDatFolders(
 
 /// Determines whether a .dat folder should be processed.
 ///
-/// This function checks the folder against the boss list and ignore list
+/// This function checks the folder against the enemy list and ignore list
 /// to decide if it should be processed.
 ///
 /// - Parameters:
 ///   - baseNameWithExtension: The base name of the folder with its extension.
-///   - bossList: The boss list
+///   - enemyList: The enemy list
 ///   - fileManager: A manager with lists for the categories map, quest, logic files.
 ///   - ignoreList: The list of files to be ignored during processing.
 /// - Returns: `true` if the folder should be processed, `false` otherwise.
-bool shouldProcessDatFolder(String baseNameWithExtension, List<String> bossList,
-    FileCategoryManager fileManager, List<String> ignoreList) {
+bool shouldProcessDatFolder(
+    String baseNameWithExtension,
+    List<String> enemyList,
+    FileCategoryManager fileManager,
+    List<String> ignoreList) {
   // Check if the file should be ignored
   if (ignoreList.contains(baseNameWithExtension) ||
       baseNameWithExtension.startsWith('r5a5')) {
     return false;
   }
 
-  // If the file is a boss file, check if it should be processed
+  // If the file is a enemy file, check if it should be processed
   if (baseNameWithExtension.startsWith('em')) {
-    if (bossList.isNotEmpty && !bossList.contains('None')) {
-      var cleanedBossList = bossList
+    if (enemyList.isNotEmpty && !enemyList.contains('None')) {
+      var cleanedEnemyList = enemyList
           .map((criteria) =>
               criteria.replaceAll('[', '').replaceAll(']', '').trim())
           .toList();
-      for (var criteria in cleanedBossList) {
+      for (var criteria in cleanedEnemyList) {
         if (baseNameWithExtension.contains(criteria)) {
           return true;
         }
@@ -170,7 +194,6 @@ bool shouldProcessDatFolder(String baseNameWithExtension, List<String> bossList,
       // If none of the criteria match, do not process
       return false;
     } else {
-      logAndPrint("Skipping processing due to Boss List conditions.");
       return false;
     }
   }
@@ -182,22 +205,48 @@ bool shouldProcessDatFolder(String baseNameWithExtension, List<String> bossList,
   return fileManager.shouldProcessFile(baseNameWithoutExtension);
 }
 
-/// Processes boss stats based on the given boss list.
+/// Processes enemy stats based on the given enemy list.
 ///
-/// This function modifies boss stats if the boss list is not empty and
-/// contains bosses.
+/// This function modifies enemy stats if the enemy list is not empty and
+/// contains enemies.
 ///
 /// - Parameters:
 ///   - currentDir: The current directory where the processing starts.
-///   - bossList: A list of bosses to be considered during processing.
-///   - bossStats: The stats to be applied to the bosses.
-Future<void> processBossStats(
-    String currentDir, List<String> bossList, double bossStats) async {
-  if (bossList.isNotEmpty && !bossList.contains('None')) {
-    logAndPrint("Started changing boss stats...");
-    await findBossStatFiles(currentDir, bossList, bossStats);
+///   - mainData: The main data containing arguments and configurations.
+///   - reverseStats: A boolean indicating whether to reverse the stats modification.
+///
+Future<void> processEnemyStats(
+  String currentDir,
+  MainData mainData,
+  bool reverseStats,
+) async {
+  List<String> enemyList = mainData.argument['enemyList'];
+  List<String> enemiesToBalance = SpecialEntities.enemiesToBalance;
+  double balanceFactor = 0.1;
+
+  List<File> enemyFiles = await findEnemyStatFiles(currentDir);
+  List<File> filteredFiles =
+      await filterEnemyFiles(enemyFiles, enemiesToBalance);
+
+  if (mainData.isBalanceMode! && reverseStats != true) {
+    for (var file in filteredFiles) {
+      await balanceEnemyToBalanceCsvFiles(file, balanceFactor);
+    }
+  }
+
+  if (enemyList.isNotEmpty && !enemyList.contains('None')) {
+    mainData.sendPort.send("Started changing enemy stats...");
+    for (var file in enemyFiles) {
+      await processCsvFile(file, mainData.argument['enemyStats'], reverseStats);
+    }
+
+    if (reverseStats && mainData.isBalanceMode == true) {
+      for (var filteredFile in filteredFiles) {
+        await normalizeEnemyToBalanceCsvFiles(filteredFile, balanceFactor);
+      }
+    }
   } else {
-    logAndPrint("No Boss Stats modified as argument is 'None'");
+    mainData.sendPort.send("No enemy Stats modified as argument is 'None'");
   }
 }
 
@@ -206,12 +255,14 @@ Future<void> processBossStats(
 /// This function scans the current directory (recursively if specified)
 /// and adds files to the pending files list.
 ///
-Future<void> processDirectory(String currentDir, CliOptions options,
-    List<String> pendingFiles, Set<String> processedFiles) async {
-  logAndPrint(
-      "Starting processing in directory: $currentDir, recursive mode: ${options.recursiveMode}");
+Future<void> getGameFilesForProcessing(
+    String currentDir, MainData mainData) async {
+  mainData.sendPort.send(
+      "Starting processing in directory: $currentDir, recursive mode: ${mainData.options.recursiveMode}");
+  List<String> pendingFiles = mainData.argument['pendingFiles'];
+  Set<String> processedFiles = mainData.argument['processedFiles'];
 
-  if (options.recursiveMode) {
+  if (mainData.options.recursiveMode) {
     pendingFiles.addAll(Directory(currentDir)
         .listSync(recursive: true)
         .where((e) => e is File && !processedFiles.contains(e.path))
@@ -229,13 +280,16 @@ Future<void> processDirectory(String currentDir, CliOptions options,
 /// This function processes each file in the pending list and adds it to the
 /// processed files list upon successful processing.
 ///
-Future<List<String>> processFiles(
+/// Recursevly extracts the child files after extracting the parent
+///
+Future<List<String>> extractGameFiles(
     List<String> pendingFiles,
     Set<String> processedFiles,
     CliOptions options,
-    List<String> bossList,
+    List<String> enemyList,
     List<String> activeOptions,
-    bool? ismanagerFile) async {
+    bool? ismanagerFile,
+    SendPort sendPort) async {
   List<String> errorFiles = [];
 
   while (pendingFiles.isNotEmpty) {
@@ -247,7 +301,7 @@ Future<List<String>> processFiles(
 
     try {
       await handleInput(input, null, options, pendingFiles, processedFiles,
-          bossList, activeOptions, ismanagerFile);
+          enemyList, activeOptions, ismanagerFile, sendPort);
       processedFiles.add(input);
       //  logAndPrint("Successfully processed file: $input, File type: $fileType");
     } on FileHandlingException catch (e) {

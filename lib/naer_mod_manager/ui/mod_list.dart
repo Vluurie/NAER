@@ -1,18 +1,26 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:async';
 import 'dart:io';
-import 'package:NAER/data/boss_data/nier_boss_class_list.dart';
+import 'dart:isolate';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';
-import 'package:NAER/naer_services/randomize_utils/shared_logs.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
-import 'package:NAER/nier_cli/nier_cli.dart';
+import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
+import 'package:NAER/nier_cli/nier_cli_isolation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:provider/provider.dart';
+import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:path/path.dart' as p;
+import 'package:stack_trace/stack_trace.dart';
 
 class Mod {
   final String id;
@@ -56,7 +64,7 @@ class Mod {
 }
 
 // ignore: must_be_immutable
-class ModsList extends StatefulWidget {
+class ModsList extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
   final ModStateManager modStateManager;
   List<Mod> mods;
@@ -71,10 +79,11 @@ class ModsList extends StatefulWidget {
   });
 
   @override
-  State<ModsList> createState() => _ModsListState();
+  ConsumerState<ModsList> createState() => _ModsListState();
 }
 
-class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
+class _ModsListState extends ConsumerState<ModsList>
+    with TickerProviderStateMixin {
   final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   late AnimationController _animationController;
@@ -86,7 +95,6 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    print(widget.cliArguments.ignoreList);
     widget.modStateManager.fetchAndUpdateModsList();
     _animationController = AnimationController(
       vsync: this,
@@ -225,9 +233,9 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       modStateManager: widget.modStateManager,
     );
 
-    return Consumer<ModStateManager>(
+    return provider.Consumer<ModStateManager>(
         builder: (context, modStateManager, child) {
-      final modStateManager = Provider.of<ModStateManager>(context);
+      final modStateManager = provider.Provider.of<ModStateManager>(context);
       final mods = modStateManager.mods;
       return ListView.builder(
         itemCount: mods.length,
@@ -235,63 +243,80 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           Mod mod = mods[index];
           bool modIsInstalled = modStateManager.isModInstalled(mod.id);
           return Card(
+            color: AutomatoThemeColors.brown25(ref),
+            shadowColor: AutomatoThemeColors.primaryColor(ref),
             margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-            elevation: 10,
+            elevation: 15,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: mod.imagePath != null
-                        ? Image.file(
-                            File(mod.imagePath!),
-                            width: 90,
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/mods/mod${mod.id}.png',
-                                width: 150,
-                                height: 150,
-                                fit: BoxFit.cover,
-                                errorBuilder: (BuildContext context,
-                                    Object error, StackTrace? stackTrace) {
-                                  return Container(
-                                    width: 100,
-                                    height: 100,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AutomatoThemeColors.darkBrown(ref)
+                              .withOpacity(0.80),
+                          spreadRadius: 3,
+                          blurRadius: 9,
+                          offset: const Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: mod.imagePath != null
+                          ? Image.file(
+                              File(mod.imagePath!),
+                              width: 90,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/mods/mod${mod.id}.png',
+                                  width: 150,
+                                  height: 150,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (BuildContext context,
+                                      Object error, StackTrace? stackTrace) {
+                                    return Container(
+                                      width: 100,
+                                      height: 100,
+                                      color: AutomatoThemeColors.darkBrown(ref),
+                                      child: Icon(
+                                        size: 80.0,
+                                        Icons.precision_manufacturing_outlined,
+                                        color: AutomatoThemeColors.primaryColor(
+                                            ref),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            )
+                          : Image.asset(
+                              'assets/mods/mod${mod.id}.gif',
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              errorBuilder: (BuildContext context, Object error,
+                                  StackTrace? stackTrace) {
+                                return Container(
+                                  width: 150,
+                                  height: 150,
+                                  color: AutomatoThemeColors.darkBrown(ref),
+                                  child: Icon(
+                                    size: 80.0,
+                                    Icons.precision_manufacturing_outlined,
                                     color:
-                                        const Color.fromARGB(255, 54, 52, 52),
-                                    child: const Icon(
-                                      size: 80.0,
-                                      Icons.precision_manufacturing_outlined,
-                                      color: Color.fromARGB(255, 0, 174, 255),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          )
-                        : Image.asset(
-                            'assets/mods/mod${mod.id}.gif',
-                            width: 150,
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorBuilder: (BuildContext context, Object error,
-                                StackTrace? stackTrace) {
-                              return Container(
-                                width: 150,
-                                height: 150,
-                                color: const Color.fromARGB(255, 54, 52, 52),
-                                child: const Icon(
-                                  size: 80.0,
-                                  Icons.precision_manufacturing_outlined,
-                                  color: Color.fromARGB(255, 0, 174, 255),
-                                ),
-                              );
-                            },
-                          ),
+                                        AutomatoThemeColors.primaryColor(ref),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
@@ -332,7 +357,7 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
                                 mods.removeWhere((item) => item.id == mod.id);
                               });
                             } else {
-                              print("Failed to delete mod metadata.");
+                              //  print("Failed to delete mod metadata.");
                             }
                           }
                         },
@@ -354,15 +379,15 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
     return IconButton(
       icon: isLoading
-          ? const CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-            )
+          ? Lottie.asset('assets/animations/loading.json',
+              width: 40, height: 40, fit: BoxFit.fill)
           : Icon(
-              modIsInstalled ? Icons.check_circle_outline : Icons.download,
+              modIsInstalled
+                  ? Icons.check_circle_outline
+                  : Icons.install_desktop,
               color: modIsInstalled
-                  ? const Color.fromARGB(255, 76, 163, 175)
-                  : Colors.grey,
+                  ? AutomatoThemeColors.primaryColor(ref)
+                  : AutomatoThemeColors.darkBrown(ref),
             ),
       onPressed: isLoading ? null : () => toggleInstallUninstallMod(index),
       tooltip: modIsInstalled ? 'Uninstall Mod' : 'Only Install Mod',
@@ -407,7 +432,8 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
   Widget installRandomizeButton(int modIndex) {
     final mods = widget.modStateManager.mods;
-    final modStateManager = Provider.of<ModStateManager>(context, listen: true);
+    final modStateManager =
+        provider.Provider.of<ModStateManager>(context, listen: true);
     final bool isInstalled = modStateManager.isModInstalled(mods[modIndex].id);
     final bool isInstalling = _installingMods[mods[modIndex].id] ?? false;
 
@@ -417,25 +443,26 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (isInstalling)
-            const CircularProgressIndicator(
-              color: Color.fromARGB(255, 0, 183, 255),
-            )
+            Lottie.asset('assets/animations/loading.json',
+                width: 50, height: 50, fit: BoxFit.fill)
           else
-            ElevatedButton(
+            AutomatoButton(
+              label:
+                  isInstalled ? "Uninstall Mod" : "Install and Randomize Mod",
               onPressed: () => installAndRandomize(modIndex, isInstalled),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: isInstalled
-                    ? Colors.grey
-                    : const Color.fromARGB(255, 76, 163, 175),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              ),
-              child: Text(
-                  isInstalled ? "Uninstall Mod" : "Install and Randomize Mod"),
+              uniqueId: 'install_$modIndex',
+              pointerColor: AutomatoThemeColors.bright(ref),
+              startColor: isInstalled
+                  ? AutomatoThemeColors.darkBrown(ref)
+                  : AutomatoThemeColors.primaryColor(ref),
+              endColor: isInstalled
+                  ? AutomatoThemeColors.dangerZone(ref)
+                  : AutomatoThemeColors.primaryColor(ref),
+              baseColor: isInstalled
+                  ? Colors.grey
+                  : AutomatoThemeColors.darkBrown(ref),
+              fontSize: 18,
+              fontFamily: 'Arial',
             ),
         ],
       ),
@@ -443,9 +470,9 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
   }
 
   Future<void> installAndRandomize(int modIndex, bool isInstalled) async {
-    final logState = Provider.of<LogState>(context, listen: false);
+    final logState = provider.Provider.of<LogState>(context, listen: false);
     final modStateManager =
-        Provider.of<ModStateManager>(context, listen: false);
+        provider.Provider.of<ModStateManager>(context, listen: false);
     var mods = widget.modStateManager.mods;
     final ModInstallHandler modInstallHandler = ModInstallHandler(
       cliArguments: widget.cliArguments,
@@ -521,8 +548,13 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
           "${await FileChange.ensureSettingsDirectory()}/Modpackage/$filePath";
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
 
-      bool shouldProcess = _shouldProcessFile(baseNameWithoutExtension,
-          questOptions, mapOptions, phaseOptions, bossList);
+      bool shouldProcess = _shouldProcessFile(
+          baseNameWithoutExtension,
+          GameFileOptions.questOptions,
+          GameFileOptions.mapOptions,
+          GameFileOptions.enemyOptions,
+          GameFileOptions.phaseOptions,
+          allEmForStatsChangeList);
 
       if (!shouldProcess) {
         bool copySuccess = await _copyFile(
@@ -577,13 +609,34 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
 
   Future<bool> _executeCLICommand(
       LogState logState, List<String> arguments) async {
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
     try {
-      bool isManagerFile = true;
-      arguments.modifyArgumentsForForcedBossList();
-      await nierCli(arguments, isManagerFile);
+      arguments.modifyArgumentsForForcedEnemyList();
+      final receivePort = ReceivePort();
+
+      receivePort.listen((message) {
+        if (message is String) {
+          logState.addLog(message);
+        }
+      });
+
+      Map<String, dynamic> args = {
+        'processArgs': arguments,
+        'isManagerFile': true,
+        'sendPort': receivePort.sendPort,
+        'backUp': false,
+        'isBalanceMode': globalState.isBalanceMode
+      };
+      globalState.isModManagerPageProcessing = true;
+      await compute(runNierCliIsolated, args);
+      globalLog("Randomization process finished the mod file successfully.");
+      globalState.isModManagerPageProcessing = false;
       return true;
-    } catch (e) {
+    } catch (e, stacktrace) {
       logState.addLog("Error executing CLI command: $e");
+      globalState.isModManagerPageProcessing = false;
+      globalLog(Trace.from(stacktrace).toString());
       return false;
     }
   }
@@ -592,18 +645,20 @@ class _ModsListState extends State<ModsList> with TickerProviderStateMixin {
       String baseNameWithoutExtension,
       List<String> questOptions,
       List<String> mapOptions,
+      List<String> enemyOptions,
       List<String> phaseOptions,
-      List<Boss> bossList) {
-    // Check against quest, map, and phase options first
+      List<Enemy> enemyList) {
+    // Check against quest, map, enemy, and phase options first
     if (questOptions.contains(baseNameWithoutExtension) ||
         mapOptions.contains(baseNameWithoutExtension) ||
+        enemyOptions.contains(baseNameWithoutExtension) ||
         phaseOptions.contains(baseNameWithoutExtension)) {
       return true;
     }
 
     var allEmIdentifiers = <String>{};
-    for (var boss in bossList) {
-      allEmIdentifiers.addAll(boss.emIdentifiers
+    for (var enemy in enemyList) {
+      allEmIdentifiers.addAll(enemy.emIdentifiers
           .expand((id) => id.split(',').map((item) => item.trim())));
     }
 
