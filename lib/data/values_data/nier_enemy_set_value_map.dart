@@ -5,7 +5,8 @@ class EnemyValues {
       'setFlag': [0x20000000, 0x10000010]
     },
     'em0030': {
-      'setType': [1]
+      'setType': [0, 1, 2, 3],
+      'setFlag': [0x9004000]
     },
     'em0000': {
       'setType': [0, 1, 2, 3, 4],

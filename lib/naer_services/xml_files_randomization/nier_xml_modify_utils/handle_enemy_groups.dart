@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:NAER/data/enemy_lists_data/nier_boss_level_list.dart';
+import 'package:NAER/data/sorted_data/nier_shooting_enemy_curve_action_ids.dart';
 import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart' as xml;
@@ -212,4 +213,29 @@ bool isEnemyGenerator(xml.XmlElement actionElement) {
   var codeElement = actionElement.findElements('code').firstOrNull;
   return codeElement != null &&
       codeElement.getAttribute('str') == 'EnemyGenerator';
+}
+
+/// Checks if the given XML element contains a ShootingEnemyCurveAction by traversing its child elements.
+///
+/// This function performs the following tasks:
+/// - Recursively iterates over all elements within the given [element].
+/// - Collects the text of all 'id' elements.
+/// - Compares these 'id' texts against a predefined list of identifiers in [ShootingEnemyCurveAction.identifier].
+/// - Returns true if any 'id' matches an identifier in the list; otherwise, returns false.
+///
+/// Parameters:
+/// - [element]: The XML element to check for ShootingEnemyCurveAction.
+///
+/// Returns:
+/// - A boolean indicating whether the given element contains a ShootingEnemyCurveAction.
+bool isShootingEnemyCurveAction(xml.XmlElement element) {
+  for (var idElement in element.findAllElements('id')) {
+    var idText = idElement.innerText;
+    for (var identifier in ShootingEnemyCurveAction.identifier) {
+      if (identifier['id'] == idText) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

@@ -8,7 +8,10 @@ import 'package:xml/xml.dart' as xml;
 /// Handles the processing of an enemy entity object in the XML element.
 ///
 /// This function performs different tasks based on the given parameters:
-/// - Finds the mapped group from the [userSelectedEnemyData] associated with the enemy number
+/// - If the XML element represents a ShootingEnemyCurveAction, it handles the level using
+///   the [handleLevel] method if [handleLevels] is true, sets specific values with [setSpecificValues],
+///   and continues processing without randomizing the enemy ID.
+/// - Otherwise, it finds the mapped group from the [userSelectedEnemyData] associated with the enemy number
 ///   (e.g., [em0030] like [Fly] or [em0010] like [Ground]) in the XML element.
 /// - Replaces the enemy number with a new random one from the user-selected data map and sets the
 ///   specific values for the new enemy number if [randomizeAndSetValues] is true.
@@ -16,7 +19,7 @@ import 'package:xml/xml.dart' as xml;
 ///
 /// The function includes logic to avoid infinite loops when selecting a new enemy number:
 /// - If after 10 iterations a big enemy is still selected and [isSpawnActionTooSmall] is true,
-///   it will default to the original enemy number object, randomizes there values and stop the loop.
+///   it will default to the original enemy number object, randomize its values and stop the loop.
 ///
 /// Parameters:
 /// - [objIdElement]: The XML element containing the enemy object ID.
@@ -36,6 +39,14 @@ Future<void> handleEnemyEntityObject(
   bool handleLevels = false,
   bool randomizeAndSetValues = false,
 }) async {
+  // Check if part of ShootingEnemyCurveAction
+  var actionElement = findRootActionElement(objIdElement);
+  if (actionElement != null && isShootingEnemyCurveAction(actionElement)) {
+    await handleShootingEnemyCurveAction(
+        objIdElement, enemyLevel, handleLevels);
+  }
+
+  // Proceed with the regular processing
   // Find the group corresponding to the enemy number in the XML element
   String? group =
       findGroupForEmNumber(objIdElement.innerText, SortedEnemyGroup.enemyData);
@@ -73,24 +84,6 @@ Future<void> handleEnemyEntityObject(
           objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
     }
   }
-}
-
-/// Handles other enemies by randomizing their IDs and setting specific values.
-///
-/// This function calls [handleEnemyEntityObject] with the [randomizeAndSetValues] parameter set to true.
-///
-/// Parameters:
-/// - [objIdElement]: The XML element containing the enemy object ID.
-/// - [userSelectedEnemyData]: A map of user-selected enemy data grouped by categories.
-/// - [enemyLevel]: The level of the enemy.
-Future<void> handleOtherEnemies(
-    xml.XmlElement objIdElement,
-    Map<String, List<String>> userSelectedEnemyData,
-    String enemyLevel,
-    bool isSpawnActionTooSmall) async {
-  await handleEnemyEntityObject(
-      objIdElement, userSelectedEnemyData, enemyLevel, isSpawnActionTooSmall,
-      randomizeAndSetValues: true);
 }
 
 /// Handles selected object ID enemies by randomizing their IDs, setting specific values, and handling levels.
@@ -152,4 +145,29 @@ Future<void> handleDefaultObjectId(
       '',
       randomizeAndSetValues: true,
       isSpawnActionTooSmall);
+}
+
+/// Handles the processing if the element is part of a ShootingEnemyCurveAction.
+///
+/// This function performs the following tasks:
+/// - Handles the level using [handleLevel] if [handleLevels] is true,
+///   sets specific values with [setSpecificValues].
+///
+/// Parameters:
+/// - [objIdElement]: The XML element containing the enemy object ID.
+/// - [enemyLevel]: The level of the enemy.
+/// - [handleLevels]: A boolean flag indicating if enemy levels should be handled.
+///
+/// Returns:
+/// - A Future that completes when the processing is done.
+Future<void> handleShootingEnemyCurveAction(
+  xml.XmlElement objIdElement,
+  String enemyLevel,
+  bool handleLevels,
+) async {
+  if (handleLevels) {
+    await handleLevel(
+        objIdElement, enemyLevel, SortedEnemyGroup.enemyData, false);
+  }
+  setSpecificValues(objIdElement, objIdElement.innerText);
 }
