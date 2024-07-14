@@ -37,7 +37,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
       gridHeight = 450.0;
     } else if (MediaQuery.of(context).size.width < 1500) {
       crossAxisCount = 6;
-      gridHeight = 550.0;
+      gridHeight = 500.0;
     } else {
       crossAxisCount = 9;
       gridHeight = 800.0;
@@ -78,7 +78,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width - 100.0,
+          width: MediaQuery.of(context).size.width - 200.0,
           child: GridView.builder(
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
