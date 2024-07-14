@@ -167,7 +167,6 @@ class SortedEnemyGroup {
       "em5300",
       "em6200",
       "em0019",
-      "em1101",
       "em3003",
       "em011a",
       "em5400",

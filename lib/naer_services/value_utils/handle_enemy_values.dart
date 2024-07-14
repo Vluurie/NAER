@@ -9,8 +9,7 @@ import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 /// If the values are null, it removes 'setType', 'setRtn', and 'setFlag' elements
 /// from the XML. Otherwise, it randomly chooses between setting 'setType' or 'setFlag'
 /// based on the [em_number_values_map] and updates the XML accordingly.
-/// Additionally, it ensures the 'rate' element is always positioned immediately
-/// after the 'objId' element.
+/// Additionally, it ensures the 'rate' and 'levelRange' elements are always positioned correctly.
 ///
 /// - Parameters:
 ///   - objIdElement: The XML element to update.
@@ -30,6 +29,7 @@ void setSpecificValues(xml.XmlElement objIdElement, String newEmNumber) {
 
   _updateElement(objIdElement, selection);
   _ensureRateIsCorrectlyPositioned(objIdElement);
+  _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
 }
 
 /// Chooses which element to set based on the provided values.
@@ -115,6 +115,7 @@ void _updateElement(
 
   int objIdIndex = _findObjIdIndex(parentValueElement);
   int rateIndex = _findRateIndex(parentValueElement);
+  int levelRangeIndex = _findLevelRangeIndex(parentValueElement);
   int insertIndex = rateIndex != -1 ? rateIndex + 1 : objIdIndex + 1;
 
   XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
@@ -122,6 +123,33 @@ void _updateElement(
 
   XmlElementHandler.updateOrCreateElement(
       parentValueElement, selection.key, null, insertIndex, selection.value);
+
+  if (levelRangeIndex != -1 && levelRangeIndex != objIdIndex + 2) {
+    _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
+  }
+}
+
+/// Ensures the 'levelRange' element is correctly positioned after 'objId' and 'rate' (if it exists) and before 'setType' and 'setFlag' elements.
+///
+/// This function finds the 'levelRange' element and repositions it if necessary.
+///
+/// - Parameters:
+///   - objIdElement: The XML element to check and adjust.
+void _ensureLevelRangeIsCorrectlyPositioned(xml.XmlElement objIdElement) {
+  var parentValueElement = _findParentValueElement(objIdElement);
+  if (parentValueElement == null) return;
+
+  int objIdIndex = _findObjIdIndex(parentValueElement);
+  int rateIndex = _findRateIndex(parentValueElement);
+  int levelRangeIndex = _findLevelRangeIndex(parentValueElement);
+  int insertIndex = rateIndex != -1 ? rateIndex + 1 : objIdIndex + 1;
+
+  if (levelRangeIndex != -1 && levelRangeIndex != insertIndex) {
+    var levelRangeElement =
+        parentValueElement.children[levelRangeIndex] as xml.XmlElement;
+    parentValueElement.children.removeAt(levelRangeIndex);
+    parentValueElement.children.insert(insertIndex, levelRangeElement);
+  }
 }
 
 /// Ensures the 'rate' element is correctly positioned immediately after the 'objId' element.
@@ -185,6 +213,18 @@ int _findObjIdIndex(xml.XmlElement parentValueElement) {
 int _findRateIndex(xml.XmlElement parentValueElement) {
   return parentValueElement.children.indexWhere(
       (element) => element is xml.XmlElement && element.name.local == 'rate');
+}
+
+/// Finds the index of the 'levelRange' element within the parent 'value' element.
+///
+/// This function searches for the 'levelRange' element and returns its index.
+///
+/// - Parameters:
+///   - parentValueElement: The parent 'value' element to search within.
+/// - Returns: The index of the 'levelRange' element.
+int _findLevelRangeIndex(xml.XmlElement parentValueElement) {
+  return parentValueElement.children.indexWhere((element) =>
+      element is xml.XmlElement && element.name.local == 'levelRange');
 }
 
 /// Removes 'setType', 'setRtn', and 'setFlag' elements from the XML element.
