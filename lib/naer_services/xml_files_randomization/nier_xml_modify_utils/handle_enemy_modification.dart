@@ -1,7 +1,7 @@
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
-import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_values.dart';
+import 'package:NAER/naer_services/xml_files_randomization/nier_xml_file_randomizer.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:xml/xml.dart' as xml;
@@ -41,40 +41,6 @@ Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
       await handleLevel(action.objIdElement, action.enemyLevel,
           SortedEnemyGroup.enemyData, false);
     }
-  }
-}
-
-/// Randomizes and sets a new enemy number for the given action XML element.
-///
-/// This function selects a new random enemy number from the user-selected data map and
-/// replaces the text in the XML element with this new number. It also ensures that
-/// an infinite loop is avoided by limiting the number of iterations.
-/// After it modifies also the set values of the specific em element if present in the em value map.
-///
-/// Parameters:
-/// - [element]: The parameters for handling enemy entity object.
-/// - [group]: The group of the enemy number.
-void randomizeEnemyNumber(EnemyEntityObjectAction action, String group) {
-  if (action.randomizeAndSetValues) {
-    String newEmNumber;
-    int iterationCount = 0;
-    do {
-      // Select a random new enemy number from the user-selected data group
-      newEmNumber = action.userSelectedEnemyData[group]![
-          random.nextInt(action.userSelectedEnemyData[group]!.length)];
-      iterationCount++;
-      // Break the loop if it iterates more than 10 times to avoid infinite loops
-      if (iterationCount > 10) {
-        newEmNumber = action.objIdElement.innerText;
-        break;
-      }
-    } while (newEmNumber == 'em3004' ||
-        (isBigEnemy(newEmNumber) && action.isSpawnActionTooSmall));
-
-    // Replace the text in the XML element with the new enemy number
-    XmlElementHandler.replaceTextInXmlElement(action.objIdElement, newEmNumber);
-    // Set specific values for the new enemy number
-    setSpecificValues(action.objIdElement, newEmNumber);
   }
 }
 
