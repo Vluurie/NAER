@@ -100,4 +100,16 @@ class EnemyEntityObjectAction {
     this.handleLevels = false,
     this.randomizeAndSetValues = false,
   });
+
+  @override
+  String toString() {
+    return 'EnemyEntityObjectAction {\n'
+        '  objIdElement: ${objIdElement.toXmlString(pretty: true)},\n'
+        '  userSelectedEnemyData: $userSelectedEnemyData,\n'
+        '  enemyLevel: $enemyLevel,\n'
+        '  isSpawnActionTooSmall: $isSpawnActionTooSmall,\n'
+        '  handleLevels: $handleLevels,\n'
+        '  randomizeAndSetValues: $randomizeAndSetValues\n'
+        '}';
+  }
 }

@@ -98,7 +98,7 @@ void removeAliases(xml.XmlElement element, List<String> aliasList) {
 /// Checks if the given `objId` corresponds to a boss.
 bool isBoss(objId) {
   // Check if the bossData map contains a "Boss" key and if it includes the objId
-  return bossData["Boss"]?.contains(objId) ?? false;
+  return BossData.objId["Boss"]?.contains(objId) ?? false;
 }
 
 /// Checks if the given `objId` corresponds to a big enemy.
