@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:args/args.dart';
+import 'package:xml/xml.dart' as xml;
 
 /// MainData contains the main configuration and arguments required for processing the game files.
 ///
@@ -80,4 +81,23 @@ class NierCliArgs {
         '  isBalanceMode: $isBalanceMode\n'
         '}';
   }
+}
+
+/// Data class for handling enemy entity object parameters
+class EnemyEntityObjectAction {
+  final xml.XmlElement objIdElement;
+  final Map<String, List<String>> userSelectedEnemyData;
+  final String enemyLevel;
+  final bool isSpawnActionTooSmall;
+  final bool handleLevels;
+  final bool randomizeAndSetValues;
+
+  EnemyEntityObjectAction({
+    required this.objIdElement,
+    required this.userSelectedEnemyData,
+    required this.enemyLevel,
+    required this.isSpawnActionTooSmall,
+    this.handleLevels = false,
+    this.randomizeAndSetValues = false,
+  });
 }
