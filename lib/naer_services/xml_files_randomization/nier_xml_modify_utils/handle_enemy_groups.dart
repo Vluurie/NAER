@@ -36,22 +36,6 @@ bool isExcludedGroup(String group) {
   return excludedGroups.contains(group);
 }
 
-/// Main random select method for the randomization of enemies
-///
-/// Gets a random enemy number from the specified group like Fly or Ground enemies.
-///
-/// Parameters:
-/// - [group]: The group name from which to select a random enemy number.
-/// - [sortedEnemyData]: A map of sorted enemy data grouped by categories.
-///
-/// Returns a randomly selected enemy number from the group.
-String getRandomEmNumberFromGroup(
-    String group, Map<String, List<String>> sortedEnemyData) {
-  var groupList = List.from(sortedEnemyData[group]!);
-  groupList.shuffle(); // Shuffle for better randomness
-  return groupList[random.nextInt(groupList.length)];
-}
-
 /// Reads sorted enemy data groups from the created [temp_sorted_enemies.dart} file.
 ///
 /// Parameters:
