@@ -41,6 +41,7 @@ bin/configExamples
 bin/config.txt
 NAER_Settings/
 bin/fork/nier_cli.exe
+lib/nier_cli/nier_cli_fork_utils/utils/new_impl_tests/
 
 
 
