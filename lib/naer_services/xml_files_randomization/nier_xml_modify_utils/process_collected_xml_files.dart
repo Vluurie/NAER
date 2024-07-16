@@ -16,9 +16,8 @@ import 'package:xml/xml.dart' as xml;
 ///
 /// [file] is the XML file to be processed.
 /// [sortedEnemyData] is the map of sorted enemy data.
-/// [enemyLevel] specifies the level of enemies to be modified.
-/// [enemyCategory] specifies the category of enemies to be modified.
 /// [importantIds] is the ImportantIDs object containing metadata IDs.
+/// [mainData] specifies the main data to be used.
 Future<void> processCollectedXmlFileForRandomization(
     File file,
     Map<String, List<String>> sortedEnemyData,

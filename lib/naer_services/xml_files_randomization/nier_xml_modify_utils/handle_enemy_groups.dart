@@ -96,19 +96,13 @@ void removeAliases(xml.XmlElement element, List<String> aliasList) {
 }
 
 /// Checks if the given `objId` corresponds to a boss.
-bool isBoss(objId) {
-  // Check if the bossData map contains a "Boss" key and if it includes the objId
-  return BossData.objId["Boss"]?.contains(objId) ?? false;
+bool isBoss(String objId) {
+  return BossData.bossIds.contains(objId);
 }
 
 /// Checks if the given `objId` corresponds to a big enemy.
 bool isBigEnemy(String objId) {
-  for (var enemy in SpecialEntities.bigEnemies) {
-    if (objId == enemy) {
-      return true;
-    }
-  }
-  return false;
+  return SpecialEntities.bigEnemies.contains(objId);
 }
 
 /// Checks if an enemy with a given `emNumber` is marked for deletion in the `enemyData`.
@@ -140,13 +134,13 @@ bool checkImportantIds(
 
 /// Checks if a given action ID is listed in a collection of bigSpawnEnemySkipIds and
 /// updates the status of the action.
-bool checkTooSmallSpawnAction(
-    String? actionId, bigSpawnEnemySkipIds, bool isSpawnActionTooSmall) {
+bool checkTooSmallSpawnAction(String? actionId,
+    Map<String, Set<String>> bigSpawnEnemySkipIds, bool isSpawnActionTooSmall) {
   // Check if the actionId is not null
   if (actionId != null) {
     // Iterate through each entry in the big spawn enemies skip map
     for (var entry in bigSpawnEnemySkipIds.entries) {
-      // Check if the entry's value contains the actionId
+      // Check if the entry's value (Set) contains the actionId
       if (entry.value.contains(actionId)) {
         // Set isSpawnActionTooSmall to true if actionId is found
         isSpawnActionTooSmall = true;
@@ -202,10 +196,10 @@ bool isEnemyGenerator(xml.XmlElement actionElement) {
 /// Checks if the given XML element contains a ShootingEnemyCurveAction by traversing its child elements.
 ///
 /// This function performs the following tasks:
-/// - Recursively iterates over all elements within the given [element].
+/// - Iterates over all elements within the given [element].
 /// - Collects the text of all 'id' elements.
-/// - Compares these 'id' texts against a predefined list of identifiers in [ShootingEnemyCurveAction.identifier].
-/// - Returns true if any 'id' matches an identifier in the list; otherwise, returns false.
+/// - Compares these 'id' texts against a predefined set of identifiers in [ShootingEnemyCurveAction.identifierSet].
+/// - Returns true if any 'id' matches an identifier in the set; otherwise, returns false.
 ///
 /// Parameters:
 /// - [element]: The XML element to check for ShootingEnemyCurveAction.
@@ -215,10 +209,8 @@ bool isEnemyGenerator(xml.XmlElement actionElement) {
 bool isShootingEnemyCurveAction(xml.XmlElement element) {
   for (var idElement in element.findAllElements('id')) {
     var idText = idElement.innerText;
-    for (var identifier in ShootingEnemyCurveAction.identifier) {
-      if (identifier['id'] == idText) {
-        return true;
-      }
+    if (ShootingEnemyCurveAction.identifierSet.contains(idText)) {
+      return true;
     }
   }
   return false;

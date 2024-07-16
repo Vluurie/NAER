@@ -27,20 +27,27 @@ int fileCount = 0;
 /// - [group]: The group of the enemy number.
 void randomizeEnemyNumber(EnemyEntityObjectAction action, String group) {
   if (action.randomizeAndSetValues) {
+    final List<String> enemyNumbers = action.userSelectedEnemyData[group]!;
     String newEmNumber;
-    int iterationCount = 0;
-    do {
-      // Select a random new enemy number from the user-selected data group
-      newEmNumber = action.userSelectedEnemyData[group]![
-          random.nextInt(action.userSelectedEnemyData[group]!.length)];
-      iterationCount++;
-      // Break the loop if it iterates more than 10 times to avoid infinite loops
-      if (iterationCount > 10) {
-        newEmNumber = action.objIdElement.innerText;
-        break;
-      }
-    } while (newEmNumber == 'em3004' ||
-        (isBigEnemy(newEmNumber) && action.isSpawnActionTooSmall));
+
+    // Use a Set to avoid duplicate checks and speed up lookups
+    final Set<String> invalidNumbers = {'em3004'};
+    if (action.isSpawnActionTooSmall) {
+      invalidNumbers.addAll(enemyNumbers.where(isBigEnemy));
+    }
+
+    // Filter valid enemy numbers beforehand
+    final List<String> validEnemyNumbers = enemyNumbers
+        .where((enemyNum) => !invalidNumbers.contains(enemyNum))
+        .toList();
+
+    // Check if there are any valid enemy numbers available
+    if (validEnemyNumbers.isEmpty) {
+      newEmNumber = action.objIdElement.innerText;
+    } else {
+      // Get a random valid enemy number
+      newEmNumber = validEnemyNumbers[random.nextInt(validEnemyNumbers.length)];
+    }
 
     // Replace the text in the XML element with the new enemy number
     XmlElementHandler.replaceTextInXmlElement(action.objIdElement, newEmNumber);

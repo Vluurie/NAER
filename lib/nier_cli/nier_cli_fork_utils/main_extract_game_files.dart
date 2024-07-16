@@ -21,7 +21,8 @@ Future<void> extractGameFilesProcess(
 
   if (!mainData.isManagerFile!) {
     mainData.sendPort.send('DO NOT CLOSE TILL FINISHED!');
-    mainData.sendPort.send('Extracting game files, can take up to ~ 1 min....');
+    mainData.sendPort.send(
+        'Extracting game files, this can take some time so prepair your coffee....');
   }
 
   // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
