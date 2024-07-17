@@ -48,11 +48,8 @@ ByteDataWrapper xmlToYax(XmlElement root) {
   List<_XmlNode> nodes = [];
   void addNodeToList(XmlElement node, int indentation) {
     int tagId = _getTagId(node);
-    String nodeText = node.children
-        .whereType<XmlText>()
-        .map((e) => e.innerText)
-        .join()
-        .trim();
+    String nodeText =
+        node.children.whereType<XmlText>().map((e) => e.text).join().trim();
     nodes.add(_XmlNode(indentation, tagId, 0, nodeText));
     for (var child in node.childElements) {
       addNodeToList(child, indentation + 1);
