@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -231,53 +230,17 @@ class LogOutputState extends ConsumerState<LogOutput> {
                                 ),
                               ),
                               if (isLastMessageProcessing())
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
+                                Center(
+                                  child: SizedBox(
+                                    width: 150,
+                                    height: 150,
+                                    child: AutomatoLoading(
+                                      color: AutomatoThemeColors.bright(ref),
+                                      translateX: 200,
+                                      svgString:
+                                          AutomatoSvgStrings.automatoSvgStrHead,
                                     ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 )
                             ],
                           );
@@ -293,19 +256,21 @@ class LogOutputState extends ConsumerState<LogOutput> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 60.0, horizontal: 20.0),
-                  child: AutomatoButton(
-                      label: "Clear Log",
-                      onPressed: clearLogMessages,
-                      uniqueId: "clearLog")),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 60.0, horizontal: 20.0),
+                child: AutomatoButton(
+                    label: "Clear Log",
+                    onPressed: clearLogMessages,
+                    uniqueId: "clearLog"),
+              ),
               Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 30.0, horizontal: 10.0),
-                  child: AutomatoButton(
-                      label: "Copy CLI Arguments",
-                      onPressed: () => onCopyArgsPressed(context),
-                      uniqueId: "copyArguments")),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 30.0, horizontal: 10.0),
+                child: AutomatoButton(
+                    label: "Copy CLI Arguments",
+                    onPressed: () => onCopyArgsPressed(context),
+                    uniqueId: "copyArguments"),
+              ),
             ],
           )
         ],
