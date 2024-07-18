@@ -28,7 +28,8 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(
+                    color: AutomatoThemeColors.textColor(ref), fontSize: 16),
               ),
             ),
             Checkbox(
@@ -70,14 +71,14 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
             child: Text(
               "Select Categories for Randomization",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AutomatoThemeColors.textColor(ref),
               ),
             ),
           ),
@@ -123,11 +124,13 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
                     child: ListTile(
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 16.0),
-                      leading: Icon(icon, color: Colors.white, size: 28),
+                      leading: Icon(icon,
+                          color: AutomatoThemeColors.textColor(ref), size: 28),
                       title: Text(
                         item.description,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(
+                            color: AutomatoThemeColors.textColor(ref),
+                            fontSize: 14),
                       ),
                       trailing: Transform.scale(
                         scale: 1,

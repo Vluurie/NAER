@@ -31,14 +31,14 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
             child: Text(
               "Adjust Enemy Stats.",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AutomatoThemeColors.textColor(ref),
               ),
             ),
           ),
@@ -50,8 +50,8 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                 !globalState.stats["None"]!
                     ? Text(
                         "Enemy Stats Multiplier - ${globalState.enemyStats.toStringAsFixed(1)}",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AutomatoThemeColors.textColor(ref),
                           fontSize: 16,
                         ),
                       )
@@ -62,8 +62,10 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: Color.lerp(const Color.fromARGB(0, 41, 39, 39),
-                                  Colors.red, globalState.enemyStats / 5.0)!
+                          color: Color.lerp(
+                                  const Color.fromARGB(0, 41, 39, 39),
+                                  AutomatoThemeColors.dangerZone(ref),
+                                  globalState.enemyStats / 5.0)!
                               .withOpacity(0.1),
                           blurRadius:
                               10.0 + (globalState.enemyStats / 5.0) * 10.0,
@@ -99,7 +101,8 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
               Expanded(
                 child: CheckboxListTile(
                   activeColor: AutomatoThemeColors.primaryColor(ref),
-                  title: const Text(
+                  title: Text(
+                    style: TextStyle(color: AutomatoThemeColors.textColor(ref)),
                     "Select All",
                     textScaler: TextScaler.linear(0.8),
                   ),
@@ -120,7 +123,10 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                 child: CheckboxListTile(
                   tristate: false,
                   activeColor: AutomatoThemeColors.dangerZone(ref),
-                  title: const Text("None", textScaler: TextScaler.linear(0.8)),
+                  title: Text("None",
+                      textScaler: const TextScaler.linear(0.8),
+                      style:
+                          TextStyle(color: AutomatoThemeColors.textColor(ref))),
                   value: globalState.stats["None"],
                   onChanged: (bool? value) {
                     setState(() {
@@ -178,8 +184,9 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                           ),
                           title: Text(
                             enemy.name,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 16),
+                            style: TextStyle(
+                                color: AutomatoThemeColors.textColor(ref),
+                                fontSize: 16),
                           ),
                           trailing: Checkbox(
                             value: enemy.isSelected,

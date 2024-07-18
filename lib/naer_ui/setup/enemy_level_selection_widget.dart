@@ -41,14 +41,14 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10.0),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
                 child: Text(
                   "Select if you want to change the Enemies Levels.",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AutomatoThemeColors.textColor(ref),
                   ),
                 ),
               ),
@@ -60,8 +60,8 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                     if (globalState.level['None'] == false)
                       Text(
                         "Enemy Level: ${globalState.enemyLevel}",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AutomatoThemeColors.textColor(ref),
                           fontSize: 16,
                         ),
                       ),
@@ -88,7 +88,9 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                   child: CheckboxListTile(
                     title: Text(
                       levelKey,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(
+                          color: AutomatoThemeColors.textColor(ref),
+                          fontSize: 16),
                     ),
                     value: globalState.level[levelKey],
                     onChanged: (bool? newValue) {
@@ -101,7 +103,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                       });
                     },
                     secondary: Icon(getIconForLevel(levelKey),
-                        color: AutomatoThemeColors.bright(ref), size: 28),
+                        color: AutomatoThemeColors.textColor(ref), size: 28),
                     activeColor: AutomatoThemeColors.primaryColor(ref),
                     checkColor: AutomatoThemeColors.darkBrown(ref),
                     contentPadding:
