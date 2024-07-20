@@ -143,6 +143,7 @@ Future<bool> checkNotAllCpkFilesExist(String directory) async {
     'data016.cpk',
     'data002.cpk',
     'data012.cpk',
+    'data100.cpk'
   ];
 
   // Check if each file exists in the directory
@@ -159,12 +160,12 @@ Future<bool> checkNotAllCpkFilesExist(String directory) async {
 }
 
 /// Checks if the DLC file 'data100.cpk' exists in the given directory and
-/// if its size is approximately 937 MB to determine if the DLC is present.
+/// if its size is approximately 928 MB (973,603,536 bytes) to determine if the DLC is present.
 ///
 /// - Parameters:
 ///   - directoryPath: The path of the directory to search in.
 ///
-/// - Returns: true if the file exists and its size is approximately 937 MB, false otherwise.
+/// - Returns: true if the file exists and its size is approximately 928 MB, false otherwise.
 Future<bool> hasDLC(String directoryPath) async {
   final Directory directory = Directory(directoryPath);
   const String fileName = 'data100.cpk';
@@ -173,14 +174,16 @@ Future<bool> hasDLC(String directoryPath) async {
   if (await file.exists()) {
     // Getting file size in bytes
     final int fileSize = await file.length();
-    // 937 MB in bytes
-    const int dlcSizeThreshold = 937 * 1024 * 1024; // 937 MB in bytes
-    // Introducing a margin of error ±10 MB in bytes
+    // 928 MB in bytes
+    const int dlcSizeThreshold = 928 * 1024 * 1024; // 928 MB in bytes
+    // Introducing a margin of error ±5 MB in bytes
     const int marginOfError = 5 * 1024 * 1024; // 5 MB in bytes
+    // Upper limit to exclude sizes around 937 MB
+    const int upperLimit = 937 * 1024 * 1024; // 937 MB in bytes
 
-    // Check if the file size is within the range
+    // Check if the file size is approximately 928 MB and less than 937 MB
     return fileSize >= (dlcSizeThreshold - marginOfError) &&
-        fileSize <= (dlcSizeThreshold + marginOfError);
+        fileSize < upperLimit;
   }
   return false;
 }

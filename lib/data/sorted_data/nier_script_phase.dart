@@ -1,8 +1,9 @@
 class ScriptingPhase {
   final String id;
   final String description;
+  final bool? dlc;
 
-  ScriptingPhase({required this.id, required this.description});
+  ScriptingPhase({required this.id, required this.description, this.dlc});
 
   static final List<ScriptingPhase> scriptingPhases = [
     ScriptingPhase(
@@ -10,7 +11,8 @@ class ScriptingPhase {
     ScriptingPhase(
         id: "p200", description: "Phase after big bang route C (ph2/p200.dat)"),
     ScriptingPhase(id: "p300", description: "Phase Route C (ph3/p300.dat)"),
-    ScriptingPhase(id: "p400", description: "DLC Phase (ph4/p400.dat)"),
+    ScriptingPhase(
+        id: "p400", description: "DLC Phase (ph4/p400.dat)", dlc: true),
     ScriptingPhase(id: "corehap", description: "Core Phase (core/corehap.dat)"),
   ];
 

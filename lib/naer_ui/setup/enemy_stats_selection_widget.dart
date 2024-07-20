@@ -1,4 +1,4 @@
-import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/naer_ui/animations/shacke_animation_widget.dart';
 import 'package:NAER/naer_ui/other/shacking_message_list.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -16,7 +16,7 @@ class EnemyStatsSelection extends ConsumerStatefulWidget {
 
 class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
   String getSelectedEnemiesArgument() {
-    List<List<String>> selectedEnemies = allEmForStatsChangeList
+    List<List<String>> selectedEnemies = EnemyList.getDLCFilteredEnemies(ref)
         .where((enemy) => enemy.isSelected)
         .map((enemy) => enemy.emIdentifiers)
         .toList();
@@ -111,7 +111,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                     setState(() {
                       globalState.stats["Select All"] = value ?? false;
                       globalState.stats["None"] = !value!;
-                      for (var enemy in allEmForStatsChangeList) {
+                      for (var enemy in EnemyList.getDLCFilteredEnemies(ref)) {
                         enemy.isSelected = value;
                       }
                       getSelectedEnemiesArgument();
@@ -132,7 +132,8 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                     setState(() {
                       if (value == true || !globalState.stats["Select All"]!) {
                         globalState.stats["None"] = true;
-                        for (var enemy in allEmForStatsChangeList) {
+                        for (var enemy
+                            in EnemyList.getDLCFilteredEnemies(ref)) {
                           enemy.isSelected = false;
                         }
                         getSelectedEnemiesArgument();
@@ -156,8 +157,10 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: Column(
-                      children:
-                          allEmForStatsChangeList.asMap().entries.map((entry) {
+                      children: EnemyList.getDLCFilteredEnemies(ref)
+                          .asMap()
+                          .entries
+                          .map((entry) {
                         int index = entry.key;
                         var enemy = entry.value;
                         final GlobalKey<ShakeAnimationWidgetState> shakeKey =
@@ -194,10 +197,10 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                               setState(() {
                                 enemy.isSelected = newValue ?? false;
                                 globalState.stats["Select All"] =
-                                    allEmForStatsChangeList
+                                    EnemyList.getDLCFilteredEnemies(ref)
                                         .every((b) => b.isSelected);
                                 globalState.stats["None"] =
-                                    allEmForStatsChangeList
+                                    EnemyList.getDLCFilteredEnemies(ref)
                                         .every((b) => !b.isSelected);
                               });
                               getSelectedEnemiesArgument();

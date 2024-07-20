@@ -68,7 +68,7 @@ void randomizeEnemyNumber(EnemyEntityObjectAction action, String group) {
 Future<void> processEnemies(MainData mainData,
     Map<String, List<String>> collectedFiles, String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
-      await getSortedEnemyData(mainData.sortedEnemiesPath!);
+      await getSortedEnemyData(mainData.sortedEnemiesPath!, mainData.hasDLC);
   await findEnemiesAndModify(
       collectedFiles, currentDir, sortedEnemyData, mainData);
 }
@@ -82,9 +82,10 @@ Future<void> processEnemies(MainData mainData,
 ///
 /// Returns a map where the keys are enemy IDs and the values are lists of enemy attributes.
 Future<Map<String, List<String>>> getSortedEnemyData(
-    String sortedEnemiesPath) async {
+    String sortedEnemiesPath, bool? hasDLC) async {
   if (sortedEnemiesPath == 'ALL') {
-    return SortedEnemyGroup.enemyData; // If "ALL", use the entire enemyData map
+    return SortedEnemyGroup.getDLCFilteredEnemyData(
+        hasDLC); // If "ALL", use the entire enemyData map
   } else {
     return readSortedEnemyDataGroups(
         sortedEnemiesPath); // Otherwise, read from the file

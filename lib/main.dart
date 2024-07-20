@@ -101,10 +101,11 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    FileChange.loadDLCOption(ref);
     _loadPathsFuture = loadPathsFromSharedPreferences();
-    updateItemsByType(SideQuest, true, context);
-    updateItemsByType(MapLocation, true, context);
-    updateItemsByType(ScriptingPhase, true, context);
+    updateItemsByType(SideQuest, true, ref);
+    updateItemsByType(MapLocation, true, ref);
+    updateItemsByType(ScriptingPhase, true, ref);
   }
 
   @override
@@ -553,18 +554,18 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
 
     try {
       CLIArguments cliArgs = await gatherCLIArguments(
-        context: context,
-        scrollController: scrollController,
-        enemyImageGridKey: globalState.enemyImageGridKey,
-        categories: globalState.categories,
-        level: globalState.level,
-        ignoredModFiles: globalState.ignoredModFiles,
-        input: globalState.input,
-        specialDatOutputPath: globalState.specialDatOutputPath,
-        scriptPath: globalState.scriptPath,
-        enemyStats: globalState.enemyStats,
-        enemyLevel: globalState.enemyLevel,
-      );
+          context: context,
+          scrollController: scrollController,
+          enemyImageGridKey: globalState.enemyImageGridKey,
+          categories: globalState.categories,
+          level: globalState.level,
+          ignoredModFiles: globalState.ignoredModFiles,
+          input: globalState.input,
+          specialDatOutputPath: globalState.specialDatOutputPath,
+          scriptPath: globalState.scriptPath,
+          enemyStats: globalState.enemyStats,
+          enemyLevel: globalState.enemyLevel,
+          ref: ref);
 
       bool isManagerFile = false;
       final receivePort = ReceivePort();
@@ -591,7 +592,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         'isManagerFile': isManagerFile,
         'sendPort': receivePort.sendPort,
         'backUp': backUp,
-        'isBalanceMode': globalState.isBalanceMode
+        'isBalanceMode': globalState.isBalanceMode,
+        'hasDLC': globalState.hasDLC
       };
 
       // Run nierCli in a separate isolate
@@ -769,7 +771,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         provider.Provider.of<GlobalState>(context, listen: false);
     List<String> details = [];
 
-    String enemyList = getSelectedEnemiesNames();
+    String enemyList = getSelectedEnemiesNames(ref);
 
     String categoryDetail = globalState.level.entries
         .firstWhere((entry) => entry.value,

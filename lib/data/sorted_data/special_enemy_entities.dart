@@ -1,4 +1,14 @@
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 class SpecialEntities {
+  static List<String> getDLCFilteredEnemiesToBalance(WidgetRef ref) {
+    final hasDLC = ref.watch(globalStateProvider).hasDLC;
+    return enemiesToBalance.where((enemy) {
+      return hasDLC || !dlcEnemies.contains(enemy);
+    }).toList();
+  }
+
   static const Map<String, Set<String>> bigSpawnEnemySkipIds = {
     "EnemySetAction": {
       '0x15a6e4d9', // Bunker attack - commander room enemies

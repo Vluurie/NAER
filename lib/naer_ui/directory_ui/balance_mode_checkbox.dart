@@ -60,7 +60,7 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
         if (file is File) {
           final fileNameWithoutExtension =
               path.basenameWithoutExtension(file.path);
-          if (SpecialEntities.enemiesToBalance
+          if (SpecialEntities.getDLCFilteredEnemiesToBalance(ref)
               .contains(fileNameWithoutExtension)) {
             try {
               await file.delete();

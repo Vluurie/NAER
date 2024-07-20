@@ -37,7 +37,6 @@ class SavePathsWidgetState extends ConsumerState<SavePathsWidget> {
 
     await prefs.setString('input', widget.input ?? '');
     await prefs.setString('output', widget.output ?? '');
-    await prefs.setString('scriptPath', widget.scriptPath ?? '');
     await prefs.setBool('savePaths', checkboxValue);
   }
 
@@ -46,7 +45,6 @@ class SavePathsWidgetState extends ConsumerState<SavePathsWidget> {
 
     await prefs.remove('input');
     await prefs.remove('output');
-    await prefs.remove('scriptPath');
     await prefs.setBool('savePaths', false);
     setState(() {
       checkboxValue = false;

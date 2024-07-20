@@ -59,7 +59,8 @@ Future<void> nierCli(NierCliArgs cliArgs) async {
       args: args,
       sendPort: cliArgs.sendPort,
       backUp: cliArgs.backUp,
-      isBalanceMode: cliArgs.isBalanceMode);
+      isBalanceMode: cliArgs.isBalanceMode,
+      hasDLC: cliArgs.hasDLC);
 
   await mainFuncProcessGameFiles(mainData);
 

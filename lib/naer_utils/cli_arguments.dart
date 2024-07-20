@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
@@ -31,19 +32,19 @@ class CLIArguments {
   });
 }
 
-Future<CLIArguments> gatherCLIArguments({
-  required BuildContext context,
-  required ScrollController scrollController,
-  required GlobalKey<EnemyImageGridState> enemyImageGridKey,
-  required Map<String, bool> categories,
-  required Map<String, bool> level,
-  required List<String> ignoredModFiles,
-  required String input,
-  required String specialDatOutputPath,
-  required String scriptPath,
-  required double enemyStats,
-  required int enemyLevel,
-}) async {
+Future<CLIArguments> gatherCLIArguments(
+    {required BuildContext context,
+    required ScrollController scrollController,
+    required GlobalKey<EnemyImageGridState> enemyImageGridKey,
+    required Map<String, bool> categories,
+    required Map<String, bool> level,
+    required List<String> ignoredModFiles,
+    required String input,
+    required String specialDatOutputPath,
+    required String scriptPath,
+    required double enemyStats,
+    required int enemyLevel,
+    required WidgetRef ref}) async {
   String tempFilePath;
   List<String>? selectedImages = enemyImageGridKey.currentState?.selectedImages;
 
@@ -73,7 +74,7 @@ Future<CLIArguments> gatherCLIArguments({
     throw ArgumentError("Error creating temporary file");
   }
 
-  String enemyList = getSelectedEnemiesArgument();
+  String enemyList = getSelectedEnemiesArgument(ref);
   List<String> processArgs = [
     input,
     '--output',

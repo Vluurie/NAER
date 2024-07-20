@@ -5,6 +5,7 @@ import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GlobalState extends ChangeNotifier {
   Completer<void> completer = Completer<void>();
@@ -35,6 +36,8 @@ class GlobalState extends ChangeNotifier {
   bool isModManagerPageProcessing = false;
   bool? isBalanceMode = false;
   bool balanceModeCheckBoxValue = false;
+  bool _hasDLC = false;
+  bool dlcCheckBoxValue = false;
   String input = '';
   String scriptPath = '';
   String specialDatOutputPath = '';
@@ -51,9 +54,10 @@ class GlobalState extends ChangeNotifier {
   };
   List<dynamic> getAllItems() {
     return [
-      ...ScriptingPhase.scriptingPhases,
-      ...MapLocation.mapLocations,
-      ...SideQuest.sideQuests,
+      ...ScriptingPhase.scriptingPhases
+          .where((item) => _hasDLC || item.dlc != true),
+      ...MapLocation.mapLocations.where((item) => _hasDLC || item.dlc != true),
+      ...SideQuest.sideQuests.where((item) => _hasDLC || item.dlc != true),
     ];
   }
 
@@ -65,9 +69,21 @@ class GlobalState extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get hasDLC => _hasDLC;
+
+  void updateDLCOption(bool value) {
+    _hasDLC = value;
+    dlcCheckBoxValue = _hasDLC;
+    notifyListeners();
+  }
+
   void complete() {
     if (!completer.isCompleted) {
       completer.complete();
     }
   }
 }
+
+final globalStateProvider = ChangeNotifierProvider<GlobalState>((ref) {
+  return GlobalState();
+});

@@ -76,18 +76,18 @@ class LogOutputState extends ConsumerState<LogOutput> {
       }
 
       CLIArguments cliArgs = await gatherCLIArguments(
-        context: context,
-        scrollController: scrollController,
-        enemyImageGridKey: globalState.enemyImageGridKey,
-        categories: globalState.categories,
-        level: globalState.level,
-        ignoredModFiles: globalState.ignoredModFiles,
-        input: globalState.input,
-        specialDatOutputPath: globalState.specialDatOutputPath,
-        scriptPath: globalState.scriptPath,
-        enemyStats: globalState.enemyStats,
-        enemyLevel: globalState.enemyLevel,
-      );
+          context: context,
+          scrollController: scrollController,
+          enemyImageGridKey: globalState.enemyImageGridKey,
+          categories: globalState.categories,
+          level: globalState.level,
+          ignoredModFiles: globalState.ignoredModFiles,
+          input: globalState.input,
+          specialDatOutputPath: globalState.specialDatOutputPath,
+          scriptPath: globalState.scriptPath,
+          enemyStats: globalState.enemyStats,
+          enemyLevel: globalState.enemyLevel,
+          ref: ref);
 
       if (context.mounted) {
         globalLog(

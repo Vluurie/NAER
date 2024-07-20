@@ -1,8 +1,9 @@
 class SideQuest {
   final String id;
   final String description;
+  final bool? dlc;
 
-  SideQuest({required this.id, required this.description});
+  SideQuest({required this.id, required this.description, this.dlc});
 
   static final List<SideQuest> sideQuests = [
     SideQuest(id: "q020", description: "Jean-Paul's Melancholy (quest/q020)"),
@@ -80,11 +81,19 @@ class SideQuest {
     SideQuest(id: "q802", description: "The Permanent Recluse (quest/q802)"),
     SideQuest(id: "q900", description: "Emil's Determination (quest/q900)"),
     SideQuest(id: "q920", description: "A Steal of a Deal (quest/q920)"),
-    SideQuest(id: "q085", description: "Mysterious Letter (quest/q085)"),
-    SideQuest(id: "q090", description: "Underground Colosseum (quest/q090)"),
-    SideQuest(id: "q091", description: "Gambler's Colosseum (quest/q091)"),
-    SideQuest(id: "q092", description: "Trial of Sand (quest/q092)"),
-    SideQuest(id: "q095", description: "Mysterious Invitation (quest/q095)"),
+    SideQuest(
+        id: "q085", description: "Mysterious Letter (quest/q085)", dlc: true),
+    SideQuest(
+        id: "q090",
+        description: "Underground Colosseum (quest/q090)",
+        dlc: true),
+    SideQuest(
+        id: "q091", description: "Gambler's Colosseum (quest/q091)", dlc: true),
+    SideQuest(id: "q092", description: "Trial of Sand (quest/q092)", dlc: true),
+    SideQuest(
+        id: "q095",
+        description: "Mysterious Invitation (quest/q095)",
+        dlc: true),
   ];
 
   // Helper function to get side quest by ID

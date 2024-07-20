@@ -1,6 +1,7 @@
 import 'package:NAER/main.dart';
 import 'package:NAER/naer_save_editor/save_editor.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
+import 'package:NAER/naer_ui/directory_ui/dlc_checkbox.dart';
 import 'package:NAER/naer_ui/nav_button/navigate_button.dart';
 
 import 'package:NAER/naer_utils/change_app_theme.dart';
@@ -199,6 +200,9 @@ class OptionsPanel extends ConsumerWidget {
                           ),
                           const ListTile(
                             title: BalanceModeCheckBox(),
+                          ),
+                          const ListTile(
+                            title: DLCCheckBox(),
                           ),
                         ],
                       ),

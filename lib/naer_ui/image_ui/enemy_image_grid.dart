@@ -120,13 +120,13 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
   }
 
   List<Widget> populateImageGrid(String folderPath) {
-    return imageNames.map((imageName) {
+    return NierEnemyImageNames.getDLCFilteredNames(ref).map((imageName) {
       return createClickableImage('$folderPath$imageName');
     }).toList();
   }
 
   List<Widget> populateEnemieImageGrid(String folderPath) {
-    return imageNamesIngame.map((imagenamesIngame) {
+    return IngamesIngame.getDLCFilteredIngameNames(ref).map((imagenamesIngame) {
       return createClickableImage('$folderPath$imagenamesIngame');
     }).toList();
   }
@@ -250,7 +250,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
 
   selectAllImages() {
     setState(() {
-      selectedImages.addAll(imageNames);
+      selectedImages.addAll(NierEnemyImageNames.getDLCFilteredNames(ref));
     });
   }
 

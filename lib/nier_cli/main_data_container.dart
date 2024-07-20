@@ -27,6 +27,7 @@ class MainData {
   final SendPort sendPort;
   final bool? backUp;
   final bool? isBalanceMode;
+  final bool? hasDLC;
 
   MainData({
     required this.argument,
@@ -38,6 +39,7 @@ class MainData {
     required this.sendPort,
     this.backUp,
     this.isBalanceMode,
+    required this.hasDLC,
   });
 
   @override
@@ -52,6 +54,7 @@ class MainData {
         '  sendPort: $sendPort,\n'
         '  backUp: $backUp\n'
         '  isBalanceMode: $isBalanceMode\n'
+        '  hasDLC: $hasDLC\n'
         '}';
   }
 }
@@ -62,14 +65,15 @@ class NierCliArgs {
   final SendPort sendPort;
   final bool? backUp;
   final bool? isBalanceMode;
+  final bool? hasDLC;
 
-  NierCliArgs({
-    required this.arguments,
-    this.isManagerFile,
-    required this.sendPort,
-    this.backUp,
-    this.isBalanceMode,
-  });
+  NierCliArgs(
+      {required this.arguments,
+      this.isManagerFile,
+      required this.sendPort,
+      this.backUp,
+      this.isBalanceMode,
+      this.hasDLC});
 
   @override
   String toString() {
@@ -79,6 +83,7 @@ class NierCliArgs {
         '  sendPort: $sendPort,\n'
         '  backUp: $backUp\n'
         '  isBalanceMode: $isBalanceMode\n'
+        '  hasDLC: $hasDLC\n'
         '}';
   }
 }
