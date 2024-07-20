@@ -3,6 +3,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/randomize_process.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/all_arguments.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/collect_files.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/count_runtime.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 
 /// Extracts the game files with various checks beforehand.
@@ -41,17 +42,22 @@ Future<void> extractGameFilesProcess(
 
   handleExtractErrors(errorFiles);
 
+  mainData.sendPort
+      .send('Extraction of game files in parallel finished successfully!');
+
   if (!mainData.isManagerFile!) {
     if (mainData.backUp!) {
       mainData.sendPort.send(
-          'Creating three backup extracted game folders for randomization in upper directory...');
+          'Creating three backup extracted game folders for randomization in upper directory (9GB disk space)...');
 
       // Collects the files for modification out of the extracted files to be processed
       var collectedFiles =
           collectExtractedGameFiles(mainData.argument['input']);
 
       // Helper method to copy the collected files to the upper directory
-      await copyCollectedGameFiles(collectedFiles, mainData.argument['input']);
+      await CountRuntime().runWithTimer(
+          copyCollectedGameFiles, [collectedFiles, mainData.argument['input']],
+          sendPort: mainData.sendPort);
       mainData.sendPort.send('Copying finished.');
     }
   }

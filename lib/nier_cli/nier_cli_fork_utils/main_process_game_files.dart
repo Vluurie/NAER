@@ -1,3 +1,5 @@
+import 'package:NAER/naer_utils/isolate_service.dart';
+
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_file_randomizer.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_extract_game_files.dart';
@@ -26,17 +28,17 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   bool extractedFoldersExist = checkIfExtractedFoldersExist(outputDir);
 
   if (mainData.isManagerFile!) {
-    /// Delete existing extracted folders in the mod package folder before randomization to start fresh.
-    await deleteExtractedGameFolders(inputDir);
+    // Start deleting existing extracted folders and let it run in an isolate.
+    IsolateService().runInIsolate(deleteExtractedGameFolders, [inputDir]);
   }
 
-  /// Extract the game files if they are not already extracted and create copies of the extracted files.
-  /// Skip copying extracted files if they are a mod manager file.
+  // Extract the game files if they are not already extracted and create copies of the extracted files.
+  // Skip copying extracted files if they are a mod manager file.
   await extractGameFilesProcess(outputDir, mainData);
 
   if (!mainData.isManagerFile!) {
     if (mainData.backUp! || extractedFoldersExist) {
-      /// Change the input directory to an already extracted folder for faster processing.
+      // Change the input directory to an already extracted folder for faster processing.
       inputDir =
           getExtractedOptionDirectories(outputDir, inputDir, mainData.argument);
     }
@@ -63,14 +65,12 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked.
   await repackModifiedGameFiles(collectedFiles, mainData);
 
-  // Delete any extracted folders to clean up, so the .exe does not read them (this would crash the game).
-
-  // clean the dynamic output
-  await deleteExtractedGameFolders(mainData.output);
-
-  // clean the original input (not the extracted folder input)
-  await deleteExtractedGameFolders(mainData.argument['input']);
+  // Start cleaning tasks and let them run in an isolate.
+  IsolateService().runInIsolate(deleteExtractedGameFolders, [mainData.output]);
+  IsolateService()
+      .runInIsolate(deleteExtractedGameFolders, [mainData.argument['input']]);
 
   // Reverse the modified .csv files to their original state.
-  await processEnemyStats(inputDir, mainData, reverseStats = true);
+  IsolateService().runInIsolate(
+      processEnemyStats, [inputDir, mainData, reverseStats = true]);
 }

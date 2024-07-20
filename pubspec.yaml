@@ -33,6 +33,7 @@ dependencies:
   automato_theme:
                   path: ../automato_theme
   flutter_riverpod: ^2.5.1
+  isolate: ^2.1.1
 
 
 

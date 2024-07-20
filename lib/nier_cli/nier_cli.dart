@@ -66,6 +66,7 @@ Future<void> nierCli(NierCliArgs cliArgs) async {
   ///####[_END_NEW_SEED_PROCCESS]###################################################################################################################
 
   // Logs the final processing time for the glory of mankind
-  processTime(t1, argument['processedFiles'], [], mainData.sendPort);
+  CountRuntime()
+      .processTime(t1, argument['processedFiles'], [], mainData.sendPort);
   logAndPrint("Randomizing complete");
 }

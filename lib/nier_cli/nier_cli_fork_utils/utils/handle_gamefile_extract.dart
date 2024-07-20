@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_valid_gamefiles.dart';
@@ -19,7 +20,7 @@ Future<bool> handleSingleCpkExtract(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> enemyList,
     List<String> activeOptions,
@@ -31,7 +32,7 @@ Future<bool> handleSingleCpkExtract(
   await Directory(output).create(recursive: true);
   var extractedFiles = await extractCpk(input, output, sendPort);
 
-  if (args.autoExtractChildren) pendingFiles.insertAll(0, extractedFiles);
+  if (args.autoExtractChildren) pendingFiles.addAll(extractedFiles);
 
   return true;
 }
@@ -42,7 +43,7 @@ Future<bool> handleSingleYaxToXml(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
     bool? isManagerFile,
@@ -60,7 +61,7 @@ Future<bool> handleSinglePakExtract(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
     bool? isManagerFile,
@@ -69,7 +70,7 @@ Future<bool> handleSinglePakExtract(
   output ??= join(dirname(input), pakExtractSubDir, basename(input));
   await Directory(output).create(recursive: true);
   var extractedFiles = await extractPakFiles(input, output, sendPort);
-  if (args.autoExtractChildren) pendingFiles.insertAll(0, extractedFiles);
+  if (args.autoExtractChildren) pendingFiles.addAll(extractedFiles);
 
   return true;
 }
@@ -80,7 +81,7 @@ Future<bool> handleSingleDatExtract(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
     bool? isManagerFile,
@@ -100,7 +101,7 @@ Future<bool> handleSingleDatExtract(
   sendPort.send('Extracted files from $input: ${extractedFiles.length} files.');
 
   if (args.autoExtractChildren) {
-    pendingFiles.insertAll(0, extractedFiles);
+    pendingFiles.addAll(extractedFiles);
   }
 
   return true;

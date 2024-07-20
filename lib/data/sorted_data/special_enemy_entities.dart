@@ -126,6 +126,19 @@ class SpecialEntities {
     'em9000', // Goliath Ball
   };
 
+  static const Set<String> dlcEnemies = {
+    "em002d",
+    "em004d",
+    "em0112",
+    "em200d",
+    "em3010",
+    "em5600",
+    "em6400",
+    "em8030",
+    "emb05d",
+    "emb016"
+  };
+
   static const List<String> enemiesToBalance = [
     "em3010",
     "em004d",

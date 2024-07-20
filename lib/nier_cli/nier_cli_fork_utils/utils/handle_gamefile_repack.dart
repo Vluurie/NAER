@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -17,7 +18,7 @@ Future<bool> handleXmlToYax(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
     bool? ismanagerFile,
@@ -43,7 +44,7 @@ Future<bool> handlePakRepack(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
     bool? ismanagerFile,
@@ -62,7 +63,7 @@ Future<bool> handleDatRepack(
     CliOptions args,
     bool isFile,
     bool isDirectory,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> activeOptions,
     bool? ismanagerFile,

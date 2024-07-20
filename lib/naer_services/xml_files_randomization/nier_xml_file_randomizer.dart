@@ -141,38 +141,33 @@ Future<void> findEnemiesAndModify(
 /// Returns the count of processed files.
 ///
 Future<int> traverseDirectory(
-    Map<String, List<String>> collectedFiles,
-    Directory directory,
-    Map<String, List<String>> sortedEnemyData,
-    ImportantIDs ids,
-    MainData mainData) async {
-  int localFileCount = 0;
-
-  // Use IsolateService for processing XML files in parallel
+  Map<String, List<String>> collectedFiles,
+  Directory directory,
+  Map<String, List<String>> sortedEnemyData,
+  ImportantIDs ids,
+  MainData mainData,
+) async {
   final isolateService = IsolateService();
 
-  // Combine all XML files from the collectedFiles map into a single list
-  final List<String> xmlFiles = [
-    ...?collectedFiles['xmlFiles'],
-  ].where((file) => file.endsWith('.xml')).toList();
+  final List<String> xmlFiles = collectedFiles['xmlFiles']
+          ?.where((file) => file.endsWith('.xml'))
+          .toList() ??
+      [];
 
-  // Distribute files among cores
-  final distributedFiles = isolateService.distributeFiles(xmlFiles);
+  final distributedFiles = await isolateService.distributeFilesAsync(xmlFiles);
 
-  // Create batched tasks to process the files
-  final tasks = <FutureOr<void> Function()>[];
-  distributedFiles.forEach((coreIndex, files) {
-    tasks.add(() async {
-      for (var file in files) {
+  mainData.sendPort.send('Creating Isolates for parallel computing...');
+
+  final tasks = distributedFiles.entries.map((entry) {
+    return (dynamic _) async {
+      for (var file in entry.value) {
         await processCollectedXmlFileForRandomization(
             File(file), sortedEnemyData, ids, mainData);
       }
-    });
-  });
+    };
+  }).toList();
 
-  // Run tasks in parallel
   await isolateService.runTasks(tasks);
 
-  localFileCount = xmlFiles.length;
-  return localFileCount;
+  return xmlFiles.length;
 }

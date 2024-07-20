@@ -1,156 +1,36 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/foundation.dart';
+import 'package:isolate/isolate.dart';
 
-/// A service for managing and executing tasks using Dart isolates.
 class IsolateService {
-  /// The number of isolates to be created, based on the number of physical processors.
-  late final int numberOfIsolates;
+  final int numberOfIsolates;
+  LoadBalancer? _loadBalancer;
 
-  /// A map storing statistics for each isolate.
-  final Map<int, IsolateStatistics> isolateStats = {};
-
-  /// Constructs an [IsolateService] and initializes the number of isolates.
-  IsolateService() {
-    numberOfIsolates = (Platform.numberOfProcessors / 2)
-        .ceil(); // Adjusted to use only physical cores
-    for (var i = 0; i < numberOfIsolates; i++) {
-      isolateStats[i] = IsolateStatistics();
-    }
+  IsolateService() : numberOfIsolates = Platform.numberOfProcessors {
+    _initializeLoadBalancer();
   }
 
-  /// Runs a list of tasks using isolates.
-  ///
-  /// [tasks] is a list of functions to be executed in parallel.
-  Future<void> runTasks(List<FutureOr<void> Function()> tasks) async {
-    final List<Isolate> isolates = [];
-    final List<ReceivePort> receivePorts = [];
-    final List<SendPort> sendPorts = [];
-    final List<Completer<void>> completers =
-        List.generate(numberOfIsolates, (_) => Completer<void>());
-
-    for (var i = 0; i < numberOfIsolates; i++) {
-      final receivePort = ReceivePort();
-      receivePorts.add(receivePort);
-
-      debugPrint('Spawning isolate $i');
-      final isolate = await Isolate.spawn(_isolateEntry, receivePort.sendPort);
-      isolates.add(isolate);
-
-      receivePort.listen((message) {
-        if (message is SendPort) {
-          debugPrint('Isolate $i SendPort received');
-          sendPorts.add(message);
-          if (sendPorts.length == numberOfIsolates) {
-            _distributeTasks(sendPorts, tasks);
-          }
-        } else if (message == 'done') {
-          debugPrint('Isolate $i completed its tasks');
-          completerComplete(completers[i]);
-        } else if (message is List<IsolateTaskReport>) {
-          _updateStatistics(i, message);
-        }
-      });
-    }
-
-    await Future.wait(completers.map((c) => c.future));
-
-    for (var i = 0; i < numberOfIsolates; i++) {
-      receivePorts[i].close();
-      isolates[i].kill(priority: Isolate.immediate);
-      debugPrint('Isolate $i killed');
-    }
-
-    _printStatistics();
+  Future<void> _initializeLoadBalancer() async {
+    _loadBalancer ??=
+        await LoadBalancer.create(numberOfIsolates, IsolateRunner.spawn);
   }
 
-  /// Distributes tasks among the available isolates.
-  ///
-  /// [sendPorts] is a list of send ports for the isolates.
-  /// [tasks] is a list of tasks to be distributed.
-  void _distributeTasks(
-      List<SendPort> sendPorts, List<FutureOr<void> Function()> tasks) {
-    final int totalTasks = tasks.length;
-    final int totalIsolates = sendPorts.length;
-
-    if (totalTasks <= totalIsolates) {
-      for (var i = 0; i < totalTasks; i++) {
-        debugPrint('Sending 1 task to isolate $i');
-        sendPorts[i].send([tasks[i]]);
-      }
-    } else {
-      final tasksPerIsolate = (totalTasks / totalIsolates).ceil();
-      for (var i = 0; i < totalIsolates; i++) {
-        final start = i * tasksPerIsolate;
-        final end = start + tasksPerIsolate > totalTasks
-            ? totalTasks
-            : start + tasksPerIsolate;
-        final tasksSubset = tasks.sublist(start, end);
-
-        debugPrint('Sending ${tasksSubset.length} tasks to isolate $i');
-        sendPorts[i].send(tasksSubset);
-      }
-    }
+  Future<T> runTask<T>(FutureOr<T> Function(dynamic) task, dynamic arg) async {
+    await _initializeLoadBalancer();
+    return _loadBalancer!.run(task, arg);
   }
 
-  /// The entry point for each isolate.
-  ///
-  /// [mainSendPort] is the send port for communicating with the main isolate.
-  static void _isolateEntry(SendPort mainSendPort) {
-    final receivePort = ReceivePort();
-    mainSendPort.send(receivePort.sendPort);
-
-    receivePort.listen((message) async {
-      if (message is List<FutureOr<void> Function()>) {
-        final taskReports = <IsolateTaskReport>[];
-        debugPrint('Isolate received ${message.length} tasks');
-        for (var task in message) {
-          final startTime = DateTime.now();
-          try {
-            await task();
-          } catch (e) {
-            debugPrint('Error in task: $e');
-          }
-          final endTime = DateTime.now();
-          taskReports.add(IsolateTaskReport(startTime, endTime));
-        }
-        mainSendPort.send(taskReports);
-        mainSendPort.send('done');
-        debugPrint('Isolate finished tasks and sent done message');
-      }
-    });
+  Future<Map<int, List<String>>> distributeFilesAsync(
+      List<String> files) async {
+    return compute(_distributeFiles, files);
   }
 
-  /// Updates statistics for an isolate based on the task reports.
-  ///
-  /// [isolateIndex] is the index of the isolate.
-  /// [taskReports] is a list of task reports generated by the isolate.
-  void _updateStatistics(
-      int isolateIndex, List<IsolateTaskReport> taskReports) {
-    final stats = isolateStats[isolateIndex]!;
-    for (var report in taskReports) {
-      stats.taskCount++;
-      stats.totalTime += report.endTime.difference(report.startTime);
-    }
-  }
-
-  /// Prints the statistics for all isolates.
-  void _printStatistics() {
-    for (var i = 0; i < numberOfIsolates; i++) {
-      final stats = isolateStats[i]!;
-      debugPrint(
-          'Isolate $i - Task Count: ${stats.taskCount}, Total Time: ${stats.totalTime.inMilliseconds} ms');
-    }
-  }
-
-  /// Distributes a list of files among the available cores.
-  ///
-  /// [files] is a list of file paths to be distributed.
-  /// Returns a map where the keys are core indices and the values are lists of file paths.
-  Map<int, List<String>> distributeFiles(List<String> files) {
-    final int numberOfCores = numberOfIsolates;
+  static Map<int, List<String>> _distributeFiles(List<String> files) {
+    final int numberOfCores = Platform.numberOfProcessors;
     final Map<int, List<String>> distributedFiles = {};
 
     for (int i = 0; i < numberOfCores; i++) {
@@ -165,33 +45,39 @@ class IsolateService {
     return distributedFiles;
   }
 
-  /// Completes a [Completer] if it is not already completed.
-  ///
-  /// [completer] is the Completer to complete.
-  void completerComplete(Completer<void> completer) {
-    if (!completer.isCompleted) {
-      completer.complete();
+  Future<void> runTasks(List<FutureOr<void> Function(dynamic)> tasks) async {
+    await _initializeLoadBalancer();
+    final taskFutures =
+        tasks.map((task) => _loadBalancer!.run(task, null)).toList();
+    await Future.wait(taskFutures);
+  }
+
+  Future<void> runInIsolate(Function function, List<dynamic> arguments) async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+        isolateEntry, [function, arguments, receivePort.sendPort]);
+    await receivePort.first;
+  }
+
+  Future<void> runInAwaitedIsolate(
+      Function function, List<dynamic> arguments) async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+        isolateEntry, [function, arguments, receivePort.sendPort]);
+    await receivePort.first;
+  }
+
+  static Future<void> isolateEntry(List<dynamic> args) async {
+    final function = args[0] as Function;
+    final arguments = args[1] as List<dynamic>;
+    final sendPort = args[2] as SendPort;
+
+    try {
+      await Function.apply(function, arguments);
+    } catch (e) {
+      globalLog("Error: $e");
+    } finally {
+      sendPort.send(null);
     }
   }
-}
-
-/// A class representing statistics for an isolate.
-class IsolateStatistics {
-  /// The number of tasks executed by the isolate.
-  int taskCount = 0;
-
-  /// The total time spent on executing tasks.
-  Duration totalTime = Duration.zero;
-}
-
-/// A class representing a report for a task executed by an isolate.
-class IsolateTaskReport {
-  /// The start time of the task.
-  final DateTime startTime;
-
-  /// The end time of the task.
-  final DateTime endTime;
-
-  /// Constructs an [IsolateTaskReport].
-  IsolateTaskReport(this.startTime, this.endTime);
 }

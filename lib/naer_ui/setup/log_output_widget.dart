@@ -141,10 +141,14 @@ class LogOutputState extends ConsumerState<LogOutput> {
         message.toLowerCase().contains('processed') ||
         message.toLowerCase().contains('found') ||
         message.toLowerCase().contains('balance mode') ||
+        message.toLowerCase().contains('balancing') ||
+        message.toLowerCase().contains('normalized') ||
+        message.toLowerCase().contains('creating three') ||
         message.toLowerCase().contains('temporary')) {
       return Colors.yellow;
     } else if (message.toLowerCase().contains('completed') ||
-        message.toLowerCase().contains('finished')) {
+        message.toLowerCase().contains('finished') ||
+        message.toLowerCase().contains('started')) {
       return const Color.fromARGB(255, 59, 255, 59);
     } else {
       return Colors.white;
@@ -168,6 +172,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
           !lastMessage.contains("Balance Mode") &&
           !lastMessage.contains("Failed") &&
           !lastMessage.contains("Ignore") &&
+          !lastMessage.contains("Normalized") &&
           !lastMessage.contains("Deleted file");
 
       return isProcessing;

@@ -105,6 +105,11 @@ bool isBigEnemy(String objId) {
   return SpecialEntities.bigEnemies.contains(objId);
 }
 
+/// Checks if the given `objId` corresponds to a dlc enemy.
+bool isDLCEnemy(String objId) {
+  return SpecialEntities.dlcEnemies.contains(objId);
+}
+
 /// Checks if an enemy with a given `emNumber` is marked for deletion in the `enemyData`.
 ///
 /// Returns `true` if the enemy is in the "Delete" group, `false` otherwise.
