@@ -157,3 +157,30 @@ Future<bool> checkNotAllCpkFilesExist(String directory) async {
 
   return false;
 }
+
+/// Checks if the DLC file 'data100.cpk' exists in the given directory and
+/// if its size is approximately 937 MB to determine if the DLC is present.
+///
+/// - Parameters:
+///   - directoryPath: The path of the directory to search in.
+///
+/// - Returns: true if the file exists and its size is approximately 937 MB, false otherwise.
+Future<bool> hasDLC(String directoryPath) async {
+  final Directory directory = Directory(directoryPath);
+  const String fileName = 'data100.cpk';
+  final File file = File('${directory.path}/$fileName');
+
+  if (await file.exists()) {
+    // Getting file size in bytes
+    final int fileSize = await file.length();
+    // 937 MB in bytes
+    const int dlcSizeThreshold = 937 * 1024 * 1024; // 937 MB in bytes
+    // Introducing a margin of error ±10 MB in bytes
+    const int marginOfError = 5 * 1024 * 1024; // 5 MB in bytes
+
+    // Check if the file size is within the range
+    return fileSize >= (dlcSizeThreshold - marginOfError) &&
+        fileSize <= (dlcSizeThreshold + marginOfError);
+  }
+  return false;
+}
