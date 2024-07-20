@@ -5,7 +5,6 @@ import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
 class EnemyStatsSelection extends ConsumerStatefulWidget {
   const EnemyStatsSelection({super.key});
@@ -25,7 +24,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
 
   @override
   Widget build(BuildContext context) {
-    final globalState = provider.Provider.of<GlobalState>(context);
+    final globalState = ref.watch(globalStateProvider);
     return Container(
       padding: const EdgeInsets.all(30),
       child: Column(
@@ -84,9 +83,9 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                             max: 5.0,
                             label: globalState.enemyStats.toStringAsFixed(1),
                             onChanged: (double newValue) {
-                              setState(() {
-                                globalState.enemyStats = newValue;
-                              });
+                              ref
+                                  .read(globalStateProvider.notifier)
+                                  .updateEnemyStats(newValue);
                             },
                           )
                         : Container(),
@@ -104,7 +103,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                   title: Text(
                     style: TextStyle(color: AutomatoThemeColors.textColor(ref)),
                     "Select All",
-                    textScaler: TextScaler.linear(0.8),
+                    textScaler: const TextScaler.linear(0.8),
                   ),
                   value: globalState.stats["Select All"],
                   onChanged: (bool? value) {

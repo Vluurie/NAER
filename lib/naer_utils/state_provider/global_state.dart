@@ -14,6 +14,7 @@ class GlobalState extends ChangeNotifier {
   GlobalKey setupCategorySelectionKey = GlobalKey();
   GlobalKey setupLogOutputKey = GlobalKey();
   GlobalKey<EnemyImageGridState> enemyImageGridKey = GlobalKey();
+  List<String> selectedImages = [];
   List<String> createdFiles = [];
   List<String> createdDatFiles = [];
   List<String> ignoredModFiles = [];
@@ -75,6 +76,58 @@ class GlobalState extends ChangeNotifier {
     _hasDLC = value;
     dlcCheckBoxValue = _hasDLC;
     notifyListeners();
+  }
+
+  void updateEnemyStats(double newValue) {
+    enemyStats = newValue;
+    notifyListeners();
+  }
+
+  void updateSelectedImages(List<String> newSelectedImages) {
+    selectedImages = newSelectedImages;
+    notifyListeners();
+  }
+
+  void addSelectedImage(String imageName) {
+    if (!selectedImages.contains(imageName)) {
+      selectedImages.add(imageName);
+      notifyListeners();
+    }
+  }
+
+  void removeSelectedImage(String imageName) {
+    if (selectedImages.contains(imageName)) {
+      selectedImages.remove(imageName);
+      notifyListeners();
+    }
+  }
+
+  void clearSelectedImages() {
+    selectedImages.clear();
+    notifyListeners();
+  }
+
+  void selectAllImages(List<String> allImageNames) {
+    selectedImages = List.from(allImageNames);
+    notifyListeners();
+  }
+
+  void unselectAllImages() {
+    selectedImages.clear();
+    notifyListeners();
+  }
+
+  void updateEnemyLevel(int newLevel) {
+    enemyLevel = newLevel;
+    notifyListeners();
+  }
+
+  void updateLevel(String levelKey, bool value) {
+    if (value || level.values.every((v) => !v)) {
+      level.updateAll((key, value) => false);
+      level[levelKey] = value;
+      notifyListeners();
+    }
   }
 
   void complete() {

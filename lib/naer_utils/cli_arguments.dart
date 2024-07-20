@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -45,11 +46,12 @@ Future<CLIArguments> gatherCLIArguments(
     required double enemyStats,
     required int enemyLevel,
     required WidgetRef ref}) async {
+  final globalState = ref.watch(globalStateProvider);
   String tempFilePath;
-  List<String>? selectedImages = enemyImageGridKey.currentState?.selectedImages;
+  List<String>? selectedImages = globalState.selectedImages;
 
   try {
-    if (selectedImages != null && selectedImages.isNotEmpty) {
+    if (selectedImages.isNotEmpty) {
       var sortedEnemies = await sortSelectedEnemies(selectedImages, context);
       var tempFile = await File(
               '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
@@ -83,9 +85,9 @@ Future<CLIArguments> gatherCLIArguments(
     '--enemies',
     enemyList.isNotEmpty ? enemyList : 'None',
     '--enemyStats',
-    enemyStats.toString(),
+    globalState.enemyStats.toString(),
     '--level=$enemyLevel',
-    ...categories.entries
+    ...globalState.categories.entries
         .where((entry) => entry.value)
         .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
   ];

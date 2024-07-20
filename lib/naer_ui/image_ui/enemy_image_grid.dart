@@ -1,30 +1,31 @@
 import 'package:NAER/data/image_data/nier_enemy_descriptions.dart';
 import 'package:NAER/data/image_data/nier_enemy_image_names.dart';
-import 'package:NAER/data/image_data/nier_enemy_images_ingame_list.dart';
 import 'package:NAER/naer_ui/image_ui/levitating_image.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter/material.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EnemyImageGrid extends ConsumerStatefulWidget {
+  const EnemyImageGrid({super.key});
+
   @override
   EnemyImageGridState createState() => EnemyImageGridState();
-  const EnemyImageGrid({super.key});
 }
 
 class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
-  List<String> selectedImages = [];
   String clickedImage = '';
   bool isImageClicked = false;
 
   @override
   Widget build(BuildContext context) {
-    return setupImageGrid(context);
+    final globalState = ref.watch(globalStateProvider);
+    return setupImageGrid(context, globalState);
   }
 
-  Widget setupImageGrid(BuildContext context) {
+  Widget setupImageGrid(BuildContext context, GlobalState globalState) {
     const folderPath = 'assets/nier_image_folders/nier_enemy_images/';
-    final imageWidgets = populateImageGrid(folderPath);
+    final imageWidgets = populateImageGrid(folderPath, globalState);
 
     double gridHeight;
     int crossAxisCount;
@@ -119,21 +120,15 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  List<Widget> populateImageGrid(String folderPath) {
+  List<Widget> populateImageGrid(String folderPath, GlobalState globalState) {
     return NierEnemyImageNames.getDLCFilteredNames(ref).map((imageName) {
-      return createClickableImage('$folderPath$imageName');
+      return createClickableImage('$folderPath$imageName', globalState);
     }).toList();
   }
 
-  List<Widget> populateEnemieImageGrid(String folderPath) {
-    return IngamesIngame.getDLCFilteredIngameNames(ref).map((imagenamesIngame) {
-      return createClickableImage('$folderPath$imagenamesIngame');
-    }).toList();
-  }
-
-  Widget createClickableImage(String imagePath) {
+  Widget createClickableImage(String imagePath, GlobalState globalState) {
     final baseName = Uri.parse(imagePath).pathSegments.last;
-    bool isSelected = selectedImages.contains(baseName);
+    bool isSelected = globalState.selectedImages.contains(baseName);
     final ValueNotifier<bool> isHovered = ValueNotifier(false);
 
     const buggyEnemies = {
@@ -174,7 +169,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
           onExit: (_) => isHovered.value = false,
           child: InkWell(
             onTap: () {
-              onImageClick(baseName);
+              onImageClick(baseName, globalState);
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -242,26 +237,23 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  unselectAllImages() {
-    setState(() {
-      selectedImages.clear();
-    });
+  void onImageClick(String imageName, GlobalState globalState) {
+    if (globalState.selectedImages.contains(imageName)) {
+      globalState.removeSelectedImage(imageName);
+    } else {
+      globalState.addSelectedImage(imageName);
+    }
   }
 
-  selectAllImages() {
-    setState(() {
-      selectedImages.addAll(NierEnemyImageNames.getDLCFilteredNames(ref));
-    });
+  void selectAllImages() {
+    final globalState = ref.read(globalStateProvider.notifier);
+    final allImageNames = NierEnemyImageNames.getDLCFilteredNames(ref);
+    globalState.selectAllImages(allImageNames);
   }
 
-  void onImageClick(String imageName) {
-    setState(() {
-      if (selectedImages.contains(imageName)) {
-        selectedImages.remove(imageName);
-      } else {
-        selectedImages.add(imageName);
-      }
-    });
+  void unselectAllImages() {
+    final globalState = ref.read(globalStateProvider.notifier);
+    globalState.unselectAllImages();
   }
 
   void showImageInformation(String imageName) {

@@ -12,12 +12,11 @@ Future<Map<String, List<String>>> readEnemyData(bool hasDLC) async {
 Future<Map<String, List<String>>> sortSelectedEnemies(
     List<String> selectedImages, BuildContext context) async {
   final globalState = provider.Provider.of<GlobalState>(context, listen: false);
-  List<String>? selectedImages =
-      globalState.enemyImageGridKey.currentState?.selectedImages;
+  List<String>? selectedImages = globalState.selectedImages;
   var enemyGroups = await readEnemyData(globalState.hasDLC);
 
   var formattedSelectedImages =
-      selectedImages!.map((image) => image.split('.').first).toList();
+      selectedImages.map((image) => image.split('.').first).toList();
 
   var sortedSelection = {
     "Ground": <String>[],

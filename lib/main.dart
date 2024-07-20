@@ -715,7 +715,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   void showModifyConfirmation(BuildContext context, WidgetRef ref) {
-    String modificationDetails = _generateModificationDetails();
+    List<Widget> modificationDetails = _generateModificationDetails(ref);
 
     AutomatoDialogManager().showYesNoDialog(
       context: context,
@@ -727,26 +727,29 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
               0.5, // Adjust the height as needed
         ),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Are you sure you want to start modification? Below are the selected settings:",
-                style: TextStyle(
-                  color: AutomatoThemeColors.textDialogColor(ref),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              border:
+                  Border.all(color: AutomatoThemeColors.textDialogColor(ref)),
+              color: AutomatoThemeColors.darkBrown(ref).withOpacity(0.1),
+            ),
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Are you sure you want to start modification? Below are the selected settings:",
+                  style: TextStyle(
+                    color: AutomatoThemeColors.textDialogColor(ref),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                modificationDetails,
-                style: TextStyle(
-                  color: AutomatoThemeColors.textDialogColor(ref),
-                  fontSize: 16,
-                ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                ...modificationDetails,
+              ],
+            ),
           ),
         ),
       ),
@@ -766,75 +769,261 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     );
   }
 
-  String _generateModificationDetails() {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
-    List<String> details = [];
+  List<Widget> _generateModificationDetails(WidgetRef ref) {
+    final globalState = ref.watch(globalStateProvider);
+    List<Widget> details = [];
 
     String enemyList = getSelectedEnemiesNames(ref);
-
     String categoryDetail = globalState.level.entries
         .firstWhere((entry) => entry.value,
             orElse: () => const MapEntry("None", false))
         .key;
-    details.add("• Level Modify Category: $categoryDetail");
 
-    if (categoryDetail == 'None') {
-      details.add("• Change Level: None");
-    } else {
-      details.add("• Change Level: ${globalState.enemyLevel}");
-    }
+    // Category
+    details.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.category,
+                  color: AutomatoThemeColors.textDialogColor(ref), size: 24),
+              const SizedBox(width: 8),
+              Text("Category Selected:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AutomatoThemeColors.textDialogColor(ref))),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 5),
+            child: Text(categoryDetail,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: AutomatoThemeColors.textDialogColor(ref))),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
 
-    if (enemyList.isNotEmpty && globalState.enemyStats != 0.0) {
-      details.add(
-          "• Change Enemy Stats: x${globalState.enemyStats} for $enemyList");
-    } else {
-      details.add("• Change Enemy Stats: None");
-    }
+    // Change Level
+    details.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.change_circle,
+                  color: AutomatoThemeColors.textDialogColor(ref), size: 24),
+              const SizedBox(width: 8),
+              Text("Change Level:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AutomatoThemeColors.textDialogColor(ref))),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 5),
+            child: Text(
+              categoryDetail == 'None' ? "None" : "${globalState.enemyLevel}",
+              style: TextStyle(
+                  fontSize: 16,
+                  color: AutomatoThemeColors.textDialogColor(ref)),
+            ),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
 
-    List<String>? selectedImages =
-        globalState.enemyImageGridKey.currentState?.selectedImages;
-    if (selectedImages != null && selectedImages.isNotEmpty) {
-      details.add("• Selected Enemies: ${selectedImages.join(', ')}");
-    } else {
-      details.add(
-          "• Selected Enemies: No Enemy selected, will use ALL Enemies for Randomization");
-    }
+    // Change Enemy Stats
+    details.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.bar_chart,
+                  color: AutomatoThemeColors.textDialogColor(ref), size: 24),
+              const SizedBox(width: 8),
+              Text("Change Enemy Stats:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AutomatoThemeColors.textDialogColor(ref))),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 5),
+            child: enemyList.isNotEmpty && globalState.enemyStats != 0.0
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Multiplier: x${globalState.enemyStats}",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: AutomatoThemeColors.textDialogColor(ref))),
+                      const SizedBox(height: 5),
+                      Text("Affected Enemies:",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: AutomatoThemeColors.textDialogColor(ref))),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: enemyList
+                            .split(',')
+                            .map((enemy) => Text("- $enemy",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: AutomatoThemeColors.textDialogColor(
+                                        ref))))
+                            .toList(),
+                      ),
+                    ],
+                  )
+                : Text("None",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: AutomatoThemeColors.textDialogColor(ref))),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
 
-    switch (categoryDetail) {
-      case "All Enemies":
-        details.add(
-            "• Level Change: Every randomized enemy & bosses in the game will be included.");
-        break;
-      // case "Only Bosses":
-      //   details.add("• Level Change: Only boss-type enemies will be included.");
-      //   break;
-      // case "Only Selected Enemies":
-      //   details.add(
-      //       "• Level Change: Only randomized selected enemies will be included.");
+    // Selected Enemies
+    details.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.group,
+                  color: AutomatoThemeColors.textDialogColor(ref), size: 24),
+              const SizedBox(width: 8),
+              Text("Selected Enemies:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AutomatoThemeColors.textDialogColor(ref))),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 5),
+            child: globalState.selectedImages.isNotEmpty
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: globalState.selectedImages
+                            .map((image) => Text("- $image",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: AutomatoThemeColors.textDialogColor(
+                                        ref))))
+                            .toList(),
+                      ),
+                    ],
+                  )
+                : Text(
+                    "No Enemy selected, will use ALL Enemies for Randomization",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: AutomatoThemeColors.textDialogColor(ref))),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
 
-      //   break;
-      case "None":
-        details.add(
-            "• Level Change: No specific category selected. No level will be modified");
-        break;
-      default:
-        details.add("• Default settings will be used.");
-        break;
-    }
+    // Level Change Details
+    details.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.details,
+                  color: AutomatoThemeColors.textDialogColor(ref), size: 24),
+              const SizedBox(width: 8),
+              Text("Level Change Details:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AutomatoThemeColors.textDialogColor(ref))),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 5),
+            child: Text(
+              categoryDetail == 'All Enemies'
+                  ? "Every randomized enemy & bosses in the game will be included."
+                  : categoryDetail == 'None'
+                      ? "No specific category selected. No level will be modified."
+                      : "You selected that only the level of enemies will be changed and no enemy will be randomized.",
+              style: TextStyle(
+                  fontSize: 16,
+                  color: AutomatoThemeColors.textDialogColor(ref)),
+            ),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
 
+    // Selected Categories
     List<String> selectedCategories = globalState.categories.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
-    if (selectedCategories.isNotEmpty) {
-      details.add("• Selected Categories: ${selectedCategories.join(', ')}");
-    } else {
-      details
-          .add("• No specific categories selected. Will use all categories!!!");
-    }
+    details.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.category,
+                  color: AutomatoThemeColors.textDialogColor(ref), size: 24),
+              const SizedBox(width: 8),
+              Text("Selected Categories:",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AutomatoThemeColors.textDialogColor(ref))),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0, top: 5),
+            child: selectedCategories.isNotEmpty
+                ? Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: selectedCategories
+                        .map((category) => Text("- $category",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color:
+                                    AutomatoThemeColors.textDialogColor(ref))))
+                        .toList(),
+                  )
+                : Text(
+                    "No specific categories selected. Will use all categories.",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: AutomatoThemeColors.textDialogColor(ref))),
+          ),
+          const SizedBox(height: 15),
+        ],
+      ),
+    );
 
-    return details.join('\n\n');
+    return details;
   }
 
   void showCompletionDialog(BuildContext context, WidgetRef ref) {
