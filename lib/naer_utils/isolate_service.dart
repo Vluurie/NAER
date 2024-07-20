@@ -52,7 +52,7 @@ class IsolateService {
     await Future.wait(taskFutures);
   }
 
-  Future<void> runInIsolate(Function function, List<dynamic> arguments) async {
+  void runInIsolate(Function function, List<dynamic> arguments) async {
     final receivePort = ReceivePort();
     await Isolate.spawn(
         isolateEntry, [function, arguments, receivePort.sendPort]);
