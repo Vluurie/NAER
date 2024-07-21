@@ -537,6 +537,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   Future<void> startRandomizing(BuildContext context, bool backUp) async {
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
+    final globalStateRiverPod = ref.watch(globalStateProvider);
     globalState.hasError = true;
     globalState.isLoading = true;
     globalState.loggedStages.clear();
@@ -557,15 +558,15 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
       CLIArguments cliArgs = await gatherCLIArguments(
           context: context,
           scrollController: scrollController,
-          enemyImageGridKey: globalState.enemyImageGridKey,
-          categories: globalState.categories,
-          level: globalState.level,
+          selectedImages: globalStateRiverPod.selectedImages,
+          categories: globalStateRiverPod.categories,
+          level: globalStateRiverPod.level,
           ignoredModFiles: globalState.ignoredModFiles,
           input: globalState.input,
           specialDatOutputPath: globalState.specialDatOutputPath,
           scriptPath: globalState.scriptPath,
-          enemyStats: globalState.enemyStats,
-          enemyLevel: globalState.enemyLevel,
+          enemyStats: globalStateRiverPod.enemyStats,
+          enemyLevel: globalStateRiverPod.enemyLevel,
           ref: ref);
 
       bool isManagerFile = false;

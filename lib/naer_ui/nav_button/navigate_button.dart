@@ -11,6 +11,7 @@ import 'package:provider/provider.dart' as provider;
 AutomatoButton navigateButton(
     BuildContext context, ScrollController scrollController, WidgetRef ref) {
   final globalState = provider.Provider.of<GlobalState>(context, listen: false);
+  final globalStateRiverPod = ref.watch(globalStateProvider);
   return AutomatoButton(
     label: 'Mod Manager',
     uniqueId: 'modManagerButton',
@@ -23,15 +24,15 @@ AutomatoButton navigateButton(
       CLIArguments cliArgs = await gatherCLIArguments(
           context: context,
           scrollController: scrollController,
-          enemyImageGridKey: globalState.enemyImageGridKey,
-          categories: globalState.categories,
-          level: globalState.level,
+          selectedImages: globalStateRiverPod.selectedImages,
+          categories: globalStateRiverPod.categories,
+          level: globalStateRiverPod.level,
           ignoredModFiles: globalState.ignoredModFiles,
           input: globalState.input,
           specialDatOutputPath: globalState.specialDatOutputPath,
           scriptPath: globalState.scriptPath,
-          enemyStats: globalState.enemyStats,
-          enemyLevel: globalState.enemyLevel,
+          enemyStats: globalStateRiverPod.enemyStats,
+          enemyLevel: globalStateRiverPod.enemyLevel,
           ref: ref);
 
       ModInstallHandler modInstallHandler =

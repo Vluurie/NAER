@@ -67,6 +67,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
 
   Future<void> _performCopyCLIArguments(
       BuildContext context, GlobalState globalState) async {
+    final globalStateRiverPod = ref.watch(globalStateProvider);
     try {
       if (globalState.input.isEmpty ||
           globalState.specialDatOutputPath.isEmpty) {
@@ -78,15 +79,15 @@ class LogOutputState extends ConsumerState<LogOutput> {
       CLIArguments cliArgs = await gatherCLIArguments(
           context: context,
           scrollController: scrollController,
-          enemyImageGridKey: globalState.enemyImageGridKey,
-          categories: globalState.categories,
-          level: globalState.level,
+          selectedImages: globalStateRiverPod.selectedImages,
+          categories: globalStateRiverPod.categories,
+          level: globalStateRiverPod.level,
           ignoredModFiles: globalState.ignoredModFiles,
           input: globalState.input,
           specialDatOutputPath: globalState.specialDatOutputPath,
           scriptPath: globalState.scriptPath,
-          enemyStats: globalState.enemyStats,
-          enemyLevel: globalState.enemyLevel,
+          enemyStats: globalStateRiverPod.enemyStats,
+          enemyLevel: globalStateRiverPod.enemyLevel,
           ref: ref);
 
       if (context.mounted) {

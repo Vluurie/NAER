@@ -3,15 +3,14 @@ import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
 Future<Map<String, List<String>>> readEnemyData(bool hasDLC) async {
   return SortedEnemyGroup.getDLCFilteredEnemyData(hasDLC);
 }
 
 Future<Map<String, List<String>>> sortSelectedEnemies(
-    List<String> selectedImages, BuildContext context) async {
-  final globalState = provider.Provider.of<GlobalState>(context, listen: false);
+    List<String> selectedImages, BuildContext context, WidgetRef ref) async {
+  final globalState = ref.watch(globalStateProvider);
   List<String>? selectedImages = globalState.selectedImages;
   var enemyGroups = await readEnemyData(globalState.hasDLC);
 
