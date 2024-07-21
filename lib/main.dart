@@ -38,12 +38,25 @@ import 'package:path/path.dart' as path;
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  bool isBalanceMode = false;
+  bool hasDLC = false;
+
   if (arguments.isNotEmpty) {
+    for (String arg in arguments) {
+      if (arg == '--balance') {
+        isBalanceMode = true;
+      } else if (arg == '--dlc') {
+        hasDLC = true;
+      }
+    }
+
     final receivePort = ReceivePort();
     Map<String, dynamic> args = {
       'processArgs': arguments,
       'isManagerFile': false,
       'sendPort': receivePort.sendPort,
+      'isBalanceMode': isBalanceMode,
+      'hasDLC': hasDLC,
     };
     await compute(runNierCliIsolated, args);
     exit(0);

@@ -145,7 +145,8 @@ class RandomizeDraggedFile {
             'isManagerFile': true,
             'sendPort': receivePort.sendPort,
             'backUp': false,
-            'isBalanceMode': globalState.isBalanceMode
+            'isBalanceMode': globalState.isBalanceMode,
+            'hasDLC': globalState.hasDLC
           };
           globalState.isModManagerPageProcessing = true;
           await compute(runNierCliIsolated, args);
