@@ -30,7 +30,7 @@ void randomizeEnemyNumber(EnemyEntityObjectAction action, String group) {
     final List<String> enemyNumbers = action.userSelectedEnemyData[group]!;
     String newEmNumber;
 
-    // Use a Set to avoid duplicate checks and speed up lookups
+    // Set to avoid duplicate checks and speed up lookups
     final Set<String> invalidNumbers = {'em3004'};
     if (action.isSpawnActionTooSmall) {
       invalidNumbers.addAll(enemyNumbers.where(isBigEnemy));

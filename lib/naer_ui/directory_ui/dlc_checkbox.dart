@@ -52,6 +52,7 @@ class DLCCheckBoxState extends ConsumerState<DLCCheckBox> {
             onChanged: (bool? newValue) async {
               final updatedValue = newValue ?? false;
               await _saveDLCOption(updatedValue);
+              globalState.updateCategories();
             },
             text: globalState.hasDLC ? 'DLC: Enabled' : 'DLC: Disabled',
           );

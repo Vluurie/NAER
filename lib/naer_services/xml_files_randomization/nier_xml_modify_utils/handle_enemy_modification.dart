@@ -35,12 +35,13 @@ Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
     if (action.randomizeAndSetValues) {
       randomizeEnemyNumber(action, group);
     }
+  }
 
-    // Handle enemy levels if requested
-    if (action.handleLevels) {
-      await handleLevel(action.objIdElement, action.enemyLevel,
-          SortedEnemyGroup.enemyData, false);
-    }
+  // Handle enemy levels if requested
+  if (action.handleLevels) {
+    await handleLevel(
+        action.objIdElement, action.enemyLevel, SortedEnemyGroup.enemyData,
+        isBoss: false);
   }
 }
 
@@ -63,7 +64,7 @@ Future<void> handleShootingEnemyCurveAction(
         action.objIdElement,
         action.enemyLevel,
         SortedEnemyGroup.enemyData,
-        false,
+        isBoss: false,
       );
     }
   }

@@ -43,7 +43,7 @@ Future<void> handleSpecialCaseEnemies(
         // Check if the enemy has an alias ancestor and belongs to specific categories
         if (category == 'allenemies' || category == 'onlylevel') {
           // Handle the level for enemies with alias
-          handleLevel(objIdElement, level, sortedEnemyData, false);
+          handleLevel(objIdElement, level, sortedEnemyData, isBoss: false);
         }
       } else {
         // Modify the objId for no boss or alias enemy

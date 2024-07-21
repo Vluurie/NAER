@@ -70,6 +70,17 @@ class GlobalState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateCategories() {
+    final allItems = getAllItems();
+    final newCategories = <String, bool>{};
+    for (var item in allItems) {
+      newCategories[item.id] =
+          categories[item.id] ?? (item.dlc == true ? _hasDLC : false);
+    }
+    categories = newCategories;
+    notifyListeners();
+  }
+
   bool get hasDLC => _hasDLC;
 
   void updateDLCOption(bool value) {
@@ -85,6 +96,11 @@ class GlobalState extends ChangeNotifier {
 
   void updateSelectedImages(List<String> newSelectedImages) {
     selectedImages = newSelectedImages;
+    notifyListeners();
+  }
+
+  void updateSelectedCategories(Map<String, bool> newCategories) {
+    categories = newCategories;
     notifyListeners();
   }
 

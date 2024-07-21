@@ -8,7 +8,8 @@ import 'package:xml/xml.dart' as xml;
 ///
 /// If `isBoss` is `true`, the function does not update the `levelRange` for 'EnemyGenerator' actions.
 Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
-    Map<String, List<String>> enemyData, bool isBoss) async {
+    Map<String, List<String>> enemyData,
+    {bool isBoss = false}) async {
   var objIdValue = objIdElement.innerText;
 
   // Check if the enemy is in the "Delete" group

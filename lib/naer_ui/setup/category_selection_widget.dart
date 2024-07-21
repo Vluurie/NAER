@@ -16,6 +16,15 @@ class CategorySelection extends ConsumerStatefulWidget {
 
 class CategorySelectionState extends ConsumerState<CategorySelection> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final globalState = ref.read(globalStateProvider);
+      globalState.updateCategories();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
 
@@ -54,6 +63,10 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
       return Icons.help_outline;
     }
 
+    void updateCategories() {
+      globalState.updateSelectedCategories(globalState.categories);
+    }
+
     return Container(
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
@@ -89,6 +102,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
               setState(() {
                 globalState.selectAllQuests = newValue!;
                 updateItemsByType(SideQuest, newValue, ref);
+                updateCategories();
               });
             },
           ),
@@ -99,6 +113,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
               setState(() {
                 globalState.selectAllMaps = newValue!;
                 updateItemsByType(MapLocation, newValue, ref);
+                updateCategories();
               });
             },
           ),
@@ -109,6 +124,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
               setState(() {
                 globalState.selectAllPhases = newValue!;
                 updateItemsByType(ScriptingPhase, newValue, ref);
+                updateCategories();
               });
             },
           ),
@@ -142,6 +158,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
                           onChanged: (bool? newValue) {
                             setState(() {
                               globalState.categories[item.id] = newValue!;
+                              updateCategories();
                             });
                           },
                         ),
