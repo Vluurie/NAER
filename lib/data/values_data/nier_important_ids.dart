@@ -140,7 +140,10 @@ Map<String, List<String>> importantIds = {
     '0xdb7601d5', // Opera Boss battle androids that do nothing
     '0x9f0ac707', // Opera Boss battle androids that do nothing
     '0x67f8d83d', // Opera Boss battle androids that do nothing
-    '0x93e648a6' // Opera Boss battle androids that do nothing
+    '0x93e648a6', // Opera Boss battle androids that do nothing
+    '0x86a14e87', // Pascal village chain machine
+    '0xe47cdd6b', // Pascal village chain machine
+    '0xc51b834e' // Enemy Set - Evacuation Room Raid
   ],
   "EnemySetArea": [
     '0x47e03801', // Complex City front enemies before house complex entry

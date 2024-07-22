@@ -9,6 +9,8 @@ class SpecialEntities {
     }).toList();
   }
 
+  // TODO: Check this entity since this route puid level will not be changed 0x29cb2a43
+
   static const Map<String, Set<String>> bigSpawnEnemySkipIds = {
     "EnemySetAction": {
       '0x15a6e4d9', // Bunker attack - commander room enemies
@@ -19,6 +21,16 @@ class SpecialEntities {
       '0xd1bc7927', // Bunker attack - escape fight four
       '0x986c3166', // Bunker attack - escape fight five
       '0x2168a843', // Resource Supply Unit Forest - 3th Floor
+      '0xd951a89', // Pascal village on fire
+      '0x6332679a', // Pascal village on fire
+      '0xa49261f2', // Pascal village on fire
+      '0xea34980b', // Pascal village on fire
+      '0x6ed0a573', // Pascal village on fire
+      '0x4bcf655b', // Pascal village on fire
+      '0xf8e100dc', // Top of ressouce after august fight
+      '0x27012076', // End tower yorha
+      '0x95378bde', // End tower yorha
+      '0x83a3d48e', // End tower yorha
     },
     "EnemySetArea": {
       '0x741eeae2', // Factory: Spiral Staircase Area ( massive drop )
@@ -96,7 +108,16 @@ class SpecialEntities {
       '0xd0649628', // Resistance Camp Attack first set area
       '0x51d90bd3', // First Prologue wave if all are tanks, one will bug out of map
       '0xfa3d0b16', // Factory prologue
-      '0x8f5d775a' // Factory prologue
+      '0x8f5d775a', // Factory prologue
+      '0x8c1d3d8f', // Factory underground
+      '0xb87e8fb4', // Factory underground
+      '0x5302d67f', // Factory underground
+      '0x9b8a3507', // Factory underground
+      '0xafbffbe6', // Factory underground
+      '0xd78ee9c1', // Factory underground at the weapon
+      '0xca8d4cf2', // Resouce recovery unit amusment park first wave
+      '0x73bd8852', // Resouce recovery unit amusment park first wave
+      '0xa16847db', // Resouce recovery unit amusment park first wave
     },
     "EnemyGenerator": {
       '0x10ec25b3', // Forest Castle Passage part C, D route
@@ -116,6 +137,11 @@ class SpecialEntities {
       '0xd4e25c1a', // Forest Castle befor the Throne generator p200.dat
       '0x9325f994', // Resistance Camp 2D fight
       '0x600a4c1b', // Resistance Camp 2D fight
+      '0x606dc393', // Factory underground
+      '0xcaa0ab4f', // Factory underground
+      '0xeb2f81f6', // Factory underground
+      '0x6b9564ce', // Factory underground
+      '0x436453ff', // Factory underground
     },
     "EnemyLayoutAction": {}
   };
