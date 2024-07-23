@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/dynamic_library_handler.dart';
 import 'package:path/path.dart' as path;
-
-import '../yax/yaxToXml.dart';
 import '../utils/ByteDataWrapper.dart';
 
 /*
@@ -87,7 +86,7 @@ Future<List<String>> extractPakFiles(
         Iterable<int>.generate(fileCount).map<Future<void>>((i) async {
       var yaxPath = path.join(extractDir, "$i.yax");
       var xmlPath = path.setExtension(yaxPath, ".xml");
-      await yaxFileToXmlFile(yaxPath, xmlPath, sendPort);
+      await convertYaxFileToXmlFile(yaxPath, xmlPath);
     }));
   }
 

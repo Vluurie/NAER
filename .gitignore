@@ -50,3 +50,4 @@ lib/nier_cli/nier_cli_fork_utils/utils/new_impl_tests/
 /android/app/debug
 /android/app/profile
 /android/app/release
+assets/rust_dll/yax_to_xml.dll

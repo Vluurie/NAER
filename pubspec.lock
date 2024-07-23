@@ -145,7 +145,7 @@ packages:
     source: hosted
     version: "1.0.6+8"
   ffi:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: ffi
       sha256: "493f37e7df1804778ff3a53bd691d8692ddf69702cf4c1c1096a2e41b4779e21"

@@ -3,12 +3,12 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_valid_gamefiles.dart';
+import 'package:NAER/naer_utils/dynamic_library_handler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/cpk/cpk_extractor.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datExtractor.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/pak/pakExtractor.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/yax/yaxToXml.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 
@@ -51,7 +51,7 @@ Future<bool> handleSingleYaxToXml(
   if (!isYaxToXmlValid(input, isFile, args)) return false;
   output ??= "${withoutExtension(input)}.xml";
   conversionCounter++;
-  await yaxFileToXmlFile(input, output, sendPort);
+  await convertYaxFileToXmlFile(input, output);
   return true;
 }
 
