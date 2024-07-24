@@ -1,7 +1,5 @@
 # NAER - N:A Enemy Randomizer Tool
 
-Note before trying to clone: The automato theme and the assets are yet not public. The automato theme library will be public when the most stable version is released. The assets will be always in the lastrelease .zip folder and not directly in the repository.
-
 ## Overview
 
 NAER, the ultimate enemy randomization tool designed to enhance your gaming experience in the critically acclaimed action RPG. With NAER, you have the power to breathe new life into the game by introducing a variety of randomization options. Whether you seek to intensify the challenge or simply wish to explore the game from a fresh perspective, NAER is here to cater to your desires.
