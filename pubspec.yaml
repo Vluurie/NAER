@@ -31,7 +31,9 @@ dependencies:
   stack_trace: ^1.11.1
   lottie: ^3.1.2
   automato_theme:
-                  path: ../automato_theme
+    git:
+      url: https://github.com/Vluurie/automato_theme.git
+      ref: main 
   flutter_riverpod: ^2.5.1
   isolate: ^2.1.1
   ffi: ^2.1.2

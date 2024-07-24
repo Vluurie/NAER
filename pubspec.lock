@@ -44,9 +44,11 @@ packages:
   automato_theme:
     dependency: "direct main"
     description:
-      path: "../automato_theme"
-      relative: true
-    source: path
+      path: "."
+      ref: main
+      resolved-ref: "08e4fe8c5ddcc601751b4c05148eecadd7b6f035"
+      url: "https://github.com/Vluurie/automato_theme.git"
+    source: git
     version: "0.0.1"
   build_config:
     dependency: transitive

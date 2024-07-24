@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_valid_gamefiles.dart';
 import 'package:NAER/naer_utils/dynamic_library_handler.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/cpk/cpk_extractor.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datExtractor.dart';
@@ -28,7 +28,7 @@ Future<bool> handleSingleCpkExtract(
     SendPort sendPort) async {
   if (!isCpkExtractionValid(input, isFile, args, enemyList)) return false;
   output ??= join(dirname(input), "${basename(input)}_extracted");
-  debugPrint("Extracting CPK to $output...");
+  globalLog("Extracting CPK to $output...");
   await Directory(output).create(recursive: true);
   var extractedFiles = await extractCpk(input, output, sendPort);
 
@@ -98,7 +98,7 @@ Future<bool> handleSingleDatExtract(
   }
 
   var extractedFiles = await extractDatFiles(input, output, sendPort);
-  sendPort.send('Extracted files from $input: ${extractedFiles.length} files.');
+  // sendPort.send('Extracted files from $input: ${extractedFiles.length} files.');
 
   if (args.autoExtractChildren) {
     pendingFiles.addAll(extractedFiles);
