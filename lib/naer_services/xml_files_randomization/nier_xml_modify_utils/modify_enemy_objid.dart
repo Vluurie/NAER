@@ -45,19 +45,22 @@ Future<void> modifyEnemyObjId(
   String category = mainData.argument['enemyCategory'];
   try {
     if (isImportantId && category == 'allenemies') {
-      await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData, false);
+      await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData,
+          isBoss: false);
       return;
     }
     switch (category) {
       case 'allenemies':
         await (isBossObj
-            ? handleLevel(objIdElement, level, userSelectedEnemyData, true)
+            ? handleLevel(objIdElement, level, userSelectedEnemyData,
+                isBoss: true)
             : handleSelectedObjectIdEnemies(objIdElement, userSelectedEnemyData,
                 level, isSpawnActionTooSmall));
         break;
       case 'onlylevel':
         await (isBossObj
-            ? handleLevel(objIdElement, level, userSelectedEnemyData, true)
+            ? handleLevel(objIdElement, level, userSelectedEnemyData,
+                isBoss: true)
             : handleOnlyObjectIdLevel(
                 objIdElement, userSelectedEnemyData, level));
         break;

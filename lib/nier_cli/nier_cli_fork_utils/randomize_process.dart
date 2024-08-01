@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -5,6 +6,7 @@ import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
@@ -17,7 +19,7 @@ import 'package:path/path.dart' as path;
 /// Processes the collected files based on the given parameters.
 ///
 /// This function performs processing on XML and DAT files collected in the
-/// `collectedFiles` map. It uses various options and file lists to determine
+/// collectedFiles map. It uses various options and file lists to determine
 /// how the files should be processed.
 ///
 /// MainData container data to use are:
@@ -35,6 +37,8 @@ import 'package:path/path.dart' as path;
 ///   - args: Command-line arguments passed to the program.
 Future<void> repackModifiedGameFiles(
     Map<String, List<String>> collectedFiles, MainData mainData) async {
+  mainData.sendPort.send("Started repacking process of modified game files...");
+
   // Prepare XML files by replacing .yax extension with .xml
   var xmlFiles = collectedFiles['yaxFiles']
           ?.map((e) => e.replaceAll('.yax', '.xml'))
@@ -54,6 +58,7 @@ Future<void> repackModifiedGameFiles(
   var fileManager = FileCategoryManager(mainData.args);
 
   // Process DAT folders if they exist
+  mainData.sendPort.send('Isolates created, repacking...');
   await processDatFolders(fileManager, collectedFiles['datFolders'], mainData);
 }
 
@@ -63,11 +68,14 @@ Future<void> repackModifiedGameFiles(
 Future<void> processEntitiesInParallel(
     Iterable<String> entities, MainData mainData) async {
   final service = IsolateService();
+  mainData.sendPort.send('Creating Isolates for parallel repacking...');
 
   final fileList = entities.toList();
-  final fileBatches = service.distributeFiles(fileList.cast<String>());
+  final fileBatches = await service.distributeFilesAsync(fileList);
   final tasks = fileBatches.values.map((files) {
-    return () => processEntities(files, mainData);
+    return (dynamic _) async {
+      await processEntities(files, mainData);
+    };
   }).toList();
 
   await service.runTasks(tasks);
@@ -80,21 +88,27 @@ Future<void> processEntitiesInParallel(
 ///
 Future<void> processEntities(
     Iterable<String> entities, MainData mainData) async {
+  final processedFiles = mainData.argument['processedFiles'] as Set<String>;
+  final pendingFilesQueue =
+      ListQueue<String>.from(mainData.argument['pendingFiles'] as List<String>);
+
   for (var file in entities) {
+    if (processedFiles.contains(file)) continue;
+
     try {
       await handleInput(
           file,
           null,
           mainData.options,
-          mainData.argument['pendingFiles'],
-          mainData.argument['processedFiles'],
-          mainData.argument['enemyList'],
-          mainData.argument['activeOptions'],
+          pendingFilesQueue,
+          processedFiles,
+          mainData.argument['enemyList'] as List<String>,
+          mainData.argument['activeOptions'] as List<String>,
           mainData.isManagerFile,
           mainData.sendPort);
-      mainData.argument['processedFiles'].add(file);
+      processedFiles.add(file);
     } catch (e) {
-      // debugPrint("input error: $e");
+      mainData.sendPort.send("Input error: $e");
     }
   }
 }
@@ -104,57 +118,64 @@ Future<void> processEntities(
 /// This function checks each DAT folder with the shouldProcessDatFolder method
 /// and then processes it till the output path.
 ///
-/// logState adds all created files to the last randomized shared preference list that can be undone with the undo button
+/// logState adds all created files to the last randomized shared preference list that can be undone with the undo button.
+///
+/// - Parameters:
+///   - fileManager: A manager with lists for the categories map, quest, logic files.
+///   - datFolders: A list of DAT folders to be processed.
+///   - mainData: MainData container with various options and parameters for processing.
 ///
 Future<void> processDatFolders(FileCategoryManager fileManager,
     List<String>? datFolders, MainData mainData) async {
-  if (datFolders != null) {
-    for (var datFolder in datFolders) {
-      var baseNameWithExtension = path.basename(datFolder);
+  if (datFolders == null) return;
 
-      // Check if the DAT folder should be processed
-      if (shouldProcessDatFolder(
-          baseNameWithExtension,
-          mainData.argument['enemyList'],
-          fileManager,
-          mainData.argument['ignoreList'])) {
-        try {
-          var datSubFolder = getDatFolder(baseNameWithExtension);
-          var datOutput =
-              path.join(mainData.output, datSubFolder, baseNameWithExtension);
-          await handleInput(
-              datFolder,
-              datOutput,
-              mainData.options,
-              [],
-              mainData.argument['processedFiles'],
-              mainData.argument['enemyList'],
-              mainData.argument['activeOptions'],
-              mainData.isManagerFile,
-              mainData.sendPort);
+  final tasks = datFolders.map((datFolder) async {
+    var baseNameWithExtension = path.basename(datFolder);
 
-          // Log the file change and send it to the main isolate
-          FileChange.logChange(datOutput, 'create');
-          logState.addLog("Folder created: $datOutput");
-          mainData.sendPort.send({
-            'event': 'file_change',
-            'filePath': datOutput,
-            'action': 'create'
-          });
-        } catch (e, stackTrace) {
-          logAndPrint("Failed to process DAT folder");
-          logAndPrint(e.toString());
+    // Check if the DAT folder should be processed
+    if (shouldProcessDatFolder(
+        baseNameWithExtension,
+        mainData.argument['enemyList'] as List<String>,
+        fileManager,
+        mainData.argument['ignoreList'] as List<String>)) {
+      try {
+        var datSubFolder = getDatFolder(baseNameWithExtension);
+        var datOutput =
+            path.join(mainData.output, datSubFolder, baseNameWithExtension);
+        await handleInput(
+            datFolder,
+            datOutput,
+            mainData.options,
+            ListQueue<String>(),
+            mainData.argument['processedFiles'] as Set<String>,
+            mainData.argument['enemyList'] as List<String>,
+            mainData.argument['activeOptions'] as List<String>,
+            mainData.isManagerFile,
+            mainData.sendPort);
 
-          // Send error message to the main isolate
-          mainData.sendPort.send({
-            'event': 'error',
-            'details': "Failed to process DAT folder: ${e.toString()}",
-            'stackTrace': stackTrace.toString()
-          });
-        }
+        // Log the file change and send it to the main isolate
+        FileChange.logChange(datOutput, 'create');
+        logState.addLog("Folder created: $datOutput");
+        mainData.sendPort.send({
+          'event': 'file_change',
+          'filePath': datOutput,
+          'action': 'create'
+        });
+      } catch (e, stackTrace) {
+        logAndPrint("Failed to process DAT folder");
+        logAndPrint(e.toString());
+
+        // Send error message to the main isolate
+        mainData.sendPort.send({
+          'event': 'error',
+          'details': "Failed to process DAT folder: ${e.toString()}",
+          'stackTrace': stackTrace.toString()
+        });
       }
     }
-  }
+  }).toList();
+
+  await Future.wait(tasks);
 }
 
 /// Determines whether a .dat folder should be processed.
@@ -167,7 +188,7 @@ Future<void> processDatFolders(FileCategoryManager fileManager,
 ///   - enemyList: The enemy list
 ///   - fileManager: A manager with lists for the categories map, quest, logic files.
 ///   - ignoreList: The list of files to be ignored during processing.
-/// - Returns: `true` if the folder should be processed, `false` otherwise.
+/// - Returns: true if the folder should be processed, false otherwise.
 bool shouldProcessDatFolder(
     String baseNameWithExtension,
     List<String> enemyList,
@@ -179,7 +200,7 @@ bool shouldProcessDatFolder(
     return false;
   }
 
-  // If the file is a enemy file, check if it should be processed
+  // If the file is an enemy file, check if it should be processed
   if (baseNameWithExtension.startsWith('em')) {
     if (enemyList.isNotEmpty && !enemyList.contains('None')) {
       var cleanedEnemyList = enemyList
@@ -229,24 +250,24 @@ Future<void> processEnemyStats(
       await filterEnemyFiles(enemyFiles, enemiesToBalance);
 
   if (mainData.isBalanceMode! && reverseStats != true) {
+    mainData.sendPort.send("Balancing enemy stats files.");
     for (var file in filteredFiles) {
       await balanceEnemyToBalanceCsvFiles(file, balanceFactor);
     }
   }
 
   if (enemyList.isNotEmpty && !enemyList.contains('None')) {
-    mainData.sendPort.send("Started changing enemy stats...");
     for (var file in enemyFiles) {
       await processCsvFile(file, mainData.argument['enemyStats'], reverseStats);
     }
 
     if (reverseStats && mainData.isBalanceMode == true) {
+      mainData.sendPort.send(
+          "Normalized balanced modified stats files for next modification.");
       for (var filteredFile in filteredFiles) {
         await normalizeEnemyToBalanceCsvFiles(filteredFile, balanceFactor);
       }
     }
-  } else {
-    mainData.sendPort.send("No enemy Stats modified as argument is 'None'");
   }
 }
 
@@ -283,34 +304,78 @@ Future<void> getGameFilesForProcessing(
 /// Recursevly extracts the child files after extracting the parent
 ///
 Future<List<String>> extractGameFiles(
-    List<String> pendingFiles,
-    Set<String> processedFiles,
-    CliOptions options,
-    List<String> enemyList,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
-  List<String> errorFiles = [];
+  List<String> pendingFiles,
+  Set<String> processedFiles,
+  CliOptions options,
+  List<String> enemyList,
+  List<String> activeOptions,
+  bool? ismanagerFile,
+  SendPort sendPort,
+) async {
+  final isolateService = IsolateService();
+  final List<String> errorFiles = [];
+
+  // Convert pendingFiles to ListQueue for efficient queue operations
+  final fileBatches = await isolateService.distributeFilesAsync(pendingFiles);
+
+  final tasks = fileBatches.values.map((batch) {
+    return (dynamic _) async {
+      final batchErrors = await _processFileBatch(
+        batch,
+        processedFiles,
+        options,
+        ListQueue<String>.from(batch),
+        enemyList,
+        activeOptions,
+        ismanagerFile,
+        sendPort,
+      );
+      errorFiles.addAll(batchErrors);
+    };
+  }).toList();
+
+  await isolateService.runTasks(tasks);
+
+  return errorFiles;
+}
+
+Future<List<String>> _processFileBatch(
+  List<String> batch,
+  Set<String> processedFiles,
+  CliOptions options,
+  ListQueue<String> pendingFiles,
+  List<String> enemyList,
+  List<String> activeOptions,
+  bool? ismanagerFile,
+  SendPort sendPort,
+) async {
+  final List<String> errorFiles = [];
 
   while (pendingFiles.isNotEmpty) {
-    String input = pendingFiles.removeAt(0);
+    final input = pendingFiles.removeFirst();
     if (processedFiles.contains(input)) continue;
-    String fileType = path.extension(input).toLowerCase();
-
-    //  logAndPrint("Processing file: $input, File type: $fileType");
+    final fileType = path.extension(input).toLowerCase();
 
     try {
-      await handleInput(input, null, options, pendingFiles, processedFiles,
-          enemyList, activeOptions, ismanagerFile, sendPort);
+      await handleInput(
+        input,
+        null,
+        options,
+        pendingFiles,
+        processedFiles,
+        enemyList,
+        activeOptions,
+        ismanagerFile,
+        sendPort,
+      );
       processedFiles.add(input);
-      //  logAndPrint("Successfully processed file: $input, File type: $fileType");
     } on FileHandlingException catch (e) {
-      logAndPrint("Invalid input for file $input (File type: $fileType): $e");
+      globalLog("Invalid input for file $input (File type: $fileType): $e");
       errorFiles.add(input);
     } catch (e, stackTrace) {
-      logAndPrint("Failed to process file $input (File type: $fileType)");
-      logAndPrint(e.toString());
-      logAndPrint(stackTrace.toString());
+      globalLog("Failed to process file $input (File type: $fileType)");
+      globalLog(e.toString());
+      globalLog(stackTrace.toString());
       errorFiles.add(input);
     }
   }

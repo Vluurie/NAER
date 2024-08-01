@@ -1,15 +1,15 @@
-const Map<String, List<String>> bossData = {
-  "Boss": [
+class BossData {
+  static const Set<String> bossIds = {
     'em012e',
     // 'em0110',
     // 'em0111',
-    //  'em0112',
+    // 'em0112',
     'em0120',
     'em560d',
     'em1000',
     'em1010',
     // 'em1070',
-    //   'em1074',
+    // 'em1074',
     'em1100',
     'em1101',
     'em2100',
@@ -29,7 +29,7 @@ const Map<String, List<String>> bossData = {
     'em6000',
     'em6200',
     'em6300',
-    //  'em6400',
+    // 'em6400',
     'em7000',
     'em7001',
     'em8000',
@@ -46,16 +46,16 @@ const Map<String, List<String>> bossData = {
     'em9011',
     'emb000',
     'emb001',
-    //'emb002',
+    // 'emb002',
     // 'emb010',
-    //  'emb014',
+    // 'emb014',
     'emb040',
     // 'emb041',
     'emb042',
     // 'emb051',
     'emb054',
-    //'emb061',
+    // 'emb061',
     'emb070',
     'emb111',
-  ]
-};
+  };
+}

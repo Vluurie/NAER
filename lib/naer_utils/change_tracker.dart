@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -158,5 +160,42 @@ class FileChange {
       var value = prefs.clear();
       globalLog('$key: $value');
     });
+  }
+
+  static Future<void> loadDLCOption(WidgetRef ref) async {
+    final prefs = await SharedPreferences.getInstance();
+    bool hasDLC = prefs.getBool('dlc') ?? false;
+    ref.read(globalStateProvider.notifier).updateDLCOption(hasDLC);
+  }
+
+  static Future<void> saveDLCOption(WidgetRef ref, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('dlc', value);
+    ref.read(globalStateProvider.notifier).updateDLCOption(value);
+  }
+
+  static Future<Map<String, dynamic>> getPathsFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final input = prefs.getString('input') ?? '';
+    final output = prefs.getString('output') ?? '';
+    final savePaths = prefs.getBool('savePaths') ?? false;
+
+    return {
+      'input': input,
+      'output': output,
+      'savePaths': savePaths,
+    };
+  }
+
+  static Future<bool> getPathsPresence() async {
+    final prefs = await SharedPreferences.getInstance();
+    final inputPresent = prefs.containsKey('input') &&
+        (prefs.getString('input') ?? '').isNotEmpty;
+    final outputPresent = prefs.containsKey('output') &&
+        (prefs.getString('output') ?? '').isNotEmpty;
+    final savePathsPresent =
+        prefs.containsKey('savePaths') && prefs.getBool('savePaths') == true;
+
+    return inputPresent && outputPresent && savePathsPresent;
   }
 }

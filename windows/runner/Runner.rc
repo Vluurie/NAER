@@ -87,14 +87,13 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904e4"
+        BLOCK "040904E4"
         BEGIN
-            VALUE "CompanyName", "com.vluurie" "\0"
+            VALUE "CompanyName", "" "\0"
             VALUE "FileDescription", "NAER" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "NAER" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.vluurie.naer. GNU General Public License.
-" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024. GNU General Public License." "\0"
             VALUE "OriginalFilename", "NAER.exe" "\0"
             VALUE "ProductName", "NAER" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

@@ -8,24 +8,19 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dev_dependencies:
-  lints: ^4.0.0
+  dependency_validator: ^4.1.0
+  flutter_lints: ^4.0.0
 dependencies:
   archive: ^3.3.6
   args: ^2.4.2
   crclib: ^3.0.0
-  csv: ^6.0.0
   euc: ^1.0.6+8
   file_picker: ^8.0.0+1
   flutter:
     sdk: flutter
-  flutter_test:
-    sdk: flutter
 
-  open_file: ^3.3.2
   path: ^1.8.3
   path_provider: ^2.1.1
-  flutter_lints: ^4.0.0
-  uuid: ^4.2.2
   xml: ^6.2.2
   tuple: ^2.0.2
   desktop_drop: ^0.4.4
@@ -36,9 +31,14 @@ dependencies:
   stack_trace: ^1.11.1
   lottie: ^3.1.2
   automato_theme:
-                  path: ../automato_theme
-  hooks_riverpod: ^2.5.1
+    git:
+      url: https://github.com/Vluurie/automato_theme.git
+      ref: main 
   flutter_riverpod: ^2.5.1
+  isolate: ^2.1.1
+  ffi: ^2.1.2
+  url_launcher: ^6.3.0
+  flutter_dotenv: ^5.1.0
 
 
 
@@ -54,6 +54,7 @@ flutter:
     - assets/naer_backgrounds/naer_background.png
     - assets/mods/
     - assets/animations/
+    - .env
   uses-material-design: true
   fonts:
     - family: MaterialIcons

@@ -1,22 +1,21 @@
-import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<Map<String, List<String>>> readEnemyData() async {
-  return SortedEnemyGroup.enemyData;
+Future<Map<String, List<String>>> readEnemyData(bool hasDLC) async {
+  return SortedEnemyGroup.getDLCFilteredEnemyData(hasDLC);
 }
 
 Future<Map<String, List<String>>> sortSelectedEnemies(
-    List<String> selectedImages, BuildContext context) async {
-  final globalState = Provider.of<GlobalState>(context, listen: false);
-  List<String>? selectedImages =
-      globalState.enemyImageGridKey.currentState?.selectedImages;
-  var enemyGroups = await readEnemyData();
+    List<String> selectedImages, BuildContext context, WidgetRef ref) async {
+  final globalState = ref.watch(globalStateProvider);
+  List<String>? selectedImages = globalState.selectedImages;
+  var enemyGroups = await readEnemyData(globalState.hasDLC);
 
   var formattedSelectedImages =
-      selectedImages!.map((image) => image.split('.').first).toList();
+      selectedImages.map((image) => image.split('.').first).toList();
 
   var sortedSelection = {
     "Ground": <String>[],
@@ -39,8 +38,8 @@ Future<Map<String, List<String>>> sortSelectedEnemies(
   return sortedSelection;
 }
 
-String getSelectedEnemiesArgument() {
-  List<List<String>> selectedEnemies = allEmForStatsChangeList
+String getSelectedEnemiesArgument(WidgetRef ref) {
+  List<List<String>> selectedEnemies = EnemyList.getDLCFilteredEnemies(ref)
       .where((enemy) => enemy.isSelected)
       .map((enemy) => enemy.emIdentifiers)
       .toList();

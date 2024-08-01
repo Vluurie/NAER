@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:args/args.dart';
+import 'package:xml/xml.dart' as xml;
 
 /// MainData contains the main configuration and arguments required for processing the game files.
 ///
@@ -26,6 +27,7 @@ class MainData {
   final SendPort sendPort;
   final bool? backUp;
   final bool? isBalanceMode;
+  final bool? hasDLC;
 
   MainData({
     required this.argument,
@@ -37,6 +39,7 @@ class MainData {
     required this.sendPort,
     this.backUp,
     this.isBalanceMode,
+    required this.hasDLC,
   });
 
   @override
@@ -51,6 +54,7 @@ class MainData {
         '  sendPort: $sendPort,\n'
         '  backUp: $backUp\n'
         '  isBalanceMode: $isBalanceMode\n'
+        '  hasDLC: $hasDLC\n'
         '}';
   }
 }
@@ -61,14 +65,15 @@ class NierCliArgs {
   final SendPort sendPort;
   final bool? backUp;
   final bool? isBalanceMode;
+  final bool? hasDLC;
 
-  NierCliArgs({
-    required this.arguments,
-    this.isManagerFile,
-    required this.sendPort,
-    this.backUp,
-    this.isBalanceMode,
-  });
+  NierCliArgs(
+      {required this.arguments,
+      this.isManagerFile,
+      required this.sendPort,
+      this.backUp,
+      this.isBalanceMode,
+      this.hasDLC});
 
   @override
   String toString() {
@@ -78,6 +83,38 @@ class NierCliArgs {
         '  sendPort: $sendPort,\n'
         '  backUp: $backUp\n'
         '  isBalanceMode: $isBalanceMode\n'
+        '  hasDLC: $hasDLC\n'
+        '}';
+  }
+}
+
+/// Data class for handling enemy entity object parameters
+class EnemyEntityObjectAction {
+  final xml.XmlElement objIdElement;
+  final Map<String, List<String>> userSelectedEnemyData;
+  final String enemyLevel;
+  final bool isSpawnActionTooSmall;
+  final bool handleLevels;
+  final bool randomizeAndSetValues;
+
+  EnemyEntityObjectAction({
+    required this.objIdElement,
+    required this.userSelectedEnemyData,
+    required this.enemyLevel,
+    required this.isSpawnActionTooSmall,
+    this.handleLevels = false,
+    this.randomizeAndSetValues = false,
+  });
+
+  @override
+  String toString() {
+    return 'EnemyEntityObjectAction {\n'
+        '  objIdElement: ${objIdElement.toXmlString(pretty: true)},\n'
+        '  userSelectedEnemyData: $userSelectedEnemyData,\n'
+        '  enemyLevel: $enemyLevel,\n'
+        '  isSpawnActionTooSmall: $isSpawnActionTooSmall,\n'
+        '  handleLevels: $handleLevels,\n'
+        '  randomizeAndSetValues: $randomizeAndSetValues\n'
         '}';
   }
 }

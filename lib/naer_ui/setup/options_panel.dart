@@ -1,12 +1,14 @@
 import 'package:NAER/main.dart';
 import 'package:NAER/naer_save_editor/save_editor.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
+import 'package:NAER/naer_ui/directory_ui/dlc_checkbox.dart';
 import 'package:NAER/naer_ui/nav_button/navigate_button.dart';
 
 import 'package:NAER/naer_utils/change_app_theme.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
 
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -191,6 +193,48 @@ class OptionsPanel extends ConsumerWidget {
                               showPointer: false,
                             ),
                           ),
+                          ListTile(
+                            title: AutomatoButton(
+                              label: "Delete Extracted Backup",
+                              onPressed: () =>
+                                  AutomatoDialogManager().showYesNoDialog(
+                                context: context,
+                                ref: ref,
+                                title: 'Are you sure?',
+                                content: Text(
+                                  'This will delete the 9GB backup that got created from extracting. Are you sure?',
+                                  style: TextStyle(
+                                    color: AutomatoThemeColors.textDialogColor(
+                                        ref),
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                onYesPressed: () async {
+                                  await deleteBackupGameFolders(
+                                      globalState.input);
+                                  Navigator.of(context).pop(false);
+                                },
+                                onNoPressed: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                yesLabel: 'OK',
+                                noLabel: 'Cancel',
+                                activeHoverColorNo:
+                                    AutomatoThemeColors.darkBrown(ref),
+                                activeHoverColorYes:
+                                    AutomatoThemeColors.dangerZone(ref),
+                                yesButtonColor:
+                                    AutomatoThemeColors.darkBrown(ref),
+                                noButtonColor:
+                                    AutomatoThemeColors.darkBrown(ref),
+                              ),
+                              uniqueId: "deleteBackup",
+                              maxScale: 0.8,
+                              activeHoverColor:
+                                  AutomatoThemeColors.dangerZone(ref),
+                              showPointer: false,
+                            ),
+                          ),
                           const Divider(),
                           ListTile(
                             title: const Text('Options'),
@@ -199,6 +243,9 @@ class OptionsPanel extends ConsumerWidget {
                           ),
                           const ListTile(
                             title: BalanceModeCheckBox(),
+                          ),
+                          const ListTile(
+                            title: DLCCheckBox(),
                           ),
                         ],
                       ),

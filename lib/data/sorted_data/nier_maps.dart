@@ -1,8 +1,9 @@
 class MapLocation {
   final String id;
   final String description;
+  final bool? dlc;
 
-  MapLocation({required this.id, required this.description});
+  MapLocation({required this.id, required this.description, this.dlc});
 
   static final List<MapLocation> mapLocations = [
     MapLocation(

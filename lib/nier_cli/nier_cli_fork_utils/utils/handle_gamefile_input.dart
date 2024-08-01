@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -14,16 +15,14 @@ const List<
         CliOptions,
         bool,
         bool,
-        List<String>,
+        ListQueue<String>,
         Set<String>,
         List<String>,
         bool? ismanagerFile,
         SendPort sendPort)> _handlers = [
   handleSingleDatExtract,
   handleDatRepack,
-  handleSinglePakExtract,
   handlePakRepack,
-  handleSingleYaxToXml,
   handleXmlToYax,
 ];
 
@@ -31,7 +30,7 @@ Future<void> handleInput(
     String input,
     String? output,
     CliOptions args,
-    List<String> pendingFiles,
+    ListQueue<String> pendingFiles,
     Set<String> processedFiles,
     List<String> enemyList,
     List<String> activeOptions,

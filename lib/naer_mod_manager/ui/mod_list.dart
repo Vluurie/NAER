@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
@@ -554,7 +554,7 @@ class _ModsListState extends ConsumerState<ModsList>
           GameFileOptions.mapOptions,
           GameFileOptions.enemyOptions,
           GameFileOptions.phaseOptions,
-          allEmForStatsChangeList);
+          EnemyList.getDLCFilteredEnemies(ref));
 
       if (!shouldProcess) {
         bool copySuccess = await _copyFile(
@@ -626,7 +626,8 @@ class _ModsListState extends ConsumerState<ModsList>
         'isManagerFile': true,
         'sendPort': receivePort.sendPort,
         'backUp': false,
-        'isBalanceMode': globalState.isBalanceMode
+        'isBalanceMode': globalState.isBalanceMode,
+        'hasDLC': globalState.hasDLC
       };
       globalState.isModManagerPageProcessing = true;
       await compute(runNierCliIsolated, args);

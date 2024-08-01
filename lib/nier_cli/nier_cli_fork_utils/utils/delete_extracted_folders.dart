@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart';
 
@@ -22,6 +23,12 @@ List<String> folderNames = [
   "em/nier2blender_extracted",
   "core/nier2blender_extracted",
   "nier2blender_extracted",
+];
+
+List<String> backupNames = [
+  'naer_onlylevel',
+  'naer_randomized',
+  'naer_randomized_and_level',
 ];
 
 /// Deletes specified folders from the given directory.
@@ -59,7 +66,22 @@ Future<void> deleteExtractedGameFolders(String directoryPath) async {
     if (await folderPath.exists()) {
       try {
         await folderPath.delete(recursive: true);
-        logAndPrint('Deleted folder: $folderName');
+        globalLog('Deleted folder: $folderName');
+      } catch (e) {
+        logAndPrint('Error deleting folder $folderName: $e');
+      }
+    }
+  }
+}
+
+Future<void> deleteBackupGameFolders(String directoryPath) async {
+  var parentDirectory = Directory(directoryPath).parent.path;
+  for (var folderName in backupNames) {
+    var folderPath = Directory(join(parentDirectory, folderName));
+    if (await folderPath.exists()) {
+      try {
+        await folderPath.delete(recursive: true);
+        globalLog('Deleted folder: $folderName');
       } catch (e) {
         logAndPrint('Error deleting folder $folderName: $e');
       }

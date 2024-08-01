@@ -29,7 +29,17 @@ class InputFileDialog {
       if (containsValidFile && !isInDataDirectory) {
         globalState.input = selectedDirectory.convertAndEscapePath();
 
-        updatePath(selectedDirectory);
+        await updatePath(selectedDirectory);
+        bool dlcExist = await hasDLC(selectedDirectory);
+        if (!dlcExist) {
+          if (context.mounted) {
+            _showNoDlcDirectoryDialog(context, ref);
+          }
+        } else {
+          if (context.mounted) {
+            _showHasDlcDirectoryDialog(context, ref);
+          }
+        }
       } else {
         if (context.mounted) {
           _showInvalidDirectoryDialog(context, ref);
@@ -60,6 +70,57 @@ class InputFileDialog {
       },
       okLabel: "OK",
     );
+  }
+
+  void _showNoDlcDirectoryDialog(BuildContext context, WidgetRef ref) {
+    final globalState = ref.read(globalStateProvider.notifier);
+
+    AutomatoDialogManager().showInfoDialog(
+      context: context,
+      ref: ref,
+      title: "DLC Not Found!",
+      content: Text(
+        "Uh-oh! It seems like the DLC hasn't been installed yet. Without it, your adventures might be lacking some epic battles against fearsome enemies. If you have the DLC, you can enable it using the checkbox in the options. Gear up and get ready!",
+        style: TextStyle(
+          color: AutomatoThemeColors.textDialogColor(ref),
+          fontSize: 20,
+        ),
+      ),
+      okLabel: "OK",
+      onOkPressed: () {
+        globalState.updateDLCOption(false);
+        _saveDLCOption(false);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  void _showHasDlcDirectoryDialog(BuildContext context, WidgetRef ref) {
+    final globalState = ref.read(globalStateProvider.notifier);
+
+    AutomatoDialogManager().showInfoDialog(
+      context: context,
+      ref: ref,
+      title: "DLC Found!",
+      content: Text(
+        "DLC detected! If you prefer to disable the DLC enemies, you can do so in the options panel. This can be helpful as most speedruns are done without the DLC.",
+        style: TextStyle(
+          color: AutomatoThemeColors.textDialogColor(ref),
+          fontSize: 20,
+        ),
+      ),
+      okLabel: "OK",
+      onOkPressed: () {
+        globalState.updateDLCOption(true);
+        _saveDLCOption(true);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  Future<void> _saveDLCOption(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('dlc', value);
   }
 }
 
@@ -186,16 +247,18 @@ class OutputFileDialog {
     AutomatoDialogManager().showInfoDialog(
       context: context,
       ref: ref,
-      title: "No Mod Files",
+      title: "No Mod Files Found!",
       content: Text(
-        "No scripted mod files were found in the data directory. Skin mods are always ignored.",
+        "Good news, adventurer! No scripted mod files were detected in the data directory. This means there are no conflicting mods that might alter your epic battles against enemies for now. Remember, skin mods are always ignored as they're just for show and don't affect gameplay. Enjoy your unaltered journey!",
         style: TextStyle(
-            color: AutomatoThemeColors.textDialogColor(ref), fontSize: 20),
+          color: AutomatoThemeColors.textDialogColor(ref),
+          fontSize: 20,
+        ),
       ),
       onOkPressed: () {
         Navigator.of(context).pop();
       },
-      okLabel: "OK",
+      okLabel: "Got it!",
     );
   }
 }

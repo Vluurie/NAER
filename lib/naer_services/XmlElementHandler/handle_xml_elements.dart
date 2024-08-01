@@ -113,9 +113,9 @@ class XmlElementHandler {
   ///   - startingElement: The XML element to start removing child elements from.
   ///   - elementNamesToRemove: A list of element names to remove.
   ///   - climbToParentWithName: An optional parent element name to climb to before removing child elements.
-  static void removeSpecifiedChildElements(
+  static Future<void> removeSpecifiedChildElements(
       xml.XmlElement startingElement, List<String> elementNamesToRemove,
-      [String? climbToParentWithName]) {
+      [String? climbToParentWithName]) async {
     xml.XmlNode? targetNode = startingElement;
 
     if (climbToParentWithName != null) {

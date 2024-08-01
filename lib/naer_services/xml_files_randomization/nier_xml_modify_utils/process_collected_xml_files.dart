@@ -16,15 +16,14 @@ import 'package:xml/xml.dart' as xml;
 ///
 /// [file] is the XML file to be processed.
 /// [sortedEnemyData] is the map of sorted enemy data.
-/// [enemyLevel] specifies the level of enemies to be modified.
-/// [enemyCategory] specifies the category of enemies to be modified.
 /// [importantIds] is the ImportantIDs object containing metadata IDs.
+/// [mainData] specifies the main data to be used.
 Future<void> processCollectedXmlFileForRandomization(
     File file,
     Map<String, List<String>> sortedEnemyData,
     ImportantIDs importantIds,
     MainData mainData) async {
-  String content = file.readAsStringSync();
+  String content = await file.readAsString();
   var document = xml.XmlDocument.parse(content);
 
   var actions = document.findAllElements('action');
@@ -33,17 +32,17 @@ Future<void> processCollectedXmlFileForRandomization(
         ? action.findElements('id').first.innerText
         : null;
 
-    Iterable<xml.XmlElement> codeElements = getEnemyCodeElements(action);
+    Iterable<xml.XmlElement> codeElements = await getEnemyCodeElements(action);
     bool isSpawnActionTooSmall = false;
     bool isActionImportant = false;
 
-    isSpawnActionTooSmall = checkTooSmallSpawnAction(
+    isSpawnActionTooSmall = await checkTooSmallSpawnAction(
         actionId, SpecialEntities.bigSpawnEnemySkipIds, isSpawnActionTooSmall);
     isActionImportant =
-        checkImportantIds(actionId, importantIds, isActionImportant);
-    handleObjIdProcessing(codeElements, isActionImportant, sortedEnemyData,
-        file, isSpawnActionTooSmall, mainData);
+        await checkImportantIds(actionId, importantIds, isActionImportant);
+    await handleObjIdProcessing(codeElements, isActionImportant,
+        sortedEnemyData, file, isSpawnActionTooSmall, mainData);
   }
 
-  file.writeAsStringSync(document.toPrettyString());
+  file.writeAsString(document.toPrettyString());
 }

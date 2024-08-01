@@ -1,7 +1,11 @@
+// naer_app_bar.dart
+
+import 'package:NAER/naer_ui/nav_button/donate_button.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_ui/appbar/appbar_icon.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final AnimationController blinkController;
@@ -38,7 +42,7 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
         AppBar(
           toolbarHeight: 70.0,
-          backgroundColor: Colors.transparent,
+          backgroundColor: AutomatoThemeColors.transparentColor(ref),
           elevation: 0,
           title: SizedBox(
             height: 70,
@@ -57,12 +61,13 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             logoText(isLargeScreen, context, ref),
+                            DonateButton(url: dotenv.env['DONATE_URL']!),
                             AppIcons.informationIcon(context, ref),
                             AppIcons.logIcon(
                                 blinkController, scrollToSetup, ref),
                             Container(
-                              height: 50, // Adjust height to match icons
-                              alignment: Alignment.center, // Center alignment
+                              height: 50,
+                              alignment: Alignment.center,
                               child: button,
                             ),
                           ],

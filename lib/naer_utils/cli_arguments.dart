@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/sort_selected_enemies.dart';
@@ -34,7 +35,7 @@ class CLIArguments {
 Future<CLIArguments> gatherCLIArguments({
   required BuildContext context,
   required ScrollController scrollController,
-  required GlobalKey<EnemyImageGridState> enemyImageGridKey,
+  List<String>? selectedImages,
   required Map<String, bool> categories,
   required Map<String, bool> level,
   required List<String> ignoredModFiles,
@@ -43,17 +44,18 @@ Future<CLIArguments> gatherCLIArguments({
   required String scriptPath,
   required double enemyStats,
   required int enemyLevel,
+  required WidgetRef ref,
 }) async {
+  final globalState = ref.watch(globalStateProvider);
   String tempFilePath;
-  List<String>? selectedImages = enemyImageGridKey.currentState?.selectedImages;
 
   try {
     if (selectedImages != null && selectedImages.isNotEmpty) {
-      var sortedEnemies = await sortSelectedEnemies(selectedImages, context);
+      var sortedEnemies =
+          await sortSelectedEnemies(selectedImages, context, ref);
       var tempFile = await File(
               '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
           .create();
-      // print('Temporary file created at: ${tempFile.path}');
       var buffer = StringBuffer();
       buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
       sortedEnemies.forEach((group, enemies) {
@@ -63,17 +65,15 @@ Future<CLIArguments> gatherCLIArguments({
       buffer.writeln("};");
       await tempFile.writeAsString(buffer.toString());
       tempFilePath = tempFile.path.convertAndEscapePath();
-      //  print('Temporary file path: $tempFilePath');
     } else {
       tempFilePath = "ALL";
     }
   } catch (e, stacktrace) {
-    //  print('Error creating temporary file: $e');
     globalLog(Trace.from(stacktrace).toString());
     throw ArgumentError("Error creating temporary file");
   }
 
-  String enemyList = getSelectedEnemiesArgument();
+  String enemyList = getSelectedEnemiesArgument(ref);
   List<String> processArgs = [
     input,
     '--output',
@@ -82,9 +82,9 @@ Future<CLIArguments> gatherCLIArguments({
     '--enemies',
     enemyList.isNotEmpty ? enemyList : 'None',
     '--enemyStats',
-    enemyStats.toString(),
+    globalState.enemyStats.toString(),
     '--level=$enemyLevel',
-    ...categories.entries
+    ...globalState.categories.entries
         .where((entry) => entry.value)
         .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
   ];

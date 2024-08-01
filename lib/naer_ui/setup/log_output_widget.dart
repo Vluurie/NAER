@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -68,6 +67,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
 
   Future<void> _performCopyCLIArguments(
       BuildContext context, GlobalState globalState) async {
+    final globalStateRiverPod = ref.watch(globalStateProvider);
     try {
       if (globalState.input.isEmpty ||
           globalState.specialDatOutputPath.isEmpty) {
@@ -77,18 +77,18 @@ class LogOutputState extends ConsumerState<LogOutput> {
       }
 
       CLIArguments cliArgs = await gatherCLIArguments(
-        context: context,
-        scrollController: scrollController,
-        enemyImageGridKey: globalState.enemyImageGridKey,
-        categories: globalState.categories,
-        level: globalState.level,
-        ignoredModFiles: globalState.ignoredModFiles,
-        input: globalState.input,
-        specialDatOutputPath: globalState.specialDatOutputPath,
-        scriptPath: globalState.scriptPath,
-        enemyStats: globalState.enemyStats,
-        enemyLevel: globalState.enemyLevel,
-      );
+          context: context,
+          scrollController: scrollController,
+          selectedImages: globalStateRiverPod.selectedImages,
+          categories: globalStateRiverPod.categories,
+          level: globalStateRiverPod.level,
+          ignoredModFiles: globalState.ignoredModFiles,
+          input: globalState.input,
+          specialDatOutputPath: globalState.specialDatOutputPath,
+          scriptPath: globalState.scriptPath,
+          enemyStats: globalStateRiverPod.enemyStats,
+          enemyLevel: globalStateRiverPod.enemyLevel,
+          ref: ref);
 
       if (context.mounted) {
         globalLog(
@@ -142,10 +142,14 @@ class LogOutputState extends ConsumerState<LogOutput> {
         message.toLowerCase().contains('processed') ||
         message.toLowerCase().contains('found') ||
         message.toLowerCase().contains('balance mode') ||
+        message.toLowerCase().contains('balancing') ||
+        message.toLowerCase().contains('normalized') ||
+        message.toLowerCase().contains('creating three') ||
         message.toLowerCase().contains('temporary')) {
       return Colors.yellow;
     } else if (message.toLowerCase().contains('completed') ||
-        message.toLowerCase().contains('finished')) {
+        message.toLowerCase().contains('finished') ||
+        message.toLowerCase().contains('started')) {
       return const Color.fromARGB(255, 59, 255, 59);
     } else {
       return Colors.white;
@@ -169,6 +173,8 @@ class LogOutputState extends ConsumerState<LogOutput> {
           !lastMessage.contains("Balance Mode") &&
           !lastMessage.contains("Failed") &&
           !lastMessage.contains("Ignore") &&
+          !lastMessage.contains("Normalized") &&
+          !lastMessage.contains("Deleted") &&
           !lastMessage.contains("Deleted file");
 
       return isProcessing;
@@ -231,53 +237,17 @@ class LogOutputState extends ConsumerState<LogOutput> {
                                 ),
                               ),
                               if (isLastMessageProcessing())
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
+                                Center(
+                                  child: SizedBox(
+                                    width: 150,
+                                    height: 150,
+                                    child: AutomatoLoading(
+                                      color: AutomatoThemeColors.bright(ref),
+                                      translateX: 200,
+                                      svgString:
+                                          AutomatoSvgStrings.automatoSvgStrHead,
                                     ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 10.0),
-                                        child: Lottie.asset(
-                                            'assets/animations/loading.json',
-                                            width: 150,
-                                            height: 150,
-                                            fit: BoxFit.fill),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 )
                             ],
                           );
@@ -293,19 +263,21 @@ class LogOutputState extends ConsumerState<LogOutput> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 60.0, horizontal: 20.0),
-                  child: AutomatoButton(
-                      label: "Clear Log",
-                      onPressed: clearLogMessages,
-                      uniqueId: "clearLog")),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 60.0, horizontal: 20.0),
+                child: AutomatoButton(
+                    label: "Clear Log",
+                    onPressed: clearLogMessages,
+                    uniqueId: "clearLog"),
+              ),
               Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 30.0, horizontal: 10.0),
-                  child: AutomatoButton(
-                      label: "Copy CLI Arguments",
-                      onPressed: () => onCopyArgsPressed(context),
-                      uniqueId: "copyArguments")),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 30.0, horizontal: 10.0),
+                child: AutomatoButton(
+                    label: "Copy CLI Arguments",
+                    onPressed: () => onCopyArgsPressed(context),
+                    uniqueId: "copyArguments"),
+              ),
             ],
           )
         ],

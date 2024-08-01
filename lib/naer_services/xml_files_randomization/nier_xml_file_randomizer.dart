@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
+import 'package:NAER/naer_services/value_utils/handle_enemy_values.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/process_collected_xml_files.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
@@ -8,9 +10,52 @@ import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
+import 'package:xml/xml.dart';
 
 /// Counter for processed files
 int fileCount = 0;
+
+/// Randomizes and sets a new enemy number for the given action XML element.
+///
+/// This function selects a new random enemy number from the user-selected data map and
+/// replaces the text in the XML element with this new number. It also ensures that
+/// an infinite loop is avoided by limiting the number of iterations.
+/// After it modifies also the set values of the specific em element if present in the em value map.
+///
+/// Parameters:
+/// - [element]: The parameters for handling enemy entity object.
+/// - [group]: The group of the enemy number.
+Future<void> randomizeEnemyNumber(
+    EnemyEntityObjectAction action, String group) async {
+  if (action.randomizeAndSetValues) {
+    final List<String> enemyNumbers = action.userSelectedEnemyData[group]!;
+    String newEmNumber;
+
+    // Set to avoid duplicate checks and speed up lookups
+    final Set<String> invalidNumbers = {'em3004'};
+    if (action.isSpawnActionTooSmall) {
+      invalidNumbers.addAll(enemyNumbers.where(isBigEnemy));
+    }
+
+    // Filter valid enemy numbers beforehand
+    final List<String> validEnemyNumbers = enemyNumbers
+        .where((enemyNum) => !invalidNumbers.contains(enemyNum))
+        .toList();
+
+    // Check if there are any valid enemy numbers available
+    if (validEnemyNumbers.isEmpty) {
+      newEmNumber = action.objIdElement.innerText;
+    } else {
+      // Get a random valid enemy number
+      newEmNumber = validEnemyNumbers[random.nextInt(validEnemyNumbers.length)];
+    }
+
+    // Replace the text in the XML element with the new enemy number
+    XmlElementHandler.replaceTextInXmlElement(action.objIdElement, newEmNumber);
+    // Set specific values for the new enemy number
+    await setSpecificValues(action.objIdElement, newEmNumber);
+  }
+}
 
 /// Modifies enemies in a given directory based on sorted enemies data.
 ///
@@ -24,7 +69,7 @@ int fileCount = 0;
 Future<void> processEnemies(MainData mainData,
     Map<String, List<String>> collectedFiles, String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
-      await getSortedEnemyData(mainData.sortedEnemiesPath!);
+      await getSortedEnemyData(mainData.sortedEnemiesPath!, mainData.hasDLC);
   await findEnemiesAndModify(
       collectedFiles, currentDir, sortedEnemyData, mainData);
 }
@@ -38,11 +83,12 @@ Future<void> processEnemies(MainData mainData,
 ///
 /// Returns a map where the keys are enemy IDs and the values are lists of enemy attributes.
 Future<Map<String, List<String>>> getSortedEnemyData(
-    String sortedEnemiesPath) async {
+    String sortedEnemiesPath, bool? hasDLC) async {
   if (sortedEnemiesPath == 'ALL') {
-    return SortedEnemyGroup.enemyData; // If "ALL", use the entire enemyData map
+    return SortedEnemyGroup.getDLCFilteredEnemyData(
+        hasDLC); // If "ALL", use the entire enemyData map
   } else {
-    return readSortedEnemyDataGroups(
+    return await readSortedEnemyDataGroups(
         sortedEnemiesPath); // Otherwise, read from the file
   }
 }
@@ -97,38 +143,33 @@ Future<void> findEnemiesAndModify(
 /// Returns the count of processed files.
 ///
 Future<int> traverseDirectory(
-    Map<String, List<String>> collectedFiles,
-    Directory directory,
-    Map<String, List<String>> sortedEnemyData,
-    ImportantIDs ids,
-    MainData mainData) async {
-  int localFileCount = 0;
-
-  // Use IsolateService for processing XML files in parallel
+  Map<String, List<String>> collectedFiles,
+  Directory directory,
+  Map<String, List<String>> sortedEnemyData,
+  ImportantIDs ids,
+  MainData mainData,
+) async {
   final isolateService = IsolateService();
 
-  // Combine all XML files from the collectedFiles map into a single list
-  final List<String> xmlFiles = [
-    ...?collectedFiles['xmlFiles'],
-  ].where((file) => file.endsWith('.xml')).toList();
+  final List<String> xmlFiles = collectedFiles['xmlFiles']
+          ?.where((file) => file.endsWith('.xml'))
+          .toList() ??
+      [];
 
-  // Distribute files among cores
-  final distributedFiles = isolateService.distributeFiles(xmlFiles);
+  final distributedFiles = await isolateService.distributeFilesAsync(xmlFiles);
 
-  // Create batched tasks to process the files
-  final tasks = <FutureOr<void> Function()>[];
-  distributedFiles.forEach((coreIndex, files) {
-    tasks.add(() async {
-      for (var file in files) {
+  mainData.sendPort.send('Creating Isolates for parallel computing...');
+
+  final tasks = distributedFiles.entries.map((entry) {
+    return (dynamic _) async {
+      for (var file in entry.value) {
         await processCollectedXmlFileForRandomization(
             File(file), sortedEnemyData, ids, mainData);
       }
-    });
-  });
+    };
+  }).toList();
 
-  // Run tasks in parallel
   await isolateService.runTasks(tasks);
 
-  localFileCount = xmlFiles.length;
-  return localFileCount;
+  return xmlFiles.length;
 }

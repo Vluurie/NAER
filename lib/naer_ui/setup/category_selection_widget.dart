@@ -1,12 +1,11 @@
-import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats__list.dart';
+import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
-import 'package:flutter/material.dart';
 import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
 class CategorySelection extends ConsumerStatefulWidget {
   const CategorySelection({super.key});
@@ -17,8 +16,18 @@ class CategorySelection extends ConsumerStatefulWidget {
 
 class CategorySelectionState extends ConsumerState<CategorySelection> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final globalState = ref.read(globalStateProvider);
+      globalState.updateCategories();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final globalState = provider.Provider.of<GlobalState>(context);
+    final globalState = ref.watch(globalStateProvider);
+
     Widget specialCheckbox(
         String title, bool value, void Function(bool?) onChanged) {
       return Padding(
@@ -28,7 +37,8 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(
+                    color: AutomatoThemeColors.textColor(ref), fontSize: 16),
               ),
             ),
             Checkbox(
@@ -53,6 +63,10 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
       return Icons.help_outline;
     }
 
+    void updateCategories() {
+      globalState.updateSelectedCategories(globalState.categories);
+    }
+
     return Container(
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
@@ -70,14 +84,14 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
             child: Text(
               "Select Categories for Randomization",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AutomatoThemeColors.textColor(ref),
               ),
             ),
           ),
@@ -87,7 +101,8 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             (newValue) {
               setState(() {
                 globalState.selectAllQuests = newValue!;
-                updateItemsByType(SideQuest, newValue, context);
+                updateItemsByType(SideQuest, newValue, ref);
+                updateCategories();
               });
             },
           ),
@@ -97,7 +112,8 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             (newValue) {
               setState(() {
                 globalState.selectAllMaps = newValue!;
-                updateItemsByType(MapLocation, newValue, context);
+                updateItemsByType(MapLocation, newValue, ref);
+                updateCategories();
               });
             },
           ),
@@ -107,7 +123,8 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             (newValue) {
               setState(() {
                 globalState.selectAllPhases = newValue!;
-                updateItemsByType(ScriptingPhase, newValue, context);
+                updateItemsByType(ScriptingPhase, newValue, ref);
+                updateCategories();
               });
             },
           ),
@@ -116,28 +133,32 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
-                children: GlobalState().getAllItems().map((item) {
+                children: globalState.getAllItems().map((item) {
                   IconData icon = getIconForItem(item);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 16.0),
-                      leading: Icon(icon, color: Colors.white, size: 28),
+                      leading: Icon(icon,
+                          color: AutomatoThemeColors.textColor(ref), size: 28),
                       title: Text(
                         item.description,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(
+                            color: AutomatoThemeColors.textColor(ref),
+                            fontSize: 14),
                       ),
                       trailing: Transform.scale(
                         scale: 1,
                         child: Checkbox(
-                          value: globalState.categories[item.id] ?? false,
+                          value: globalState.categories[item.id] ??
+                              (item.dlc == true ? globalState.hasDLC : false),
                           activeColor: AutomatoThemeColors.primaryColor(ref),
                           checkColor: AutomatoThemeColors.darkBrown(ref),
                           onChanged: (bool? newValue) {
                             setState(() {
                               globalState.categories[item.id] = newValue!;
+                              updateCategories();
                             });
                           },
                         ),
@@ -154,16 +175,16 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
   }
 }
 
-void updateItemsByType(Type type, bool value, BuildContext context) {
-  final globalState = provider.Provider.of<GlobalState>(context, listen: false);
-  List<dynamic> allItems = GlobalState().getAllItems();
+void updateItemsByType(Type type, bool value, WidgetRef ref) {
+  final globalState = ref.read(globalStateProvider);
+  List<dynamic> allItems = globalState.getAllItems();
   for (var item in allItems.where((item) => item.runtimeType == type)) {
     globalState.categories[item.id] = value;
   }
 }
 
-String getSelectedEnemiesNames() {
-  List<String> selectedEnemies = allEmForStatsChangeList
+String getSelectedEnemiesNames(WidgetRef ref) {
+  List<String> selectedEnemies = EnemyList.getDLCFilteredEnemies(ref)
       .where((enemy) => enemy.isSelected)
       .map((enemy) => enemy.name)
       .toList();

@@ -1,4 +1,19 @@
+import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
+
 class SortedEnemyGroup {
+  static Map<String, List<String>> getDLCFilteredEnemyData(bool? hasDLC) {
+    if (hasDLC!) {
+      return enemyData;
+    } else {
+      return enemyData.map((key, enemies) {
+        List<String> filteredEnemies = enemies.where((enemy) {
+          return !SpecialEntities.dlcEnemies.contains(enemy);
+        }).toList();
+        return MapEntry(key, filteredEnemies);
+      });
+    }
+  }
+
   static const Map<String, List<String>> enemyData = {
     "Ground": [
       "em0110", // Normal Goliath Tank
@@ -167,7 +182,6 @@ class SortedEnemyGroup {
       "em5300",
       "em6200",
       "em0019",
-      "em1101",
       "em3003",
       "em011a",
       "em5400",

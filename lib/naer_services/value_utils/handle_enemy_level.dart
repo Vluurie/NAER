@@ -8,7 +8,8 @@ import 'package:xml/xml.dart' as xml;
 ///
 /// If `isBoss` is `true`, the function does not update the `levelRange` for 'EnemyGenerator' actions.
 Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
-    Map<String, List<String>> enemyData, bool isBoss) async {
+    Map<String, List<String>> enemyData,
+    {bool isBoss = false}) async {
   var objIdValue = objIdElement.innerText;
 
   // Check if the enemy is in the "Delete" group
@@ -19,35 +20,44 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
   // Find or create the 'param' element and update/create 'Lv' values
   var parentValueElement = findParentValueElement(objIdElement);
   if (parentValueElement != null) {
-    var paramElement = parentValueElement.findElements('param').firstOrNull;
-    if (paramElement == null) {
-      paramElement = createParamElement();
-      // Ensure paramElement is the last child
+    // Check if a 'levelRange' element exists
+    var levelRangeElement =
+        parentValueElement.findElements('levelRange').firstOrNull;
+    if (levelRangeElement != null) {
+      // Update the existing 'levelRange' element
+      updateEnemyLevelRange(levelRangeElement, enemyLevel);
+    } else {
+      // Proceed to check or create 'param' element and update 'Lv' values
+      var paramElement = parentValueElement.findElements('param').firstOrNull;
+      if (paramElement == null) {
+        paramElement = createParamElement();
+        // Ensure paramElement is the last child
+        parentValueElement.children.add(paramElement);
+      }
+
+      // Flow:
+      // param element for Level exist?
+      //
+      // No = [updateOrCreateLevelValue]
+      updateOrCreateLevelValue(paramElement, 'Lv', enemyLevel);
+
+      // Yes = [updateLevelValueIfExists]
+
+      updateLevelValueIfExists(paramElement, 'LV', enemyLevel);
+      updateLevelValueIfExists(paramElement, 'Lv_B', enemyLevel);
+      updateLevelValueIfExists(paramElement, 'Lv_C', enemyLevel);
+      updateLevelValueIfExists(paramElement, 'Lv_D', enemyLevel);
+
+      // increases the count or creates it so the game knows that a new param/value was added
+      updateOrCreateCountElement(paramElement);
+
+      // Ensure paramElement is the last child (in case it was already present)
+      parentValueElement.children.remove(paramElement);
       parentValueElement.children.add(paramElement);
+
+      // Move delay element to the end if it exists
+      moveDelayElementToEnd(parentValueElement);
     }
-
-    // Flow:
-    // param element for Level exist?
-    //
-    // No = [updateOrCreateLevelValue]
-    updateOrCreateLevelValue(paramElement, 'Lv', enemyLevel);
-
-    // Yes = [updateLevelValueIfExists]
-
-    updateLevelValueIfExists(paramElement, 'LV', enemyLevel);
-    updateLevelValueIfExists(paramElement, 'Lv_B', enemyLevel);
-    updateLevelValueIfExists(paramElement, 'Lv_C', enemyLevel);
-    updateLevelValueIfExists(paramElement, 'Lv_D', enemyLevel);
-
-    // increases the count or creates it so the game knows that a new param/value was added
-    updateOrCreateCountElement(paramElement);
-
-    // Ensure paramElement is the last child (in case it was already present)
-    parentValueElement.children.remove(paramElement);
-    parentValueElement.children.add(paramElement);
-
-    // Move delay element to the end if it exists
-    moveDelayElementToEnd(parentValueElement);
   }
 
   // Only update levelRange for 'EnemyGenerator' actions if not a boss
@@ -56,6 +66,22 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
     if (rootActionElement != null && isEnemyGenerator(rootActionElement)) {
       updateGeneratorLevelRange(rootActionElement, enemyLevel);
     }
+  }
+}
+
+/// Updates the `levelRange` for an element with the specified `enemyLevel`.
+///
+/// If 'min' and 'max' elements exist within `levelRange`, their text is replaced with `enemyLevel`.
+void updateEnemyLevelRange(
+    xml.XmlElement levelRangeElement, String enemyLevel) {
+  var minElement = levelRangeElement.findElements('min').firstOrNull;
+  var maxElement = levelRangeElement.findElements('max').firstOrNull;
+
+  if (minElement != null) {
+    minElement.firstChild?.replace(xml.XmlText(enemyLevel));
+  }
+  if (maxElement != null) {
+    maxElement.firstChild?.replace(xml.XmlText(enemyLevel));
   }
 }
 

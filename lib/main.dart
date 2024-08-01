@@ -8,6 +8,7 @@ import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_ui/appbar/appbar.dart';
+import 'package:NAER/naer_ui/dialog/details.dart';
 import 'package:NAER/naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_ui/setup/category_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/directory_selection_widget.dart';
@@ -24,6 +25,7 @@ import 'package:NAER/nier_cli/nier_cli_isolation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,13 +38,27 @@ import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+
+  bool isBalanceMode = false;
+  bool hasDLC = false;
 
   if (arguments.isNotEmpty) {
+    for (String arg in arguments) {
+      if (arg == '--balance') {
+        isBalanceMode = true;
+      } else if (arg == '--dlc') {
+        hasDLC = true;
+      }
+    }
+
     final receivePort = ReceivePort();
     Map<String, dynamic> args = {
       'processArgs': arguments,
       'isManagerFile': false,
       'sendPort': receivePort.sendPort,
+      'isBalanceMode': isBalanceMode,
+      'hasDLC': hasDLC,
     };
     await compute(runNierCliIsolated, args);
     exit(0);
@@ -101,10 +117,11 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    FileChange.loadDLCOption(ref);
     _loadPathsFuture = loadPathsFromSharedPreferences();
-    updateItemsByType(SideQuest, true, context);
-    updateItemsByType(MapLocation, true, context);
-    updateItemsByType(ScriptingPhase, true, context);
+    updateItemsByType(SideQuest, true, ref);
+    updateItemsByType(MapLocation, true, ref);
+    updateItemsByType(ScriptingPhase, true, ref);
   }
 
   @override
@@ -535,6 +552,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   Future<void> startRandomizing(BuildContext context, bool backUp) async {
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
+    final globalStateRiverPod = ref.watch(globalStateProvider);
     globalState.hasError = true;
     globalState.isLoading = true;
     globalState.loggedStages.clear();
@@ -553,18 +571,18 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
 
     try {
       CLIArguments cliArgs = await gatherCLIArguments(
-        context: context,
-        scrollController: scrollController,
-        enemyImageGridKey: globalState.enemyImageGridKey,
-        categories: globalState.categories,
-        level: globalState.level,
-        ignoredModFiles: globalState.ignoredModFiles,
-        input: globalState.input,
-        specialDatOutputPath: globalState.specialDatOutputPath,
-        scriptPath: globalState.scriptPath,
-        enemyStats: globalState.enemyStats,
-        enemyLevel: globalState.enemyLevel,
-      );
+          context: context,
+          scrollController: scrollController,
+          selectedImages: globalStateRiverPod.selectedImages,
+          categories: globalStateRiverPod.categories,
+          level: globalStateRiverPod.level,
+          ignoredModFiles: globalState.ignoredModFiles,
+          input: globalState.input,
+          specialDatOutputPath: globalState.specialDatOutputPath,
+          scriptPath: globalState.scriptPath,
+          enemyStats: globalStateRiverPod.enemyStats,
+          enemyLevel: globalStateRiverPod.enemyLevel,
+          ref: ref);
 
       bool isManagerFile = false;
       final receivePort = ReceivePort();
@@ -591,7 +609,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         'isManagerFile': isManagerFile,
         'sendPort': receivePort.sendPort,
         'backUp': backUp,
-        'isBalanceMode': globalState.isBalanceMode
+        'isBalanceMode': globalState.isBalanceMode,
+        'hasDLC': globalState.hasDLC
       };
 
       // Run nierCli in a separate isolate
@@ -713,7 +732,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   void showModifyConfirmation(BuildContext context, WidgetRef ref) {
-    String modificationDetails = _generateModificationDetails();
+    List<Widget> modificationDetails = generateModificationDetails(ref);
 
     AutomatoDialogManager().showYesNoDialog(
       context: context,
@@ -721,30 +740,32 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
       title: 'Confirm Modification',
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height *
-              0.5, // Adjust the height as needed
+          maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Are you sure you want to start modification? Below are the selected settings:",
-                style: TextStyle(
-                  color: AutomatoThemeColors.textDialogColor(ref),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              border:
+                  Border.all(color: AutomatoThemeColors.textDialogColor(ref)),
+              color: AutomatoThemeColors.darkBrown(ref).withOpacity(0.1),
+            ),
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Are you sure you want to start modification? Below are the selected settings:",
+                  style: TextStyle(
+                    color: AutomatoThemeColors.textDialogColor(ref),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                modificationDetails,
-                style: TextStyle(
-                  color: AutomatoThemeColors.textDialogColor(ref),
-                  fontSize: 16,
-                ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                ...modificationDetails,
+              ],
+            ),
           ),
         ),
       ),
@@ -762,77 +783,6 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
       yesButtonColor: AutomatoThemeColors.darkBrown(ref),
       noButtonColor: AutomatoThemeColors.darkBrown(ref),
     );
-  }
-
-  String _generateModificationDetails() {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
-    List<String> details = [];
-
-    String enemyList = getSelectedEnemiesNames();
-
-    String categoryDetail = globalState.level.entries
-        .firstWhere((entry) => entry.value,
-            orElse: () => const MapEntry("None", false))
-        .key;
-    details.add("• Level Modify Category: $categoryDetail");
-
-    if (categoryDetail == 'None') {
-      details.add("• Change Level: None");
-    } else {
-      details.add("• Change Level: ${globalState.enemyLevel}");
-    }
-
-    if (enemyList.isNotEmpty && globalState.enemyStats != 0.0) {
-      details.add(
-          "• Change Enemy Stats: x${globalState.enemyStats} for $enemyList");
-    } else {
-      details.add("• Change Enemy Stats: None");
-    }
-
-    List<String>? selectedImages =
-        globalState.enemyImageGridKey.currentState?.selectedImages;
-    if (selectedImages != null && selectedImages.isNotEmpty) {
-      details.add("• Selected Enemies: ${selectedImages.join(', ')}");
-    } else {
-      details.add(
-          "• Selected Enemies: No Enemy selected, will use ALL Enemies for Randomization");
-    }
-
-    switch (categoryDetail) {
-      case "All Enemies":
-        details.add(
-            "• Level Change: Every randomized enemy & bosses in the game will be included.");
-        break;
-      // case "Only Bosses":
-      //   details.add("• Level Change: Only boss-type enemies will be included.");
-      //   break;
-      // case "Only Selected Enemies":
-      //   details.add(
-      //       "• Level Change: Only randomized selected enemies will be included.");
-
-      //   break;
-      case "None":
-        details.add(
-            "• Level Change: No specific category selected. No level will be modified");
-        break;
-      default:
-        details.add("• Default settings will be used.");
-        break;
-    }
-
-    List<String> selectedCategories = globalState.categories.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-    if (selectedCategories.isNotEmpty) {
-      details.add("• Selected Categories: ${selectedCategories.join(', ')}");
-    } else {
-      details
-          .add("• No specific categories selected. Will use all categories!!!");
-    }
-
-    return details.join('\n\n');
   }
 
   void showCompletionDialog(BuildContext context, WidgetRef ref) {
