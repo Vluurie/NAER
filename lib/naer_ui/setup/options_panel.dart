@@ -8,6 +8,7 @@ import 'package:NAER/naer_utils/change_app_theme.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
 
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -187,6 +188,48 @@ class OptionsPanel extends ConsumerWidget {
                               },
                               label: 'Reset Application Local State',
                               uniqueId: 'reset',
+                              activeHoverColor:
+                                  AutomatoThemeColors.dangerZone(ref),
+                              showPointer: false,
+                            ),
+                          ),
+                          ListTile(
+                            title: AutomatoButton(
+                              label: "Delete Extracted Backup",
+                              onPressed: () =>
+                                  AutomatoDialogManager().showYesNoDialog(
+                                context: context,
+                                ref: ref,
+                                title: 'Are you sure?',
+                                content: Text(
+                                  'This will delete the 9GB backup that got created from extracting. Are you sure?',
+                                  style: TextStyle(
+                                    color: AutomatoThemeColors.textDialogColor(
+                                        ref),
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                onYesPressed: () async {
+                                  await deleteBackupGameFolders(
+                                      globalState.input);
+                                  Navigator.of(context).pop(false);
+                                },
+                                onNoPressed: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                yesLabel: 'OK',
+                                noLabel: 'Cancel',
+                                activeHoverColorNo:
+                                    AutomatoThemeColors.darkBrown(ref),
+                                activeHoverColorYes:
+                                    AutomatoThemeColors.dangerZone(ref),
+                                yesButtonColor:
+                                    AutomatoThemeColors.darkBrown(ref),
+                                noButtonColor:
+                                    AutomatoThemeColors.darkBrown(ref),
+                              ),
+                              uniqueId: "deleteBackup",
+                              maxScale: 0.8,
                               activeHoverColor:
                                   AutomatoThemeColors.dangerZone(ref),
                               showPointer: false,

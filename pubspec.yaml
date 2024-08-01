@@ -37,6 +37,8 @@ dependencies:
   flutter_riverpod: ^2.5.1
   isolate: ^2.1.1
   ffi: ^2.1.2
+  url_launcher: ^6.3.0
+  flutter_dotenv: ^5.1.0
 
 
 
@@ -52,6 +54,7 @@ flutter:
     - assets/naer_backgrounds/naer_background.png
     - assets/mods/
     - assets/animations/
+    - .env
   uses-material-design: true
   fonts:
     - family: MaterialIcons
