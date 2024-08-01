@@ -26,13 +26,13 @@ Future<void> handleSpecialCaseEnemies(
   }
 
   // Recursive function to find and process all objId elements in the current element and its descendants
-  void processObjIdElements(xml.XmlElement elem) {
+  Future<void> processObjIdElements(xml.XmlElement elem) async {
     final objIdElements = elem.findAllElements('objId').toList();
 
     for (var objIdElement in objIdElements) {
-      if (isBoss(objIdElement.innerText)) {
+      if (await isBoss(objIdElement.innerText)) {
         // Modify the objId for bosses
-        modifyEnemyObjId(
+        await modifyEnemyObjId(
           objIdElement,
           sortedEnemyData,
           filePath,
@@ -43,11 +43,12 @@ Future<void> handleSpecialCaseEnemies(
         // Check if the enemy has an alias ancestor and belongs to specific categories
         if (category == 'allenemies' || category == 'onlylevel') {
           // Handle the level for enemies with alias
-          handleLevel(objIdElement, level, sortedEnemyData, isBoss: false);
+          await handleLevel(objIdElement, level, sortedEnemyData,
+              isBoss: false);
         }
       } else {
         // Modify the objId for no boss or alias enemy
-        modifyEnemyObjId(
+        await modifyEnemyObjId(
           objIdElement,
           sortedEnemyData,
           filePath,
@@ -59,10 +60,10 @@ Future<void> handleSpecialCaseEnemies(
 
     // Recursively process again child elements since all is sooo damn nested
     for (var child in elem.children.whereType<xml.XmlElement>()) {
-      processObjIdElements(child);
+      await processObjIdElements(child);
     }
   }
 
   // Start processing from the root element (love recursiv)
-  processObjIdElements(element);
+  await processObjIdElements(element);
 }

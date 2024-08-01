@@ -55,7 +55,9 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   var collectedFiles = collectExtractedGameFiles(inputDir);
 
   // Modify or randomize enemies within the input .xml files based on the arguments.
-  await processEnemies(mainData, collectedFiles, inputDir);
+  //await processEnemies(mainData, collectedFiles, inputDir);
+  await IsolateService().runInAwaitedIsolate(
+      processEnemies, [mainData, collectedFiles, inputDir]);
 
   // Process enemy stats for the specified enemies from the enemy list.
   bool reverseStats = false;

@@ -58,7 +58,7 @@ Future<void> handleShootingEnemyCurveAction(
         !isExcludedGroup(group) &&
         action.userSelectedEnemyData[group]?.isNotEmpty == true) {
       // Handle randomization and setting of new enemy number if requested
-      randomizeEnemyNumber(action, group);
+      await randomizeEnemyNumber(action, group);
 
       await handleLevel(
         action.objIdElement,

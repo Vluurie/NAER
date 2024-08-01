@@ -14,22 +14,23 @@ import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 /// - Parameters:
 ///   - objIdElement: The XML element to update.
 ///   - newEmNumber: The EM number used to retrieve specific values.
-void setSpecificValues(xml.XmlElement objIdElement, String newEmNumber) {
+Future<void> setSpecificValues(
+    xml.XmlElement objIdElement, String newEmNumber) async {
   var values = EnemyValues.emNumberValues[newEmNumber];
   if (values == null) {
-    _removeSetTypeAndSetRtnAndSetFlag(objIdElement);
+    await _removeSetTypeAndSetRtnAndSetFlag(objIdElement);
     return;
   }
 
   final selection = _chooseElementToSet(values);
   if (selection == null) {
-    _removeSetTypeAndSetRtnAndSetFlag(objIdElement);
+    await _removeSetTypeAndSetRtnAndSetFlag(objIdElement);
     return;
   }
 
-  _updateElement(objIdElement, selection);
-  _ensureRateIsCorrectlyPositioned(objIdElement);
-  _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
+  await _updateElement(objIdElement, selection);
+  await _ensureRateIsCorrectlyPositioned(objIdElement);
+  await _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
 }
 
 /// Chooses which element to set based on the provided values.
@@ -108,8 +109,8 @@ MapEntry<String, String>? _selectSetFlag(List<int?>? setFlagValues) {
 /// - Parameters:
 ///   - objIdElement: The XML element to update.
 ///   - selection: A [MapEntry] containing the name and value of the element to set.
-void _updateElement(
-    xml.XmlElement objIdElement, MapEntry<String, String> selection) {
+Future<void> _updateElement(
+    xml.XmlElement objIdElement, MapEntry<String, String> selection) async {
   var parentValueElement = _findParentValueElement(objIdElement);
   if (parentValueElement == null) return;
 
@@ -135,7 +136,8 @@ void _updateElement(
 ///
 /// - Parameters:
 ///   - objIdElement: The XML element to check and adjust.
-void _ensureLevelRangeIsCorrectlyPositioned(xml.XmlElement objIdElement) {
+Future<void> _ensureLevelRangeIsCorrectlyPositioned(
+    xml.XmlElement objIdElement) async {
   var parentValueElement = _findParentValueElement(objIdElement);
   if (parentValueElement == null) return;
 
@@ -158,7 +160,8 @@ void _ensureLevelRangeIsCorrectlyPositioned(xml.XmlElement objIdElement) {
 ///
 /// - Parameters:
 ///   - objIdElement: The XML element to check and adjust.
-void _ensureRateIsCorrectlyPositioned(xml.XmlElement objIdElement) {
+Future<void> _ensureRateIsCorrectlyPositioned(
+    xml.XmlElement objIdElement) async {
   var parentValueElement = _findParentValueElement(objIdElement);
   if (parentValueElement == null) return;
 
@@ -233,8 +236,9 @@ int _findLevelRangeIndex(xml.XmlElement parentValueElement) {
 ///
 /// - Parameters:
 ///   - objIdElement: The XML element from which to remove specified child elements.
-void _removeSetTypeAndSetRtnAndSetFlag(xml.XmlElement objIdElement) {
+Future<void> _removeSetTypeAndSetRtnAndSetFlag(
+    xml.XmlElement objIdElement) async {
   const elementsToRemove = ['setType', 'setRtn', 'setFlag'];
-  XmlElementHandler.removeSpecifiedChildElements(
+  await XmlElementHandler.removeSpecifiedChildElements(
       objIdElement, elementsToRemove, 'value');
 }

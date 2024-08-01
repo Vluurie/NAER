@@ -25,7 +25,8 @@ int fileCount = 0;
 /// Parameters:
 /// - [element]: The parameters for handling enemy entity object.
 /// - [group]: The group of the enemy number.
-void randomizeEnemyNumber(EnemyEntityObjectAction action, String group) {
+Future<void> randomizeEnemyNumber(
+    EnemyEntityObjectAction action, String group) async {
   if (action.randomizeAndSetValues) {
     final List<String> enemyNumbers = action.userSelectedEnemyData[group]!;
     String newEmNumber;
@@ -52,7 +53,7 @@ void randomizeEnemyNumber(EnemyEntityObjectAction action, String group) {
     // Replace the text in the XML element with the new enemy number
     XmlElementHandler.replaceTextInXmlElement(action.objIdElement, newEmNumber);
     // Set specific values for the new enemy number
-    setSpecificValues(action.objIdElement, newEmNumber);
+    await setSpecificValues(action.objIdElement, newEmNumber);
   }
 }
 
@@ -87,7 +88,7 @@ Future<Map<String, List<String>>> getSortedEnemyData(
     return SortedEnemyGroup.getDLCFilteredEnemyData(
         hasDLC); // If "ALL", use the entire enemyData map
   } else {
-    return readSortedEnemyDataGroups(
+    return await readSortedEnemyDataGroups(
         sortedEnemiesPath); // Otherwise, read from the file
   }
 }

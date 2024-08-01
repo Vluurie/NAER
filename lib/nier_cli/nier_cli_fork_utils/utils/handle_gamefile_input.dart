@@ -22,9 +22,7 @@ const List<
         SendPort sendPort)> _handlers = [
   handleSingleDatExtract,
   handleDatRepack,
-  handleSinglePakExtract,
   handlePakRepack,
-  handleSingleYaxToXml,
   handleXmlToYax,
 ];
 

@@ -44,7 +44,8 @@ bool isExcludedGroup(String group) {
 /// Returns a map of sorted enemy data grouped by categories.
 ///
 /// Throws an exception if the file does not exist or an error occurs while reading the file.
-Map<String, List<String>> readSortedEnemyDataGroups(String filePath) {
+Future<Map<String, List<String>>> readSortedEnemyDataGroups(
+    String filePath) async {
   var file = File(filePath);
   if (!file.existsSync()) {
     throw Exception('Sorted enemy data file does not exist: $filePath');
@@ -119,8 +120,8 @@ bool isDeletedEnemy(String emNumber, Map<String, List<String>> enemyData) {
 
 /// Checks if a given action ID is listed in a collection of important IDs and
 /// updates the importance status of the action.
-bool checkImportantIds(
-    String? actionId, ImportantIDs importantIds, bool isActionImportant) {
+Future<bool> checkImportantIds(
+    String? actionId, ImportantIDs importantIds, bool isActionImportant) async {
   // Check if the actionId is not null
   if (actionId != null) {
     // Iterate through each entry in the importantIds map
@@ -139,8 +140,10 @@ bool checkImportantIds(
 
 /// Checks if a given action ID is listed in a collection of bigSpawnEnemySkipIds and
 /// updates the status of the action.
-bool checkTooSmallSpawnAction(String? actionId,
-    Map<String, Set<String>> bigSpawnEnemySkipIds, bool isSpawnActionTooSmall) {
+Future<bool> checkTooSmallSpawnAction(
+    String? actionId,
+    Map<String, Set<String>> bigSpawnEnemySkipIds,
+    bool isSpawnActionTooSmall) async {
   // Check if the actionId is not null
   if (actionId != null) {
     // Iterate through each entry in the big spawn enemies skip map
@@ -173,7 +176,8 @@ bool checkTooSmallSpawnAction(String? actionId,
 /// Returns:
 /// An iterable collection of XML elements that match the criteria and are used
 /// to spawn enemies or other object entities in the scripting engine.
-Iterable<xml.XmlElement> getEnemyCodeElements(xml.XmlElement action) {
+Future<Iterable<xml.XmlElement>> getEnemyCodeElements(
+    xml.XmlElement action) async {
   const prefixes = [
     'EnemyGenerator',
     'EnemySetAction',
