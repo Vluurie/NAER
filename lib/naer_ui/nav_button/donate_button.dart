@@ -93,7 +93,7 @@ class DonateButtonState extends ConsumerState<DonateButton>
                     color: AutomatoThemeColors.dangerZone(ref)),
                 const SizedBox(width: 8.0),
                 Text(
-                  'Donate',
+                  'Donate Coffee!',
                   style: TextStyle(
                     color: AutomatoThemeColors.primaryColor(ref),
                     fontSize: 18.0,

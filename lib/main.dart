@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
+import 'package:NAER/naer_services/error_utils/windows_close_handler.dart';
 import 'package:NAER/naer_ui/appbar/appbar.dart';
 import 'package:NAER/naer_ui/dialog/details.dart';
 import 'package:NAER/naer_ui/other/asciiArt.dart';
@@ -35,11 +36,9 @@ import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_ui/image_ui/enemy_image_grid.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:path/path.dart' as path;
+import 'package:window_manager/window_manager.dart';
 
 void main(List<String> arguments) async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-
   bool isBalanceMode = false;
   bool hasDLC = false;
 
@@ -63,7 +62,11 @@ void main(List<String> arguments) async {
     await compute(runNierCliIsolated, args);
     exit(0);
   } else {
+    WidgetsFlutterBinding.ensureInitialized();
+    await windowManager.ensureInitialized();
+    await dotenv.load(fileName: ".env");
     final themeNotifier = await AutomatoThemeNotifier.loadFromPreferences();
+    windowManager.setPreventClose(true);
 
     runApp(
       ProviderScope(
@@ -81,6 +84,8 @@ void main(List<String> arguments) async {
     );
   }
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class EnemyRandomizerApp extends ConsumerWidget {
   const EnemyRandomizerApp({super.key});
@@ -127,6 +132,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   @override
   void initState() {
     super.initState();
+    windowManager.addListener(WindowsCloseListener(context, ref));
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles().then((_) {}).catchError((error) {});
     scrollController = ScrollController();

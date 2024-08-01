@@ -39,6 +39,7 @@ dependencies:
   ffi: ^2.1.2
   url_launcher: ^6.3.0
   flutter_dotenv: ^5.1.0
+  window_manager: ^0.3.9
 
 
 
