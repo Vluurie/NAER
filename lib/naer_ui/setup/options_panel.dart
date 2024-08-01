@@ -90,29 +90,31 @@ class OptionsPanel extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ListTile(
-                              title: navigateButton(
-                                  context, scrollController, ref)),
-                          ListTile(
-                            title: AutomatoButton(
-                              label: "Save File Editor",
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SaveEditor(),
-                                  ),
-                                );
-                              },
-                              uniqueId: "exp_money",
-                              maxScale: 0.9,
-                              showPointer: false,
-                              baseColor: AutomatoThemeColors.darkBrown(ref),
-                              activeFillColor:
-                                  AutomatoThemeColors.primaryColor(ref),
-                              fillBehavior: FillBehavior.filledRightToLeft,
+                          if (!globalState.isLoading)
+                            ListTile(
+                                title: navigateButton(
+                                    context, scrollController, ref)),
+                          if (!globalState.isLoading)
+                            ListTile(
+                              title: AutomatoButton(
+                                label: "Save File Editor",
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SaveEditor(),
+                                    ),
+                                  );
+                                },
+                                uniqueId: "exp_money",
+                                maxScale: 0.9,
+                                showPointer: false,
+                                baseColor: AutomatoThemeColors.darkBrown(ref),
+                                activeFillColor:
+                                    AutomatoThemeColors.primaryColor(ref),
+                                fillBehavior: FillBehavior.filledRightToLeft,
+                              ),
                             ),
-                          ),
                           ListTile(
                             title: AutomatoButton(
                               label: "App Theme Modifier",
@@ -141,16 +143,71 @@ class OptionsPanel extends ConsumerWidget {
                               fillBehavior: FillBehavior.filledRightToLeft,
                             ),
                           ),
-                          ListTile(
-                            title: AutomatoButton(
-                              maxScale: 0.8,
-                              onPressed: () async {
-                                AutomatoDialogManager().showYesNoDialog(
+                          if (!globalState.isLoading)
+                            ListTile(
+                              title: AutomatoButton(
+                                maxScale: 0.8,
+                                onPressed: () async {
+                                  AutomatoDialogManager().showYesNoDialog(
+                                    context: context,
+                                    ref: ref,
+                                    title: 'Are you sure?',
+                                    content: Text(
+                                      'This will reset the app and clear all local app settings data. Do you want to proceed? It is suggested to restart the app afterward.',
+                                      style: TextStyle(
+                                        color:
+                                            AutomatoThemeColors.textDialogColor(
+                                                ref),
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    onYesPressed: () async {
+                                      await FileChange
+                                          .deleteAllSharedPreferences();
+
+                                      if (context.mounted) {
+                                        Navigator.of(context)
+                                            .pushAndRemoveUntil(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const EnemyRandomizerApp()),
+                                          (Route<dynamic> route) => false,
+                                        );
+                                      }
+                                    },
+                                    onNoPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    yesLabel: 'OK',
+                                    noLabel: 'Cancel',
+                                    activeHoverColorNo:
+                                        AutomatoThemeColors.darkBrown(ref),
+                                    activeHoverColorYes:
+                                        AutomatoThemeColors.dangerZone(ref),
+                                    yesButtonColor:
+                                        AutomatoThemeColors.darkBrown(ref),
+                                    noButtonColor:
+                                        AutomatoThemeColors.darkBrown(ref),
+                                  );
+                                },
+                                label: 'Reset Application Local State',
+                                uniqueId: 'reset',
+                                activeHoverColor:
+                                    AutomatoThemeColors.dangerZone(ref),
+                                showPointer: false,
+                              ),
+                            ),
+                          if (!globalState.isLoading)
+                            ListTile(
+                              title: AutomatoButton(
+                                label: "Delete Extracted Backup",
+                                onPressed: () =>
+                                    AutomatoDialogManager().showYesNoDialog(
                                   context: context,
                                   ref: ref,
                                   title: 'Are you sure?',
                                   content: Text(
-                                    'This will reset the app and clear all local app settings data. Do you want to proceed? It is suggested to restart the app afterward.',
+                                    'This will delete the 9GB backup that got created from extracting. Are you sure?',
                                     style: TextStyle(
                                       color:
                                           AutomatoThemeColors.textDialogColor(
@@ -159,17 +216,9 @@ class OptionsPanel extends ConsumerWidget {
                                     ),
                                   ),
                                   onYesPressed: () async {
-                                    await FileChange
-                                        .deleteAllSharedPreferences();
-
-                                    if (context.mounted) {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const EnemyRandomizerApp()),
-                                        (Route<dynamic> route) => false,
-                                      );
-                                    }
+                                    await deleteBackupGameFolders(
+                                        globalState.input);
+                                    Navigator.of(context).pop(false);
                                   },
                                   onNoPressed: () {
                                     Navigator.of(context).pop(false);
@@ -184,57 +233,14 @@ class OptionsPanel extends ConsumerWidget {
                                       AutomatoThemeColors.darkBrown(ref),
                                   noButtonColor:
                                       AutomatoThemeColors.darkBrown(ref),
-                                );
-                              },
-                              label: 'Reset Application Local State',
-                              uniqueId: 'reset',
-                              activeHoverColor:
-                                  AutomatoThemeColors.dangerZone(ref),
-                              showPointer: false,
-                            ),
-                          ),
-                          ListTile(
-                            title: AutomatoButton(
-                              label: "Delete Extracted Backup",
-                              onPressed: () =>
-                                  AutomatoDialogManager().showYesNoDialog(
-                                context: context,
-                                ref: ref,
-                                title: 'Are you sure?',
-                                content: Text(
-                                  'This will delete the 9GB backup that got created from extracting. Are you sure?',
-                                  style: TextStyle(
-                                    color: AutomatoThemeColors.textDialogColor(
-                                        ref),
-                                    fontSize: 20,
-                                  ),
                                 ),
-                                onYesPressed: () async {
-                                  await deleteBackupGameFolders(
-                                      globalState.input);
-                                  Navigator.of(context).pop(false);
-                                },
-                                onNoPressed: () {
-                                  Navigator.of(context).pop(false);
-                                },
-                                yesLabel: 'OK',
-                                noLabel: 'Cancel',
-                                activeHoverColorNo:
-                                    AutomatoThemeColors.darkBrown(ref),
-                                activeHoverColorYes:
+                                uniqueId: "deleteBackup",
+                                maxScale: 0.8,
+                                activeHoverColor:
                                     AutomatoThemeColors.dangerZone(ref),
-                                yesButtonColor:
-                                    AutomatoThemeColors.darkBrown(ref),
-                                noButtonColor:
-                                    AutomatoThemeColors.darkBrown(ref),
+                                showPointer: false,
                               ),
-                              uniqueId: "deleteBackup",
-                              maxScale: 0.8,
-                              activeHoverColor:
-                                  AutomatoThemeColors.dangerZone(ref),
-                              showPointer: false,
                             ),
-                          ),
                           const Divider(),
                           ListTile(
                             title: const Text('Options'),
