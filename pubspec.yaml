@@ -29,7 +29,6 @@ dependencies:
   crypto: ^3.0.3
   intl: ^0.19.0
   stack_trace: ^1.11.1
-  lottie: ^3.1.2
   automato_theme:
     git:
       url: https://github.com/Vluurie/automato_theme.git
@@ -55,7 +54,6 @@ flutter:
     - assets/naer_backgrounds/error_background.png
     - assets/naer_backgrounds/naer_background.png
     - assets/mods/
-    - assets/animations/
     - .env
   uses-material-design: true
   fonts:

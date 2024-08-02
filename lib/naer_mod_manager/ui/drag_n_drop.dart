@@ -6,7 +6,6 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart' as provider;
 
 class DragDropWidget extends ConsumerStatefulWidget {
@@ -32,8 +31,16 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
       padding: widget.padding,
       child: _isLoading
           ? Center(
-              child: Lottie.asset('assets/animations/loading.json',
-                  width: 150, height: 150, fit: BoxFit.fill))
+              child: SizedBox(
+                width: 150,
+                height: 150,
+                child: AutomatoLoading(
+                  color: AutomatoThemeColors.bright(ref),
+                  translateX: 0,
+                  svgString: AutomatoSvgStrings.automatoSvgStrHead,
+                ),
+              ),
+            )
           : DropTarget(
               onDragEntered: (detail) => setState(() => _dragging = true),
               onDragExited: (detail) => setState(() => _dragging = false),
