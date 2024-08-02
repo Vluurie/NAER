@@ -83,19 +83,29 @@ class UpdateService {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.only(top: 8.0),
-            decoration: BoxDecoration(
-              color: AutomatoThemeColors.darkBrown(ref),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                description,
-                style: TextStyle(
-                  color: AutomatoThemeColors.bright(ref),
-                  fontSize: 20,
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Container(
+              height: 200,
+              padding: const EdgeInsets.only(top: 8.0),
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                      offset: const Offset(5, 5),
+                      blurRadius: 2,
+                      color: AutomatoThemeColors.brown25(ref)),
+                ],
+                color: AutomatoThemeColors.darkBrown(ref),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  description,
+                  style: TextStyle(
+                    color: AutomatoThemeColors.bright(ref),
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),
@@ -106,7 +116,7 @@ class UpdateService {
         _launchURL(naerNexusMods);
         Navigator.of(context).pop();
       },
-      okLabel: "Checkout Nexusmods Now",
+      okLabel: "Get it on Nexusmods",
       ref: ref,
     );
   }
