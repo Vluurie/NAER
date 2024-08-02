@@ -20,6 +20,7 @@ import 'package:NAER/naer_ui/setup/options_panel.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
+import 'package:NAER/naer_utils/update_util.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
@@ -136,6 +137,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     FileChange.loadChanges();
     FileChange.loadIgnoredFiles().then((_) {}).catchError((error) {});
     scrollController = ScrollController();
+    _checkForUpdate();
     _blinkController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -157,6 +159,20 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     setState(() {
       _isPanelVisible = !_isPanelVisible;
     });
+  }
+
+  Future<void> _checkForUpdate() async {
+    final updateService = UpdateService();
+    try {
+      final latestRelease = await updateService.getLatestRelease();
+      if (latestRelease != null &&
+          updateService.isUpdateAvailable(latestRelease['version']!)) {
+        updateService.showUpdateDialog(context, ref, latestRelease['version']!,
+            latestRelease['description']!);
+      }
+    } catch (e) {
+      globalLog('Failed to check for updates: $e');
+    }
   }
 
   @override
