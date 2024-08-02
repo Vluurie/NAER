@@ -174,6 +174,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
           !lastMessage.contains("Failed") &&
           !lastMessage.contains("Ignore") &&
           !lastMessage.contains("Normalized") &&
+          !lastMessage.contains("Mod requires") &&
           !lastMessage.contains("Deleted") &&
           !lastMessage.contains("Deleted file");
 
