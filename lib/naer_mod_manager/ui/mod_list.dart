@@ -7,6 +7,7 @@ import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
@@ -17,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:path/path.dart' as p;
 import 'package:stack_trace/stack_trace.dart';
@@ -31,17 +31,18 @@ class Mod {
   final List<Map<String, String>> files;
   final String? imagePath;
   final bool? canBeRandomized;
+  final String? dlc;
 
-  Mod({
-    required this.id,
-    required this.name,
-    required this.version,
-    required this.author,
-    required this.description,
-    required this.files,
-    this.imagePath,
-    this.canBeRandomized,
-  });
+  Mod(
+      {required this.id,
+      required this.name,
+      required this.version,
+      required this.author,
+      required this.description,
+      required this.files,
+      this.imagePath,
+      this.canBeRandomized,
+      this.dlc});
 
   factory Mod.fromJson(Map<String, dynamic> json) {
     var filesList = json['files'] as List<dynamic>;
@@ -59,6 +60,7 @@ class Mod {
       files: parsedFiles,
       imagePath: json['imagePath'],
       canBeRandomized: json['randomized'],
+      dlc: json['dlc'],
     );
   }
 }
@@ -131,10 +133,31 @@ class _ModsListState extends ConsumerState<ModsList>
 
     try {
       Mod mod = widget.mods[index];
+
       final ModInstallHandler modInstallHandler = ModInstallHandler(
         cliArguments: widget.cliArguments,
         modStateManager: widget.modStateManager,
       );
+
+      final globalState = ref.watch(globalStateProvider);
+
+      // Stop installation if selectedMod requires DLC but user does not have DLC
+      if (mod.dlc!.toBool() && !globalState.hasDLC) {
+        globalLog("Mod requires DLC which is not available.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+              style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
+            ),
+            backgroundColor: AutomatoThemeColors.primaryColor(ref),
+          ),
+        );
+        setState(() {
+          _loadingMap[index] = false;
+        });
+        return;
+      }
 
       if (widget.modStateManager.isModInstalled(mod.id)) {
         // Uninstall the mod
@@ -158,7 +181,6 @@ class _ModsListState extends ConsumerState<ModsList>
           }
         }
         await FileChange.saveIgnoredFiles();
-        // await modInstallHandler.printAllSharedPreferences();
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -379,8 +401,17 @@ class _ModsListState extends ConsumerState<ModsList>
 
     return IconButton(
       icon: isLoading
-          ? Lottie.asset('assets/animations/loading.json',
-              width: 40, height: 40, fit: BoxFit.fill)
+          ? Center(
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: AutomatoLoading(
+                  color: AutomatoThemeColors.bright(ref),
+                  translateX: 0,
+                  svgString: AutomatoSvgStrings.automatoSvgStrHead,
+                ),
+              ),
+            )
           : Icon(
               modIsInstalled
                   ? Icons.check_circle_outline
@@ -443,8 +474,17 @@ class _ModsListState extends ConsumerState<ModsList>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (isInstalling)
-            Lottie.asset('assets/animations/loading.json',
-                width: 50, height: 50, fit: BoxFit.fill)
+            Center(
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: AutomatoLoading(
+                  color: AutomatoThemeColors.bright(ref),
+                  translateX: 50,
+                  svgString: AutomatoSvgStrings.automatoSvgStrHead,
+                ),
+              ),
+            )
           else
             AutomatoButton(
               label:
@@ -478,10 +518,27 @@ class _ModsListState extends ConsumerState<ModsList>
       cliArguments: widget.cliArguments,
       modStateManager: widget.modStateManager,
     );
+    final globalState = ref.watch(globalStateProvider);
     Mod selectedMod = mods[modIndex];
     String modId = selectedMod.id;
 
     setState(() => _installingMods[modId] = true);
+
+    // Stop installation if selectedMod requires DLC but user does not have DLC
+    if (selectedMod.dlc!.toBool() && !globalState.hasDLC) {
+      globalLog("Mod requires DLC which is not available.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'The mod "${selectedMod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+            style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
+          ),
+          backgroundColor: AutomatoThemeColors.primaryColor(ref),
+        ),
+      );
+      setState(() => _installingMods[modId] = false);
+      return;
+    }
 
     if (!Platform.isWindows ||
         widget.cliArguments.input.isEmpty ||

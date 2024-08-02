@@ -242,8 +242,10 @@ class ModInstallHandler {
       mods.removeWhere((mod) => mod['id'] == modId);
       metadata['mods'] = mods;
 
-      await metadataFile.writeAsString(jsonEncode(metadata),
-          mode: FileMode.write);
+      JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+      String prettyJson = encoder.convert(metadata);
+
+      await metadataFile.writeAsString(prettyJson, mode: FileMode.write);
       print("Mod metadata for $modId deleted successfully.");
     } else {
       print("Mod metadata file not found.");

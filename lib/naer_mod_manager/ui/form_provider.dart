@@ -15,6 +15,7 @@ final authorControllerProvider =
     Provider<TextEditingController>((ref) => TextEditingController());
 final descriptionControllerProvider =
     Provider<TextEditingController>((ref) => TextEditingController());
+final dlcControllerProvider = StateProvider<String?>((ref) => 'false');
 
 final enemySetActionControllersProvider =
     StateNotifierProvider<ControllerNotifier, List<TextEditingController>>(
@@ -90,6 +91,7 @@ class MetadataProvider {
   final List<String> directoryContentsInfo;
   final String? selectedImagePath;
   final String? selectedDirectory;
+  final String? dlcValue;
 
   MetadataProvider(WidgetRef ref)
       : formKey = ref.read(formKeyProvider),
@@ -106,7 +108,8 @@ class MetadataProvider {
         showModFolderWarning = ref.watch(showModFolderWarningProvider),
         directoryContentsInfo = ref.watch(directoryContentsInfoProvider),
         selectedImagePath = ref.watch(selectedImagePathProvider),
-        selectedDirectory = ref.watch(selectedDirectoryProvider);
+        selectedDirectory = ref.watch(selectedDirectoryProvider),
+        dlcValue = ref.watch(dlcControllerProvider);
 }
 
 class SelectedImagePathNotifier extends StateNotifier<String?> {

@@ -1,3 +1,5 @@
+import 'package:NAER/naer_mod_manager/ui/form_provider.dart';
+import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_dlc_dropdown.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_textform_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +25,8 @@ class MetaDataFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dlcValue = ref.watch(dlcControllerProvider);
+
     return Column(
       children: [
         Padding(
@@ -74,6 +78,16 @@ class MetaDataFormFields extends StatelessWidget {
             label: 'Description',
             validator: (value) =>
                 value?.validateText(value, fieldName: 'Description'),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.only(right: 20, left: 20),
+          child: MetadataDLCDropdown(
+            initialValue: dlcValue,
+            onChanged: (value) {
+              ref.read(dlcControllerProvider.notifier).state = value;
+            },
           ),
         ),
       ],

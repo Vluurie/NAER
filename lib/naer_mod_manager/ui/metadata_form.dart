@@ -1,15 +1,16 @@
-import 'package:NAER/naer_mod_manager/ui/form_provider.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_directory_structure.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_form_fields.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_id_form_widget.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_image_selection.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form_widgets.dart/metadata_savebutton.dart';
-import 'package:NAER/naer_mod_manager/utils/metadata_utils.dart';
-import 'package:NAER/naer_utils/cli_arguments.dart';
-import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:flutter/material.dart';
-import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:NAER/naer_mod_manager/ui/form_provider.dart';
+import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:automato_theme/automato_theme.dart';
+
+import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:NAER/naer_mod_manager/utils/metadata_utils.dart';
 
 class MetadataForm extends ConsumerStatefulWidget {
   const MetadataForm({

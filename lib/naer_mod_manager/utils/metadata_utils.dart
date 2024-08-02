@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 
 class MetadataUtils {
   static Future<void> saveMetadata(
-      WidgetRef ref, ModStateManager modStateManager) async {
+      WidgetRef ref, ModStateManager modStateManager, String? dlcValue) async {
     final selectedDirectory = ref.watch(selectedDirectoryProvider);
     final formKey = ref.read(formKeyProvider);
     final idController = ref.read(idControllerProvider);
@@ -71,6 +71,7 @@ class MetadataUtils {
         "version": versionController.text.trim(),
         "author": authorController.text.trim(),
         "description": descriptionController.text.trim(),
+        "dlc": dlcValue,
         "files": filesMetadata,
         "importantIDs": idsData,
       };

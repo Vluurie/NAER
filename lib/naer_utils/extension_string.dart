@@ -66,4 +66,11 @@ extension StringExtensions on String {
 
     return this;
   }
+
+  /// Converts the string to a boolean value.
+  ///
+  /// Returns `true` if the string is "true" (case insensitive), otherwise returns `false`.
+  bool toBool() {
+    return toLowerCase() == 'true';
+  }
 }

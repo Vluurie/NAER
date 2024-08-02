@@ -10,8 +10,11 @@ class SaveMetadataButton extends ConsumerWidget {
   final MetadataProvider metadata;
   final ModStateManager modStateManager;
 
-  const SaveMetadataButton(
-      {super.key, required this.metadata, required this.modStateManager});
+  const SaveMetadataButton({
+    super.key,
+    required this.metadata,
+    required this.modStateManager,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,10 +36,10 @@ class SaveMetadataButton extends ConsumerWidget {
                     .isNotEmpty;
 
                 if (formIsValid && directoryHasContents) {
-                  MetadataUtils.saveMetadata(ref, modStateManager);
+                  final dlcValue = ref.read(dlcControllerProvider);
+                  MetadataUtils.saveMetadata(ref, modStateManager, dlcValue);
                   Navigator.of(context).pop();
                 } else {
-                  // Update the warning state using the notifier
                   ref.read(warningProvider.notifier).state =
                       !directoryHasContents;
                 }
