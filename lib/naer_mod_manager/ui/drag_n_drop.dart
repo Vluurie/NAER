@@ -50,7 +50,10 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
                   ref: ref,
                   title: "Are You Sure?",
                   content: Text(
-                    "This feature randomizes any folder with the settings from the main page. The modified files will not be added to the ignore list and will get overwritten on next randomization with other files if they are the same. You can undo them also with the main page undo button",
+                    "This feature randomizes folders using main page settings. "
+                    "Modified files won't be added to the ignore list and may be overwritten "
+                    "in the next randomization. Undo changes with the main page's undo button. "
+                    "Files not exported to the output path don't need randomization as they contain no randomizable data.",
                     style: TextStyle(
                       color: AutomatoThemeColors.textDialogColor(ref),
                       fontSize: 20,
