@@ -10,6 +10,7 @@ import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_services/error_utils/windows_close_handler.dart';
 import 'package:NAER/naer_ui/appbar/appbar.dart';
 import 'package:NAER/naer_ui/dialog/details.dart';
+import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/other/asciiArt.dart';
 import 'package:NAER/naer_ui/setup/category_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/directory_selection_widget.dart';
@@ -18,6 +19,7 @@ import 'package:NAER/naer_ui/setup/enemy_stats_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/log_output_widget.dart';
 import 'package:NAER/naer_ui/setup/options_panel.dart';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/naer_utils/update_util.dart';
@@ -475,7 +477,13 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
         globalState.enemyImageGridKey.currentState?.unselectAllImages();
         break;
       case 2:
-        showUndoConfirmation(context, ref);
+        bool isNierRunning =
+            ProcessService.isProcessRunning("NieRAutomata.exe");
+        if (!isNierRunning) {
+          showUndoConfirmation(context, ref);
+        } else {
+          showNierIsRunningDialog(context, ref);
+        }
         break;
       case 3:
         onPressedAction();
@@ -486,36 +494,41 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   void handleStartRandomizing() async {
-    bool backUp = await showBackupDialog(context, ref);
+    bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
+    if (!isNierRunning) {
+      bool backUp = await showBackupDialog(context, ref);
 
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
-    if (!globalState.isLoading) {
-      setState(() {
-        globalState.isLoading = true;
-        globalState.isButtonEnabled = false;
-      });
-
-      try {
-        await FileChange.savePreRandomizationTime();
-        log("Ignored mod files before starting: ${globalState.ignoredModFiles}");
-        final stopwatch = Stopwatch()..start();
-        await startRandomizing(context, backUp);
-        await FileChange.saveChanges();
-        stopwatch.stop();
-
-        globalLog(
-          'Total randomization time: ${stopwatch.elapsed}',
-        );
-      } catch (e, stackTrace) {
-        LogState.logError(
-            'Error during randomization $e', Trace.from(stackTrace));
-      } finally {
+      final globalState =
+          provider.Provider.of<GlobalState>(context, listen: false);
+      if (!globalState.isLoading) {
         setState(() {
-          globalState.isLoading = false;
-          globalState.isButtonEnabled = true;
+          globalState.isLoading = true;
+          globalState.isButtonEnabled = false;
         });
+
+        try {
+          await FileChange.savePreRandomizationTime();
+          log("Ignored mod files before starting: ${globalState.ignoredModFiles}");
+          final stopwatch = Stopwatch()..start();
+          await startRandomizing(context, backUp);
+          await FileChange.saveChanges();
+          stopwatch.stop();
+
+          globalLog(
+            'Total randomization time: ${stopwatch.elapsed}',
+          );
+        } catch (e, stackTrace) {
+          LogState.logError(
+              'Error during randomization $e', Trace.from(stackTrace));
+        } finally {
+          setState(() {
+            globalState.isLoading = false;
+            globalState.isButtonEnabled = true;
+          });
+        }
       }
+    } else {
+      showNierIsRunningDialog(context, ref);
     }
   }
 

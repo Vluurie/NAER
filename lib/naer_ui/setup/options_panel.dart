@@ -1,5 +1,6 @@
 import 'package:NAER/main.dart';
 import 'package:NAER/naer_save_editor/save_editor.dart';
+import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
 import 'package:NAER/naer_ui/directory_ui/dlc_checkbox.dart';
 import 'package:NAER/naer_ui/nav_button/navigate_button.dart';
@@ -7,6 +8,7 @@ import 'package:NAER/naer_ui/nav_button/navigate_button.dart';
 import 'package:NAER/naer_utils/change_app_theme.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
+import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
 
@@ -99,12 +101,20 @@ class OptionsPanel extends ConsumerWidget {
                               title: AutomatoButton(
                                 label: "Save File Editor",
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const SaveEditor(),
-                                    ),
-                                  );
+                                  bool isNierRunning =
+                                      ProcessService.isProcessRunning(
+                                          "NieRAutomata.exe");
+                                  if (!isNierRunning) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SaveEditor(),
+                                      ),
+                                    );
+                                  } else {
+                                    showNierIsRunningDialog(context, ref);
+                                  }
                                 },
                                 uniqueId: "exp_money",
                                 maxScale: 0.9,

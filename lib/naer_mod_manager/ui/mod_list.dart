@@ -7,11 +7,13 @@ import 'package:NAER/naer_mod_manager/ui/mod_popup.dart';
 import 'package:NAER/naer_mod_manager/utils/file_utils.dart';
 import 'package:NAER/naer_mod_manager/utils/notification_manager.dart';
 import 'package:NAER/naer_mod_manager/utils/shared_preferences_utils.dart';
+import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
@@ -146,78 +148,83 @@ class _ModsListState extends ConsumerState<ModsList>
   }
 
   Future<void> toggleInstallUninstallMod(int index) async {
-    setState(() {
-      _loadingMap[index] = true;
-    });
+    bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
+    if (!isNierRunning) {
+      setState(() {
+        _loadingMap[index] = true;
+      });
 
-    try {
-      Mod mod = widget.mods[index];
+      try {
+        Mod mod = widget.mods[index];
 
-      final modInstallHandler = ModInstallHandler(widget.cliArguments);
+        final modInstallHandler = ModInstallHandler(widget.cliArguments);
 
-      final globalState = ref.watch(globalStateProvider);
+        final globalState = ref.watch(globalStateProvider);
 
-      // Stop installation if selectedMod requires DLC but user does not have DLC
-      if (mod.dlc!.toBool() && !globalState.hasDLC) {
-        globalLog("Mod requires DLC which is not available.");
+        // Stop installation if selectedMod requires DLC but user does not have DLC
+        if (mod.dlc!.toBool() && !globalState.hasDLC) {
+          globalLog("Mod requires DLC which is not available.");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+                style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
+              ),
+              backgroundColor: AutomatoThemeColors.primaryColor(ref),
+            ),
+          );
+          setState(() {
+            _loadingMap[index] = false;
+          });
+          return;
+        }
+
+        if (widget.modStateManager.isModInstalled(mod.id)) {
+          // Uninstall the mod
+          await modInstallHandler.uninstallMod(mod.id);
+          widget.modStateManager.uninstallMod(mod.id);
+          List<String> filenamesToRemove = mod.files
+              .map((fileMap) => fileMap['path'] ?? '')
+              .where((path) => path.isNotEmpty)
+              .map((path) => p.basename(path))
+              .toList();
+          await FileChange.removeIgnoreFiles(filenamesToRemove);
+        } else {
+          // Install the mod
+          await modInstallHandler.copyModToInstallPath(mod.id);
+          widget.modStateManager.installMod(mod.id);
+          for (var fileMap in mod.files) {
+            String filePath = fileMap['path'] ?? '';
+            if (filePath.isNotEmpty) {
+              String fileName = p.basename(filePath);
+              FileChange.ignoredFiles.add(fileName);
+            }
+          }
+          await FileChange.saveIgnoredFiles();
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
-              style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
-            ),
-            backgroundColor: AutomatoThemeColors.primaryColor(ref),
+            content: Text(widget.modStateManager.isModInstalled(mod.id)
+                ? 'Mod installed.'
+                : 'Mod uninstalled.'),
+            duration: const Duration(seconds: 2),
           ),
         );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $error'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } finally {
         setState(() {
           _loadingMap[index] = false;
         });
-        return;
       }
-
-      if (widget.modStateManager.isModInstalled(mod.id)) {
-        // Uninstall the mod
-        await modInstallHandler.uninstallMod(mod.id);
-        widget.modStateManager.uninstallMod(mod.id);
-        List<String> filenamesToRemove = mod.files
-            .map((fileMap) => fileMap['path'] ?? '')
-            .where((path) => path.isNotEmpty)
-            .map((path) => p.basename(path))
-            .toList();
-        await FileChange.removeIgnoreFiles(filenamesToRemove);
-      } else {
-        // Install the mod
-        await modInstallHandler.copyModToInstallPath(mod.id);
-        widget.modStateManager.installMod(mod.id);
-        for (var fileMap in mod.files) {
-          String filePath = fileMap['path'] ?? '';
-          if (filePath.isNotEmpty) {
-            String fileName = p.basename(filePath);
-            FileChange.ignoredFiles.add(fileName);
-          }
-        }
-        await FileChange.saveIgnoredFiles();
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(widget.modStateManager.isModInstalled(mod.id)
-              ? 'Mod installed.'
-              : 'Mod uninstalled.'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $error'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } finally {
-      setState(() {
-        _loadingMap[index] = false;
-      });
+    } else {
+      showNierIsRunningDialog(context, ref);
     }
   }
 
@@ -522,85 +529,90 @@ class _ModsListState extends ConsumerState<ModsList>
   }
 
   Future<void> installAndRandomize(int modIndex, bool isInstalled) async {
-    final logState = provider.Provider.of<LogState>(context, listen: false);
-    final modStateManager =
-        provider.Provider.of<ModStateManager>(context, listen: false);
-    var mods = widget.modStateManager.mods;
-    final modInstallHandler = ModInstallHandler(widget.cliArguments);
-    final globalState = ref.watch(globalStateProvider);
-    Mod selectedMod = mods[modIndex];
-    String modId = selectedMod.id;
+    bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
+    if (!isNierRunning) {
+      final logState = provider.Provider.of<LogState>(context, listen: false);
+      final modStateManager =
+          provider.Provider.of<ModStateManager>(context, listen: false);
+      var mods = widget.modStateManager.mods;
+      final modInstallHandler = ModInstallHandler(widget.cliArguments);
+      final globalState = ref.watch(globalStateProvider);
+      Mod selectedMod = mods[modIndex];
+      String modId = selectedMod.id;
 
-    setState(() => _installingMods[modId] = true);
+      setState(() => _installingMods[modId] = true);
 
-    // Stop installation if selectedMod requires DLC but user does not have DLC
-    if (selectedMod.dlc!.toBool() && !globalState.hasDLC) {
-      globalLog("Mod requires DLC which is not available.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'The mod "${selectedMod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
-            style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
+      // Stop installation if selectedMod requires DLC but user does not have DLC
+      if (selectedMod.dlc!.toBool() && !globalState.hasDLC) {
+        globalLog("Mod requires DLC which is not available.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'The mod "${selectedMod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+              style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
+            ),
+            backgroundColor: AutomatoThemeColors.primaryColor(ref),
           ),
-          backgroundColor: AutomatoThemeColors.primaryColor(ref),
-        ),
-      );
-      setState(() => _installingMods[modId] = false);
-      return;
-    }
+        );
+        setState(() => _installingMods[modId] = false);
+        return;
+      }
 
-    if (!Platform.isWindows ||
-        widget.cliArguments.input.isEmpty ||
-        widget.cliArguments.specialDatOutputPath.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(!Platform.isWindows
-              ? 'This feature is currently only supported on Windows.'
-              : 'Please select both input and output directory first!')));
-      setState(() => _installingMods[modId] = false);
-      return;
-    }
+      if (!Platform.isWindows ||
+          widget.cliArguments.input.isEmpty ||
+          widget.cliArguments.specialDatOutputPath.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(!Platform.isWindows
+                ? 'This feature is currently only supported on Windows.'
+                : 'Please select both input and output directory first!')));
+        setState(() => _installingMods[modId] = false);
+        return;
+      }
 
-    if (isInstalled) {
-      await _uninstallMod(selectedMod, modStateManager, logState);
-      setState(() => _installingMods[modId] = false);
-      return;
-    }
+      if (isInstalled) {
+        await _uninstallMod(selectedMod, modStateManager, logState);
+        setState(() => _installingMods[modId] = false);
+        return;
+      }
 
-    List<String> fileNames = selectedMod.files
-        .map((fileMap) => fileMap['path'] ?? '')
-        .where((path) => path.isNotEmpty)
-        .map((path) => p.basename(path))
-        .toList();
-    await FileChange.removeIgnoreFiles(fileNames);
-
-    bool success =
-        await _processModFiles(selectedMod, modInstallHandler, logState);
-
-    if (success) {
-      modStateManager.installMod(selectedMod.id);
-      List<String> filenamesToSave = selectedMod.files
+      List<String> fileNames = selectedMod.files
           .map((fileMap) => fileMap['path'] ?? '')
           .where((path) => path.isNotEmpty)
           .map((path) => p.basename(path))
           .toList();
-
       await FileChange.removeIgnoreFiles(fileNames);
-      FileChange.ignoredFiles.addAll(filenamesToSave);
-      await FileChange.saveIgnoredFiles();
-      const snackBar = SnackBar(
-        content: Text("Mod installed and randomized successfully!"),
-        backgroundColor: Colors.green,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    } else {
-      const snackBar = SnackBar(
-        content: Text("Error processing mod file"),
-        backgroundColor: Colors.red,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
 
-    setState(() => _installingMods[modId] = false);
+      bool success =
+          await _processModFiles(selectedMod, modInstallHandler, logState);
+
+      if (success) {
+        modStateManager.installMod(selectedMod.id);
+        List<String> filenamesToSave = selectedMod.files
+            .map((fileMap) => fileMap['path'] ?? '')
+            .where((path) => path.isNotEmpty)
+            .map((path) => p.basename(path))
+            .toList();
+
+        await FileChange.removeIgnoreFiles(fileNames);
+        FileChange.ignoredFiles.addAll(filenamesToSave);
+        await FileChange.saveIgnoredFiles();
+        const snackBar = SnackBar(
+          content: Text("Mod installed and randomized successfully!"),
+          backgroundColor: Colors.green,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        const snackBar = SnackBar(
+          content: Text("Error processing mod file"),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+
+      setState(() => _installingMods[modId] = false);
+    } else {
+      showNierIsRunningDialog(context, ref);
+    }
   }
 
   Future<bool> _processModFiles(Mod selectedMod,
@@ -614,7 +626,6 @@ class _ModsListState extends ConsumerState<ModsList>
           "${await FileChange.ensureSettingsDirectory()}/Modpackage/$filePath";
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
 
-      // Use the new helper method to determine if the file should be processed
       bool shouldProcess = _shouldProcessFileBasedOnGameOptions(
           baseNameWithoutExtension, createdPath);
 

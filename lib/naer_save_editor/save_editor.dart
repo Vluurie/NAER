@@ -164,11 +164,18 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
         title: directoryPath.isNotEmpty && selectedFile != null
             ? SaveFileName(filePath: selectedFile!.path)
             : Text(
-                "SAVE FILE EDITOR",
+                'SAVE FILE EDITOR',
                 style: TextStyle(
-                    fontStyle: FontStyle.normal,
-                    color: AutomatoThemeColors.darkBrown(ref),
-                    fontWeight: FontWeight.w800),
+                  fontSize: 48.0,
+                  color: AutomatoThemeColors.darkBrown(ref),
+                  fontWeight: FontWeight.w700,
+                  shadows: [
+                    Shadow(
+                        offset: const Offset(5.0, 5),
+                        color: AutomatoThemeColors.hoverBrown(ref)
+                            .withOpacity(0.5)),
+                  ],
+                ),
               ),
       ),
       body: Stack(

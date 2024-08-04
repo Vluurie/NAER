@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:path/path.dart' as p;
 import 'mod_service.dart';
 import 'notification_manager.dart';
 
@@ -15,6 +15,11 @@ class ModStateManager extends ChangeNotifier {
   List<String> affectedModsInfo = [];
   String affectedModName = "";
   List<String> currentModfiles = [];
+  Timer? verificationTimer;
+  bool _isVerifying = false;
+  bool _isVerificationInProgress = false;
+
+  bool get isVerifying => _isVerifying;
 
   final ModService modService;
   final ModInstallHandler modInstallHandler;
@@ -22,12 +27,12 @@ class ModStateManager extends ChangeNotifier {
 
   ModStateManager(this.modService, this.modInstallHandler) {
     _loadInstalledMods();
-    _startVerification();
   }
 
   @override
   void dispose() {
     _isDisposed = true;
+    verificationTimer?.cancel();
     super.dispose();
   }
 
@@ -49,14 +54,40 @@ class ModStateManager extends ChangeNotifier {
     await modService.saveInstalledMods(_installedModsIds.toList());
   }
 
-  void _startVerification() {
-    globalLog(
-        "Verifying mods in process... A check will occur every 15 seconds.");
+  void toggleVerification() {
+    if (_isVerifying) {
+      _stopVerification();
+    } else {
+      _startVerification();
+    }
+    notifyListeners();
+    globalLog(isVerifying
+        ? "Mod verification started"
+        : "Mod verification stopped, finishing any running verification....");
+  }
 
-    // Schedule periodic checks every 15 seconds
-    Timer.periodic(const Duration(seconds: 15), (timer) async {
-      await _verifyInstalledMods();
+  void _startVerification() {
+    _isVerifying = true;
+    notifyListeners();
+    globalLog(
+        "Verifying mods in process... A check will occur every 3 seconds.");
+
+    // Schedule periodic checks every 3 seconds
+    verificationTimer =
+        Timer.periodic(const Duration(seconds: 3), (timer) async {
+      if (!_isVerificationInProgress) {
+        _isVerificationInProgress = true;
+        await _verifyInstalledMods();
+        _isVerificationInProgress = false;
+      }
     });
+  }
+
+  void _stopVerification() {
+    verificationTimer?.cancel();
+    _isVerifying = false;
+    notifyListeners();
+    globalLog("Verification process stopped.");
   }
 
   Future<void> _verifyInstalledMods() async {

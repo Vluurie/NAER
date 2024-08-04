@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
@@ -10,7 +11,6 @@ import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
 import 'package:NAER/naer_mod_manager/ui/drag_n_drop.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:automato_theme/automato_theme.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SecondPage extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
@@ -21,10 +21,10 @@ class SecondPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SecondPage> createState() => _SecondPageState();
+  SecondPageState createState() => SecondPageState();
 }
 
-class _SecondPageState extends ConsumerState<SecondPage>
+class SecondPageState extends ConsumerState<SecondPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   double modLoaderWidgetOpacity = 0.0;
@@ -41,6 +41,12 @@ class _SecondPageState extends ConsumerState<SecondPage>
       setState(() {
         modLoaderWidgetOpacity = 1.0;
       });
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final modStateManager =
+          provider.Provider.of<ModStateManager>(context, listen: false);
+      modStateManager.toggleVerification();
     });
   }
 
@@ -69,12 +75,36 @@ class _SecondPageState extends ConsumerState<SecondPage>
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.of(context).canPop();
-    final modStateManager =
-        provider.Provider.of<ModStateManager>(context, listen: false);
     final outputPath = widget.cliArguments.specialDatOutputPath;
     final inputPath = widget.cliArguments.input;
+    final globalState =
+        provider.Provider.of<GlobalState>(context, listen: false);
 
     final actionButtons = <Widget>[
+      provider.Consumer<ModStateManager>(
+        builder: (context, modStateManager, child) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: AutomatoButton(
+                label: modStateManager.isVerifying
+                    ? "Stop Verification Checks"
+                    : "Start Verification",
+                onPressed: () {
+                  modStateManager.toggleVerification();
+                },
+                uniqueId: "theme",
+                maxScale: 0.8,
+                showPointer: false,
+                baseColor: AutomatoThemeColors.darkBrown(ref),
+                activeFillColor: AutomatoThemeColors.primaryColor(ref),
+                fillBehavior: FillBehavior.filledRightToLeft,
+              ),
+            ),
+          );
+        },
+      ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: AutomatoButton(
@@ -89,6 +119,9 @@ class _SecondPageState extends ConsumerState<SecondPage>
           uniqueId: "theme",
           maxScale: 0.8,
           showPointer: false,
+          baseColor: AutomatoThemeColors.darkBrown(ref),
+          activeFillColor: AutomatoThemeColors.primaryColor(ref),
+          fillBehavior: FillBehavior.filledRightToLeft,
         ),
       ),
       Padding(
@@ -111,13 +144,9 @@ class _SecondPageState extends ConsumerState<SecondPage>
       ),
     ];
 
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
-
     return WillPopScope(
       onWillPop: () async {
         if (globalState.isModManagerPageProcessing) {
-          // Prevent navigation if the page is processing
           return false;
         }
         return true;
@@ -186,9 +215,13 @@ class _SecondPageState extends ConsumerState<SecondPage>
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
                       height: MediaQuery.of(context).size.height * 0.5,
-                      child: ModLoaderWidget(
-                        cliArguments: widget.cliArguments,
-                        modStateManager: modStateManager,
+                      child: provider.Consumer<ModStateManager>(
+                        builder: (context, modStateManager, child) {
+                          return ModLoaderWidget(
+                            cliArguments: widget.cliArguments,
+                            modStateManager: modStateManager,
+                          );
+                        },
                       ),
                     ),
                   ),

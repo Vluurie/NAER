@@ -63,7 +63,7 @@ class WindowsCloseListener with WindowListener {
       title: "Are you sure you want to quit?",
       content: Text(
         "Thanks for using this app!\n\n"
-        "If you enjoyed it, a donation would be awesome ❤️. After over 1 Year developing, even androids need coffee breaks! Thank you!",
+        "If you enjoyed it, a donation would be awesome ❤️. Even androids need coffee breaks! Thank you!",
         style: TextStyle(
           fontSize: 22,
           color: AutomatoThemeColors.textDialogColor(ref),
