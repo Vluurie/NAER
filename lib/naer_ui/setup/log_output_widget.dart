@@ -176,6 +176,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
           !lastMessage.contains("Normalized") &&
           !lastMessage.contains("Re-checking") &&
           !lastMessage.contains("Re-checked") &&
+          !lastMessage.contains("Mod verification") &&
           !lastMessage.contains("Mod requires") &&
           !lastMessage.contains("Deleted") &&
           !lastMessage.contains("Deleted file");

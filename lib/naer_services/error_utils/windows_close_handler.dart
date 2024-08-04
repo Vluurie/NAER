@@ -60,10 +60,9 @@ class WindowsCloseListener with WindowListener {
     final completer = Completer<bool>();
     AutomatoDialogManager().showYesNoDialog(
       context: context,
-      title: "Are you sure you want to quit?",
+      title: "Information",
       content: Text(
-        "Thanks for using this app!\n\n"
-        "If you enjoyed it, a donation would be awesome ❤️. Even androids need coffee breaks! Thank you!",
+        "Are you sure you want to quit? (⊙＿⊙') ",
         style: TextStyle(
           fontSize: 22,
           color: AutomatoThemeColors.textDialogColor(ref),
