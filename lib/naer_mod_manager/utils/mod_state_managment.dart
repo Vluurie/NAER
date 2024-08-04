@@ -40,23 +40,20 @@ class ModStateManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Load installed mod IDs from SharedPreferences
   Future<void> _loadInstalledMods() async {
     _installedModsIds = await modService.loadInstalledMods();
     notifyListeners();
   }
 
-  // Save installed mod IDs to SharedPreferences
   Future<void> _saveInstalledMods() async {
     await modService.saveInstalledMods(_installedModsIds.toList());
   }
 
   void _startVerification() {
-    // Log the initial verification message
     globalLog(
         "Verifying mods in process... A check will occur every 15 seconds.");
 
-    // Schedule periodic checks every 30 seconds
+    // Schedule periodic checks every 15 seconds
     Timer.periodic(const Duration(seconds: 15), (timer) async {
       await _verifyInstalledMods();
     });
