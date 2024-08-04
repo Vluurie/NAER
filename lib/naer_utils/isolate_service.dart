@@ -67,6 +67,20 @@ class IsolateService {
     await receivePort.first;
   }
 
+  Future<T> runInAwaitedReturnIsolate<T>(
+      Function function, List<dynamic> arguments) async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(
+        _isolateEntryWithReturn, [function, arguments, receivePort.sendPort]);
+
+    final result = await receivePort.first;
+    if (result is T) {
+      return result;
+    } else {
+      throw Exception('Unexpected result type: ${result.runtimeType}');
+    }
+  }
+
   static Future<void> isolateEntry(List<dynamic> args) async {
     final function = args[0] as Function;
     final arguments = args[1] as List<dynamic>;
@@ -78,6 +92,19 @@ class IsolateService {
       globalLog("Error: $e");
     } finally {
       sendPort.send(null);
+    }
+  }
+
+  static Future<void> _isolateEntryWithReturn(List<dynamic> args) async {
+    final function = args[0] as Function;
+    final arguments = args[1] as List<dynamic>;
+    final sendPort = args[2] as SendPort;
+
+    try {
+      final result = await Function.apply(function, arguments);
+      sendPort.send(result);
+    } catch (e) {
+      sendPort.send(e);
     }
   }
 }

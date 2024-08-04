@@ -2,8 +2,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';
+import 'package:NAER/naer_mod_manager/ui/mod_popup.dart';
+import 'package:NAER/naer_mod_manager/utils/file_utils.dart';
+import 'package:NAER/naer_mod_manager/utils/notification_manager.dart';
+import 'package:NAER/naer_mod_manager/utils/shared_preferences_utils.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
@@ -115,9 +118,25 @@ class _ModsListState extends ConsumerState<ModsList>
 
     NotificationManager.notificationStream.listen((event) {
       if (mounted && event.message == "Affected mods have been handled") {
-        widget.modStateManager.showStyledPopup(context);
+        _showStyledPopup();
       }
     });
+  }
+
+  void _showStyledPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ModPopup(
+          currentlyIgnored: FileChange.ignoredFiles,
+          affectedModsInfo: widget.modStateManager.affectedModsInfo,
+          onDismiss: () {
+            widget.modStateManager.clearAffectedModsInfo();
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -126,7 +145,7 @@ class _ModsListState extends ConsumerState<ModsList>
     super.dispose();
   }
 
-  void toggleInstallUninstallMod(int index) async {
+  Future<void> toggleInstallUninstallMod(int index) async {
     setState(() {
       _loadingMap[index] = true;
     });
@@ -134,10 +153,7 @@ class _ModsListState extends ConsumerState<ModsList>
     try {
       Mod mod = widget.mods[index];
 
-      final ModInstallHandler modInstallHandler = ModInstallHandler(
-        cliArguments: widget.cliArguments,
-        modStateManager: widget.modStateManager,
-      );
+      final modInstallHandler = ModInstallHandler(widget.cliArguments);
 
       final globalState = ref.watch(globalStateProvider);
 
@@ -206,10 +222,7 @@ class _ModsListState extends ConsumerState<ModsList>
   }
 
   Future<void> verifyAllModFiles() async {
-    final ModInstallHandler modInstallHandler = ModInstallHandler(
-      cliArguments: widget.cliArguments,
-      modStateManager: widget.modStateManager,
-    );
+    final modInstallHandler = ModInstallHandler(widget.cliArguments);
 
     bool foundInvalidFiles = false;
     for (var mod in widget.mods) {
@@ -250,10 +263,7 @@ class _ModsListState extends ConsumerState<ModsList>
         shouldShowMissingFilesSnackbar = false;
       }
     });
-    final ModInstallHandler modInstallHandler = ModInstallHandler(
-      cliArguments: widget.cliArguments,
-      modStateManager: widget.modStateManager,
-    );
+    final modInstallHandler = ModInstallHandler(widget.cliArguments);
 
     return provider.Consumer<ModStateManager>(
         builder: (context, modStateManager, child) {
@@ -292,7 +302,7 @@ class _ModsListState extends ConsumerState<ModsList>
                       child: mod.imagePath != null
                           ? Image.file(
                               File(mod.imagePath!),
-                              width: 90,
+                              width: 150,
                               height: 150,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
@@ -420,7 +430,8 @@ class _ModsListState extends ConsumerState<ModsList>
                   ? AutomatoThemeColors.primaryColor(ref)
                   : AutomatoThemeColors.darkBrown(ref),
             ),
-      onPressed: isLoading ? null : () => toggleInstallUninstallMod(index),
+      onPressed:
+          isLoading ? null : () async => await toggleInstallUninstallMod(index),
       tooltip: modIsInstalled ? 'Uninstall Mod' : 'Only Install Mod',
     );
   }
@@ -489,7 +500,8 @@ class _ModsListState extends ConsumerState<ModsList>
             AutomatoButton(
               label:
                   isInstalled ? "Uninstall Mod" : "Install and Randomize Mod",
-              onPressed: () => installAndRandomize(modIndex, isInstalled),
+              onPressed: () async =>
+                  await installAndRandomize(modIndex, isInstalled),
               uniqueId: 'install_$modIndex',
               pointerColor: AutomatoThemeColors.bright(ref),
               startColor: isInstalled
@@ -514,10 +526,7 @@ class _ModsListState extends ConsumerState<ModsList>
     final modStateManager =
         provider.Provider.of<ModStateManager>(context, listen: false);
     var mods = widget.modStateManager.mods;
-    final ModInstallHandler modInstallHandler = ModInstallHandler(
-      cliArguments: widget.cliArguments,
-      modStateManager: widget.modStateManager,
-    );
+    final modInstallHandler = ModInstallHandler(widget.cliArguments);
     final globalState = ref.watch(globalStateProvider);
     Mod selectedMod = mods[modIndex];
     String modId = selectedMod.id;
@@ -605,13 +614,9 @@ class _ModsListState extends ConsumerState<ModsList>
           "${await FileChange.ensureSettingsDirectory()}/Modpackage/$filePath";
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
 
-      bool shouldProcess = _shouldProcessFile(
-          baseNameWithoutExtension,
-          GameFileOptions.questOptions,
-          GameFileOptions.mapOptions,
-          GameFileOptions.enemyOptions,
-          GameFileOptions.phaseOptions,
-          EnemyList.getDLCFilteredEnemies(ref));
+      // Use the new helper method to determine if the file should be processed
+      bool shouldProcess = _shouldProcessFileBasedOnGameOptions(
+          baseNameWithoutExtension, createdPath);
 
       if (!shouldProcess) {
         bool copySuccess = await _copyFile(
@@ -654,14 +659,30 @@ class _ModsListState extends ConsumerState<ModsList>
       }
 
       for (String filePath in filesToHash) {
-        String fileHash =
-            await modInstallHandler.computeFileHash(File(filePath));
-        await modInstallHandler.storeFileHashInPreferences(
+        String fileHash = await FileUtils.computeFileHash(File(filePath));
+        await SharedPreferencesUtils.storeFileHash(
             selectedMod.id, filePath, fileHash);
       }
     }
 
     return success;
+  }
+
+  bool _shouldProcessFileBasedOnGameOptions(
+      String baseNameWithoutExtension, String filePath) {
+    final extension = p.extension(filePath).toLowerCase();
+    if (extension != '.dat') {
+      return false;
+    }
+
+    final gameOptions = [
+      ...GameFileOptions.questOptions,
+      ...GameFileOptions.mapOptions,
+      ...GameFileOptions.enemyOptions,
+      ...GameFileOptions.phaseOptions,
+    ];
+
+    return gameOptions.contains(baseNameWithoutExtension);
   }
 
   Future<bool> _executeCLICommand(
@@ -699,31 +720,6 @@ class _ModsListState extends ConsumerState<ModsList>
     }
   }
 
-  bool _shouldProcessFile(
-      String baseNameWithoutExtension,
-      List<String> questOptions,
-      List<String> mapOptions,
-      List<String> enemyOptions,
-      List<String> phaseOptions,
-      List<Enemy> enemyList) {
-    // Check against quest, map, enemy, and phase options first
-    if (questOptions.contains(baseNameWithoutExtension) ||
-        mapOptions.contains(baseNameWithoutExtension) ||
-        enemyOptions.contains(baseNameWithoutExtension) ||
-        phaseOptions.contains(baseNameWithoutExtension)) {
-      return true;
-    }
-
-    var allEmIdentifiers = <String>{};
-    for (var enemy in enemyList) {
-      allEmIdentifiers.addAll(enemy.emIdentifiers
-          .expand((id) => id.split(',').map((item) => item.trim())));
-    }
-
-    return allEmIdentifiers
-        .any((identifier) => baseNameWithoutExtension.contains(identifier));
-  }
-
   Future<bool> _copyFile(LogState logState, String createdPath, String filePath,
       ModInstallHandler modInstallHandler, String modId) async {
     try {
@@ -731,10 +727,8 @@ class _ModsListState extends ConsumerState<ModsList>
           await modInstallHandler.createModInstallPath(filePath);
       await Directory(p.dirname(targetPath)).create(recursive: true);
       await File(createdPath).copy(targetPath);
-      String fileHash =
-          await modInstallHandler.computeFileHash(File(targetPath));
-      await modInstallHandler.storeFileHashInPreferences(
-          modId, targetPath, fileHash);
+      String fileHash = await FileUtils.computeFileHash(File(targetPath));
+      await SharedPreferencesUtils.storeFileHash(modId, targetPath, fileHash);
       logState.addLog("Copied file: $filePath to $targetPath");
       return true;
     } catch (e) {
@@ -745,10 +739,7 @@ class _ModsListState extends ConsumerState<ModsList>
 
   Future<void> _uninstallMod(Mod selectedMod, ModStateManager modStateManager,
       LogState logState) async {
-    final ModInstallHandler modInstallHandler = ModInstallHandler(
-      cliArguments: widget.cliArguments,
-      modStateManager: widget.modStateManager,
-    );
+    final modInstallHandler = ModInstallHandler(widget.cliArguments);
     try {
       modInstallHandler.uninstallMod(selectedMod.id);
       modStateManager.uninstallMod(selectedMod.id);

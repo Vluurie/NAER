@@ -126,6 +126,20 @@ class _SecondPageState extends ConsumerState<SecondPage>
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: AppBar(
+            title: Text(
+              'MOD MANAGER',
+              style: TextStyle(
+                fontSize: 48.0,
+                color: AutomatoThemeColors.darkBrown(ref),
+                fontWeight: FontWeight.w700,
+                shadows: [
+                  Shadow(
+                      offset: const Offset(5.0, 5),
+                      color:
+                          AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5)),
+                ],
+              ),
+            ),
             foregroundColor: AutomatoThemeColors.darkBrown(ref),
             backgroundColor: AutomatoThemeColors.transparentColor(ref),
             elevation: 0,

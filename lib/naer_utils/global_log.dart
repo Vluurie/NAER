@@ -9,6 +9,7 @@ void globalLog(String message) {
   if (processedLog.isEmpty) {
     return;
   }
+  print(message);
 
   LogState().addLog(processedLog);
 }

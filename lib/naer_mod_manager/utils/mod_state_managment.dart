@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
-import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as p;
+import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
+import 'package:NAER/naer_utils/change_tracker.dart';
+import 'mod_service.dart';
+import 'notification_manager.dart';
 
 class ModStateManager extends ChangeNotifier {
   Set<String> _installedModsIds = {};
@@ -16,10 +16,11 @@ class ModStateManager extends ChangeNotifier {
   String affectedModName = "";
   List<String> currentModfiles = [];
 
+  final ModService modService;
   final ModInstallHandler modInstallHandler;
   bool _isDisposed = false;
 
-  ModStateManager(this.modInstallHandler) {
+  ModStateManager(this.modService, this.modInstallHandler) {
     _loadInstalledMods();
     _startVerification();
   }
@@ -32,22 +33,31 @@ class ModStateManager extends ChangeNotifier {
 
   bool get isDisposed => _isDisposed;
 
+  void clearAffectedModsInfo() {
+    affectedModsInfo = [];
+    affectedModName = "";
+    currentModfiles = [];
+    notifyListeners();
+  }
+
   // Load installed mod IDs from SharedPreferences
   Future<void> _loadInstalledMods() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> modIds = prefs.getStringList('installedModsIds') ?? [];
-    _installedModsIds = modIds.toSet();
+    _installedModsIds = await modService.loadInstalledMods();
     notifyListeners();
   }
 
   // Save installed mod IDs to SharedPreferences
   Future<void> _saveInstalledMods() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('installedModsIds', _installedModsIds.toList());
+    await modService.saveInstalledMods(_installedModsIds.toList());
   }
 
   void _startVerification() {
-    Timer.periodic(const Duration(seconds: 3), (timer) async {
+    // Log the initial verification message
+    globalLog(
+        "Verifying mods in process... A check will occur every 15 seconds.");
+
+    // Schedule periodic checks every 30 seconds
+    Timer.periodic(const Duration(seconds: 15), (timer) async {
       await _verifyInstalledMods();
     });
   }
@@ -95,17 +105,25 @@ class ModStateManager extends ChangeNotifier {
 
         _installedModsIds.remove(modId);
         changed = true;
+
+        globalLog(
+            "Changes found in mod: $modName. Affected files: ${affectedFiles.join(', ')}");
       }
     }
 
     if (changed) {
+      globalLog(
+          "Re-checked mods, changes detected. Updating installed mods list...");
       if (_isDisposed) {
         return;
       }
       await _saveInstalledMods();
       notifyListeners();
       String notificationMessage = "Affected mods have been handled";
+      globalLog("$notificationMessage: ${affectedModsInfo.join('; ')}");
       NotificationManager.notify(notificationMessage);
+    } else {
+      globalLog("Re-checked mods, no issues found.");
     }
   }
 
@@ -146,102 +164,7 @@ class ModStateManager extends ChangeNotifier {
   }
 
   Future<void> fetchAndUpdateModsList() async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
-    final metadataPath = p.join(directoryPath, 'mod_metadata.json');
-    final File metadataFile = File(metadataPath);
-
-    if (await metadataFile.exists()) {
-      final String metadataContent = await metadataFile.readAsString();
-      final decoded = jsonDecode(metadataContent);
-
-      List<dynamic> modsJson = decoded['mods'];
-      _mods = modsJson.map((modJson) => Mod.fromJson(modJson)).toList();
-
-      notifyListeners();
-    }
-  }
-
-  showStyledPopup(BuildContext context) {
-    List<String> currentlyIgnored = FileChange.ignoredFiles;
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color.fromARGB(255, 35, 34, 34),
-          title: const Text(
-            '🔧 Mod Update Heads-up!',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: SingleChildScrollView(
-            child: RichText(
-              text: TextSpan(
-                style: const TextStyle(fontSize: 16, color: Colors.white),
-                children: <TextSpan>[
-                  const TextSpan(
-                      text:
-                          "Hey there! NAER noticed a few mods might need your attention. Nothing too scary, but here’s the gist:\n\n",
-                      style: TextStyle(color: Colors.lightBlueAccent)),
-                  const TextSpan(
-                      text:
-                          "🚀 One mod might have gotten a bit too excited and replaced another mod's files.\n",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                      text:
-                          "🧹 Maybe some files were accidentally swept away from the installation path.\n",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  TextSpan(
-                      text:
-                          "🚫 And there’s a chance that some files didn’t make it to the installation path due to our 'ignore files' setting:\nFiles that where in installation path: $currentlyIgnored \n\n",
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                      text: "Affected mod files of the mod: ",
-                      style: TextStyle(color: Colors.greenAccent)),
-                  TextSpan(
-                      text: "${affectedModsInfo.join('; ')}.\n\n",
-                      style: const TextStyle(fontStyle: FontStyle.italic)),
-                  const TextSpan(
-                      text:
-                          "Could you take a peek at your randomization settings? Just to make sure everything’s shipshape.",
-                      style: TextStyle(color: Colors.white)),
-                  const TextSpan(
-                      text:
-                          "\n\nThe affected mod got uninstalled automatically for you 🧹. ",
-                      style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Got it!',
-                  style: TextStyle(color: Colors.lightBlueAccent)),
-              onPressed: () {
-                affectedModsInfo = [];
-                affectedModName = "";
-                currentModfiles = [];
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class NotificationEvent {
-  final String message;
-  NotificationEvent(this.message);
-}
-
-class NotificationManager {
-  static final _notificationStreamController =
-      StreamController<NotificationEvent>.broadcast();
-  static Stream<NotificationEvent> get notificationStream =>
-      _notificationStreamController.stream;
-
-  static void notify(String message) {
-    _notificationStreamController.add(NotificationEvent(message));
+    _mods = await modService.fetchMods();
+    notifyListeners();
   }
 }

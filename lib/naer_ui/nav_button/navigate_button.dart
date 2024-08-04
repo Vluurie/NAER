@@ -1,5 +1,6 @@
 import 'package:NAER/naer_mod_manager/mod_manager.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
+import 'package:NAER/naer_mod_manager/utils/mod_service.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -35,9 +36,9 @@ AutomatoButton navigateButton(
           enemyLevel: globalStateRiverPod.enemyLevel,
           ref: ref);
 
-      ModInstallHandler modInstallHandler =
-          ModInstallHandler(cliArguments: cliArgs);
-      ModStateManager modStateManager = ModStateManager(modInstallHandler);
+      final modInstallHandler = ModInstallHandler(cliArgs);
+      ModStateManager modStateManager =
+          ModStateManager(ModService(), modInstallHandler);
 
       if (context.mounted) {
         Navigator.of(context).push(

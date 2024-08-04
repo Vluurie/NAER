@@ -56,7 +56,6 @@ final validFolderNamesProvider = Provider<List<String>>((ref) => [
       "quest",
       "ph2",
       "ph3",
-      "quest",
       "st1",
       "st2",
       "st5",
@@ -73,7 +72,11 @@ final validFolderNamesProvider = Provider<List<String>>((ref) => [
       "pl",
       "ui",
       "um",
-      "wp"
+      "wp",
+      "misctex",
+      "effect",
+      "dat",
+      "dtt"
     ]);
 
 class MetadataProvider {

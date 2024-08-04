@@ -1,100 +1,189 @@
-// ignore_for_file: avoid_print
-
-import 'dart:io';
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
+import 'dart:io';
+import 'dart:isolate';
 import 'package:path/path.dart' as path;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
+import 'file_utils.dart';
+import 'shared_preferences_utils.dart';
 
 class ModInstallHandler {
   final CLIArguments cliArguments;
-  ModStateManager? modStateManager;
+  final ModStateManager? modStateManager;
+  final FileUtils fileUtils;
+  final SharedPreferencesUtils sharedPreferencesUtils;
 
-  ModInstallHandler({
+  ModInstallHandler._internal({
     required this.cliArguments,
     this.modStateManager,
+    required this.fileUtils,
+    required this.sharedPreferencesUtils,
   });
 
-  Future<String> computeFileHash(File file) async {
-    try {
-      var contents = await file.readAsBytes();
-      var digest = sha256.convert(contents);
-      return digest.toString();
-    } catch (e) {
-      print("Error computing file hash: $e");
-      return "ERROR_COMPUTING_HASH";
+  factory ModInstallHandler(CLIArguments cliArguments,
+      {ModStateManager? modStateManager}) {
+    final fileUtils = FileUtils();
+    final sharedPreferencesUtils = SharedPreferencesUtils();
+    return ModInstallHandler._internal(
+      cliArguments: cliArguments,
+      modStateManager: modStateManager,
+      fileUtils: fileUtils,
+      sharedPreferencesUtils: sharedPreferencesUtils,
+    );
+  }
+
+  Future<List<String>> verifyModFiles(String modId) async {
+    final filePaths = await _extractFilePathsFromMetadata(modId);
+    final fileHashes = await _fetchStoredFileHashes(modId, filePaths);
+
+    final receivePort = ReceivePort();
+
+    await Isolate.spawn(_verifyFilesInIsolate, [
+      receivePort.sendPort,
+      filePaths,
+      fileHashes,
+      cliArguments.specialDatOutputPath
+    ]);
+
+    return await receivePort.first;
+  }
+
+  Future<Map<String, String>> _fetchStoredFileHashes(
+      String modId, List<String> filePaths) async {
+    final fileHashes = <String, String>{};
+    for (final filePath in filePaths) {
+      final storedHash =
+          await SharedPreferencesUtils.getFileHash(modId, filePath);
+      if (storedHash != null) {
+        fileHashes[filePath] = storedHash;
+      }
     }
-  }
-
-  Future<void> storeFileHashInPreferences(
-      String modId, String filePath, String fileHash) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('hash_$modId${path.basename(filePath)}', fileHash);
-  }
-
-  Future<String?> getFileHashFromPreferences(
-      String modId, String filePath) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('hash_$modId${path.basename(filePath)}');
+    return fileHashes;
   }
 
   Future<void> copyModToInstallPath(String modId) async {
-    List<String> filePaths = await extractFilePathsFromMetadata(modId);
-    String directoryPath =
+    final filePaths = await _extractFilePathsFromMetadata(modId);
+    final directoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage";
 
-    for (String filePath in filePaths) {
-      String sourceFilePath = path.join(directoryPath, filePath);
-      File sourceFile = File(sourceFilePath);
-      String destinationFilePath = await createModInstallPath(filePath);
-      File destinationFile = File(destinationFilePath);
+    for (final filePath in filePaths) {
+      final sourceFilePath = path.join(directoryPath, filePath);
+      final sourceFile = File(sourceFilePath);
+      final destinationFilePath = await createModInstallPath(filePath);
+      final destinationFile = File(destinationFilePath);
 
       await destinationFile.parent.create(recursive: true);
       if (await sourceFile.exists()) {
         await sourceFile.copy(destinationFilePath);
-        String fileHash = await computeFileHash(destinationFile);
-        await storeFileHashInPreferences(modId, filePath, fileHash);
+        final fileHash = await FileUtils.computeFileHash(destinationFile);
+        await SharedPreferencesUtils.storeFileHash(modId, filePath, fileHash);
       }
     }
   }
 
   Future<void> uninstallMod(String modId) async {
-    List<String> filePaths = await extractFilePathsFromMetadata(modId);
-    List<String> installPaths = await createModInstallPaths(filePaths);
+    final filePaths = await _extractFilePathsFromMetadata(modId);
+    final installPaths = await createModInstallPaths(filePaths);
 
-    for (String filePath in installPaths) {
-      File file = File(filePath);
+    for (final filePath in installPaths) {
+      final file = File(filePath);
       if (await file.exists()) {
         await file.delete();
-        await _deleteEmptyParentDirectories(file.parent);
+        await FileUtils.deleteEmptyParentDirectories(
+            file.parent, cliArguments.specialDatOutputPath);
       }
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    var keysToRemove = prefs.getKeys().where((k) => k.contains('hash_$modId'));
-    for (var key in keysToRemove) {
-      prefs.remove(key);
+    await SharedPreferencesUtils.removeModHashes(modId);
+  }
+
+  Future<void> removeModFiles(String modId, List<String> invalidFiles) async {
+    final filePaths = await _extractFilePathsFromMetadata(modId);
+    var deletedFiles = false;
+
+    for (final filePath in filePaths) {
+      if (!invalidFiles.contains(filePath)) {
+        final installPath = await createModInstallPath(filePath);
+        final file = File(installPath);
+        if (await file.exists()) {
+          try {
+            await file.delete();
+            deletedFiles = true;
+          } catch (e) {
+            print("Error deleting file $installPath: $e");
+          }
+        }
+      }
+    }
+
+    if (deletedFiles) {
+      await SharedPreferencesUtils.removeModHashes(modId);
     }
   }
 
-  Future<List<String>> extractFilePathsFromMetadata(String modId) async {
+  Future<void> saveHashesForModFiles(String modId) async {
+    final filePaths = await _extractFilePathsFromMetadata(modId);
+
+    for (final filePath in filePaths) {
+      final installPath = await createModInstallPath(filePath);
+      final fileToCheck = File(installPath);
+      if (await fileToCheck.exists()) {
+        final currentHash = await FileUtils.computeFileHash(fileToCheck);
+        await SharedPreferencesUtils.storeFileHash(
+            modId, filePath, currentHash);
+      }
+    }
+  }
+
+  Future<bool> deleteModMetadata(String modId) async {
     final directoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage";
-    final String metadataPath = path.join(directoryPath, 'mod_metadata.json');
-    final File metadataFile = File(metadataPath);
+    final metadataPath = path.join(directoryPath, 'mod_metadata.json');
+    final metadataFile = File(metadataPath);
 
     if (await metadataFile.exists()) {
-      final String metadataContent = await metadataFile.readAsString();
-      final List<dynamic> modsData = jsonDecode(metadataContent)['mods'];
-      for (var mod in modsData) {
+      final metadataContent = await metadataFile.readAsString();
+      final metadata = jsonDecode(metadataContent) as Map<String, dynamic>;
+      final mods = metadata['mods'] as List<dynamic>;
+      mods.removeWhere((mod) => mod['id'] == modId);
+      metadata['mods'] = mods;
+
+      const encoder = JsonEncoder.withIndent('  ');
+      final prettyJson = encoder.convert(metadata);
+
+      await metadataFile.writeAsString(prettyJson, mode: FileMode.write);
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> deleteModDirectory(String modId) async {
+    final modDirectoryPath = path.join(
+        await FileChange.ensureSettingsDirectory(), "ModPackage", modId);
+    final modDirectory = Directory(modDirectoryPath);
+    if (await modDirectory.exists()) {
+      await modDirectory.delete(recursive: true);
+      return true;
+    }
+    return false;
+  }
+
+  Future<List<String>> _extractFilePathsFromMetadata(String modId) async {
+    final directoryPath =
+        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
+    final metadataPath = path.join(directoryPath, 'mod_metadata.json');
+    final metadataFile = File(metadataPath);
+
+    if (await metadataFile.exists()) {
+      final metadataContent = await metadataFile.readAsString();
+      final modsData = jsonDecode(metadataContent)['mods'] as List<dynamic>;
+      for (final mod in modsData) {
         if (mod['id'] == modId) {
-          return mod['files'].map<String>((file) {
-            final path = file['path'];
-            if (path is String) {
-              return path;
+          return (mod['files'] as List<dynamic>).map<String>((file) {
+            final filePath = file['path'];
+            if (filePath is String) {
+              return filePath;
             } else {
               throw Exception("File path is not a string");
             }
@@ -105,185 +194,54 @@ class ModInstallHandler {
     return [];
   }
 
-  Future<String> getMetaDataPath() async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
-    final metadataPath = path.join(directoryPath, 'mod_metadata.json');
-    print("Found metadata at $metadataPath");
-    return metadataPath;
-  }
-
-  Future<List<String>> verifyModFiles(String modId) async {
-    List<String> filePaths = await extractFilePathsFromMetadata(modId);
-    List<String> invalidFiles = [];
-
-    for (String filePath in filePaths) {
-      String installPath = await createModInstallPath(filePath);
-      File fileToCheck = File(installPath);
-      if (await fileToCheck.exists()) {
-        String currentHash = await computeFileHash(fileToCheck);
-        String? storedHash = await getFileHashFromPreferences(modId, filePath);
-        if (currentHash != storedHash) {
-          invalidFiles.add(filePath);
-        }
-      } else {
-        invalidFiles.add(filePath);
-      }
-    }
-
-    return invalidFiles;
-  }
-
-  Future<void> removeModFiles(String modId, List<String> invalidFiles) async {
-    print(
-        'Attempting to remove mod files for modId: $modId, except explicitly modified files.');
-
-    final prefs = await SharedPreferences.getInstance();
-    List<String> filePaths = await extractFilePathsFromMetadata(modId);
-
-    bool deletedFiles = false;
-    for (String filePath in filePaths) {
-      String installPath = await createModInstallPath(filePath);
-
-      if (!invalidFiles.contains(filePath)) {
-        File file = File(installPath);
-        if (await file.exists()) {
-          try {
-            await file.delete();
-            print(
-                "Deleted file: $installPath as it matched modId's file list.");
-            deletedFiles = true;
-          } catch (e) {
-            print("Error deleting file $installPath: $e");
-          }
-        }
-      }
-    }
-
-    if (deletedFiles) {
-      var keysToRemove =
-          prefs.getKeys().where((k) => k.contains('hash_$modId'));
-      for (var key in keysToRemove) {
-        prefs.remove(key);
-      }
-      print(
-          "Completed cleanup for modId: $modId, preserving user-modified files.");
-    } else {
-      print(
-          "No files were deleted for modId: $modId. Possibly already clean or files were user-modified.");
-    }
-  }
-
-  Future<void> _deleteEmptyParentDirectories(Directory directory) async {
-    if (directory.path == cliArguments.specialDatOutputPath) {
-      return;
-    }
-    if (await directory.list().isEmpty) {
-      await directory.delete();
-      await _deleteEmptyParentDirectories(directory.parent);
-    }
-  }
-
   Future<String> createModInstallPath(String filePath) async {
-    List<String> parts = path.split(filePath);
+    final parts = path.split(filePath);
     if (parts.isNotEmpty) {
       parts.removeAt(0);
-      String modifiedPath =
-          path.join(cliArguments.specialDatOutputPath, path.joinAll(parts));
-      return modifiedPath;
+      return path.join(cliArguments.specialDatOutputPath, path.joinAll(parts));
     }
     return '';
   }
 
   Future<List<String>> createModInstallPaths(List<String> filePaths) async {
-    List<String> modifiedPaths = [];
-    for (String filePath in filePaths) {
-      List<String> parts = path.split(filePath);
+    final modifiedPaths = <String>[];
+    for (final filePath in filePaths) {
+      final parts = path.split(filePath);
       if (parts.isNotEmpty) {
         parts.removeAt(0);
-        String modifiedPath =
+        final modifiedPath =
             path.join(cliArguments.specialDatOutputPath, path.joinAll(parts));
         modifiedPaths.add(modifiedPath);
       }
     }
     return modifiedPaths;
   }
+}
 
-  Future<void> saveHashesForModFiles(String modId) async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> filePaths = await extractFilePathsFromMetadata(modId);
+// The function that runs in the isolate every 15 seconds.
+void _verifyFilesInIsolate(List<dynamic> args) async {
+  final sendPort = args[0] as SendPort;
+  final filePaths = args[1] as List<String>;
+  final fileHashes = args[2] as Map<String, String>;
+  final specialDatOutputPath = args[3] as String;
 
-    for (String filePath in filePaths) {
-      String installPath = await createModInstallPath(filePath);
-      File fileToCheck = File(installPath);
-      if (await fileToCheck.exists()) {
-        String currentHash = await computeFileHash(fileToCheck);
-        String hashKey = 'hash_${modId}_$filePath';
-        await prefs.setString(hashKey, currentHash);
-        print("Saved hash for file: $filePath");
-      } else {
-        print(
-            "File does not exist at install path: $installPath, skipping hash saving.");
+  final invalidFiles = <String>[];
+
+  for (final filePath in filePaths) {
+    final installPath = path.join(
+        specialDatOutputPath, path.joinAll(path.split(filePath)..removeAt(0)));
+    final fileToCheck = File(installPath);
+    if (await fileToCheck.exists()) {
+      final currentHash = await FileUtils.computeFileHash(fileToCheck);
+      final storedHash = fileHashes[filePath];
+      if (currentHash != storedHash) {
+        invalidFiles.add(filePath);
       }
-    }
-    print("Completed saving hashes for modId: $modId.");
-  }
-
-  Future<bool> deleteModMetadata(String modId) async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
-    final metadataPath = path.join(directoryPath, 'mod_metadata.json');
-    final File metadataFile = File(metadataPath);
-
-    if (await metadataFile.exists()) {
-      String metadataContent = await metadataFile.readAsString();
-      Map<String, dynamic> metadata = jsonDecode(metadataContent);
-      List<dynamic> mods = metadata['mods'];
-      mods.removeWhere((mod) => mod['id'] == modId);
-      metadata['mods'] = mods;
-
-      JsonEncoder encoder = const JsonEncoder.withIndent('  ');
-      String prettyJson = encoder.convert(metadata);
-
-      await metadataFile.writeAsString(prettyJson, mode: FileMode.write);
-      print("Mod metadata for $modId deleted successfully.");
     } else {
-      print("Mod metadata file not found.");
-      return false;
+      invalidFiles.add(filePath);
     }
-    return true;
   }
 
-  Future<bool> deleteModDirectory(String modId) async {
-    final String modDirectoryPath = path.join(
-      await FileChange.ensureSettingsDirectory(),
-      "ModPackage",
-      modId,
-    );
-
-    final Directory modDirectory = Directory(modDirectoryPath);
-    if (await modDirectory.exists()) {
-      await modDirectory.delete(recursive: true);
-      return true;
-    }
-    return false;
-  }
-
-  Future<void> printAllSharedPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    print('All Shared Preferences:');
-    prefs.getKeys().forEach((key) {
-      var value = prefs.get(key);
-      print('$key: $value');
-    });
-  }
-
-  Future<void> deleteAllSharedPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    print('All Shared Preferences:');
-    prefs.getKeys().forEach((key) {
-      var value = prefs.clear();
-      print('$key: $value');
-    });
-  }
+  // Send the result back to the main isolate.
+  sendPort.send(invalidFiles);
 }
