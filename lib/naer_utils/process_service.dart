@@ -119,7 +119,8 @@ Future<void> startNierAutomataExecutable(String directoryPath) async {
   if (await File(processPath).exists()) {
     await ProcessService.startProcess(processPath);
   } else {
-    throw Exception('NierAutomata.exe not found in $parentDirectory');
+    throw Exception(
+        'NierAutomata.exe not found in $parentDirectory, try to start it manually.');
   }
 }
 
