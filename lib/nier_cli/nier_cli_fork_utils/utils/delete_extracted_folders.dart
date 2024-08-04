@@ -88,3 +88,20 @@ Future<void> deleteBackupGameFolders(String directoryPath) async {
     }
   }
 }
+
+/// Validates if the specified extracted game folders have been deleted.
+///
+/// This function iterates over the [folderNames] list,
+/// constructs the full path for each folder, checks if the folder exists,
+/// and returns `true` if all folders are deleted, `false` otherwise.
+///
+/// [directoryPath] is the base directory from which the folders will be checked.
+Future<bool> validateExtractedFolderDeletion(String directoryPath) async {
+  for (var folderName in folderNames) {
+    var folderPath = Directory(join(directoryPath, folderName));
+    if (await folderPath.exists()) {
+      return false;
+    }
+  }
+  return true;
+}

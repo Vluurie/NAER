@@ -226,9 +226,41 @@ class OptionsPanel extends ConsumerWidget {
                                     ),
                                   ),
                                   onYesPressed: () async {
+                                    Navigator.of(context).pop(
+                                        false); // Close the confirmation dialog
+
+                                    // Show loading dialog
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) {
+                                        return WillPopScope(
+                                          onWillPop: () async => false,
+                                          child: Dialog(
+                                            backgroundColor: Colors.transparent,
+                                            child: Center(
+                                              child: SizedBox(
+                                                width: 150,
+                                                height: 150,
+                                                child: AutomatoLoading(
+                                                  color: AutomatoThemeColors
+                                                      .bright(ref),
+                                                  translateX: 0,
+                                                  svgString: AutomatoSvgStrings
+                                                      .automatoSvgStrHead,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+
                                     await deleteBackupGameFolders(
                                         globalState.input);
-                                    Navigator.of(context).pop(false);
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop(true);
+                                    }
                                   },
                                   onNoPressed: () {
                                     Navigator.of(context).pop(false);

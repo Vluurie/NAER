@@ -62,7 +62,7 @@ class ProcessService {
     return false; // Process name not found
   }
 
-  static void startProcess(String processPath) {
+  static Future<void> startProcess(String processPath) async {
     Process.run(processPath, []);
   }
 
@@ -109,6 +109,17 @@ class ProcessService {
     free(processIds);
     free(cbNeeded);
     return false;
+  }
+}
+
+Future<void> startNierAutomataExecutable(String directoryPath) async {
+  var parentDirectory = Directory(directoryPath).parent.path;
+  var processPath = '$parentDirectory\\NierAutomata.exe';
+
+  if (await File(processPath).exists()) {
+    await ProcessService.startProcess(processPath);
+  } else {
+    throw Exception('NierAutomata.exe not found in $parentDirectory');
   }
 }
 

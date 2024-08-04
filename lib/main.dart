@@ -24,6 +24,7 @@ import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/naer_utils/update_util.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
 import 'package:flutter/foundation.dart';
@@ -659,7 +660,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
       globalLog('Thank you for using the randomization tool.');
       globalLog(asciiArt2B);
       globalLog("Randomization process finished.");
-      showCompletionDialog(context, ref);
+      showCompletionDialog(context, ref, globalState.input);
     }
   }
 
@@ -820,26 +821,130 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     );
   }
 
-  void showCompletionDialog(BuildContext context, WidgetRef ref) {
+  void showCompletionDialog(
+      BuildContext context, WidgetRef ref, String directoryPath) {
     final globalState =
         provider.Provider.of<GlobalState>(context, listen: false);
     globalState.isLoading = false;
 
-    AutomatoDialogManager().showInfoDialog(
+    AutomatoDialogManager().showYesNoDialog(
+      context: context,
+      ref: ref,
+      title: 'Randomization Complete',
+      content: Text(
+        'Randomization process completed successfully.',
+        style: TextStyle(
+          color: AutomatoThemeColors.textDialogColor(ref),
+          fontSize: 18,
+        ),
+      ),
+      yesLabel: "Play now!",
+      noLabel: 'Close',
+      onYesPressed: () async {
+        globalState.isLoading = true;
+        Navigator.of(context).pop();
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              onWillPop: () async => false,
+              child: Dialog(
+                backgroundColor: Colors.transparent,
+                child: Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: AutomatoLoading(
+                      color: AutomatoThemeColors.bright(ref),
+                      translateX: 0,
+                      svgString: AutomatoSvgStrings.automatoSvgStrHead,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+
+        try {
+          await Future.delayed(const Duration(seconds: 10));
+          bool isClean = await validateExtractedFolderDeletion(directoryPath);
+          if (isClean) {
+            await startNierAutomataExecutable(directoryPath);
+            await Future.delayed(const Duration(seconds: 20));
+            Navigator.of(context).pop();
+          } else {
+            Navigator.of(context).pop();
+            showErrorDialog(
+              context,
+              ref,
+              'Extracted folder deletion is still in process... Retry in a few seconds...',
+              directoryPath,
+              globalState,
+            );
+          }
+        } catch (e) {
+          Navigator.of(context).pop();
+          showErrorDialog(
+            context,
+            ref,
+            e.toString(),
+            directoryPath,
+            globalState,
+          );
+        } finally {
+          globalState.isLoading = false;
+        }
+      },
+      onNoPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  void showErrorDialog(BuildContext context, WidgetRef ref, String errorMessage,
+      String directoryPath, GlobalState globalState) {
+    AutomatoDialogManager().showYesNoDialog(
         context: context,
         ref: ref,
-        title: 'Randomization Complete',
+        title: 'Is this a curse or some kind of punishment?',
         content: Text(
-          'Randomization process completed successfully.',
+          'Stopped starting Nier: Automata.\nError: $errorMessage',
           style: TextStyle(
             color: AutomatoThemeColors.textDialogColor(ref),
             fontSize: 18,
           ),
         ),
-        onOkPressed: () {
-          Navigator.of(context).pop();
+        yesLabel: "Retry",
+        noLabel: 'Close',
+        onYesPressed: () async {
+          try {
+            bool isClean = await validateExtractedFolderDeletion(directoryPath);
+            if (isClean) {
+              Navigator.of(context).pop();
+              await startNierAutomataExecutable(directoryPath);
+            } else {
+              Navigator.of(context).pop();
+              showErrorDialog(
+                  context,
+                  ref,
+                  'Extracted folder deletion is still in process... Retry in a few seconds...',
+                  directoryPath,
+                  globalState);
+            }
+          } catch (e) {
+            Navigator.of(context).pop();
+            showErrorDialog(
+                context, ref, e.toString(), directoryPath, globalState);
+          } finally {
+            globalState.isLoading = false;
+          }
         },
-        okLabel: "Ok");
+        onNoPressed: () {
+          Navigator.of(context).pop();
+        });
   }
 
   void clearLogMessages() {
