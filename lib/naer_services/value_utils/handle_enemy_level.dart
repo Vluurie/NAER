@@ -3,7 +3,8 @@ import 'package:xml/xml.dart' as xml;
 
 /// Handles the level update for an enemy or boss based on the `isBoss` flag.
 ///
-/// If the enemy is in the "Delete" group, the function skips the level update.
+/// If the enemy is in the "Delete" group or does not belong to any group,
+/// the function skips the level update.
 /// Otherwise, it updates or creates the necessary level values in the XML element.
 ///
 /// If `isBoss` is `true`, the function does not update the `levelRange` for 'EnemyGenerator' actions.
@@ -12,8 +13,9 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
     {bool isBoss = false}) async {
   var objIdValue = objIdElement.innerText;
 
-  // Check if the enemy is in the "Delete" group
-  if (isDeletedEnemy(objIdValue, enemyData)) {
+  // Check if the enemy is in the "Delete" group or does not belong to any group
+  var enemyGroup = findGroupForEmNumber(objIdValue, enemyData);
+  if (enemyGroup == null || enemyGroup == "Delete") {
     return;
   }
 
