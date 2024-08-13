@@ -16,7 +16,7 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
   // Check if the enemy belongs to any group
   var enemyGroup = findGroupForEmNumber(objIdValue, enemyData);
   if (enemyGroup == null) {
-    // skip all bg ids or item ids from level update, 
+    // skip all bg ids or item ids from level update,
     //keep delete enemies for level update as would not update the level otherwise
     return;
   }

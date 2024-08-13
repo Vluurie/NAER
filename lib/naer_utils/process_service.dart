@@ -17,7 +17,6 @@ class ProcessService {
     }
 
     final count = cbNeeded.value ~/ sizeOf<Uint32>();
-    final List<String> processNames = [];
 
     for (var i = 0; i < count; i++) {
       final hProcess = OpenProcess(
@@ -28,7 +27,16 @@ class ProcessService {
       if (hProcess != NULL) {
         final szExeFile = wsalloc(MAX_PATH);
         if (GetModuleBaseName(hProcess, NULL, szExeFile, MAX_PATH) > 0) {
-          processNames.add(szExeFile.toDartString());
+          final currentProcessName = szExeFile.toDartString();
+          // directly exit if the process was found instead of making a binary search
+          // on unsorted data
+          if (currentProcessName == processName) {
+            CloseHandle(hProcess);
+            free(szExeFile);
+            free(processIds);
+            free(cbNeeded);
+            return true;
+          }
         }
         CloseHandle(hProcess);
         free(szExeFile);
@@ -37,29 +45,7 @@ class ProcessService {
 
     free(processIds);
     free(cbNeeded);
-
-    processNames.sort();
-
-    return binarySearchProcessName(processNames, processName);
-  }
-
-  static bool binarySearchProcessName(List<String> sortedList, String target) {
-    int left = 0;
-    int right = sortedList.length - 1;
-
-    while (left <= right) {
-      int mid = left + (right - left) ~/ 2;
-      int cmp = sortedList[mid].compareTo(target);
-
-      if (cmp == 0) {
-        return true; // Found the target process name
-      } else if (cmp < 0) {
-        left = mid + 1; // Search in the right half
-      } else {
-        right = mid - 1; // Search in the left half
-      }
-    }
-    return false; // Process name not found
+    return false;
   }
 
   static Future<void> startProcess(String processPath) async {

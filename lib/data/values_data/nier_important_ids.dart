@@ -119,7 +119,7 @@ class ImportantIDMap {
       '0x864ec3e4', // Desert House Complex Main Quest Run Away Enemy
       '0x82f0aad8', // Desert House Complex Main Quest Run Away Enemy
       '0xfcb31941', // Desert House Complex Main Quest Run Away Enemy
-      '0xc28c49c8', // Flight Units in free shooting
+      // '0xc28c49c8', // Flight Units in free shooting
       '0xa85d4ceb', // Ground Zako Battle A2 enemies
       '0xa0f02852', // Ground Zako Battle A2 enemies
       '0x4337e41b', // Ground Zako Battle A2 enemies
