@@ -14,6 +14,7 @@ import 'package:args/args.dart';
 /// - Specification of enemies and their stats.
 /// - Level and category of enemies.
 /// - Special output directories for DAT files.
+/// - Balance mode, DLC presence, and backup flag.
 ///
 /// Returns an [ArgParser] configured with all the necessary command-line options.
 ArgParser allArguments() {
@@ -93,6 +94,12 @@ ArgParser allArguments() {
 
   // WEM file extraction flag
   argParser.addFlag("WEM", help: "Only extract WEM files", negatable: false);
+
+  // Additional flags for balance mode, DLC, and backup
+  argParser.addFlag("balance", help: "Enable balance mode", negatable: false);
+  argParser.addFlag("dlc", help: "Include DLC content", negatable: false);
+  argParser.addFlag("backUp",
+      help: "Create a backup before processing", negatable: false);
 
   return argParser;
 }

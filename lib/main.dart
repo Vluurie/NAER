@@ -45,6 +45,26 @@ import 'package:window_manager/window_manager.dart';
 void main(List<String> arguments) async {
   bool isBalanceMode = false;
   bool hasDLC = false;
+  bool backUp = false;
+
+  // // Test mode: predefined arguments
+  // if (arguments.isEmpty) {
+  //   arguments = [
+  //     r'D:\SteamLibrary\steamapps\common\NieRAutomata\data',
+  //     '--output',
+  //     r'D:\SteamLibrary\steamapps\common\NieRAutomata\data',
+  //     'ALL',
+  //     '--enemies',
+  //     '[em3000]',
+  //     '--enemyStats',
+  //     '5.0',
+  //     '--level=99',
+  //     '--p100',
+  //     '--category=allenemies',
+  //     '--backUp',
+  //   ];
+  //   print('test arguments: $arguments');
+  // }
 
   if (arguments.isNotEmpty) {
     for (String arg in arguments) {
@@ -52,6 +72,8 @@ void main(List<String> arguments) async {
         isBalanceMode = true;
       } else if (arg == '--dlc') {
         hasDLC = true;
+      } else if (arg == '--backUp') {
+        backUp = true;
       }
     }
 
@@ -62,8 +84,11 @@ void main(List<String> arguments) async {
       'sendPort': receivePort.sendPort,
       'isBalanceMode': isBalanceMode,
       'hasDLC': hasDLC,
+      'backUp': backUp
     };
     await compute(runNierCliIsolated, args);
+    print("Cleaning Input: ${arguments[0]}");
+    await deleteExtractedGameFolders(arguments[0]);
     exit(0);
   } else {
     WidgetsFlutterBinding.ensureInitialized();
