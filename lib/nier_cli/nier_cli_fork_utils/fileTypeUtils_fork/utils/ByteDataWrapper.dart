@@ -61,9 +61,7 @@ class ByteDataWrapper {
         }
       }
       sendPort.send("\nRead $position bytes");
-      sendPort.send("Continue processing");
-      sendPort.send(
-          "Note: This can take some time, a fast computer takes approximately 1:30 min with all arguments.");
+      sendPort.send("Continue processing..");
       return ByteDataWrapper(buffer);
     }
   }

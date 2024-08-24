@@ -19,14 +19,15 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final globalState = ref.read(globalStateProvider);
-      globalState.updateCategories();
+      final globalStateNotifier = ref.read(globalStateProvider.notifier);
+      globalStateNotifier.updateCategories();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final globalState = ref.watch(globalStateProvider);
+    final globalStateNotifier = ref.read(globalStateProvider.notifier);
+    final categories = ref.watch(globalStateProvider).categories;
 
     Widget specialCheckbox(
         String title, bool value, void Function(bool?) onChanged) {
@@ -63,10 +64,6 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
       return Icons.help_outline;
     }
 
-    void updateCategories() {
-      globalState.updateSelectedCategories(globalState.categories);
-    }
-
     return Container(
       padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
@@ -87,7 +84,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
           Padding(
             padding: const EdgeInsets.only(bottom: 10.0),
             child: Text(
-              "Select Categories for Randomization",
+              "Select Categories for Modification",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -97,35 +94,29 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
           ),
           specialCheckbox(
             "All Quests",
-            globalState.selectAllQuests,
+            globalStateNotifier.readSelectAllQuests(),
             (newValue) {
-              setState(() {
-                globalState.selectAllQuests = newValue!;
-                updateItemsByType(SideQuest, newValue, ref);
-                updateCategories();
-              });
+              globalStateNotifier.setSelectAllQuests(newValue!);
+              updateItemsByType(SideQuest, newValue, ref);
+              globalStateNotifier.updateCategories();
             },
           ),
           specialCheckbox(
             "All Maps",
-            globalState.selectAllMaps,
+            globalStateNotifier.readSelectAllMaps(),
             (newValue) {
-              setState(() {
-                globalState.selectAllMaps = newValue!;
-                updateItemsByType(MapLocation, newValue, ref);
-                updateCategories();
-              });
+              globalStateNotifier.setSelectAllMaps(newValue!);
+              updateItemsByType(MapLocation, newValue, ref);
+              globalStateNotifier.updateCategories();
             },
           ),
           specialCheckbox(
             "All Phases",
-            globalState.selectAllPhases,
+            globalStateNotifier.readSelectAllPhases(),
             (newValue) {
-              setState(() {
-                globalState.selectAllPhases = newValue!;
-                updateItemsByType(ScriptingPhase, newValue, ref);
-                updateCategories();
-              });
+              globalStateNotifier.setSelectAllPhases(newValue!);
+              updateItemsByType(ScriptingPhase, newValue, ref);
+              globalStateNotifier.updateCategories();
             },
           ),
           SizedBox(
@@ -133,7 +124,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Column(
-                children: globalState.getAllItems().map((item) {
+                children: globalStateNotifier.getAllItems().map((item) {
                   IconData icon = getIconForItem(item);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -151,15 +142,18 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
                       trailing: Transform.scale(
                         scale: 1,
                         child: Checkbox(
-                          value: globalState.categories[item.id] ??
-                              (item.dlc == true ? globalState.hasDLC : false),
+                          value: categories[item.id] ??
+                              (item.dlc == true
+                                  ? globalStateNotifier.readHasDLC()
+                                  : false),
                           activeColor: AutomatoThemeColors.primaryColor(ref),
                           checkColor: AutomatoThemeColors.darkBrown(ref),
                           onChanged: (bool? newValue) {
-                            setState(() {
-                              globalState.categories[item.id] = newValue!;
-                              updateCategories();
-                            });
+                            final modifiableCategories = Map.of(categories);
+                            modifiableCategories[item.id] = newValue!;
+                            globalStateNotifier
+                                .setCategories(modifiableCategories);
+                            globalStateNotifier.updateCategories();
                           },
                         ),
                       ),
@@ -175,12 +169,17 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
   }
 }
 
-void updateItemsByType(Type type, bool value, WidgetRef ref) {
-  final globalState = ref.read(globalStateProvider);
-  List<dynamic> allItems = globalState.getAllItems();
+Future<void> updateItemsByType(Type type, bool value, WidgetRef ref) async {
+  final globalStateNotifier = ref.read(globalStateProvider.notifier);
+  List<dynamic> allItems = globalStateNotifier.getAllItems();
+  final modifiableCategories = Map.of(globalStateNotifier.readCategories());
+
   for (var item in allItems.where((item) => item.runtimeType == type)) {
-    globalState.categories[item.id] = value;
+    modifiableCategories[item.id] = value;
   }
+
+  globalStateNotifier.setCategories(modifiableCategories);
+  globalStateNotifier.updateCategories();
 }
 
 String getSelectedEnemiesNames(WidgetRef ref) {

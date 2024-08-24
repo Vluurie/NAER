@@ -1,9 +1,9 @@
-import 'package:NAER/main.dart';
 import 'package:NAER/naer_save_editor/save_editor.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
 import 'package:NAER/naer_ui/directory_ui/dlc_checkbox.dart';
-import 'package:NAER/naer_ui/nav_button/navigate_button.dart';
+import 'package:NAER/naer_ui/button/navigate_button.dart';
+import 'package:NAER/naer_ui/setup/path_checkbox_widget.dart';
 
 import 'package:NAER/naer_utils/change_app_theme.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
@@ -15,7 +15,6 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 
 class OptionsPanel extends ConsumerWidget {
   final bool isVisible;
@@ -31,7 +30,7 @@ class OptionsPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final globalState = provider.Provider.of<GlobalState>(context);
+    final globalState = ref.watch(globalStateProvider);
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 150),
@@ -93,9 +92,7 @@ class OptionsPanel extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (!globalState.isLoading)
-                            ListTile(
-                                title: navigateButton(
-                                    context, scrollController, ref)),
+                            ListTile(title: navigateButton(context, ref)),
                           if (!globalState.isLoading)
                             ListTile(
                               title: AutomatoButton(
@@ -163,7 +160,7 @@ class OptionsPanel extends ConsumerWidget {
                                     ref: ref,
                                     title: 'Are you sure?',
                                     content: Text(
-                                      'This will reset the app and clear all local app settings data. Do you want to proceed? It is suggested to restart the app afterward.',
+                                      'This will reset the app and clear all local app settings data. Do you want to proceed?',
                                       style: TextStyle(
                                         color:
                                             AutomatoThemeColors.textDialogColor(
@@ -174,15 +171,9 @@ class OptionsPanel extends ConsumerWidget {
                                     onYesPressed: () async {
                                       await FileChange
                                           .deleteAllSharedPreferences();
-
+                                      await resetGlobalState(ref);
                                       if (context.mounted) {
-                                        Navigator.of(context)
-                                            .pushAndRemoveUntil(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const EnemyRandomizerApp()),
-                                          (Route<dynamic> route) => false,
-                                        );
+                                        Navigator.of(context).pop();
                                       }
                                     },
                                     onNoPressed: () {
@@ -226,16 +217,16 @@ class OptionsPanel extends ConsumerWidget {
                                     ),
                                   ),
                                   onYesPressed: () async {
-                                    Navigator.of(context).pop(
-                                        false); // Close the confirmation dialog
+                                    Navigator.of(context).pop(false);
 
                                     // Show loading dialog
                                     showDialog(
                                       context: context,
                                       barrierDismissible: false,
                                       builder: (BuildContext context) {
-                                        return WillPopScope(
-                                          onWillPop: () async => false,
+                                        return PopScope(
+                                          onPopInvokedWithResult:
+                                              (canPop, result) async {},
                                           child: Dialog(
                                             backgroundColor: Colors.transparent,
                                             child: Center(
@@ -290,10 +281,13 @@ class OptionsPanel extends ConsumerWidget {
                             textColor: AutomatoThemeColors.darkBrown(ref),
                           ),
                           const ListTile(
-                            title: BalanceModeCheckBox(),
+                            title: PathCheckBoxWidget(),
                           ),
                           const ListTile(
                             title: DLCCheckBox(),
+                          ),
+                          const ListTile(
+                            title: BalanceModeCheckBox(),
                           ),
                         ],
                       ),

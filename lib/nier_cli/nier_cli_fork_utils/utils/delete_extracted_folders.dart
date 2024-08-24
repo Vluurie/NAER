@@ -61,15 +61,43 @@ List<String> backupNames = [
 /// ]);
 /// ```
 Future<void> deleteExtractedGameFolders(String directoryPath) async {
+  const int maxRetries = 3;
+  const Duration retryDelay = Duration(seconds: 1);
+
   for (var folderName in folderNames) {
     var folderPath = Directory(join(directoryPath, folderName));
+
     if (await folderPath.exists()) {
-      try {
-        await folderPath.delete(recursive: true);
-        globalLog('Deleted folder: $folderName');
-      } catch (e) {
-        logAndPrint('Error deleting folder $folderName: $e');
+      bool deletionSuccess = false;
+
+      for (int attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          await folderPath.delete(recursive: true);
+          globalLog('Deleted folder: $folderName');
+          deletionSuccess = true;
+          break;
+        } catch (e) {
+          globalLog(
+              'Error deleting folder $folderName on attempt ${attempt + 1}: $e');
+          if (attempt < maxRetries - 1) {
+            await Future.delayed(retryDelay);
+            logAndPrint('Retrying deletion of folder $folderName...');
+          }
+        }
       }
+
+      if (!deletionSuccess) {
+        globalLog(
+            'Failed to delete folder $folderName after $maxRetries attempts.');
+      }
+
+      // Verify if the folder still exists after deletion attempts
+      if (await folderPath.exists()) {
+        globalLog(
+            'Warning: Folder $folderName still exists after deletion attempts.');
+      }
+    } else {
+      globalLog('Folder $folderName does not exist, skipping deletion.');
     }
   }
 }

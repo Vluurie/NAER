@@ -454,8 +454,7 @@ class Cpk {
         "em"
       ];
       if (!validFolderNames.contains(dirName)) {
-        print("Skipping folder $dirName");
-        continue; // Skip this folder and its contents
+        continue;
       }
 
       bytes.position = fileOffset + contentDelta;

@@ -41,6 +41,9 @@ dependencies:
   window_manager: ^0.4.0
   http: ^1.2.2
   win32: ^5.5.3
+  flutter_form_builder: ^9.4.1
+  form_builder_validators: ^11.0.0
+  lottie: ^3.1.2
 
 
 
@@ -54,6 +57,7 @@ flutter:
     - assets/naer_icons/icon.png
     - assets/naer_backgrounds/error_background.png
     - assets/naer_backgrounds/naer_background.png
+    - assets/animations/splash_animation.json
     - assets/mods/
     - .env
   uses-material-design: true

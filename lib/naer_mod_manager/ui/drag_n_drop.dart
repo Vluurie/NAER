@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
+import 'package:NAER/naer_mod_manager/ui/modify_dragged_file.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
@@ -134,8 +134,8 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
   Future<void> _processDraggedItems(List<String> paths) async {
     setState(() => _isLoading = true); // Start loading
 
-    final RandomizeDraggedFile random = RandomizeDraggedFile(
-        cliArguments: widget.cliArguments, context: context);
+    final ModifyDraggedFile random = ModifyDraggedFile(
+        cliArguments: widget.cliArguments, context: context, ref: ref);
     final logState = provider.Provider.of<LogState>(context, listen: false);
 
     setState(() {

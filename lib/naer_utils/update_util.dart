@@ -83,33 +83,41 @@ class UpdateService {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 200,
-              padding: const EdgeInsets.only(top: 8.0),
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
+          FractionallySizedBox(
+            widthFactor: 1.0,
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Container(
+                constraints: const BoxConstraints(
+                  maxHeight: 200,
+                  minHeight: 50,
+                ),
+                padding: const EdgeInsets.only(top: 8.0),
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
                       offset: const Offset(5, 5),
                       blurRadius: 2,
-                      color: AutomatoThemeColors.brown25(ref)),
-                ],
-                color: AutomatoThemeColors.darkBrown(ref),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  description,
-                  style: TextStyle(
-                    color: AutomatoThemeColors.bright(ref),
-                    fontSize: 20,
+                      color: AutomatoThemeColors.brown25(ref),
+                    ),
+                  ],
+                  color: AutomatoThemeColors.darkBrown(ref),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    description,
+                    style: TextStyle(
+                      color: AutomatoThemeColors.bright(ref),
+                      fontSize: 20,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          )
         ],
       ),
       onOkPressed: () {

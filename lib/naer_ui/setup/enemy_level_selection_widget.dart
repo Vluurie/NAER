@@ -52,7 +52,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (globalState.level['None'] == false)
+                  if (globalState.levelMap['None'] == false)
                     Text(
                       "Enemy Level: ${globalState.enemyLevel}",
                       style: TextStyle(
@@ -60,7 +60,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                         fontSize: 16,
                       ),
                     ),
-                  if (globalState.level['None'] == false)
+                  if (globalState.levelMap['None'] == false)
                     Slider(
                       activeColor: AutomatoThemeColors.primaryColor(ref),
                       value: globalState.enemyLevel.toDouble(),
@@ -77,7 +77,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                 ],
               ),
             ),
-            ...globalState.level.keys.map((levelKey) {
+            ...globalState.levelMap.keys.map((levelKey) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: CheckboxListTile(
@@ -88,7 +88,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                       fontSize: 16,
                     ),
                   ),
-                  value: globalState.level[levelKey],
+                  value: globalState.levelMap[levelKey],
                   onChanged: (bool? newValue) {
                     if (newValue != null) {
                       ref

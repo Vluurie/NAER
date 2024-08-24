@@ -19,13 +19,12 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final globalState = ref.watch(globalStateProvider);
-    return setupImageGrid(context, globalState);
+    return setupImageGrid(context);
   }
 
-  Widget setupImageGrid(BuildContext context, GlobalState globalState) {
+  Widget setupImageGrid(BuildContext context) {
     const folderPath = 'assets/nier_image_folders/nier_enemy_images/';
-    final imageWidgets = populateImageGrid(folderPath, globalState);
+    final imageWidgets = populateImageGrid(folderPath);
 
     double gridHeight;
     int crossAxisCount;
@@ -36,7 +35,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     } else if (MediaQuery.of(context).size.width < 950) {
       crossAxisCount = 4;
       gridHeight = 450.0;
-    } else if (MediaQuery.of(context).size.width < 1500) {
+    } else if (MediaQuery.of(context).size.width < 1400) {
       crossAxisCount = 6;
       gridHeight = 500.0;
     } else {
@@ -79,7 +78,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width - 200.0,
+          width: MediaQuery.of(context).size.width - 300.0,
           child: GridView.builder(
             shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -120,15 +119,16 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  List<Widget> populateImageGrid(String folderPath, GlobalState globalState) {
+  List<Widget> populateImageGrid(String folderPath) {
     return NierEnemyImageNames.getDLCFilteredNames(ref).map((imageName) {
-      return createClickableImage('$folderPath$imageName', globalState);
+      return createClickableImage('$folderPath$imageName');
     }).toList();
   }
 
-  Widget createClickableImage(String imagePath, GlobalState globalState) {
+  Widget createClickableImage(String imagePath) {
+    final globalState = ref.read(globalStateProvider.notifier);
     final baseName = Uri.parse(imagePath).pathSegments.last;
-    bool isSelected = globalState.selectedImages.contains(baseName);
+    bool isSelected = globalState.readSelectedImages().contains(baseName);
     final ValueNotifier<bool> isHovered = ValueNotifier(false);
 
     const buggyEnemies = {
@@ -169,7 +169,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
           onExit: (_) => isHovered.value = false,
           child: InkWell(
             onTap: () {
-              onImageClick(baseName, globalState);
+              onImageClick(baseName);
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -237,8 +237,9 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  void onImageClick(String imageName, GlobalState globalState) {
-    if (globalState.selectedImages.contains(imageName)) {
+  void onImageClick(String imageName) {
+    final globalState = ref.read(globalStateProvider.notifier);
+    if (globalState.readSelectedImages().contains(imageName)) {
       globalState.removeSelectedImage(imageName);
     } else {
       globalState.addSelectedImage(imageName);

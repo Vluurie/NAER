@@ -3,17 +3,13 @@ import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart';
-
-import 'package:NAER/naer_utils/change_tracker.dart';
-import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/sort_selected_enemies.dart';
-import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 class CLIArguments {
   final String input;
   final String specialDatOutputPath;
-  final String tempFilePath;
+  final String sortedEnemyGroupsIdentifierMap;
   final String enemyList;
   final List<String> processArgs;
   final String command;
@@ -23,7 +19,7 @@ class CLIArguments {
   CLIArguments({
     required this.input,
     required this.specialDatOutputPath,
-    required this.tempFilePath,
+    required this.sortedEnemyGroupsIdentifierMap,
     required this.enemyList,
     required this.processArgs,
     required this.command,
@@ -32,53 +28,51 @@ class CLIArguments {
   });
 }
 
-Future<CLIArguments> gatherCLIArguments({
-  required BuildContext context,
-  required ScrollController scrollController,
-  List<String>? selectedImages,
-  required Map<String, bool> categories,
-  required Map<String, bool> level,
-  required List<String> ignoredModFiles,
-  required String input,
-  required String specialDatOutputPath,
-  required String scriptPath,
-  required double enemyStats,
-  required int enemyLevel,
-  required WidgetRef ref,
-}) async {
+Future<CLIArguments> gatherCLIArguments(
+    {List<String>? selectedImages,
+    required Map<String, bool> categories,
+    required Map<String, bool> level,
+    required List<String> ignoredModFiles,
+    required String input,
+    required String specialDatOutputPath,
+    required double enemyStats,
+    required int enemyLevel,
+    required WidgetRef ref}) async {
   final globalState = ref.watch(globalStateProvider);
-  String tempFilePath;
+  String sortedEnemyGroupsIdentifierMap;
+  Map<String, List<String>> customSelectedEnemies = {
+    "Ground": [],
+    "Fly": [],
+    "Delete": [],
+  };
 
   try {
     if (selectedImages != null && selectedImages.isNotEmpty) {
-      var sortedEnemies =
-          await sortSelectedEnemies(selectedImages, context, ref);
-      var tempFile = await File(
-              '${await FileChange.ensureSettingsDirectory()}/temp_sorted_enemies.dart')
-          .create();
-      var buffer = StringBuffer();
-      buffer.writeln("const Map<String, List<String>> sortedEnemyData = {");
-      sortedEnemies.forEach((group, enemies) {
-        var enemiesFormatted = enemies.map((e) => '"$e"').join(', ');
-        buffer.writeln('  "$group": [$enemiesFormatted],');
-      });
-      buffer.writeln("};");
-      await tempFile.writeAsString(buffer.toString());
-      tempFilePath = tempFile.path.convertAndEscapePath();
+      customSelectedEnemies =
+          await sortSelectedEnemiesState(selectedImages, ref);
+
+      sortedEnemyGroupsIdentifierMap = "CUSTOM_SELECTED";
     } else {
-      tempFilePath = "ALL";
+      sortedEnemyGroupsIdentifierMap = "ALL";
     }
   } catch (e, stacktrace) {
     globalLog(Trace.from(stacktrace).toString());
-    throw ArgumentError("Error creating temporary file");
+    throw ArgumentError("Error processing selected enemies");
   }
 
   String enemyList = getSelectedEnemiesArgument(ref);
+
+  List<String> customEnemiesArgs = customSelectedEnemies.entries.map((entry) {
+    String group = entry.key;
+    String enemies = entry.value.map((e) => '"$e"').join(', ');
+    return '--$group=[$enemies]';
+  }).toList();
+
   List<String> processArgs = [
     input,
     '--output',
     specialDatOutputPath,
-    tempFilePath,
+    sortedEnemyGroupsIdentifierMap,
     '--enemies',
     enemyList.isNotEmpty ? enemyList : 'None',
     '--enemyStats',
@@ -87,6 +81,7 @@ Future<CLIArguments> gatherCLIArguments({
     ...globalState.categories.entries
         .where((entry) => entry.value)
         .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
+    ...customEnemiesArgs
   ];
 
   if (level["All Enemies"] == true) {
@@ -107,11 +102,8 @@ Future<CLIArguments> gatherCLIArguments({
     globalLog('Ignore arguments added: $ignoreArgs');
   }
 
-  String command = scriptPath;
-  if (Platform.isMacOS || Platform.isLinux) {
-    processArgs.insert(0, scriptPath);
-    command = 'sudo';
-  } else if (Platform.isWindows) {
+  String command = '';
+  if (Platform.isWindows) {
     var currentDir = Directory.current.path;
     command = p.join(currentDir, 'NAER.exe');
   }
@@ -119,13 +111,27 @@ Future<CLIArguments> gatherCLIArguments({
   List<String> fullCommand = [command] + processArgs;
 
   return CLIArguments(
-    input: input,
-    specialDatOutputPath: specialDatOutputPath,
-    tempFilePath: tempFilePath,
-    enemyList: enemyList,
-    processArgs: processArgs,
-    command: command,
-    fullCommand: fullCommand,
-    ignoreList: ignoredModFiles,
-  );
+      input: input,
+      specialDatOutputPath: specialDatOutputPath,
+      sortedEnemyGroupsIdentifierMap: sortedEnemyGroupsIdentifierMap,
+      enemyList: enemyList,
+      processArgs: processArgs,
+      command: command,
+      fullCommand: fullCommand,
+      ignoreList: ignoredModFiles);
+}
+
+Future<CLIArguments> getGlobalArguments(WidgetRef ref) async {
+  final globalState = ref.watch(globalStateProvider.notifier);
+  CLIArguments cliArgs = await gatherCLIArguments(
+      selectedImages: globalState.readSelectedImages(),
+      categories: globalState.readCategories(),
+      level: globalState.readLevelMap(),
+      ignoredModFiles: globalState.readIgnoredModFiles(),
+      input: globalState.readInput(),
+      specialDatOutputPath: globalState.readSpecialDatOutputPath(),
+      enemyStats: globalState.readEnemyStats(),
+      enemyLevel: globalState.readEnemyLevel(),
+      ref: ref);
+  return cliArgs;
 }

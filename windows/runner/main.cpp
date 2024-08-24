@@ -2,61 +2,67 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 #include <iostream>
-#include <iomanip>
 
 #include "flutter_window.h"
 #include "utils.h"
 
 bool isRunningFromCommandLine() {
-    // if the process was attached to a console window at startup
+    // Check if the process was attached to a console window at startup
     DWORD processList[2];
     if (GetConsoleProcessList(processList, 2) > 1) {
-        // If more than one process is attached to the console, it's running from a command line
-        return true;
+        return true; 
     }
     return false;
+}
+
+void DisableQuickEditMode() {
+    // Get the console handle
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+
+    // Get the current console mode
+    DWORD mode;
+    GetConsoleMode(hStdin, &mode);
+
+    // Clear the quick edit mode flag
+    mode &= ~ENABLE_QUICK_EDIT_MODE;
+
+    // Set the new mode
+    SetConsoleMode(hStdin, mode);
+}
+
+void PrintWelcomeMessage() {
+    std::cout << std::endl;
+    std::cout << " .-----------------. .----------------.  .----------------.  .----------------. " << std::endl;
+    std::cout << "| .--------------. || .--------------. || .--------------. || .--------------. |" << std::endl;
+    std::cout << "| | ____  _____  | || |      __      | || |  _________   | || |  _______     | |" << std::endl;
+    std::cout << "| ||_   \\|_   _| | || |     /  \\     | || | |_   ___  |  | || | |_   __ \\    | |" << std::endl;
+    std::cout << "| |  |   \\ | |   | || |    / /\\ \\    | || |   | |_  \\_|  | || |   | |__) |   | |" << std::endl;
+    std::cout << "| |  | |\\ \\| |   | || |   / ____ \\   | || |   |  _|  _   | || |   |  __ /    | |" << std::endl;
+    std::cout << "| | _| |_\\   |_  | || | _/ /    \\ \\_ | || |  _| |___/ |  | || |  _| |  \\ \\_  | |" << std::endl;
+    std::cout << "| ||_____\\____| | || ||____|  |____|| || | |_________|  | || | |____| |___| | |" << std::endl;
+    std::cout << "| |              | || |              | || |              | || |              | |" << std::endl;
+    std::cout << "| '--------------' || '--------------' || '--------------' || '--------------' |" << std::endl;
+    std::cout << " '----------------'  '----------------'  '----------------'  '----------------' " << std::endl;
+    std::cout << std::endl;
+    std::cout << "  Welcome to NAER CLI Version" << std::endl;
+    std::cout << "  Version: 3.6.0" << std::endl;
+    std::cout << std::endl;
 }
 
 int main(int argc, char** argv) {
     bool runningFromCommandLine = isRunningFromCommandLine();
 
-    if (!runningFromCommandLine) {
-        // If no console was attached (likely launched via GUI), create one
-        if (AllocConsole()) {
-            freopen_s(nullptr, "CONOUT$", "w", stdout);
-            freopen_s(nullptr, "CONOUT$", "w", stderr);
-        }
+    if (runningFromCommandLine) {
+        // If running from command line, print the welcome message
+        PrintWelcomeMessage();
+    } else {
+        // If launched via GUI, hide the console
+        HWND hWnd = GetConsoleWindow();
+        ShowWindow(hWnd, SW_HIDE);
     }
 
-    if (!runningFromCommandLine) {
-        // Only show the formatted GUI-only output if the application was launched via GUI
-        std::cerr << std::endl;
-        std::cerr << " .-----------------. .----------------.  .----------------.  .----------------. " << std::endl;
-        std::cerr << "| .--------------. || .--------------. || .--------------. || .--------------. |" << std::endl;
-        std::cerr << "| | ____  _____  | || |      __      | || |  _________   | || |  _______     | |" << std::endl;
-        std::cerr << "| ||_   \\|_   _| | || |     /  \\     | || | |_   ___  |  | || | |_   __ \\    | |" << std::endl;
-        std::cerr << "| |  |   \\ | |   | || |    / /\\ \\    | || |   | |_  \\_|  | || |   | |__) |   | |" << std::endl;
-        std::cerr << "| |  | |\\ \\| |   | || |   / ____ \\   | || |   |  _|  _   | || |   |  __ /    | |" << std::endl;
-        std::cerr << "| | _| |_\\   |_  | || | _/ /    \\ \\_ | || |  _| |___/ |  | || |  _| |  \\ \\_  | |" << std::endl;
-        std::cerr << "| ||_____\\____| | || ||____|  |____|| || | |_________|  | || | |____| |___| | |" << std::endl;
-        std::cerr << "| |              | || |              | || |              | || |              | |" << std::endl;
-        std::cerr << "| '--------------' || '--------------' || '--------------' || '--------------' |" << std::endl;
-        std::cerr << " '----------------'  '----------------'  '----------------'  '----------------' " << std::endl;
-        std::cerr << std::endl;
-        std::cerr << "  Welcome to NAER Application" << std::endl;
-        std::cerr << "  Version: 3.5.0" << std::endl;
-        std::cerr << std::endl;
-        std::cerr << " This is the command-line output window." << std::endl;
-        std::cerr << " Did you know that you can use NAER as a console application too?" << std::endl;
-        std::cerr << " Example input: " << std::endl;
-        std::cerr << std::endl;
-        std::cerr << "    NAER.exe D:\\SteamLibrary\\steamapps\\common\\NieRAutomata\\data \\" << std::endl;
-        std::cerr << "             --output D:\\SteamLibrary\\steamapps\\common\\NieRAutomata\\data \\" << std::endl;
-        std::cerr << "             ALL --enemies [em3000] --enemyStats 5.0 --level=99 \\" << std::endl;
-        std::cerr << "             --p100 --category=allenemies --backUp" << std::endl;
-        std::cerr << std::endl;
-        std::cerr << "######### NAER GUI Application started successfully. ##########\n" << std::endl;
-    }
+    // Disable QuickEdit Mode to prevent accidental freezes
+    DisableQuickEditMode();
 
     ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 

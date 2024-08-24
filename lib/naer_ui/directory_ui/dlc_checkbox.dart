@@ -24,18 +24,19 @@ class DLCCheckBoxState extends ConsumerState<DLCCheckBox> {
     final prefs = await SharedPreferences.getInstance();
     bool? savedValue = prefs.getBool('dlc');
     if (savedValue != null) {
-      ref.read(globalStateProvider.notifier).updateDLCOption(savedValue);
+      ref.watch(globalStateProvider.notifier).updateDLCOption(savedValue);
     }
   }
 
   Future<void> _saveDLCOption(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('dlc', value);
-    ref.read(globalStateProvider.notifier).updateDLCOption(value);
+    ref.watch(globalStateProvider.notifier).updateDLCOption(value);
   }
 
   @override
   Widget build(BuildContext context) {
+    final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     final globalState = ref.watch(globalStateProvider);
 
     return FutureBuilder<void>(
@@ -52,7 +53,7 @@ class DLCCheckBoxState extends ConsumerState<DLCCheckBox> {
             onChanged: (bool? newValue) async {
               final updatedValue = newValue ?? false;
               await _saveDLCOption(updatedValue);
-              globalState.updateCategories();
+              globalStateNotifier.updateCategories();
             },
             text: globalState.hasDLC ? 'DLC: Enabled' : 'DLC: Disabled',
           );

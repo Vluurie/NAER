@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'package:xml/xml.dart';
 
@@ -48,6 +50,7 @@ ByteDataWrapper xmlToYax(XmlElement root) {
   List<_XmlNode> nodes = [];
   void addNodeToList(XmlElement node, int indentation) {
     int tagId = _getTagId(node);
+    // need to use old .text because new api works not correct with xmltext node
     String nodeText =
         node.children.whereType<XmlText>().map((e) => e.text).join().trim();
     nodes.add(_XmlNode(indentation, tagId, 0, nodeText));

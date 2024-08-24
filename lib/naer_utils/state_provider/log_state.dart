@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/material.dart';
 
@@ -14,20 +13,20 @@ class LogState with ChangeNotifier {
 
   final List<String> _logs = [];
 
-  List<String> get logs => _logs;
+  List<String> get logs => List.unmodifiable(_logs);
 
   void addLog(String log) {
     _logs.add(log);
-    notifyListeners();
+    notifyListeners(); // Notify listeners of the new log entry
   }
 
   void clearLogs() {
     _logs.clear();
-    notifyListeners();
+    notifyListeners(); // Notify listeners that logs have been cleared
   }
 
   static String processLog(String log) {
-    // Process the log message if necessary
+    // Process the log here if necessary (e.g., add timestamp, etc.)
     return log;
   }
 
@@ -35,11 +34,6 @@ class LogState with ChangeNotifier {
     return _instance._logs;
   }
 
-  /// Logs an error message to the global log, sends it through the send port,
-  /// and writes it to a log.txt file with a timestamp and stack trace.
-  ///
-  /// [error] is the error message to be logged.
-  /// [stackTrace] is the stack trace associated with the error.
   static Future<void> logError(String error, StackTrace stackTrace) async {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage =
@@ -47,7 +41,11 @@ class LogState with ChangeNotifier {
 
     globalLog(logMessage);
 
-    final logFile = File('log.txt');
-    await logFile.writeAsString(logMessage, mode: FileMode.append);
+    try {
+      final logFile = File('log.txt');
+      await logFile.writeAsString(logMessage, mode: FileMode.append);
+    } catch (e) {
+      globalLog('Failed to write to log.txt: $e');
+    }
   }
 }

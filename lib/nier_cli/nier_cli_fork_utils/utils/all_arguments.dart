@@ -1,3 +1,7 @@
+// ignore_for_file: avoid_print
+
+import 'dart:convert';
+
 import 'package:NAER/data/sorted_data/file_paths_data.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
@@ -5,6 +9,7 @@ import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:args/args.dart';
 
 /// Constructs and returns an [ArgParser] with all the expected command-line arguments.
+/// Provides a user-friendly error message if an invalid option is used.
 ///
 /// This parser includes options for:
 /// - Output file or folder.
@@ -18,90 +23,143 @@ import 'package:args/args.dart';
 ///
 /// Returns an [ArgParser] configured with all the necessary command-line options.
 ArgParser allArguments() {
-  var argParser = ArgParser();
+  try {
+    var argParser = ArgParser();
 
-  // Output option: specifies the output file or folder
-  argParser.addOption("output", abbr: "o", help: "Output file or folder");
+    argParser.addFlag('guided',
+        help:
+            'Start the guided mode where you will be prompted to input options step-by-step',
+        negatable: false);
 
-  // Separator for extraction options
-  argParser.addSeparator("Extraction Options:");
+    // Folder extraction flag: extracts all files in a folder
+    argParser.addFlag("folder", negatable: false);
 
-  // Folder extraction flag: extracts all files in a folder
-  argParser.addFlag("folder",
-      help: "Extract all files in a folder", negatable: false);
+    // Recursive extraction flag: extracts all files in a folder and all subfolders
+    argParser.addFlag("recursive", abbr: "r", negatable: false);
 
-  // Recursive extraction flag: extracts all files in a folder and all subfolders
-  argParser.addFlag("recursive",
-      abbr: "r",
-      help: "Extract all files in a folder and all subfolders",
-      negatable: false);
+    // File type extraction flags
+    argParser.addFlag("CPK", help: "Only extract CPK files", negatable: false);
+    argParser.addFlag("DAT", help: "Only extract DAT files", negatable: false);
+    argParser.addFlag("PAK", help: "Only extract PAK files", negatable: false);
+    argParser.addFlag("YAX", help: "Only extract YAX files", negatable: false);
 
-  // Auto-extract children flag: automatically processes all extracted files when unpacking DAT, CPK, PAK, etc. files
-  argParser.addFlag("autoExtractChildren",
-      help:
-          "When unpacking DAT, CPK, PAK, etc. files automatically process all extracted files",
-      negatable: false,
-      defaultsTo: true);
+    // Auto-extract children flag: automatically processes all extracted files when unpacking DAT, CPK, PAK, etc. files
+    argParser.addFlag("autoExtractChildren",
+        negatable: false, defaultsTo: true);
 
-  // Sorted enemies file path option
-  argParser.addOption("sortedEnemies",
-      help: "Path to the file with sorted enemies");
+    argParser.addSeparator(
+        "Game Category options - For more Info see: https://github.com/ArthurHeitmann/NierDocs/blob/master/docs/cpkAndDttContents/cpkAndDttContents.md");
 
-  // Separator for extraction filters
-  argParser.addSeparator("Extraction filters:");
+    // Add flags for quest, map, phase, and enemy file options
+    for (var option in GameFileOptions.questOptions) {
+      argParser.addFlag(option,
+          help: "Quest Identifier.", negatable: false, defaultsTo: false);
+    }
+    for (var option in GameFileOptions.mapOptions) {
+      argParser.addFlag(option,
+          help: "Map Identifier.", negatable: false, defaultsTo: false);
+    }
+    for (var option in GameFileOptions.phaseOptions) {
+      argParser.addFlag(option,
+          help: "Phase Identifier.", negatable: false, defaultsTo: false);
+    }
+    for (var option in GameFileOptions.enemyOptions) {
+      argParser.addFlag(option,
+          help: "Enemy Identifier.", negatable: false, defaultsTo: false);
+    }
 
-  // Ignore list option: specifies files to ignore during repacking
-  argParser.addOption("ignore",
-      help: "List of files to ignore during repacking");
+    // Output option: specifies the output file or folder
+    argParser.addOption("output", abbr: "o", help: "Output file or folder");
 
-  // Add flags for quest, map, phase and enemy file options
-  for (var option in GameFileOptions.questOptions) {
-    argParser.addFlag(option, negatable: false, defaultsTo: false);
+    // Separator for extraction options
+    argParser.addSeparator("NAER arguments:");
+
+    // Sorted enemies file path option
+    argParser.addOption("sortedEnemies",
+        help: "Path to the temp file with sorted enemies or by ALL");
+
+    // Enemies option: specifies the list of selected enemies to change stats
+    argParser.addOption("enemies", help: "List of enemies to change stats");
+
+    // Enemy stats option: specifies the float stats value for the enemy stats
+    argParser.addOption("enemyStats",
+        help: "The float stats value for the enemy stats");
+
+    // Enemy level option: specifies the enemy level
+    argParser.addOption("level", help: "Specify the enemy level");
+
+    // Enemy category option: specifies the enemy category
+    argParser.addOption("category", help: "Specify the enemy category");
+
+    // Special DAT output directory option
+    argParser.addOption("specialDatOutput",
+        help: "Special output directory for DAT files");
+
+    // Ignore list option: specifies files to ignore during repacking
+    argParser.addOption("ignore",
+        help: "List of files to ignore during repacking");
+
+    argParser.addOption("Delete",
+        help: "Delete enemies: This enemies are skipped from randomization.");
+
+    argParser.addOption("Fly",
+        help: "Fly enemies that are used for randomization");
+
+    argParser.addOption("Ground",
+        help: "Ground enemies that are used for randomization");
+
+    // Additional flags for balance mode, DLC, and backup
+    argParser.addFlag("balance", help: "Enable balance mode", negatable: false);
+    argParser.addFlag("dlc", help: "Include DLC content", negatable: false);
+    argParser.addFlag("backUp",
+        help: "Create a backup before processing", negatable: false);
+
+    argParser.addOption("create_temp", help: '''
++----------------------------------------------------------------------------+
+| Create a sorted enemy template file in:                                    |
+| NAER_Settings/temp_sorted_enemies.dart                                     |
+|                                                                            |
+| This file provides a structured template of enemy groups (Ground, Fly,     |
+| Delete) that you can easily modify. Customize this file to specify         |
+| different enemies according to your needs.                                 |
+|                                                                            |
+| Use this option to generate the template automatically, making it easier   |
+| to set up your custom enemy configurations without starting from scratch.  |
++----------------------------------------------------------------------------+
+''');
+
+    // Help flag to provide an overview or detailed explanation of options
+    argParser.addFlag("help",
+        abbr: "h",
+        help: '''
++----------------------------------------------------------------------------+
+| Display help information for options.                                      |
+| Use --help [option] for a deeper explanation.                              |
+| Example: naer --help sortedEnemies                                         |
++----------------------------------------------------------------------------+
+''',
+        negatable: false);
+
+    return argParser;
+  } catch (e) {
+    print('''
++---------------------------------------------------+
+| Oops! An error occurred while parsing arguments.  |
++---------------------------------------------------+
+| Possible Issues:                                  |
+| - An invalid option was used.                     |
+| - There might be a typo in one of the arguments.  |
++---------------------------------------------------+
+| What to do:                                       |
+| - Double-check the command you entered.           |
+| - Use the --help option to see the correct usage. |
++---------------------------------------------------+
+| Error Details:                                    |
+| $e                                                |
++---------------------------------------------------+
+''');
+    rethrow;
   }
-  for (var option in GameFileOptions.mapOptions) {
-    argParser.addFlag(option, negatable: false, defaultsTo: false);
-  }
-  for (var option in GameFileOptions.phaseOptions) {
-    argParser.addFlag(option, negatable: false, defaultsTo: false);
-  }
-  for (var option in GameFileOptions.enemyOptions) {
-    argParser.addFlag(option, negatable: false, defaultsTo: false);
-  }
-
-  // Enemies option: specifies the list of selected enemies to change stats
-  argParser.addOption("enemies",
-      help: "List of Selected enemies to change stats");
-
-  // Enemy stats option: specifies the float stats value for the enemy stats
-  argParser.addOption("enemyStats",
-      help: "The float stats value for the enemy stats");
-
-  // File type extraction flags
-  argParser.addFlag("CPK", help: "Only extract CPK files", negatable: false);
-  argParser.addFlag("DAT", help: "Only extract DAT files", negatable: false);
-  argParser.addFlag("PAK", help: "Only extract PAK files", negatable: false);
-  argParser.addFlag("YAX", help: "Only extract YAX files", negatable: false);
-
-  // Enemy level option: specifies the enemy level
-  argParser.addOption("level", help: "Specify the enemy level");
-
-  // Enemy category option: specifies the enemy category
-  argParser.addOption("category", help: "Specify the enemy category");
-
-  // Special DAT output directory option
-  argParser.addOption("specialDatOutput",
-      help: "Special output directory for DAT files");
-
-  // WEM file extraction flag
-  argParser.addFlag("WEM", help: "Only extract WEM files", negatable: false);
-
-  // Additional flags for balance mode, DLC, and backup
-  argParser.addFlag("balance", help: "Enable balance mode", negatable: false);
-  argParser.addFlag("dlc", help: "Include DLC content", negatable: false);
-  argParser.addFlag("backUp",
-      help: "Create a backup before processing", negatable: false);
-
-  return argParser;
 }
 
 /// Retrieves active option paths based on the provided [ArgResults] and output directory.
@@ -160,6 +218,31 @@ List<String> getAllPossibleOptions(String input) {
       .where((option) => FilePaths.paths.containsKey(option))
       .map((option) => '$input/${FilePaths.paths[option]!}')
       .toList();
+}
+
+/// Creates the needed map based on --Ground, --Fly, and --Delete arguments.
+Map<String, List<String>> createCustomSelectedEnemiesMap(ArgResults? args) {
+  Map<String, List<String>> customSelectedEnemies = {
+    "Ground": _parseJsonArray(args?['Ground']),
+    "Fly": _parseJsonArray(args?['Fly']),
+    "Delete": _parseJsonArray(args?['Delete']),
+  };
+
+  return customSelectedEnemies;
+}
+
+List<String> _parseJsonArray(String? arg) {
+  if (arg == null) {
+    // empty list probably its 'ALL' identifier
+    return [];
+  }
+
+  try {
+    List<dynamic> parsedList = jsonDecode(arg);
+    return List<String>.from(parsedList);
+  } catch (e) {
+    throw ArgumentError("Error parsing JSON array: $arg. ${e.toString()}");
+  }
 }
 
 /// Parses command-line arguments into a [CliOptions] object.

@@ -30,7 +30,7 @@ Future<void> handleSpecialCaseEnemies(
     final objIdElements = elem.findAllElements('objId').toList();
 
     for (var objIdElement in objIdElements) {
-      if (await isBoss(objIdElement.innerText)) {
+      if (isBoss(objIdElement.innerText)) {
         // Modify the objId for bosses
         await modifyEnemyObjId(
           objIdElement,

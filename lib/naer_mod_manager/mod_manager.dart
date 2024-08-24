@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:NAER/naer_ui/setup/log_widget/log_output_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
-import 'package:NAER/naer_mod_manager/ui/modlog_output_widget.dart';
 import 'package:NAER/naer_mod_manager/ui/metadata_form.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_loader_widget.dart';
 import 'package:NAER/naer_mod_manager/ui/drag_n_drop.dart';
@@ -77,8 +77,7 @@ class SecondPageState extends ConsumerState<SecondPage>
     final canPop = Navigator.of(context).canPop();
     final outputPath = widget.cliArguments.specialDatOutputPath;
     final inputPath = widget.cliArguments.input;
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
+    final globalState = ref.watch(globalStateProvider.notifier);
 
     final actionButtons = <Widget>[
       provider.Consumer<ModStateManager>(
@@ -144,12 +143,12 @@ class SecondPageState extends ConsumerState<SecondPage>
       ),
     ];
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (globalState.isModManagerPageProcessing) {
-          return false;
+    return PopScope(
+      onPopInvokedWithResult: (canPop, result) async {
+        if (globalState.readIsModManagerPageProcessing()) {
+          return;
         }
-        return true;
+        canPop;
       },
       child: Scaffold(
         appBar: PreferredSize(
@@ -186,7 +185,7 @@ class SecondPageState extends ConsumerState<SecondPage>
             ),
             leading:
                 canPop ? null : (actionButtons.isNotEmpty ? Container() : null),
-            actions: globalState.isModManagerPageProcessing
+            actions: globalState.readIsModManagerPageProcessing()
                 ? null
                 : (canPop ? actionButtons : null),
           ),
@@ -228,20 +227,43 @@ class SecondPageState extends ConsumerState<SecondPage>
                 ),
                 Row(
                   children: [
-                    Expanded(
+                    Flexible(
                       flex: 2,
-                      child: DragDropWidget(cliArguments: widget.cliArguments),
-                    ),
-                    Expanded(
-                      flex: 3,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child:
-                            LogoutOutWidget(cliArguments: widget.cliArguments),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: 250,
+                            maxWidth: 450,
+                            minHeight: 150,
+                            maxHeight: 300,
+                          ),
+                          child:
+                              DragDropWidget(cliArguments: widget.cliArguments),
+                        ),
+                      ),
+                    ),
+                    const Spacer(flex: 1),
+                    Flexible(
+                      flex: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          right: 50.0,
+                          top: 20,
+                        ),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: 250,
+                            maxWidth: 550,
+                            minHeight: 200,
+                            maxHeight: 400,
+                          ),
+                          child: const LogOutput(),
+                        ),
                       ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ],

@@ -16,6 +16,7 @@ import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
+import 'package:NAER/naer_utils/state_provider/setup_state.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
 import 'package:flutter/foundation.dart';
@@ -643,6 +644,12 @@ class _ModsListState extends ConsumerState<ModsList>
     bool success = true;
     for (String dirPath in uniqueDirectories) {
       List<String> arguments = List.from(widget.cliArguments.processArgs);
+      final selectedSetup =
+          ref.read(setupConfigProvider.notifier).getCurrentSelectedSetup();
+      if (selectedSetup != null) {
+        arguments = selectedSetup.generateArguments(ref);
+      }
+
       arguments[0] = dirPath;
       success = await _executeCLICommand(logState, arguments) && success;
       if (!success) {
@@ -698,8 +705,7 @@ class _ModsListState extends ConsumerState<ModsList>
 
   Future<bool> _executeCLICommand(
       LogState logState, List<String> arguments) async {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
+    final globalState = ref.read(globalStateProvider.notifier);
     try {
       arguments.modifyArgumentsForForcedEnemyList();
       final receivePort = ReceivePort();
@@ -715,17 +721,17 @@ class _ModsListState extends ConsumerState<ModsList>
         'isManagerFile': true,
         'sendPort': receivePort.sendPort,
         'backUp': false,
-        'isBalanceMode': globalState.isBalanceMode,
-        'hasDLC': globalState.hasDLC
+        'isBalanceMode': globalState.readIsBalanceMode(),
+        'hasDLC': globalState.readHasDLC(),
       };
-      globalState.isModManagerPageProcessing = true;
+      globalState.setIsModManagerPageProcessing(true);
       await compute(runNierCliIsolated, args);
       globalLog("Randomization process finished the mod file successfully.");
-      globalState.isModManagerPageProcessing = false;
+      globalState.setIsModManagerPageProcessing(false);
       return true;
     } catch (e, stacktrace) {
       logState.addLog("Error executing CLI command: $e");
-      globalState.isModManagerPageProcessing = false;
+      globalState.setIsModManagerPageProcessing(false);
       globalLog(Trace.from(stacktrace).toString());
       return false;
     }

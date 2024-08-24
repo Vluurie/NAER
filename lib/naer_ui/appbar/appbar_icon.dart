@@ -17,28 +17,4 @@ class AppIcons {
       ],
     );
   }
-
-  static Widget logIcon(AnimationController blinkController,
-      VoidCallback scrollToSetup, WidgetRef ref) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          tooltip: "Jump to Log Output",
-          icon: AnimatedBuilder(
-            animation: blinkController,
-            builder: (context, child) {
-              final color = ColorTween(
-                begin: AutomatoThemeColors.darkBrown(ref),
-                end: AutomatoThemeColors.saveZone(ref),
-              ).animate(blinkController).value;
-              return Icon(Icons.terminal, size: 32.0, color: color);
-            },
-          ),
-          hoverColor: AutomatoThemeColors.brown15(ref),
-          onPressed: scrollToSetup,
-        ),
-      ],
-    );
-  }
 }

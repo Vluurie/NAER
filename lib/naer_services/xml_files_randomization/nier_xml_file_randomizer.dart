@@ -32,6 +32,7 @@ Future<void> randomizeEnemyNumber(
     String newEmNumber;
 
     // Set to avoid duplicate checks and speed up lookups
+    // i check for em3004 because if he get's used for rando, they got no fall down animation and stay in the air
     final Set<String> invalidNumbers = {'em3004'};
     if (action.isSpawnActionTooSmall) {
       invalidNumbers.addAll(enemyNumbers.where(isBigEnemy));
@@ -69,27 +70,31 @@ Future<void> randomizeEnemyNumber(
 Future<void> processEnemies(MainData mainData,
     Map<String, List<String>> collectedFiles, String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
-      await getSortedEnemyData(mainData.sortedEnemiesPath!, mainData.hasDLC);
+      await getSortedEnemyData(mainData);
   await findEnemiesAndModify(
       collectedFiles, currentDir, sortedEnemyData, mainData);
 }
 
 /// Retrieves the sorted enemy data either from the provided path or the entire enemy data.
 ///
-/// If the [sortedEnemiesPath] is 'ALL', it returns the entire enemy data map.
-/// Otherwise, it reads the sorted enemy data groups from the specified file.
-///
-/// [sortedEnemiesPath] is the path to the sorted enemies data file or 'ALL'.
+/// If the [sortedEnemyGroupsIdentifierMap] is 'ALL', it returns the entire enemy data map.
+/// Otherwise, it reads the sorted enemy data groups from the provider.
 ///
 /// Returns a map where the keys are enemy IDs and the values are lists of enemy attributes.
-Future<Map<String, List<String>>> getSortedEnemyData(
-    String sortedEnemiesPath, bool? hasDLC) async {
-  if (sortedEnemiesPath == 'ALL') {
-    return SortedEnemyGroup.getDLCFilteredEnemyData(
-        hasDLC); // If "ALL", use the entire enemyData map
+Future<Map<String, List<String>>> getSortedEnemyData(MainData mainData) async {
+  if (mainData.sortedEnemyGroupsIdentifierMap == 'ALL') {
+    // If "ALL", return the entire enemy data map, possibly filtered by DLC
+    return SortedEnemyGroup.getDLCFilteredEnemyData(mainData.hasDLC);
+  } else if (mainData.sortedEnemyGroupsIdentifierMap == 'CUSTOM_SELECTED') {
+    final sortedEnemyData = mainData.argument['customSelectedEnemies'];
+    if (sortedEnemyData.isEmpty) {
+      throw ArgumentError(
+          "Sorted enemy data is empty. Ensure that it has been updated correctly.");
+    }
+    return sortedEnemyData;
   } else {
-    return await readSortedEnemyDataGroups(
-        sortedEnemiesPath); // Otherwise, read from the file
+    throw ArgumentError(
+        "Invalid Sorted Enemy Data Identifier Value: ${mainData.sortedEnemyGroupsIdentifierMap}");
   }
 }
 
@@ -124,7 +129,7 @@ Future<void> findEnemiesAndModify(
   // Stop the timer
   stopwatch.stop();
   mainData.sendPort
-      .send('Traversal complete. Randomizer processed $fileCount files.');
+      .send('Traversal complete. NAER processed $fileCount files.');
   mainData.sendPort.send(
       'Time taken to find and modify enemies: ${stopwatch.elapsedMilliseconds} ms');
 }
@@ -141,7 +146,6 @@ Future<void> findEnemiesAndModify(
 /// [ids] is the ImportantIDs object containing metadata IDs.
 ///
 /// Returns the count of processed files.
-///
 Future<int> traverseDirectory(
   Map<String, List<String>> collectedFiles,
   Directory directory,
@@ -149,17 +153,23 @@ Future<int> traverseDirectory(
   ImportantIDs ids,
   MainData mainData,
 ) async {
-  final isolateService = IsolateService();
+  // Instantiate IsolateService without auto-initialization.
+  final isolateService = IsolateService(autoInitialize: false);
 
   final List<String> xmlFiles = collectedFiles['xmlFiles']
           ?.where((file) => file.endsWith('.xml'))
           .toList() ??
       [];
 
+  // Distribute the XML files across the available cores for parallel processing
   final distributedFiles = await isolateService.distributeFilesAsync(xmlFiles);
 
   mainData.sendPort.send('Creating Isolates for parallel computing...');
 
+  // Initialize isolates explicitly for parallel processing
+  await isolateService.initialize();
+
+  // Create tasks to process XML files in parallel using isolates
   final tasks = distributedFiles.entries.map((entry) {
     return (dynamic _) async {
       for (var file in entry.value) {
@@ -169,7 +179,11 @@ Future<int> traverseDirectory(
     };
   }).toList();
 
+  // Run all tasks in parallel using the isolates
   await isolateService.runTasks(tasks);
+
+  // Clean up the isolates after processing
+  await isolateService.cleanup();
 
   return xmlFiles.length;
 }

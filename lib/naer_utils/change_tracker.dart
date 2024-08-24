@@ -42,11 +42,11 @@ class FileChange {
     await prefs.setString('ignored_files', jsonData);
   }
 
-  static Future<void> loadIgnoredFiles() async {
+  static Future<List<String>> loadIgnoredFiles() async {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = prefs.getString('ignored_files') ?? '[]';
     ignoredFiles = List<String>.from(jsonDecode(jsonData));
-    // print('Loaded ignoredFiles: $ignoredFiles');
+    return ignoredFiles;
   }
 
   static Future<void> removeIgnoreFiles(List<String> filesToRemove) async {
@@ -118,7 +118,7 @@ class FileChange {
         DateFormat('yyyy-MM-dd HH:mm:ss').format(preRandomizationTime);
     await prefs.setString('pre_randomization_time', formattedTime);
     if (kDebugMode) {
-      LogState().addLog("Pre-randomization time saved: $formattedTime");
+      LogState().addLog("Pre-modification time saved: $formattedTime");
     }
   }
 
@@ -129,7 +129,7 @@ class FileChange {
         DateFormat('yyyy-MM-dd HH:mm:ss').format(lastRandomizationTime);
     await prefs.setString('last_randomization_time', formattedTime);
     if (kDebugMode) {
-      LogState().addLog("Last randomization time saved: $formattedTime");
+      LogState().addLog("Last modification time saved: $formattedTime");
     }
   }
 
@@ -147,31 +147,55 @@ class FileChange {
       return parsedTime;
     } catch (e) {
       if (kDebugMode) {
-        LogState().addLog('Error parsing pre-randomization time: $e');
+        LogState().addLog('Error parsing pre-modification time: $e');
       }
       return DateTime.now();
     }
   }
 
+  static String formatKey(String key) {
+    return key
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
   static Future<void> deleteAllSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    // print('All Shared Preferences:');
-    prefs.getKeys().forEach((key) {
-      var value = prefs.clear();
-      globalLog('$key: $value');
-    });
+    final keys = prefs.getKeys();
+    bool undoPossible = true;
+
+    for (String key in keys) {
+      bool result = await prefs.remove(key);
+      String formattedKey = formatKey(key);
+      globalLog(
+          '$formattedKey: ${result ? "Successfully deleted." : "Failed to delete."}');
+      if (key == 'file_changes' && result) {
+        undoPossible = false;
+      }
+    }
+
+    bool allCleared = await prefs.clear();
+    globalLog(
+        'All data cleared and state removed: ${allCleared ? "Yes" : "Failed to clear all data."}');
+
+    if (!undoPossible) {
+      globalLog(
+          'Undo functionality is no longer up to date as "File Changes" data has been deleted.');
+    }
   }
 
   static Future<void> loadDLCOption(WidgetRef ref) async {
     final prefs = await SharedPreferences.getInstance();
     bool hasDLC = prefs.getBool('dlc') ?? false;
-    ref.read(globalStateProvider.notifier).updateDLCOption(hasDLC);
+    ref.watch(globalStateProvider.notifier).updateDLCOption(hasDLC);
   }
 
   static Future<void> saveDLCOption(WidgetRef ref, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('dlc', value);
-    ref.read(globalStateProvider.notifier).updateDLCOption(value);
+    ref.watch(globalStateProvider.notifier).updateDLCOption(value);
   }
 
   static Future<Map<String, dynamic>> getPathsFromPreferences() async {

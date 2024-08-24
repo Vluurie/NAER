@@ -90,13 +90,13 @@ class DonateButtonState extends ConsumerState<DonateButton>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.favorite,
-                    color: AutomatoThemeColors.dangerZone(ref)),
+                    size: 16.0, color: AutomatoThemeColors.dangerZone(ref)),
                 const SizedBox(width: 8.0),
                 Text(
                   'Donate Coffee!',
                   style: TextStyle(
                     color: AutomatoThemeColors.primaryColor(ref),
-                    fontSize: 18.0,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -11,12 +11,6 @@ class MoneyService {
   /// The length (in bytes) of the money data to read from the save file.
   static const int moneyLength = 4;
 
-  /// Reads the money value from a specified position in a save file.
-  ///
-  /// Parameters:
-  /// - `filePath`: The path to the save file.
-  ///
-  /// Returns a future that completes with the integer value of the money.
   static Future<int> getMoneyFromFile(String filePath) async {
     var file = File(filePath);
     RandomAccessFile raf = await file.open(mode: FileMode.read);
@@ -28,13 +22,6 @@ class MoneyService {
     return money;
   }
 
-  /// Updates the money value in a save file to a new value.
-  ///
-  /// Parameters:
-  /// - `filePath`: The path to the save file.
-  /// - `newMoney`: The new money value to write to the file.
-  ///
-  /// Validates the new money value before writing and ensures it doesn't exceed the game's limits.
   static Future<void> updateMoneyInFile(String filePath, int newMoney) async {
     if (newMoney < 0) {
       throw ArgumentError("Money cannot be negative.");

@@ -63,22 +63,34 @@ Future<void> repackModifiedGameFiles(
 }
 
 /// This method processes all given entities in parallel,
-/// splitting the task into the amount of cores a device has for maximum computation time.
+/// splitting the task into the number of cores a device has for maximum computation efficiency.
 /// See [IsolateService]
 Future<void> processEntitiesInParallel(
     Iterable<String> entities, MainData mainData) async {
-  final service = IsolateService();
+  // Instantiate IsolateService without auto-initialization.
+  final service = IsolateService(autoInitialize: false);
   mainData.sendPort.send('Creating Isolates for parallel repacking...');
 
+  // Initialize isolates explicitly for this task
+  await service.initialize();
+
   final fileList = entities.toList();
+
+  // Distribute the files across the available cores
   final fileBatches = await service.distributeFilesAsync(fileList);
+
+  // Prepare tasks to be run in parallel using isolates
   final tasks = fileBatches.values.map((files) {
     return (dynamic _) async {
       await processEntities(files, mainData);
     };
   }).toList();
 
+  // Run all tasks in parallel using the isolates
   await service.runTasks(tasks);
+
+  // Clean up the isolates after processing
+  await service.cleanup();
 }
 
 /// Processes a list of entities such as files or folders.
@@ -278,8 +290,7 @@ Future<void> processEnemyStats(
 ///
 Future<void> getGameFilesForProcessing(
     String currentDir, MainData mainData) async {
-  mainData.sendPort.send(
-      "Starting processing in directory: $currentDir, recursive mode: ${mainData.options.recursiveMode}");
+  mainData.sendPort.send("Starting processing in directory: $currentDir");
   List<String> pendingFiles = mainData.argument['pendingFiles'];
   Set<String> processedFiles = mainData.argument['processedFiles'];
 
@@ -301,23 +312,27 @@ Future<void> getGameFilesForProcessing(
 /// This function processes each file in the pending list and adds it to the
 /// processed files list upon successful processing.
 ///
-/// Recursevly extracts the child files after extracting the parent
-///
+/// Recursively extracts the child files after extracting the parent.
 Future<List<String>> extractGameFiles(
   List<String> pendingFiles,
   Set<String> processedFiles,
   CliOptions options,
   List<String> enemyList,
   List<String> activeOptions,
-  bool? ismanagerFile,
+  bool? isManagerFile,
   SendPort sendPort,
 ) async {
-  final isolateService = IsolateService();
+  // Instantiate IsolateService without auto-initialization.
+  final isolateService = IsolateService(autoInitialize: false);
   final List<String> errorFiles = [];
 
-  // Convert pendingFiles to ListQueue for efficient queue operations
+  // Distribute the pending files across the available cores for parallel processing.
   final fileBatches = await isolateService.distributeFilesAsync(pendingFiles);
 
+  // Initialize isolates explicitly for parallel processing.
+  await isolateService.initialize();
+
+  // Create tasks to process each batch of files in parallel using isolates.
   final tasks = fileBatches.values.map((batch) {
     return (dynamic _) async {
       final batchErrors = await _processFileBatch(
@@ -327,15 +342,21 @@ Future<List<String>> extractGameFiles(
         ListQueue<String>.from(batch),
         enemyList,
         activeOptions,
-        ismanagerFile,
+        isManagerFile,
         sendPort,
       );
+      // Collect any errors encountered during processing.
       errorFiles.addAll(batchErrors);
     };
   }).toList();
 
+  // Run all tasks in parallel using the isolates.
   await isolateService.runTasks(tasks);
 
+  // Clean up the isolates after processing.
+  await isolateService.cleanup();
+
+  // Return the list of files that encountered errors during processing.
   return errorFiles;
 }
 

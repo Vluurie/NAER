@@ -5,7 +5,6 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:provider/provider.dart' as provider;
 
 class WindowsCloseListener with WindowListener {
   final BuildContext context;
@@ -15,9 +14,8 @@ class WindowsCloseListener with WindowListener {
 
   @override
   void onWindowClose() async {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
-    if (globalState.isLoading) {
+    final globalState = ref.watch(globalStateProvider.notifier);
+    if (globalState.readIsLoading()) {
       windowManager.setPreventClose(true);
       await _showProcessingWarningDialog(ref);
     } else {

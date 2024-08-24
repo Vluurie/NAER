@@ -1,6 +1,11 @@
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final fileUtilsProvider = Provider<FileUtils>((ref) {
+  return FileUtils();
+});
 
 class FileUtils {
   static Future<String> computeFileHash(File file) async {

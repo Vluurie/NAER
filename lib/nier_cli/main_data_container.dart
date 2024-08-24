@@ -19,7 +19,7 @@ import 'package:xml/xml.dart' as xml;
 /// [backUp]: A boolean indicating if a backup is needed.
 class MainData {
   final Map<String, dynamic> argument;
-  final String? sortedEnemiesPath;
+  final String? sortedEnemyGroupsIdentifierMap;
   final CliOptions options;
   final bool? isManagerFile;
   final String output;
@@ -31,7 +31,7 @@ class MainData {
 
   MainData({
     required this.argument,
-    required this.sortedEnemiesPath,
+    required this.sortedEnemyGroupsIdentifierMap,
     required this.options,
     this.isManagerFile,
     required this.output,
@@ -46,7 +46,7 @@ class MainData {
   String toString() {
     return 'MainData {\n'
         '  argument: $argument,\n'
-        '  sortedEnemiesPath: $sortedEnemiesPath,\n'
+        '  sortedEnemiesPath: $sortedEnemyGroupsIdentifierMap,\n'
         '  options: $options,\n'
         '  isManagerFile: $isManagerFile,\n'
         '  output: $output,\n'

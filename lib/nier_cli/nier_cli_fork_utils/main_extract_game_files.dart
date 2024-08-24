@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_string_escapes
+
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/randomize_process.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/all_arguments.dart';
@@ -29,6 +31,9 @@ Future<void> extractGameFilesProcess(
   // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
   await getGameFilesForProcessing(mainData.argument['input'], mainData);
 
+  // Start the timer before extractGameFiles
+  final startTime = DateTime.now();
+
   List<String> errorFiles = await extractGameFiles(
       mainData.argument['pendingFiles'],
       mainData.argument['processedFiles'],
@@ -40,6 +45,19 @@ Future<void> extractGameFilesProcess(
       mainData.isManagerFile,
       mainData.sendPort);
 
+  final endTime = DateTime.now();
+  final duration = endTime.difference(startTime);
+  mainData.sendPort.send(
+      '''Time for extracting the game files with the Rust DLL: ${duration.inSeconds} seconds. 
+      
+█ █         █ █  RUST RUST RUST 
+▀█  ▄█████▄  █▀
+ ▀▄███▀█▀███▄▀   
+ ▄▀███▀▀▀███▀▄ 
+ █ ▄▀▀▀▀▀▀▀▄ █ 
+
+ ''');
+
   handleExtractErrors(errorFiles);
 
   mainData.sendPort
@@ -48,7 +66,7 @@ Future<void> extractGameFilesProcess(
   if (!mainData.isManagerFile!) {
     if (mainData.backUp!) {
       mainData.sendPort.send(
-          'Creating three backup extracted game folders for randomization in upper directory (9GB disk space)...');
+          'Creating three backup extracted game folders for modifications in upper directory (9GB disk space)...');
 
       // Collects the files for modification out of the extracted files to be processed
       var collectedFiles =

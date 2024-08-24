@@ -1,24 +1,22 @@
-// naer_app_bar.dart
-
-import 'package:NAER/naer_ui/nav_button/donate_button.dart';
-import 'package:flutter/material.dart';
 import 'package:NAER/naer_ui/appbar/appbar_icon.dart';
+import 'package:NAER/naer_ui/button/donate_button.dart';
 import 'package:automato_theme/automato_theme.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final AnimationController blinkController;
   final VoidCallback scrollToSetup;
   final GlobalKey setupLogOutputKey;
-  final AutomatoButton button;
+  final VoidCallback onMenuPressed;
 
   const NaerAppBar({
     super.key,
     required this.blinkController,
     required this.scrollToSetup,
     required this.setupLogOutputKey,
-    required this.button,
+    required this.onMenuPressed,
   });
 
   bool isScreenLarge(double maxWidth) => maxWidth > 600;
@@ -51,61 +49,74 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 bool isLargeScreen = isScreenLarge(constraints.maxWidth);
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    logoPadding(isLargeScreen),
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: SizedBox(
-                        height: 70,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            logoText(isLargeScreen, context, ref),
-                            DonateButton(url: dotenv.env['DONATE_URL']!),
-                            AppIcons.informationIcon(context, ref),
-                            AppIcons.logIcon(
-                                blinkController, scrollToSetup, ref),
-                            Container(
-                              height: 50,
-                              alignment: Alignment.center,
-                              child: button,
-                            ),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(width: 8.0),
+                    logoText(isLargeScreen, context, ref),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AppIcons.informationIcon(context, ref),
+                        const SizedBox(width: 16.0),
+                        DonateButton(url: dotenv.env['DONATE_URL']!),
+                      ],
                     ),
                   ],
                 );
               },
             ),
           ),
-        ),
+          leading: Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AutomatoThemeColors.textDialogColor(ref),
+                    AutomatoThemeColors.darkBrown(ref),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: AutomatoThemeColors.brown25(ref),
+                    offset: const Offset(2, 4),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                hoverColor: AutomatoThemeColors.textDialogColor(ref),
+                highlightColor: AutomatoThemeColors.darkBrown(ref),
+                color: AutomatoThemeColors.dangerZone(ref),
+                icon: Icon(
+                  Icons.menu_outlined,
+                  color: AutomatoThemeColors.primaryColor(ref),
+                ),
+                onPressed: onMenuPressed,
+              ),
+            ),
+          ),
+        )
       ],
-    );
-  }
-
-  Padding logoPadding(bool isLargeScreen) {
-    return Padding(
-      padding: EdgeInsets.only(right: isLargeScreen ? 20.0 : 10.0),
-      child: Image.asset(
-        'assets/naer_icons/icon.png',
-        fit: BoxFit.cover,
-        width: isLargeScreen ? 70.0 : 50.0,
-      ),
     );
   }
 
   Text logoText(bool isLargeScreen, BuildContext context, WidgetRef ref) {
     return Text(
-      'NAER v3.5a',
+      'NAER v3.6a',
       style: TextStyle(
         fontSize: isLargeScreen ? 48.0 : 24.0,
         color: AutomatoThemeColors.darkBrown(ref),
         fontWeight: FontWeight.w700,
         shadows: [
           Shadow(
-              offset: const Offset(5.0, 5),
-              color: AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5)),
+            offset: const Offset(5.0, 5),
+            color: AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5),
+          ),
         ],
       ),
     );

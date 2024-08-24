@@ -6,7 +6,6 @@ import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BalanceModeCheckBox extends ConsumerStatefulWidget {
@@ -26,15 +25,12 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
   }
 
   Future<void> loadBalanceMode() async {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
+    final globalState = ref.read(globalStateProvider.notifier);
     final prefs = await SharedPreferences.getInstance();
     bool? savedValue = prefs.getBool('balance_mode');
     if (savedValue != null) {
-      setState(() {
-        globalState.balanceModeCheckBoxValue = savedValue;
-        globalState.isBalanceMode = globalState.balanceModeCheckBoxValue;
-      });
+      globalState.setBalanceModeCheckBoxValue(savedValue);
+      globalState.setIsBalanceMode(globalState.readBalanceModeCheckBoxValue());
     }
   }
 
@@ -44,8 +40,7 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
   }
 
   Future<void> deleteEnemyFilesIfBalanceModeUnchecked() async {
-    final globalState =
-        provider.Provider.of<GlobalState>(context, listen: false);
+    final globalState = ref.watch(globalStateProvider);
     if (!globalState.isBalanceMode!) {
       final directory = Directory("${globalState.specialDatOutputPath}/em");
 
@@ -84,31 +79,30 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
         } else if (snapshot.hasError) {
           return const Text('Error loading balance mode');
         } else {
-          final globalState =
-              provider.Provider.of<GlobalState>(context, listen: false);
+          final globalState = ref.read(globalStateProvider.notifier);
           return AutomatoCheckBox(
-            initialValue: globalState.balanceModeCheckBoxValue,
+            initialValue: globalState.readBalanceModeCheckBoxValue(),
             textColorUnchecked: AutomatoThemeColors.primaryColor(ref),
             onChanged: (bool? newValue) async {
               setState(() {
-                globalState.balanceModeCheckBoxValue = newValue ?? false;
-                globalState.isBalanceMode =
-                    globalState.balanceModeCheckBoxValue;
-                _saveBalanceMode(globalState.balanceModeCheckBoxValue);
+                globalState.setBalanceModeCheckBoxValue(newValue ?? false);
+                globalState.setIsBalanceMode(
+                    globalState.readBalanceModeCheckBoxValue());
+                _saveBalanceMode(globalState.readBalanceModeCheckBoxValue());
               });
 
-              if (globalState.isBalanceMode!) {
+              if (globalState.readIsBalanceMode()!) {
                 globalLog(
                     "Balance Mode enabled, file stats will be changed during modifying process.");
               }
 
-              if (!globalState.isBalanceMode!) {
+              if (!globalState.readIsBalanceMode()!) {
                 await deleteEnemyFilesIfBalanceModeUnchecked();
                 globalLog(
                     "Balance Mode disabled, all existing files associated with it have been removed.");
               }
             },
-            text: globalState.balanceModeCheckBoxValue
+            text: globalState.readBalanceModeCheckBoxValue()
                 ? 'Balance Mode: Enabled'
                 : 'Balance Mode: Disabled',
           );

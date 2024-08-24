@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:ffi/ffi.dart';
 
 /// Loads the dynamic library for the platform.
-/// The DLL `yax_to_xml.dll` should be in the same directory as the Dart executable.
+/// The DLL `extract_dat_files.dll` should be in the same directory as the Dart executable.
 final DynamicLibrary dylib = DynamicLibrary.open('extract_dat_files.dll');
 
 /// Type definition for the `extract_dat_files_ffi` function in the Rust library.
@@ -34,29 +34,24 @@ final ExtractDatFilesFFI extractDatFilesFFI = dylib
 /// 5. Parses the JSON result to get a list of extracted file paths.
 Future<List<String>> extractDatFiles(String datFilePath, String extractDirPath,
     bool shouldExtractPakFiles) async {
-  // Convert Dart strings to C-style UTF-8 strings.
   final Pointer<Utf8> datFilePathPtr = datFilePath.toNativeUtf8();
   final Pointer<Utf8> extractDirPathPtr = extractDirPath.toNativeUtf8();
 
-  // Call the Rust function.
-  final Pointer<Utf8> resultPtr = extractDatFilesFFI(
-      datFilePathPtr, extractDirPathPtr, shouldExtractPakFiles ? 1 : 0);
+  try {
+    // Call the Rust function.
+    final Pointer<Utf8> resultPtr = extractDatFilesFFI(
+        datFilePathPtr, extractDirPathPtr, shouldExtractPakFiles ? 1 : 0);
 
-  // Free the allocated memory.
-  malloc.free(datFilePathPtr);
-  malloc.free(extractDirPathPtr);
+    if (resultPtr == nullptr) {
+      throw Exception('Error extracting DAT files.');
+    }
 
-  if (resultPtr == nullptr) {
-    throw Exception('Error extracting DAT files.');
+    final String resultStr = resultPtr.toDartString();
+
+    final List<dynamic> files = jsonDecode(resultStr);
+    return files.cast<String>();
+  } finally {
+    malloc.free(datFilePathPtr);
+    malloc.free(extractDirPathPtr);
   }
-
-  // Convert the result to a Dart string.
-  final String resultStr = resultPtr.toDartString();
-
-  // Free the allocated memory for the result.
-  malloc.free(resultPtr);
-
-  // Parse the JSON result to get a list of extracted file paths.
-  final List<dynamic> files = jsonDecode(resultStr);
-  return files.cast<String>();
 }

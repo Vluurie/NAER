@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ExperienceWidget extends ConsumerStatefulWidget {
   final String filePath;
 
-  /// A StatefulWidget that displays and allows updating of the NieR:Automata SlotData's experience and level.
+  /// Displays and allows updating of the NieR:Automata SlotData's experience and level.
   ///
   /// Requires a filePath to the SlotData.
   ///
@@ -18,15 +18,12 @@ class ExperienceWidget extends ConsumerStatefulWidget {
 }
 
 class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
-  // Experience related state variables
   int _experience = 0;
   int _level = 0;
   int _experienceToNextLevel = 0;
 
-  /// Controller for the text field allowing manual experience input.
   final TextEditingController _controller = TextEditingController();
 
-  /// Dropdown menu items for selecting a level.
   List<DropdownMenuItem<int>> dropdownItems = [];
 
   @override
@@ -104,20 +101,33 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
   /// Persists the updated experience value to the file and shows a confirmation snackbar.
   void _persistExperienceChange(int experience) {
     ExperienceService.updateExperienceInFile(widget.filePath, experience)
-        .then((_) => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  backgroundColor: AutomatoThemeColors.darkBrown(ref),
-                  content: Text(
-                    'Experience updated! New experience: $experience',
-                    style: TextStyle(color: AutomatoThemeColors.textColor(ref)),
-                  )),
-            ))
-        .catchError(
-            // ignore: invalid_return_type_for_catch_error, avoid_print
-            (error) => print('Error updating experience in file: $error'));
+        .then((_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AutomatoThemeColors.darkBrown(ref),
+            content: Text(
+              'Experience updated! New experience: $experience',
+              style: TextStyle(color: AutomatoThemeColors.textColor(ref)),
+            ),
+          ),
+        );
+      }
+    }).catchError((error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'Error updating experience in file: $error',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    });
   }
 
-  /// Builds the widget UI, allowing users to view and update their experience and level.
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -140,15 +150,13 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Note: Changes are directly modified and saved.'),
-                  // Current level display and dropdown for level selection
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const SizedBox(
                         child: Text(
                           'Current: ',
-                          style: TextStyle(
-                              fontSize: 20), // Adjusted for visibility
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
                       DropdownMenu(
@@ -159,18 +167,15 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // Progress bar showing progress towards the next level
                   LinearProgressIndicator(
                     value: _calculateExperienceProgress(),
                     backgroundColor: AutomatoThemeColors.textColor(ref),
                     color: AutomatoThemeColors.saveZone(ref),
                   ),
                   const SizedBox(height: 20),
-                  // Displays the experience points needed to reach the next level
                   Text(
                     'Experience to Next Level: $_experienceToNextLevel',
-                    style:
-                        theme.textTheme.titleMedium, // Adjusted for visibility
+                    style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 30),
                   // Input field for manually adding experience

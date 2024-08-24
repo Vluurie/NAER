@@ -9,8 +9,6 @@ class SpecialEntities {
     }).toList();
   }
 
-  // TODO: Check this entity since this route puid level will not be changed 0x29cb2a43
-
   static const Map<String, Set<String>> bigSpawnEnemySkipIds = {
     "EnemySetAction": {
       '0x15a6e4d9', // Bunker attack - commander room enemies

@@ -9,14 +9,31 @@ import 'package:isolate/isolate.dart';
 class IsolateService {
   final int numberOfIsolates;
   LoadBalancer? _loadBalancer;
+  final List<IsolateRunner> _isolateRunners = [];
+  final List<IsolateRunner> _availableRunners = [];
+  bool _isInitialized = false;
 
-  IsolateService() : numberOfIsolates = Platform.numberOfProcessors {
-    _initializeLoadBalancer();
+  IsolateService({bool autoInitialize = false})
+      : numberOfIsolates = Platform.numberOfProcessors {
+    if (autoInitialize) {
+      _initializeLoadBalancer();
+    }
   }
 
   Future<void> _initializeLoadBalancer() async {
-    _loadBalancer ??=
-        await LoadBalancer.create(numberOfIsolates, IsolateRunner.spawn);
+    if (!_isInitialized) {
+      _loadBalancer = await LoadBalancer.create(numberOfIsolates, () async {
+        final runner = await _getOrCreateRunner();
+        return runner;
+      });
+      _isInitialized = true;
+    }
+  }
+
+  Future<void> initialize({bool forceReinitialize = false}) async {
+    if (!_isInitialized || forceReinitialize) {
+      await _initializeLoadBalancer();
+    }
   }
 
   Future<T> runTask<T>(FutureOr<T> Function(dynamic) task, dynamic arg) async {
@@ -52,32 +69,32 @@ class IsolateService {
     await Future.wait(taskFutures);
   }
 
-  void runInIsolate(Function function, List<dynamic> arguments) async {
+  Future<void> runInIsolate(Function function, List<dynamic> arguments) async {
     final receivePort = ReceivePort();
-    await Isolate.spawn(
-        isolateEntry, [function, arguments, receivePort.sendPort]);
+    final runner = await _getOrCreateRunner();
+    await runner.run(isolateEntry, [function, arguments, receivePort.sendPort]);
+    _availableRunners.add(runner); // Return the runner to the pool
     await receivePort.first;
   }
 
   Future<void> runInAwaitedIsolate(
       Function function, List<dynamic> arguments) async {
     final receivePort = ReceivePort();
-    await Isolate.spawn(
-        isolateEntry, [function, arguments, receivePort.sendPort]);
+    final runner = await _getOrCreateRunner();
+    await runner.run(isolateEntry, [function, arguments, receivePort.sendPort]);
+    _availableRunners.add(runner); // Return the runner to the pool
     await receivePort.first;
   }
 
-  Future<T> runInAwaitedReturnIsolate<T>(
-      Function function, List<dynamic> arguments) async {
-    final receivePort = ReceivePort();
-    await Isolate.spawn(
-        _isolateEntryWithReturn, [function, arguments, receivePort.sendPort]);
-
-    final result = await receivePort.first;
-    if (result is T) {
-      return result;
+  Future<IsolateRunner> _getOrCreateRunner() async {
+    // If there is an available runner, reuse it
+    if (_availableRunners.isNotEmpty) {
+      return _availableRunners.removeLast();
     } else {
-      throw Exception('Unexpected result type: ${result.runtimeType}');
+      // Otherwise, create a new runner
+      final runner = await IsolateRunner.spawn();
+      _isolateRunners.add(runner);
+      return runner;
     }
   }
 
@@ -95,16 +112,18 @@ class IsolateService {
     }
   }
 
-  static Future<void> _isolateEntryWithReturn(List<dynamic> args) async {
-    final function = args[0] as Function;
-    final arguments = args[1] as List<dynamic>;
-    final sendPort = args[2] as SendPort;
-
-    try {
-      final result = await Function.apply(function, arguments);
-      sendPort.send(result);
-    } catch (e) {
-      sendPort.send(e);
+  Future<void> killAllIsolates() async {
+    for (var runner in _isolateRunners) {
+      await runner.close();
     }
+    _isolateRunners.clear();
+    _availableRunners.clear();
+  }
+
+  Future<void> cleanup() async {
+    await _loadBalancer?.close();
+    await killAllIsolates();
+    _loadBalancer = null;
+    _isInitialized = false;
   }
 }

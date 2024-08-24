@@ -1,5 +1,4 @@
 import 'package:NAER/naer_utils/isolate_service.dart';
-
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_file_randomizer.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_extract_game_files.dart';
@@ -23,13 +22,15 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders
 ///
 /// [mainData] contains the necessary data and configuration for processing the game files.
 Future<void> mainFuncProcessGameFiles(MainData mainData) async {
+  final isolateService = IsolateService(autoInitialize: false);
+
   String inputDir = mainData.argument['input'];
   String outputDir = path.dirname(inputDir);
   bool extractedFoldersExist = checkIfExtractedFoldersExist(outputDir);
 
   if (mainData.isManagerFile!) {
-    // Start deleting existing extracted folders and let it run in an isolate.
-    IsolateService().runInIsolate(deleteExtractedGameFolders, [inputDir]);
+    await isolateService.initialize();
+    await isolateService.runInIsolate(deleteExtractedGameFolders, [inputDir]);
   }
 
   // Extract the game files if they are not already extracted and create copies of the extracted files.
@@ -46,8 +47,7 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
 
   // Identify files to be processed and add them to the pending files list.
   if (mainData.isManagerFile!) {
-    // init pending files
-    //  mainData.argument['pendingFiles'];
+    await isolateService.initialize();
     await getGameFilesForProcessing(inputDir, mainData);
   }
 
@@ -55,8 +55,7 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   var collectedFiles = collectExtractedGameFiles(inputDir);
 
   // Modify or randomize enemies within the input .xml files based on the arguments.
-  //await processEnemies(mainData, collectedFiles, inputDir);
-  await IsolateService().runInAwaitedIsolate(
+  await isolateService.runInAwaitedIsolate(
       processEnemies, [mainData, collectedFiles, inputDir]);
 
   // Process enemy stats for the specified enemies from the enemy list.
@@ -68,11 +67,14 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
   await repackModifiedGameFiles(collectedFiles, mainData);
 
   // Start cleaning tasks and let them run in an isolate.
-  IsolateService().runInIsolate(deleteExtractedGameFolders, [mainData.output]);
-  IsolateService()
+  await isolateService
+      .runInIsolate(deleteExtractedGameFolders, [mainData.output]);
+  await isolateService
       .runInIsolate(deleteExtractedGameFolders, [mainData.argument['input']]);
 
   // Reverse the modified .csv files to their original state.
-  IsolateService().runInIsolate(
+  await isolateService.runInIsolate(
       processEnemyStats, [inputDir, mainData, reverseStats = true]);
+
+  await isolateService.cleanup();
 }

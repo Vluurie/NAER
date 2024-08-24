@@ -9,7 +9,7 @@ List<Widget> generateModificationDetails(WidgetRef ref) {
   List<Widget> details = [];
 
   String enemyList = getSelectedEnemiesNames(ref);
-  String categoryDetail = globalState.level.entries
+  String categoryDetail = globalState.levelMap.entries
       .firstWhere((entry) => entry.value,
           orElse: () => const MapEntry("None", false))
       .key;

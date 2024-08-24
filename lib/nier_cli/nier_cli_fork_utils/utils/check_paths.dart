@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:NAER/naer_utils/change_tracker.dart';
@@ -12,29 +14,61 @@ import 'package:path/path.dart' as path;
 ///
 /// - Parameter arguments: The list of command-line arguments.
 /// - Returns: The sorted enemies path if it exists, otherwise null.
-String? getSortedEnemiesPath(List<String> arguments) {
+String? getSortedEnemyGroupsIdentifierMap(List<String> arguments) {
   if (arguments.length >= 4) {
     return arguments[3];
   }
   return null;
 }
 
-/// Validates the provided paths for sorted enemies and output.
+/// Validates the provided paths for the sorted enemies file and output.
 ///
-/// This function checks if the `sortedEnemiesPath` and `output` paths are valid.
-/// If either path is null or invalid, it throws a [FileHandlingException].
+/// This function checks if the `sortedEnemyGroupsIdentifierMap` and `output` paths are valid.
+/// If either path is null or invalid, it throws a [FileHandlingException] message.
 ///
 /// - Parameters:
-///   - sortedEnemiesPath: The path to the sorted enemies file.
-///   - output: The output path where results should be saved.
-/// - Throws: [FileHandlingException] if either path is invalid.
-void validatePaths(String? sortedEnemiesPath, String? output) {
-  if (sortedEnemiesPath == null || sortedEnemiesPath.isEmpty) {
-    throw const FileHandlingException("Sorted enemies file path not specified");
-  }
+///   - sortedEnemyGroupsIdentifierMap: string "ALL" or "CUSTOM_SELECTED".
+///   - output: The output path where results should be saved (must be the second argument).
+/// - Throws: [FileHandlingException] if either path is invalid or not provided.
+void validateIdentifierAndOutput(
+    String? sortedEnemyGroupsIdentifierMap, String? output) {
+  try {
+    if (sortedEnemyGroupsIdentifierMap == null ||
+        sortedEnemyGroupsIdentifierMap.isEmpty) {
+      throw const FileHandlingException(
+          "The sorted enemies identifier is not specified. Please make sure the third argument is either 'CUSTOM_SELECTED' or 'ALL' to include all enemies.");
+    }
 
-  if (output == null) {
-    throw const FileHandlingException("Output path not specified");
+    if (output == null || output.isEmpty) {
+      throw const FileHandlingException(
+          "The output path is not specified. Please make sure the second argument is the path where you want to save the results.");
+    }
+  } catch (e) {
+    print('''
++-------------------------------------------------+
+| Oops! Something went wrong with the paths.      |
++-------------------------------------------------+
+| Possible Issues:                                |
+| - The third argument (path to sorted enemies)   |
+|   is missing or incorrect. Ensure it's either   |
+|   an absolute path (e.g.,                       |
+|   ../NAER_Settings/temp_sorted_enemies.dart) or |
+|   the word 'ALL' to include all enemies.        |
+| - The second argument (output path) is missing  |
+|   or incorrect. Ensure it's the correct path    |
+|   where you want to save the results.           |
++-------------------------------------------------+
+| What to do:                                     |
+| 1. Ensure the third argument is correct.        |
+| 2. Ensure the second argument is correct.       |
+| 3. Double-check both paths for typos or errors. |
++-------------------------------------------------+
+| Error Details:                                  |
+| $e                                              |
++-------------------------------------------------+
+| If issues persist, seek further assistance.     |
++-------------------------------------------------+
+''');
   }
 }
 

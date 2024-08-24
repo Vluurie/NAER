@@ -1,18 +1,14 @@
 import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
-import 'package:flutter/material.dart';
+import 'package:NAER/naer_utils/state_provider/selected_enemy_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<Map<String, List<String>>> readEnemyData(bool hasDLC) async {
-  return SortedEnemyGroup.getDLCFilteredEnemyData(hasDLC);
-}
-
-Future<Map<String, List<String>>> sortSelectedEnemies(
-    List<String> selectedImages, BuildContext context, WidgetRef ref) async {
+Future<Map<String, List<String>>> sortSelectedEnemiesState(
+    List<String> selectedImages, WidgetRef ref) async {
   final globalState = ref.watch(globalStateProvider);
-  List<String>? selectedImages = globalState.selectedImages;
-  var enemyGroups = await readEnemyData(globalState.hasDLC);
+  var enemyGroups =
+      SortedEnemyGroup.getDLCFilteredEnemyData(globalState.hasDLC);
 
   var formattedSelectedImages =
       selectedImages.map((image) => image.split('.').first).toList();
@@ -32,9 +28,16 @@ Future<Map<String, List<String>>> sortSelectedEnemies(
         break;
       }
     }
-    if (!found) {}
+    if (!found) {
+      sortedSelection["Delete"]?.add(enemy);
+    }
   }
 
+  ref
+      .read(sortedEnemyDataProvider.notifier)
+      .updateSelectedEnemies(sortedSelection);
+
+  // Return the sorted map
   return sortedSelection;
 }
 
