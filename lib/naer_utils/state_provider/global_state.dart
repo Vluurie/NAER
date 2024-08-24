@@ -643,7 +643,7 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
     state.enemyImageGridKey.currentState?.unselectAllImages();
   }
 
-  // Method to get the GlobalKey for accessing the EnemyImageGridState
+  // i dont't like this
   GlobalKey<EnemyImageGridState> get enemyImageGridKey =>
       state.enemyImageGridKey;
 

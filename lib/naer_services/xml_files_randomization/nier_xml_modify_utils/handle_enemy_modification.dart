@@ -46,10 +46,8 @@ Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
 }
 
 /// Handles the processing if the element is part of a ShootingEnemyCurveAction.
-///
-/// This function performs the following tasks:
 /// - If [handleLevels] is true, it handles the level using [handleLevel] and randomizes the enemy number if [randomizeAndSetValues] is true.
-/// - By default, it sets specific values with [setSpecificValues].
+/// - By default, it sets [setSpecificValues].
 ///
 Future<void> handleShootingEnemyCurveAction(
     EnemyEntityObjectAction action, String? group) async {
@@ -71,9 +69,7 @@ Future<void> handleShootingEnemyCurveAction(
   setSpecificValues(action.objIdElement, action.objIdElement.innerText);
 }
 
-/// Handles selected object ID enemies by randomizing their IDs, setting specific values, and handling levels.
-///
-/// This function calls [handleEnemyEntityObject] with the [handleLevels] and [randomizeAndSetValues] parameters set to true.
+/// Calls [handleEnemyEntityObject] with the [handleLevels] and [randomizeAndSetValues] parameters set to true.
 Future<void> handleSelectedObjectIdEnemies(
   xml.XmlElement objIdElement,
   Map<String, List<String>> userSelectedEnemyData,
@@ -92,9 +88,7 @@ Future<void> handleSelectedObjectIdEnemies(
   );
 }
 
-/// Handles only the enemy level without randomizing IDs or setting specific values.
-///
-/// This function calls [handleEnemyEntityObject] with the [handleLevels] parameter set to true.
+/// Calls [handleEnemyEntityObject] with the [handleLevels] parameter set to true.
 Future<void> handleOnlyObjectIdLevel(
   xml.XmlElement objIdElement,
   Map<String, List<String>> userSelectedEnemyData,
@@ -111,9 +105,7 @@ Future<void> handleOnlyObjectIdLevel(
   );
 }
 
-/// Handles default object ID enemies by randomizing their IDs and setting specific values.
-///
-/// This function calls [handleEnemyEntityObject] with the [randomizeAndSetValues] parameter set to true, and an empty [enemyLevel].
+/// Calls [handleEnemyEntityObject] with the [randomizeAndSetValues] parameter set to true, and an empty [enemyLevel].
 Future<void> handleDefaultObjectId(
   xml.XmlElement objIdElement,
   Map<String, List<String>> userSelectedEnemyData,

@@ -27,13 +27,12 @@ Future<bool> startNierAutomataExecutable(
       try {
         await ProcessService.startProcess(processPath);
 
-        // Start a 60-second listener to check if the process starts
+        //  60-second listener to check if the process starts
         bool processStarted =
             await ProcessService.checkProcessStartedWithinTime(
                 'NierAutomata.exe', const Duration(seconds: 60));
 
         if (processStarted) {
-          // If process started within 20 seconds, continue with 2-second monitoring
           ProcessService.monitorProcessByName(
               'NierAutomata.exe', onProcessStopped);
           return true; // Process started successfully
@@ -113,7 +112,7 @@ class ProcessService {
       }
     });
 
-    // Set a timeout to stop the check after the specified duration
+    // timeout to stop the check after duration
     timeoutTimer = Timer(timeout, () {
       checkTimer?.cancel();
       if (!completer.isCompleted) {

@@ -53,13 +53,13 @@ class ModifyDraggedFile {
             'isBalanceMode': globalState.readIsBalanceMode(),
             'hasDLC': globalState.readHasDLC()
           };
-          globalState.setIsModManagerPageProcessing(true); //= true;
+          globalState.setIsModManagerPageProcessing(true);
           await compute(runNierCliIsolated, args);
-          globalState.setIsModManagerPageProcessing(false); //= false;
+          globalState.setIsModManagerPageProcessing(false);
           globalLog(
               "Randomization process finished the dragged file successfully.");
         } catch (e) {
-          globalState.setIsModManagerPageProcessing(false); // = false;
+          globalState.setIsModManagerPageProcessing(false);
           logState.addLog("Failed to process folder $folderPath: $e");
         }
       }

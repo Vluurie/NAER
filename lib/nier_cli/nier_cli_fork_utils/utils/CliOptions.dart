@@ -23,6 +23,4 @@ class CliOptions {
     required this.specialDatOutputPath,
   })  : autoExtractChildren = true, // Always set to true
         fileTypeIsKnown = isCpk || isDat || isPak || isYax;
-
-  // Add an empty constructor body
 }

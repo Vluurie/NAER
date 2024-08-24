@@ -5,19 +5,16 @@ import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// StateNotifier to manage the selected setup's state
 class SetupStateNotifier extends StateNotifier<String?> {
   SetupStateNotifier() : super(null) {
     _loadSelectedSetup();
   }
 
-  // Load the saved setup ID from shared preferences
   Future<void> _loadSelectedSetup() async {
     final prefs = await SharedPreferences.getInstance();
     state = prefs.getString('selectedSetupId');
   }
 
-  // Save the selected setup ID to shared preferences
   Future<void> _saveSelectedSetup(String? setupId) async {
     final prefs = await SharedPreferences.getInstance();
     if (setupId == null) {
@@ -27,27 +24,24 @@ class SetupStateNotifier extends StateNotifier<String?> {
     }
   }
 
-  // Select a new setup and persist it
   void selectSetup(String? setupId) {
     state = setupId;
     _saveSelectedSetup(setupId);
   }
 
-  // Deselect the current setup
   void deselectSetup() {
     state = null;
     _saveSelectedSetup(null);
   }
 }
 
-// Provider for the SetupStateNotifier
 final setupStateProvider =
     StateNotifierProvider<SetupStateNotifier, String?>((ref) {
   return SetupStateNotifier();
 });
 
 class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
-  final Ref ref; // Declare a private ref variable
+  final Ref ref;
 
   SetupConfigNotifier(this.ref) : super([]) {
     _loadConfigs();

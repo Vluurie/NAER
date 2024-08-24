@@ -132,7 +132,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
   }
 
   Future<void> _processDraggedItems(List<String> paths) async {
-    setState(() => _isLoading = true); // Start loading
+    setState(() => _isLoading = true);
 
     final ModifyDraggedFile random = ModifyDraggedFile(
         cliArguments: widget.cliArguments, context: context, ref: ref);

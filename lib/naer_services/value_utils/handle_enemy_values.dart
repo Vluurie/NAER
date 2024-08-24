@@ -33,15 +33,9 @@ Future<void> setSpecificValues(
   await _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
 }
 
-/// Chooses which element to set based on the provided values.
-///
-/// This function prioritizes 'setType' over 'setFlag' based on a 65% bias.
+/// Prioritizes 'setType' over 'setFlag' based on a 65% bias.
 /// It evaluates the availability and validity of 'setType' and 'setFlag' values,
 /// and returns a [MapEntry] containing the chosen element name and value.
-///
-/// - Parameters:
-///   - values: A map containing 'setType' and 'setFlag' values.
-/// - Returns: A [MapEntry] with the selected element name and value, or null if no valid value is found.
 MapEntry<String, String>? _chooseElementToSet(Map<String, dynamic> values) {
   const int setTypeBias = 65;
   var setTypeValues = values['setType'] as List<int?>?;
@@ -55,12 +49,6 @@ MapEntry<String, String>? _chooseElementToSet(Map<String, dynamic> values) {
 }
 
 /// Determines whether 'setType' should be chosen based on the provided values and bias.
-///
-/// - Parameters:
-///   - setTypeValues: A list of possible 'setType' values.
-///   - setFlagValues: A list of possible 'setFlag' values.
-///   - setTypeBias: The bias percentage favoring 'setType'.
-/// - Returns: True if 'setType' should be chosen, false otherwise.
 bool _shouldChooseSetType(
     List<int?>? setTypeValues, List<int?>? setFlagValues, int setTypeBias) {
   return setTypeValues != null &&
@@ -70,14 +58,9 @@ bool _shouldChooseSetType(
           Random().nextInt(100) < setTypeBias);
 }
 
-/// Selects a value from 'setTypeValues'.
-///
-/// This function randomly selects a value from the provided 'setTypeValues'.
+/// Randomly selects a value from the provided 'setTypeValues'.
 /// If the selected value is 0, it returns null.
-///
-/// - Parameters:
-///   - setTypeValues: A list of possible 'setType' values.
-/// - Returns: A [MapEntry] with 'setType' and the selected value, or null if the value is 0.
+
 MapEntry<String, String>? _selectSetType(List<int?>? setTypeValues) {
   if (setTypeValues == null || setTypeValues.isEmpty) return null;
   int? setTypeValue = setTypeValues[Random().nextInt(setTypeValues.length)];
@@ -85,14 +68,8 @@ MapEntry<String, String>? _selectSetType(List<int?>? setTypeValues) {
   return MapEntry('setType', setTypeValue.toString());
 }
 
-/// Selects a value from 'setFlagValues'.
-///
-/// This function randomly selects a value from the provided 'setFlagValues'
+/// Randomly selects a value from the provided 'setFlagValues'
 /// and converts it to a hexadecimal string prefixed with '0x'.
-///
-/// - Parameters:
-///   - setFlagValues: A list of possible 'setFlag' values.
-/// - Returns: A [MapEntry] with 'setFlag' and the selected value.
 MapEntry<String, String>? _selectSetFlag(List<int?>? setFlagValues) {
   if (setFlagValues == null || setFlagValues.isEmpty) return null;
   int? setFlagValue = setFlagValues[Random().nextInt(setFlagValues.length)];
@@ -101,14 +78,6 @@ MapEntry<String, String>? _selectSetFlag(List<int?>? setFlagValues) {
 }
 
 /// Updates or creates the selected element within the XML structure.
-///
-/// This function finds the parent 'value' element and the correct insertion position
-/// for the new element. It then removes conflicting elements and updates or creates
-/// the selected element with the provided value.
-///
-/// - Parameters:
-///   - objIdElement: The XML element to update.
-///   - selection: A [MapEntry] containing the name and value of the element to set.
 Future<void> _updateElement(
     xml.XmlElement objIdElement, MapEntry<String, String> selection) async {
   var parentValueElement = _findParentValueElement(objIdElement);
@@ -132,10 +101,7 @@ Future<void> _updateElement(
 
 /// Ensures the 'levelRange' element is correctly positioned after 'objId' and 'rate' (if it exists) and before 'setType' and 'setFlag' elements.
 ///
-/// This function finds the 'levelRange' element and repositions it if necessary.
-///
-/// - Parameters:
-///   - objIdElement: The XML element to check and adjust.
+/// Finds the 'levelRange' element and repositions it if necessary.
 Future<void> _ensureLevelRangeIsCorrectlyPositioned(
     xml.XmlElement objIdElement) async {
   var parentValueElement = _findParentValueElement(objIdElement);
@@ -156,10 +122,7 @@ Future<void> _ensureLevelRangeIsCorrectlyPositioned(
 
 /// Ensures the 'rate' element is correctly positioned immediately after the 'objId' element.
 ///
-/// This function finds the 'rate' element and repositions it if necessary.
-///
-/// - Parameters:
-///   - objIdElement: The XML element to check and adjust.
+/// Finds the 'rate' element and repositions it if necessary.
 Future<void> _ensureRateIsCorrectlyPositioned(
     xml.XmlElement objIdElement) async {
   var parentValueElement = _findParentValueElement(objIdElement);
@@ -177,12 +140,8 @@ Future<void> _ensureRateIsCorrectlyPositioned(
 
 /// Finds the parent 'value' element starting from the given XML element.
 ///
-/// This function traverses the XML tree upwards starting from the provided element
+/// Traverses the XML tree upwards starting from the provided element
 /// and returns the first parent element with the name 'value'.
-///
-/// - Parameters:
-///   - startingElement: The XML element to start the search from.
-/// - Returns: The parent 'value' element if found, or null otherwise.
 xml.XmlElement? _findParentValueElement(xml.XmlElement startingElement) {
   var currentElement = startingElement.parent;
   while (currentElement != null && currentElement is xml.XmlElement) {
@@ -194,37 +153,19 @@ xml.XmlElement? _findParentValueElement(xml.XmlElement startingElement) {
   return null;
 }
 
-/// Finds the index of the 'objId' element within the parent 'value' element.
-///
-/// This function searches for the 'objId' element and returns its index.
-///
-/// - Parameters:
-///   - parentValueElement: The parent 'value' element to search within.
-/// - Returns: The index of the 'objId' element.
+///Searches for the 'objId' element and returns its index.
 int _findObjIdIndex(xml.XmlElement parentValueElement) {
   return parentValueElement.children.indexWhere(
       (element) => element is xml.XmlElement && element.name.local == 'objId');
 }
 
-/// Finds the index of the 'rate' element within the parent 'value' element.
-///
-/// This function searches for the 'rate' element and returns its index.
-///
-/// - Parameters:
-///   - parentValueElement: The parent 'value' element to search within.
-/// - Returns: The index of the 'rate' element.
+/// Searches for the 'rate' element and returns its index.
 int _findRateIndex(xml.XmlElement parentValueElement) {
   return parentValueElement.children.indexWhere(
       (element) => element is xml.XmlElement && element.name.local == 'rate');
 }
 
-/// Finds the index of the 'levelRange' element within the parent 'value' element.
-///
-/// This function searches for the 'levelRange' element and returns its index.
-///
-/// - Parameters:
-///   - parentValueElement: The parent 'value' element to search within.
-/// - Returns: The index of the 'levelRange' element.
+/// Sarches for the 'levelRange' element and returns its index.
 int _findLevelRangeIndex(xml.XmlElement parentValueElement) {
   return parentValueElement.children.indexWhere((element) =>
       element is xml.XmlElement && element.name.local == 'levelRange');
@@ -232,10 +173,7 @@ int _findLevelRangeIndex(xml.XmlElement parentValueElement) {
 
 /// Removes 'setType', 'setRtn', and 'setFlag' elements from the XML element.
 ///
-/// This function targets the specified elements for removal within the 'value' parent element.
-///
-/// - Parameters:
-///   - objIdElement: The XML element from which to remove specified child elements.
+/// Targets the elements for removal within the 'value' parent element.
 Future<void> _removeSetTypeAndSetRtnAndSetFlag(
     xml.XmlElement objIdElement) async {
   const elementsToRemove = ['setType', 'setRtn', 'setFlag'];

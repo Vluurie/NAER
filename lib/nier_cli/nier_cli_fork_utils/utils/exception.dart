@@ -9,14 +9,6 @@ class FileHandlingException implements Exception {
   String toString() => message;
 }
 
-/// Handles the errors encountered during file processing.
-///
-/// This function takes a list of error files and logs the errors.
-/// If there are any files in the [errorFiles] list, it logs the number of failed files
-/// and lists each file that failed to process. If there are no errors, it logs a success message.
-///
-/// [errorFiles] is a list of file paths that encountered errors during processing.
-///
 void handleExtractErrors(List<String> errorFiles) {
   if (errorFiles.isNotEmpty) {
     logAndPrint("Failed to extract ${errorFiles.length} files:");

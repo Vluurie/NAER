@@ -81,7 +81,7 @@ class InputDirectoryHandler {
     }
   }
 
-  // Method to manage isolates and search across all drives
+  // Manages isolates and search across all drives
   Future<String?> _searchAcrossDrives(List<String> drives) async {
     final completer = Completer<String?>();
     final receivePort = ReceivePort();
@@ -112,7 +112,6 @@ class InputDirectoryHandler {
     return completer.future;
   }
 
-  // Entry point for the isolate
   static Future<void> _isolateSearchEntry(List<dynamic> args) async {
     final String drive = args[0];
     final SendPort sendPort = args[1];
@@ -121,7 +120,6 @@ class InputDirectoryHandler {
     sendPort.send(foundDirectory);
   }
 
-  // Function to search for the NieR:Automata directory within a specific drive
   static Future<String?> _searchForNierAutomataDirectory(String drive) async {
     Directory rootDir = Directory(drive);
     return await _bfsSearchDirectory(rootDir);
@@ -141,7 +139,7 @@ class InputDirectoryHandler {
           if (entity is Directory) {
             String dirPath = entity.path;
 
-            // Check if the directory is the target "NieRAutomata\data"
+            // Check if the directory is the target "NieRAutomata\data and got the .exe"
             if (dirPath.endsWith(r'NieRAutomata\data')) {
               String parentDir = Directory(dirPath).parent.path;
               File exeFile = File(path.join(parentDir, 'NieRAutomata.exe'));

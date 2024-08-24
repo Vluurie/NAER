@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:NAER/data/enemy_lists_data/nier_boss_level_list.dart';
 import 'package:NAER/data/sorted_data/nier_shooting_enemy_curve_action_ids.dart';
@@ -10,12 +9,6 @@ import 'package:xml/xml.dart' as xml;
 Random random = Random();
 
 /// Finds the group like Fly or Ground that contains the given enemy number.
-///
-/// Parameters:
-/// - [emNumber]: The enemy number to search for.
-/// - [enemyData]: A map of enemy data grouped by categories.
-///
-/// Returns the group name if found, otherwise returns null.
 String? findGroupForEmNumber(
     String emNumber, Map<String, List<String>> enemyData) {
   for (var group in enemyData.keys) {
@@ -26,52 +19,10 @@ String? findGroupForEmNumber(
   return null;
 }
 
-/// Checks if the given group is an excluded group.
-///
-/// Parameters:
 /// - [group]: The group name to check.
-///
-/// Returns true if the group is excluded, otherwise false.
 bool isExcludedGroup(String group) {
   const excludedGroups = {'Delete'};
   return excludedGroups.contains(group);
-}
-
-/// Reads sorted enemy data groups from the created [temp_sorted_enemies.dart} file.
-///
-/// Parameters:
-/// - [filePath]: The path to the file containing the sorted enemy data.
-///
-/// Returns a map of sorted enemy data grouped by categories.
-///
-/// Throws an exception if the file does not exist or an error occurs while reading the file.
-Future<Map<String, List<String>>> readSortedEnemyDataGroups(
-    String filePath) async {
-  var file = File(filePath);
-  if (!file.existsSync()) {
-    throw Exception('Sorted enemy data file does not exist: $filePath');
-  }
-
-  try {
-    var content = file.readAsStringSync();
-    var sortedEnemyData = <String, List<String>>{};
-    var matches =
-        RegExp(r'"(\w+)": \[(.*?)\]', multiLine: true).allMatches(content);
-    for (var match in matches) {
-      var group = match.group(1)!;
-      var enemiesStr = match.group(2)!.replaceAll(RegExp(r'[\[\]"]'), '');
-      var enemies = enemiesStr
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
-      sortedEnemyData[group] = enemies;
-    }
-
-    return sortedEnemyData;
-  } catch (e) {
-    throw Exception('Error reading sorted enemy data: $e');
-  }
 }
 
 // Check if any ancestor of objIdElement contains an 'alias' element
@@ -166,7 +117,7 @@ Future<bool> checkTooSmallSpawnAction(
 /// Retrieves a collection of XML elements that represent enemy code actions
 /// containing enemy `objId`s used to spawn the enemies.
 ///
-/// This function filters the descendants of the given `action` XML element to
+/// Filters the descendants of the given `action` XML element to
 /// find 'code' elements whose 'str' attribute starts with any of the specified
 /// prefixes. These prefixes are associated with various enemy-related actions
 /// that include enemy `objId`s and are used for spawning enemies or other entities.
@@ -204,18 +155,6 @@ bool isEnemyGenerator(xml.XmlElement actionElement) {
 }
 
 /// Checks if the given XML element contains a ShootingEnemyCurveAction by traversing its child elements.
-///
-/// This function performs the following tasks:
-/// - Iterates over all elements within the given [element].
-/// - Collects the text of all 'id' elements.
-/// - Compares these 'id' texts against a predefined set of identifiers in [ShootingEnemyCurveAction.identifierSet].
-/// - Returns true if any 'id' matches an identifier in the set; otherwise, returns false.
-///
-/// Parameters:
-/// - [element]: The XML element to check for ShootingEnemyCurveAction.
-///
-/// Returns:
-/// - A boolean indicating whether the given element contains a ShootingEnemyCurveAction.
 bool isShootingEnemyCurveAction(xml.XmlElement element) {
   for (var idElement in element.findAllElements('id')) {
     var idText = idElement.innerText;

@@ -6,17 +6,12 @@ import 'package:ffi/ffi.dart';
 /// The DLL `extract_dat_files.dll` should be in the same directory as the Dart executable.
 final DynamicLibrary dylib = DynamicLibrary.open('extract_dat_files.dll');
 
-/// Type definition for the `extract_dat_files_ffi` function in the Rust library.
-/// This represents the function signature in C: `char* extract_dat_files_ffi(const char* datPath, const char* extractDir, bool shouldExtractPakFiles)`.
 typedef ExtractDatFilesFFIFunc = Pointer<Utf8> Function(Pointer<Utf8> datPath,
     Pointer<Utf8> extractDir, Uint8 shouldExtractPakFiles);
 
-/// Dart function type corresponding to the Rust `extract_dat_files_ffi` function.
 typedef ExtractDatFilesFFI = Pointer<Utf8> Function(
     Pointer<Utf8> datPath, Pointer<Utf8> extractDir, int shouldExtractPakFiles);
 
-/// Looks up the `extract_dat_files_ffi` function in the dynamic library and assigns it to a Dart variable.
-/// The function can then be called from Dart.
 final ExtractDatFilesFFI extractDatFilesFFI = dylib
     .lookup<NativeFunction<ExtractDatFilesFFIFunc>>('extract_dat_files_ffi')
     .asFunction();

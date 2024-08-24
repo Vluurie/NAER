@@ -67,8 +67,7 @@ void changeAppThemePopup(BuildContext context, WidgetRef ref) {
       title: 'Change App Theme',
       content: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height *
-              0.5, // Adjust the height as needed
+          maxHeight: MediaQuery.of(context).size.height * 0.5,
         ),
         child: SingleChildScrollView(
           child: Column(

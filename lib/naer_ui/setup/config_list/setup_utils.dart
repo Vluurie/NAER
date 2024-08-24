@@ -34,12 +34,10 @@ class SetupUtils {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     final globalState = ref.read(globalStateProvider);
 
-    // Check if loading is in progress
     if (globalState.isLoading) {
-      return; // Do nothing if loading is in progress
+      return;
     }
 
-    // Handle setup when it is not selected
     if (!setup.isSelected) {
       if (isNierRunning) {
         showNierIsRunningDialog(context, ref);
@@ -47,7 +45,6 @@ class SetupUtils {
         _selectSetup(setup);
       }
     } else {
-      // Handle setup when it is selected
       if (isNierRunning) {
         showNierIsRunningDialog(context, ref);
       } else {

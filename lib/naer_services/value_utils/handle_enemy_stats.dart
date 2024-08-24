@@ -1,19 +1,11 @@
 import 'dart:io';
 
-/// Finds enemy CSV files containing bosenemys stats in the specified directory.
-///
-/// This function searches through the given [directoryPath] for files that match
-/// the specific enemy pattern that contains enemy stats information.
-///
-/// - Parameters:
-///   - directoryPath: The path of the directory to search in.
-/// - Returns: A list of files that match the criteria.
+/// Finds enemy CSV files containing enemy stats in the specified directory.
 Future<List<File>> findEnemyStatFiles(String directoryPath) async {
   var directory = Directory(directoryPath);
   List<File> enemyFiles = [];
 
   if (!await directory.exists()) {
-    //print("Directory does not exist: $directoryPath");
     return enemyFiles;
   }
 
@@ -30,16 +22,6 @@ Future<List<File>> findEnemyStatFiles(String directoryPath) async {
   return enemyFiles;
 }
 
-/// Processes a CSV file by modifying its contents based on the enemy stats.
-///
-/// This function reads the lines of the specified [file], modifies each line
-/// based on the provided [enemyStats] value, and then writes the modified lines
-/// back to the file. If [enemyStats] is 0.0, the file is skipped.
-///
-/// - Parameters:
-///   - file: The file to process.
-///   - enemyStats: A value representing the enemy stats to be used for modifying file contents.
-///   - reverseStats: A boolean indicating whether to reverse the stats modification.
 Future<void> processCsvFile(
     File file, double enemyStats, bool reverseStats) async {
   try {
@@ -65,18 +47,6 @@ Future<void> processCsvFile(
   }
 }
 
-/// Modifies a line of CSV content based on the enemy stats.
-///
-/// This function takes a line of CSV data, parses it, and modifies the values in
-/// specific columns (columns 2 and 3) based on the provided [enemyStats] value. The
-/// values are scaled by predetermined factors and the modified line is returned as a string.
-/// If the values in columns 2 or 3 are not valid numbers, they are left unchanged.
-/// The values in columns 0, 3, and 4 are preserved as they are.
-///
-/// - Parameters:
-///   - line: A line of CSV content to modify.
-///   - enemyStats: A value representing the enemy stats to be used for modifying the line.
-/// - Returns: The modified line of CSV content as a string.
 String modifyLine(String line, double enemyStats) {
   const double maxFactorColumn2 = 2.30;
   const double maxFactorColumn3 = 1.90;
@@ -109,18 +79,6 @@ String modifyLine(String line, double enemyStats) {
   return values.join(',');
 }
 
-/// Reverts the modifications of a line of CSV content based on the enemy stats.
-///
-/// This function takes a line of CSV data, parses it, and reverts the values in
-/// specific columns (columns 2 and 3) based on the provided [enemyStats] value. The
-/// values are scaled by predetermined factors and the reverted line is returned as a string.
-/// If the values in columns 2 or 3 are not valid numbers, they are left unchanged.
-/// The values in columns 0, 3, and 4 are preserved as they are.
-///
-/// - Parameters:
-///   - line: A line of CSV content to revert.
-///   - enemyStats: A value representing the enemy stats to be used for reverting the line.
-/// - Returns: The reverted line of CSV content as a string.
 String reverseModifyLine(String line, double enemyStats) {
   const double maxFactorColumn2 = 2.30;
   const double maxFactorColumn3 = 1.90;
@@ -154,14 +112,6 @@ String reverseModifyLine(String line, double enemyStats) {
 }
 
 /// Filters the enemy files based on the list of enemies to balance.
-///
-/// This function filters the enemy files by checking if the path of the file
-/// contains any of the specified enemy identifiers.
-///
-/// - Parameters:
-///   - enemyFiles: A list of files to filter.
-///   - enemiesToBalance: A list of enemy names or identifiers to filter by.
-/// - Returns: A list of files that contain any of the specified enemies in their path.
 Future<List<File>> filterEnemyFiles(
     List<File> enemyFiles, List<String> enemiesToBalance) async {
   List<File> filteredFiles = [];

@@ -148,7 +148,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
       List<String> command = cliArgs.processArgs;
       List<String> arguments = [];
 
-      // Regex to split on spaces but keep arguments with '=' together
+      // Regex to split on spaces but keep arguments with '=' together ... :)
       RegExp exp = RegExp(r'--[^\s=]+(?:=\[[^\]]*\]|=\S+)?|[^\s]+');
       Iterable<RegExpMatch> matches = exp.allMatches(command.join(' '));
 
@@ -156,7 +156,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
         arguments.add(match.group(0)!);
       }
 
-      // Conditionally add the --ignore argument if there are ignored files
+      // check if he got ignored files
       if (globalState.ignoredModFiles.isNotEmpty) {
         arguments.add("--ignore=${globalState.ignoredModFiles.join(',')}");
       }
@@ -174,7 +174,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
 
       print("${newConfig.arguments}");
 
-      // Add the new configuration and save to SharedPreferences through the notifier
+      // when added it also saves in shared pref
       ref.read(setupConfigProvider.notifier).addConfig(newConfig);
 
       if (context.mounted) {

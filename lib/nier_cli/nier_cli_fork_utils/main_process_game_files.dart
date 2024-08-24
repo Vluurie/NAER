@@ -8,9 +8,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/collect_files.dart';
 import 'package:path/path.dart' as path;
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
 
-/// Processes the game files for modification.
-///
-/// This function performs several tasks to modify and process game files, including:
+/// Performs several tasks to modify and process game files, including:
 /// 1. Retrieving the game files to be processed.
 /// 2. Extracting the game files that are added to the pending list.
 /// 3. Collecting the extracted game files for further processing.

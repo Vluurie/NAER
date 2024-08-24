@@ -31,9 +31,7 @@ List<String> backupNames = [
   'naer_randomized_and_level',
 ];
 
-/// Deletes specified folders from the given directory.
-///
-/// This function iterates over the hardcoded [folderNames] list, constructs the full path for each folder,
+/// Iterates over the hardcoded [folderNames] list, constructs the full path for each folder,
 /// checks if the folder exists, and if so, deletes it. It prints a message for each deleted folder
 /// or an error message if the deletion fails.
 ///
@@ -117,13 +115,7 @@ Future<void> deleteBackupGameFolders(String directoryPath) async {
   }
 }
 
-/// Validates if the specified extracted game folders have been deleted.
-///
-/// This function iterates over the [folderNames] list,
-/// constructs the full path for each folder, checks if the folder exists,
-/// and returns `true` if all folders are deleted, `false` otherwise.
-///
-/// [directoryPath] is the base directory from which the folders will be checked.
+/// Validates if the extracted game folders have been deleted.
 Future<bool> validateExtractedFolderDeletion(String directoryPath) async {
   for (var folderName in folderNames) {
     var folderPath = Directory(join(directoryPath, folderName));

@@ -9,19 +9,6 @@ import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:args/args.dart';
 
 /// Constructs and returns an [ArgParser] with all the expected command-line arguments.
-/// Provides a user-friendly error message if an invalid option is used.
-///
-/// This parser includes options for:
-/// - Output file or folder.
-/// - Extraction options for folders and subfolders.
-/// - Auto extraction of children files.
-/// - Extraction filters for various file types.
-/// - Specification of enemies and their stats.
-/// - Level and category of enemies.
-/// - Special output directories for DAT files.
-/// - Balance mode, DLC presence, and backup flag.
-///
-/// Returns an [ArgParser] configured with all the necessary command-line options.
 ArgParser allArguments() {
   try {
     var argParser = ArgParser();
@@ -166,11 +153,6 @@ ArgParser allArguments() {
 ///
 /// Combines quest options, map options, and phase options, and generates a list of paths
 /// for options that are active. Additionally, processes any specified enemies and their paths.
-///
-/// [argResults] contains the parsed command-line arguments.
-/// [output] is the directory where the paths should be output.
-///
-/// Returns a list of active option paths.
 List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
   List<String> allOptions = [
     ...GameFileOptions.questOptions,
@@ -246,13 +228,6 @@ List<String> _parseJsonArray(String? arg) {
 }
 
 /// Parses command-line arguments into a [CliOptions] object.
-///
-/// This function extracts relevant options from the provided [ArgResults] and
-/// initializes a [CliOptions] object with those values.
-///
-/// [args] contains the parsed command-line arguments.
-///
-/// Returns a [CliOptions] object with the parsed argument values.
 CliOptions parseArguments(ArgResults args) {
   return CliOptions(
     output: null,
@@ -266,12 +241,6 @@ CliOptions parseArguments(ArgResults args) {
   );
 }
 
-/// Checks for compatibility of provided CLI options.
-///
-/// Ensures that conflicting options are not used together, such as
-/// --folder and --recursive, or combining these with --output.
-///
-/// [options] contains the parsed CLI options.
 void checkOptionsCompatibility(CliOptions options) {
   var fileModeOptionsCount =
       [options.recursiveMode, options.folderMode].where((b) => b).length;

@@ -37,7 +37,6 @@ Future<Map<String, List<String>>> sortSelectedEnemiesState(
       .read(sortedEnemyDataProvider.notifier)
       .updateSelectedEnemies(sortedSelection);
 
-  // Return the sorted map
   return sortedSelection;
 }
 

@@ -103,36 +103,6 @@ List<Widget> generateModificationDetails(WidgetRef ref) {
     ),
   );
 
-  // // Balance Mode
-  // details.add(
-  //   Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Row(
-  //         children: [
-  //           Icon(Icons.balance,
-  //               color: AutomatoThemeColors.textDialogColor(ref), size: 24),
-  //           const SizedBox(width: 8),
-  //           Text("Balance Mode:",
-  //               style: TextStyle(
-  //                   fontWeight: FontWeight.bold,
-  //                   fontSize: 18,
-  //                   color: AutomatoThemeColors.textDialogColor(ref))),
-  //         ],
-  //       ),
-  //       Padding(
-  //         padding: const EdgeInsets.only(left: 32.0, top: 5),
-  //         child: Text(
-  //           globalState.isBalanceMode! ? "Yes" : "No",
-  //           style: TextStyle(
-  //               fontSize: 16, color: AutomatoThemeColors.textDialogColor(ref)),
-  //         ),
-  //       ),
-  //       const SizedBox(height: 15),
-  //     ],
-  //   ),
-  // );
-
   // Change Enemy Stats
   details.add(
     Column(

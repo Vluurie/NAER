@@ -1,8 +1,7 @@
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:xml/xml.dart' as xml;
 
-/// Handles the level update for an enemy or boss based on the `isBoss` flag.
-///
+/// Update level
 /// If the enemy is in the "Delete" group or does not belong to any group,
 /// the function skips the level update.
 /// Otherwise, it updates or creates the necessary level values in the XML element.

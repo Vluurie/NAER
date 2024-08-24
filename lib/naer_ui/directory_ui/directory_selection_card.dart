@@ -15,7 +15,7 @@ class DirectorySelectionCard extends ConsumerWidget {
   final String? path;
   final Future<void> Function(Function(String)) onBrowse;
   final IconData icon;
-  final double width; // This can now be treated as a maxWidth
+  final double width;
   final bool enabled;
   final String? hint;
   final String? hints;
@@ -27,7 +27,7 @@ class DirectorySelectionCard extends ConsumerWidget {
     this.path,
     required this.onBrowse,
     required this.icon,
-    this.width = 300, // This acts as a default max width
+    this.width = 300,
     this.enabled = true,
     this.hint,
     this.hints,
@@ -36,14 +36,13 @@ class DirectorySelectionCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use uniqueSuffix to ensure each card is independently tracked
+    // uniqueSuffix to ensure each card is independently tracked
     final compositeKey = '${path ?? 'no-path'}-$uniqueSuffix';
 
     final state = ref.watch(directorySelectionCardProvider(compositeKey));
     final notifier =
         ref.read(directorySelectionCardProvider(compositeKey).notifier);
 
-    // Update the path in the state only if it has changed
     if (state.selectedPath != path) {
       Future.microtask(() => notifier.updatePath(path ?? ''));
     }
@@ -60,7 +59,6 @@ class DirectorySelectionCard extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Adjust the width based on available space, respecting the maxWidth (width)
         final responsiveWidth =
             constraints.maxWidth < width ? constraints.maxWidth : width;
 

@@ -44,7 +44,6 @@ class SavePathsWidget extends ConsumerWidget {
     bool isCheckboxEnabled = globalState.input.isNotEmpty &&
         globalState.specialDatOutputPath.isNotEmpty;
 
-    // Automatically check/uncheck the checkbox based on the paths
     Future.microtask(() {
       if (isCheckboxEnabled && !checkboxValue) {
         ref.read(checkboxValueProvider.notifier).state = true;

@@ -4,14 +4,6 @@ import 'package:NAER/naer_utils/global_log.dart';
 
 /// Util class for counting runtime of single methods or full processing time.
 class CountRuntime {
-  /// Converts a [Duration] to a human-readable string format.
-  ///
-  /// This function takes a [Duration] and returns a string representation of
-  /// the duration in milliseconds (ms), seconds (s), or minutes and seconds (m s)
-  /// depending on the length of the duration.
-  ///
-  /// - Parameter d: The duration to be converted.
-  /// - Returns: A string representation of the duration.
   String timeStr(Duration d) {
     var ms = d.inMilliseconds;
     if (ms < 1000) {
@@ -25,16 +17,6 @@ class CountRuntime {
     }
   }
 
-  /// Processes and prints the time taken to process files along with a summary.
-  ///
-  /// This function calculates the time difference between the current time and
-  /// the start time [t1]. It then prints the duration and a summary of the
-  /// processed files, including any errors encountered.
-  ///
-  /// - Parameters:
-  ///   - t1: The start time when the processing began.
-  ///   - processedFiles: A set of files that have been successfully processed.
-  ///   - errorFiles: A list of files that encountered errors during processing.
   void processTime(DateTime t1, Set<String> processedFiles,
       List<String> errorFiles, SendPort sendPort) {
     var tD = DateTime.now().difference(t1);
@@ -57,9 +39,6 @@ class CountRuntime {
 
   /// Runs the given [function] with the provided [arguments] and measures its execution time.
   /// Optionally handles messages sent back from the isolate using a [SendPort].
-  ///
-  /// This method uses a [Stopwatch] to measure how long the [function] takes to execute.
-  /// It then prints the duration to the console or another logging mechanism.
   ///
   /// - [function]: The function to be executed and timed.
   /// - [arguments]: A list of arguments to be passed to the function.

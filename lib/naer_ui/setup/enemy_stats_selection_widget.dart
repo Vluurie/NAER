@@ -107,7 +107,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                   value: globalState.stats["Select All"],
                   onChanged: (bool? value) {
                     setState(() {
-                      // Create a mutable copy of stats
+                      //ill need a copy here
                       final updatedStats =
                           Map<String, bool>.from(globalState.stats);
                       updatedStats["Select All"] = value ?? false;
@@ -115,7 +115,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                       for (var enemy in EnemyList.getDLCFilteredEnemies(ref)) {
                         enemy.isSelected = value;
                       }
-                      // Update the state with the new stats map
+                      // update with copy
                       globalStateNotifier.setStats(updatedStats);
                       getSelectedEnemiesArgument();
                     });
@@ -132,7 +132,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                   value: globalState.stats["None"],
                   onChanged: (bool? value) {
                     setState(() {
-                      // Create a mutable copy of stats
+                      // also copy
                       final updatedStats =
                           Map<String, bool>.from(globalState.stats);
                       if (value == true || !globalState.stats["Select All"]!) {
@@ -144,7 +144,6 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                         getSelectedEnemiesArgument();
                       }
                       updatedStats["Select All"] = false;
-                      // Update the state with the new stats map
                       globalStateNotifier.setStats(updatedStats);
                     });
                   },

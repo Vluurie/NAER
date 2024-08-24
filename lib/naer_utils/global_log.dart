@@ -26,6 +26,5 @@ void globalLog(String message) {
 
   final processedLog = LogState.processLog(message);
 
-  // Add the processed log to the LogState instance
   LogState().addLog(processedLog);
 }

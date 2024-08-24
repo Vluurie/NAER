@@ -4,19 +4,6 @@ import 'package:args/args.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// MainData contains the main configuration and arguments required for processing the game files.
-///
-/// This class holds the configuration details, arguments, and necessary information
-/// to perform game file modifications and processes. It acts as a container for
-/// the primary data required throughout the game file processing operations.
-///
-/// [argument]: A map of arguments and their corresponding values.
-/// [sortedEnemiesPath]: The path for the sorted enemies file.
-/// [options]: Parsed additional options for CLI operations.
-/// [isManagerFile]: A boolean indicating if the file is from the mod manager.
-/// [output]: The output path for the processed files.
-/// [args]: Parsed command-line arguments.
-/// [sendPort]: A SendPort for inter-isolate communication.
-/// [backUp]: A boolean indicating if a backup is needed.
 class MainData {
   final Map<String, dynamic> argument;
   final String? sortedEnemyGroupsIdentifierMap;

@@ -73,7 +73,7 @@ class IsolateService {
     final receivePort = ReceivePort();
     final runner = await _getOrCreateRunner();
     await runner.run(isolateEntry, [function, arguments, receivePort.sendPort]);
-    _availableRunners.add(runner); // Return the runner to the pool
+    _availableRunners.add(runner);
     await receivePort.first;
   }
 
@@ -82,16 +82,16 @@ class IsolateService {
     final receivePort = ReceivePort();
     final runner = await _getOrCreateRunner();
     await runner.run(isolateEntry, [function, arguments, receivePort.sendPort]);
-    _availableRunners.add(runner); // Return the runner to the pool
+    _availableRunners.add(runner);
     await receivePort.first;
   }
 
   Future<IsolateRunner> _getOrCreateRunner() async {
-    // If there is an available runner, reuse it
+    // runner avaliable??
     if (_availableRunners.isNotEmpty) {
       return _availableRunners.removeLast();
     } else {
-      // Otherwise, create a new runner
+      // no, create one
       final runner = await IsolateRunner.spawn();
       _isolateRunners.add(runner);
       return runner;

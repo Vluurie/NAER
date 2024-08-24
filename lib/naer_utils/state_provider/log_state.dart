@@ -17,16 +17,15 @@ class LogState with ChangeNotifier {
 
   void addLog(String log) {
     _logs.add(log);
-    notifyListeners(); // Notify listeners of the new log entry
+    notifyListeners();
   }
 
   void clearLogs() {
     _logs.clear();
-    notifyListeners(); // Notify listeners that logs have been cleared
+    notifyListeners();
   }
 
   static String processLog(String log) {
-    // Process the log here if necessary (e.g., add timestamp, etc.)
     return log;
   }
 

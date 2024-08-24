@@ -5,7 +5,7 @@ import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:xml/xml.dart' as xml;
 
-/// This function handles special cases for enemies within an XML element. It processes
+/// Handles special cases for enemies within an XML element. It processes
 /// 'objId' elements and modifies them based as whether the
 /// enemy is a boss or has an alias ancestor. Depending on the enemy category, it also
 /// handles leveled enemies with aliases.

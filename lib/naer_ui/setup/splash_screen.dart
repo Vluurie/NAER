@@ -20,13 +20,12 @@ class SplashScreenState extends ConsumerState<SplashScreen>
   void initState() {
     super.initState();
 
-    // Initialize the animation controller
     _controller = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
 
-    // Bounce animation for the Lottie file
+    // animation for the Lottie file
     _bounceAnimation = Tween<double>(begin: 0.0, end: -30.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -34,12 +33,12 @@ class SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    // Text opacity animation for the text that appears after the Lottie animation
+    // animation for the text that appears after the Lottie animation
     _textOpacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(
-          0.7, // Start halfway through the bounce
+          0.7,
           0.9,
           curve: Curves.easeIn,
         ),

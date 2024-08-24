@@ -12,19 +12,14 @@ import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart';
 
-/// Counter for processed files
-int fileCount = 0;
+int processedFileCount = 0;
 
 /// Randomizes and sets a new enemy number for the given action XML element.
 ///
-/// This function selects a new random enemy number from the user-selected data map and
+/// Selects a new random enemy number from the user-selected data map and
 /// replaces the text in the XML element with this new number. It also ensures that
 /// an infinite loop is avoided by limiting the number of iterations.
 /// After it modifies also the set values of the specific em element if present in the em value map.
-///
-/// Parameters:
-/// - [element]: The parameters for handling enemy entity object.
-/// - [group]: The group of the enemy number.
 Future<void> randomizeEnemyNumber(
     EnemyEntityObjectAction action, String group) async {
   if (action.randomizeAndSetValues) {
@@ -58,15 +53,7 @@ Future<void> randomizeEnemyNumber(
   }
 }
 
-/// Modifies enemies in a given directory based on sorted enemies data.
-///
-/// This method uses the sorted enemies data and modifies the enemies found
-/// in the specified directory according to the provided enemy level and category.
-///
-/// [directoryPath] is the path to the directory containing enemy files.
-/// [sortedEnemiesPath] is the path to the sorted enemies data file.
-/// [enemyLevel] specifies the level of enemies to be modified.
-/// [enemyCategory] specifies the category of enemies to be modified.
+/// main enemy modify method
 Future<void> processEnemies(MainData mainData,
     Map<String, List<String>> collectedFiles, String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
@@ -98,15 +85,8 @@ Future<Map<String, List<String>>> getSortedEnemyData(MainData mainData) async {
   }
 }
 
-/// Finds and modifies enemies in the specified directory.
-///
-/// This method searches the given directory for enemy files, loads important IDs,
+/// Searches the given directory for enemy files, loads important IDs,
 /// and modifies the enemies based on the sorted enemy data, level, and category.
-///
-/// [directoryPath] is the path to the directory containing enemy files.
-/// [sortedEnemyData] is the map of sorted enemy data.
-/// [enemyLevel] specifies the level of enemies to be modified.
-/// [enemyCategory] specifies the category of enemies to be modified.
 Future<void> findEnemiesAndModify(
     Map<String, List<String>> collectedFiles,
     String directoryPath,
@@ -123,29 +103,20 @@ Future<void> findEnemiesAndModify(
     return;
   }
 
-  fileCount = await traverseDirectory(
+  processedFileCount = await traverseDirectory(
       collectedFiles, directory, sortedEnemyData, ids, mainData);
 
   // Stop the timer
   stopwatch.stop();
   mainData.sendPort
-      .send('Traversal complete. NAER processed $fileCount files.');
+      .send('Traversal complete. NAER processed $processedFileCount files.');
   mainData.sendPort.send(
       'Time taken to find and modify enemies: ${stopwatch.elapsedMilliseconds} ms');
 }
 
-/// Traverses the directory to process files and directories.
-///
-/// This method recursively traverses the directory, processes each XML file it finds in parallel (with [IsolateService])
+/// Recursively traverses the directory, processes each XML file it finds in parallel (with [IsolateService])
 /// according to the provided sorted enemy data, level, and category, and counts the processed files.
-///
-/// [directory] is the directory to traverse.
-/// [sortedEnemyData] is the map of sorted enemy data.
-/// [enemyLevel] specifies the level of enemies to be modified.
-/// [enemyCategory] specifies the category of enemies to be modified.
-/// [ids] is the ImportantIDs object containing metadata IDs.
-///
-/// Returns the count of processed files.
+
 Future<int> traverseDirectory(
   Map<String, List<String>> collectedFiles,
   Directory directory,

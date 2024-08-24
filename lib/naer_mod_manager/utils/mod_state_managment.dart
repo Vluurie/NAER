@@ -175,14 +175,12 @@ class ModStateManager extends ChangeNotifier {
         : [];
   }
 
-  // Method to install a mod
   void installMod(String modId) async {
     _installedModsIds.add(modId);
     await _saveInstalledMods();
     notifyListeners();
   }
 
-  // Method to uninstall a mod
   void uninstallMod(String modId) async {
     _installedModsIds.remove(modId);
     await _saveInstalledMods();

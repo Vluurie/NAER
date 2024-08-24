@@ -16,25 +16,6 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:path/path.dart' as path;
 
-/// Processes the collected files based on the given parameters.
-///
-/// This function performs processing on XML and DAT files collected in the
-/// collectedFiles map. It uses various options and file lists to determine
-/// how the files should be processed.
-///
-/// MainData container data to use are:
-/// - Parameters:
-///   - currentDir: The current directory where the processing starts.
-///   - collectedFiles: A map of collected files and folders with specific keys.
-///   - options: CLI options that influence the processing behavior.
-///   - pendingFiles: A list of files that are pending to be processed.
-///   - processedFiles: A set of files that have already been processed.
-///   - enemyList: A list of enemy criteria to be considered during processing.
-///   - activeOptions: A list of active options for file processing.
-///   - ismanagerFile: A flag indicating if a mod manager file is involved.
-///   - ignoreList: A list of files or folders to be ignored during processing.
-///   - output: The output directory where processed files should be saved.
-///   - args: Command-line arguments passed to the program.
 Future<void> repackModifiedGameFiles(
     Map<String, List<String>> collectedFiles, MainData mainData) async {
   mainData.sendPort.send("Started repacking process of modified game files...");
@@ -93,11 +74,6 @@ Future<void> processEntitiesInParallel(
   await service.cleanup();
 }
 
-/// Processes a list of entities such as files or folders.
-///
-/// This function iterates over the given entities and processes each entity
-/// using the provided files to process
-///
 Future<void> processEntities(
     Iterable<String> entities, MainData mainData) async {
   final processedFiles = mainData.argument['processedFiles'] as Set<String>;
@@ -127,16 +103,10 @@ Future<void> processEntities(
 
 /// Processes DAT folders based on the given criteria.
 ///
-/// This function checks each DAT folder with the shouldProcessDatFolder method
+/// Checks each DAT folder with the shouldProcessDatFolder method
 /// and then processes it till the output path.
 ///
 /// logState adds all created files to the last randomized shared preference list that can be undone with the undo button.
-///
-/// - Parameters:
-///   - fileManager: A manager with lists for the categories map, quest, logic files.
-///   - datFolders: A list of DAT folders to be processed.
-///   - mainData: MainData container with various options and parameters for processing.
-///
 Future<void> processDatFolders(FileCategoryManager fileManager,
     List<String>? datFolders, MainData mainData) async {
   if (datFolders == null) return;
@@ -191,16 +161,6 @@ Future<void> processDatFolders(FileCategoryManager fileManager,
 }
 
 /// Determines whether a .dat folder should be processed.
-///
-/// This function checks the folder against the enemy list and ignore list
-/// to decide if it should be processed.
-///
-/// - Parameters:
-///   - baseNameWithExtension: The base name of the folder with its extension.
-///   - enemyList: The enemy list
-///   - fileManager: A manager with lists for the categories map, quest, logic files.
-///   - ignoreList: The list of files to be ignored during processing.
-/// - Returns: true if the folder should be processed, false otherwise.
 bool shouldProcessDatFolder(
     String baseNameWithExtension,
     List<String> enemyList,
@@ -242,12 +202,6 @@ bool shouldProcessDatFolder(
 ///
 /// This function modifies enemy stats if the enemy list is not empty and
 /// contains enemies.
-///
-/// - Parameters:
-///   - currentDir: The current directory where the processing starts.
-///   - mainData: The main data containing arguments and configurations.
-///   - reverseStats: A boolean indicating whether to reverse the stats modification.
-///
 Future<void> processEnemyStats(
   String currentDir,
   MainData mainData,
@@ -312,7 +266,8 @@ Future<void> getGameFilesForProcessing(
 /// This function processes each file in the pending list and adds it to the
 /// processed files list upon successful processing.
 ///
-/// Recursively extracts the child files after extracting the parent.
+/// ALWAYS recursively extracts the child files after extracting the parent.
+/// It uses the [extract_dat_files.dll]
 Future<List<String>> extractGameFiles(
   List<String> pendingFiles,
   Set<String> processedFiles,

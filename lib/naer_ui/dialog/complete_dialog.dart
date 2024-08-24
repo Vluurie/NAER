@@ -80,7 +80,7 @@ void showCompletionDialog(
         }
       } catch (e) {
         if (context.mounted && Navigator.of(context).canPop()) {
-          Navigator.of(context).pop(); // Close loading dialog
+          Navigator.of(context).pop();
           showErrorDialog(
             context,
             ref,

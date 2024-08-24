@@ -1,4 +1,3 @@
-// MAIN MODIFY BUTTON FUNCTIONALITY
 import 'dart:isolate';
 
 import 'package:NAER/naer_ui/dialog/complete_dialog.dart';
@@ -71,7 +70,7 @@ Future<void> runProcessInIsolate(
     'hasDLC': globalState.hasDLC,
   };
 
-  // Run the CLI process in a separate isolate
+  // separate compute
   await compute(runNierCliIsolated, args);
 }
 

@@ -14,7 +14,6 @@ import 'package:args/args.dart';
 /// The main function for the Nier CLI tool refactored and modified for enemy randomization, level and boss stats.
 Future<void> nierCli(NierCliArgs cliArgs) async {
   try {
-    // Record start of the start time for processing
     var t1 = DateTime.now();
 
     // Clone the arguments list to avoid side-effects
@@ -74,7 +73,7 @@ Future<void> nierCli(NierCliArgs cliArgs) async {
     // Logs the final processing time for the glory of mankind
     CountRuntime()
         .processTime(t1, argument['processedFiles'], [], mainData.sendPort);
-    logAndPrint("Randomizing complete");
+    logAndPrint("Mofification complete");
   } catch (e) {
     print('''
 +---------------------------------------------------------------+
