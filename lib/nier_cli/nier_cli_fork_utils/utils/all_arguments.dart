@@ -212,19 +212,24 @@ Map<String, List<String>> createCustomSelectedEnemiesMap(ArgResults? args) {
 
 List<String> _parseJsonArray(String? arg) {
   if (arg == null) {
-    // empty list probably its 'ALL' identifier
     return [];
   }
 
   try {
     String cleanedArg = arg.trim();
-    if (cleanedArg.startsWith('"') && cleanedArg.endsWith('"')) {
+
+    // Remove surrounding square brackets if present
+    if (cleanedArg.startsWith('[') && cleanedArg.endsWith(']')) {
       cleanedArg = cleanedArg.substring(1, cleanedArg.length - 1);
     }
 
-    cleanedArg = cleanedArg.replaceAll('[', '').replaceAll(']', '');
-
-    List<String> elements = cleanedArg.split(',').map((e) => e.trim()).toList();
+    List<String> elements = cleanedArg.split(',').map((e) {
+      String element = e.trim();
+      if (element.startsWith('"') && element.endsWith('"')) {
+        element = element.substring(1, element.length - 1);
+      }
+      return element;
+    }).toList();
 
     return elements;
   } catch (e) {

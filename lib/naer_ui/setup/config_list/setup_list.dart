@@ -23,6 +23,14 @@ class SetupListState extends ConsumerState<SetupList> {
       setup.isSelected = setup.id == selectedSetupId;
     }
 
+    setups.sort((a, b) {
+      final isCustomA = !SetupData.setups.any((s) => s.id == a.id);
+      final isCustomB = !SetupData.setups.any((s) => s.id == b.id);
+      if (isCustomA && !isCustomB) return -1;
+      if (!isCustomA && isCustomB) return 1;
+      return 0;
+    });
+
     return LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount;

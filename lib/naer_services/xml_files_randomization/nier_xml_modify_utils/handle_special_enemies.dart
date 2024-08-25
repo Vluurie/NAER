@@ -1,3 +1,4 @@
+import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/data/values_data/nier_randomizable_aliases.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
@@ -43,7 +44,7 @@ Future<void> handleSpecialCaseEnemies(
         // Check if the enemy has an alias ancestor and belongs to specific categories
         if (category == 'allenemies' || category == 'onlylevel') {
           // Handle the level for enemies with alias
-          await handleLevel(objIdElement, level, sortedEnemyData,
+          await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData,
               isBoss: false);
         }
       } else {
