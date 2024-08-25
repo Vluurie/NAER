@@ -70,34 +70,35 @@ class LeftSideSelection extends ConsumerWidget {
                 unselectedColor: AutomatoThemeColors.darkBrown(ref),
                 onToggle: () => globalStateNotifier.toggleCustomSelection(),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Tooltip(
-                  message: 'Add new configuration',
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SetupConfigFormScreen(),
+              if (!globalState.customSelection)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Tooltip(
+                    message: 'Add new configuration',
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SetupConfigFormScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AutomatoThemeColors.darkBrown(ref),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(80.0),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AutomatoThemeColors.darkBrown(ref),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(80.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 12.0),
+                        elevation: 3.0,
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 12.0),
-                      elevation: 3.0,
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: AutomatoThemeColors.primaryColor(ref),
+                      child: Icon(
+                        Icons.add,
+                        color: AutomatoThemeColors.primaryColor(ref),
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ],

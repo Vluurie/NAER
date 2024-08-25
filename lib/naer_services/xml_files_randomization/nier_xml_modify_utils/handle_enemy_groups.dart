@@ -274,5 +274,5 @@ String generateGroundGroupArgument(
     groundList.remove(enemyId);
   }
 
-  return '--Ground=[${groundList.map((e) => '"$e"').join(', ')}]';
+  return '--Ground=[${groundList.map((e) => '"$e"').join(',')}]';
 }

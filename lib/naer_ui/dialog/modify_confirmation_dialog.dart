@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:NAER/naer_ui/dialog/details.dart';
+import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/handle_start_modification.dart';
 import 'package:automato_theme/automato_theme.dart';
@@ -64,4 +67,35 @@ void showModifyDialogAndModify(
     yesButtonColor: AutomatoThemeColors.darkBrown(ref),
     noButtonColor: AutomatoThemeColors.darkBrown(ref),
   );
+}
+
+Future<bool?> showStartSetupDialog(
+    WidgetRef ref, BuildContext context, SetupConfigData setup) async {
+  final completer = Completer<bool>();
+  final currSetup = setup.title;
+  AutomatoDialogManager().showYesNoDialog(
+    context: context,
+    title: "Information",
+    content: Center(
+      child: Text(
+        "Start the setup: $currSetup ?",
+        style: TextStyle(
+          fontSize: 22,
+          color: AutomatoThemeColors.textDialogColor(ref),
+        ),
+      ),
+    ),
+    onYesPressed: () {
+      completer.complete(true);
+      Navigator.of(context).pop();
+    },
+    onNoPressed: () {
+      completer.complete(false);
+      Navigator.of(context).pop();
+    },
+    yesLabel: "Yes",
+    noLabel: "No",
+    ref: ref,
+  );
+  return completer.future;
 }

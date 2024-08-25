@@ -1,7 +1,7 @@
-import 'package:NAER/data/setup_data/setup_data.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
+import 'package:NAER/naer_utils/state_provider/setup_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,14 +14,20 @@ void onCopyArgsPressed(BuildContext context, WidgetRef ref) {
       _performCopyCLIArguments(context, ref);
     } else {
       try {
-        final selectedSetup = SetupData.getCurrentSelectedSetup();
-        if (selectedSetup.isSelected) {
+        final selectedSetup =
+            ref.read(setupConfigProvider.notifier).getCurrentSelectedSetup();
+        if (selectedSetup != null && selectedSetup.isSelected) {
           final arguments = selectedSetup.generateArguments(ref);
           copyToClipboard(arguments, context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No setup is currently selected.')),
+          );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No setup is currently selected.')),
+          const SnackBar(
+              content: Text('Error occurred while copying arguments.')),
         );
       }
     }
@@ -42,8 +48,7 @@ Future<void> _performCopyCLIArguments(
     CLIArguments cliArgs = await getGlobalArguments(ref);
 
     if (context.mounted) {
-      List<String> command = cliArgs.fullCommand;
-      copyToClipboard(command, context);
+      copyToClipboard(cliArgs.fullCommand, context);
     }
   } catch (e) {
     if (context.mounted) {
@@ -53,10 +58,20 @@ Future<void> _performCopyCLIArguments(
 }
 
 void copyToClipboard(List<String> command, BuildContext context) {
-  String commandString = command.join(' ');
+  String formattedCommand = command.map((cmd) {
+    if (cmd.contains('=') && (cmd.contains('[') && cmd.contains(']'))) {
+      return cmd
+          .replaceAll(' ', '')
+          .replaceAll('",', '",')
+          .replaceAll('\'', '\"');
+    } else {
+      return cmd.startsWith('"') && cmd.endsWith('"') ? cmd : '"$cmd"';
+    }
+  }).join(' ');
 
-  Clipboard.setData(ClipboardData(text: commandString)).then((result) {
+  Clipboard.setData(ClipboardData(text: formattedCommand)).then((result) {
     const snackBar = SnackBar(content: Text('Command copied to clipboard'));
+    globalLog("Copied Command: $formattedCommand");
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }

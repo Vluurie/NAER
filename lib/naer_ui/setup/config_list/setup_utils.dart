@@ -1,3 +1,4 @@
+import 'package:NAER/naer_ui/dialog/modify_confirmation_dialog.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/dialog/undo_dialog.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
@@ -56,10 +57,15 @@ class SetupUtils {
     }
   }
 
-  void _selectSetup(SetupConfigData setup) {
-    ref.read(setupConfigProvider.notifier).selectSetup(setup.id);
-    installSetup(setup);
-    globalLog('STARTED NEW MODIFICATION SETUP.');
+  void _selectSetup(SetupConfigData setup) async {
+    bool? shouldStartSetup = await showStartSetupDialog(ref, context, setup);
+    if (shouldStartSetup!) {
+      ref.read(setupConfigProvider.notifier).selectSetup(setup.id);
+      installSetup(setup);
+      globalLog('STARTED NEW MODIFICATION SETUP.');
+    } else {
+      return;
+    }
   }
 
   void _deselectSetup(SetupConfigData setup) {

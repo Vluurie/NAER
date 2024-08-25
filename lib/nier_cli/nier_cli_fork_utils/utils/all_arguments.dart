@@ -1,7 +1,4 @@
 // ignore_for_file: avoid_print
-
-import 'dart:convert';
-
 import 'package:NAER/data/sorted_data/file_paths_data.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
@@ -220,8 +217,16 @@ List<String> _parseJsonArray(String? arg) {
   }
 
   try {
-    List<dynamic> parsedList = jsonDecode(arg);
-    return List<String>.from(parsedList);
+    String cleanedArg = arg.trim();
+    if (cleanedArg.startsWith('"') && cleanedArg.endsWith('"')) {
+      cleanedArg = cleanedArg.substring(1, cleanedArg.length - 1);
+    }
+
+    cleanedArg = cleanedArg.replaceAll('[', '').replaceAll(']', '');
+
+    List<String> elements = cleanedArg.split(',').map((e) => e.trim()).toList();
+
+    return elements;
   } catch (e) {
     throw ArgumentError("Error parsing JSON array: $arg. ${e.toString()}");
   }
