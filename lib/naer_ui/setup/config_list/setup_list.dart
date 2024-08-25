@@ -36,7 +36,7 @@ class SetupListState extends ConsumerState<SetupList> {
           childAspectRatio = 5 / 7.5;
         } else if (constraints.maxWidth > 1200) {
           crossAxisCount = 4;
-          childAspectRatio = 5 / 6.0;
+          childAspectRatio = 5 / 6.2;
         } else if (constraints.maxWidth > 1000) {
           crossAxisCount = 3;
           childAspectRatio = 6 / 5.5;

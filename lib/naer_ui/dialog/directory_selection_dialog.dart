@@ -34,9 +34,9 @@ Future<void> showNoDlcDirectoryDialog(
   AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
-    title: "DLC Not Found!",
+    title: "DLC Not Found",
     content: Text(
-      "Uh-oh! It seems like the DLC hasn't been installed yet. Without it, your adventures might be lacking some epic battles against fearsome enemies. If you have the DLC, you can enable it using the checkbox in the options. Gear up and get ready!",
+      "NAER detected that the DLC isn't installed. If you have it, enable it in the options.",
       style: TextStyle(
         color: AutomatoThemeColors.textDialogColor(ref),
         fontSize: 20,
@@ -60,7 +60,7 @@ Future<void> showAsyncInfoDialog(BuildContext context, WidgetRef ref) async {
     ref: ref,
     title: "DLC Found!",
     content: Text(
-      "DLC detected! If you prefer to disable the DLC enemies, you can do so in the options panel. This can be helpful as most speedruns are done without the DLC.",
+      "DLC detected! If you prefer to disable the DLC enemies, you can do so in the options pane.",
       style: TextStyle(
         color: AutomatoThemeColors.textDialogColor(ref),
         fontSize: 20,
@@ -87,9 +87,8 @@ Future<bool> askForDeepSearchPermission(
     ref: ref,
     title: "Empty Paths (≧︿≦)",
     content: Text(
-      "NAER noticed that the paths are empty and needs to scan your drives to find the data folder. "
-      "If you encounter any issues, like an error, manually selecting the correct path."
-      "\n\nWould you like to proceed?",
+      "NAER didn't find any paths and needs to scan your drives to locate the data folder. If this causes any issues, you can manually select the correct path."
+      "\n\nDo you want to proceed?",
       style: TextStyle(
         color: AutomatoThemeColors.textDialogColor(ref),
         fontSize: 22,
@@ -192,9 +191,9 @@ void showNoModFilesDialog(BuildContext context, WidgetRef ref) {
   AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
-    title: "No Mod Files Found!",
+    title: "No Mod Files Found",
     content: Text(
-      "Good news, adventurer! No scripted mod files were detected in the data directory. This means there are no conflicting mods that might alter your epic battles against enemies for now. Remember, skin mods are always ignored as they're just for show and don't affect gameplay. Enjoy your unaltered journey!",
+      "Awesome, no mods found that NAER also uses. You can savely modify.",
       style: TextStyle(
         color: AutomatoThemeColors.textDialogColor(ref),
         fontSize: 20,
@@ -203,6 +202,6 @@ void showNoModFilesDialog(BuildContext context, WidgetRef ref) {
     onOkPressed: () {
       Navigator.of(context).pop();
     },
-    okLabel: "Got it!",
+    okLabel: "OK",
   );
 }

@@ -38,8 +38,11 @@ class SetupConfigData implements ConfigDataContainer {
   final List<String> arguments;
 
   final bool showCheckbox;
+  final bool? isAddition;
   final String? checkboxText;
   final ValueChanged<bool>? onCheckboxChanged;
+  final StateNotifierProvider<CheckboxStateNotifier, bool>
+      checkboxStateProvider;
 
   SetupConfigData({
     required this.id,
@@ -52,8 +55,12 @@ class SetupConfigData implements ConfigDataContainer {
     required this.arguments,
     this.showCheckbox = false,
     this.checkboxText,
+    this.isAddition,
     this.onCheckboxChanged,
-  });
+  }) : checkboxStateProvider =
+            StateNotifierProvider<CheckboxStateNotifier, bool>(
+          (ref) => CheckboxStateNotifier(),
+        );
 
   Map<String, dynamic> toJson() {
     return {
@@ -65,6 +72,8 @@ class SetupConfigData implements ConfigDataContainer {
       'stats': stats,
       'arguments': arguments,
       'isSelected': isSelected,
+      'showCheckbox': showCheckbox,
+      'checkboxText': checkboxText,
     };
   }
 
@@ -78,6 +87,8 @@ class SetupConfigData implements ConfigDataContainer {
       stats: json['stats'],
       arguments: List<String>.from(json['arguments']),
       isSelected: json['isSelected'],
+      showCheckbox: json['showCheckbox'] ?? false,
+      checkboxText: json['checkboxText'],
     );
   }
 

@@ -43,8 +43,7 @@ Future<void> _performCopyCLIArguments(
 
     if (context.mounted) {
       List<String> command = cliArgs.fullCommand;
-      List<String> copiedCommand = copyToClipboard(command, context);
-      globalLog("Copied Command List: $copiedCommand");
+      copyToClipboard(command, context);
     }
   } catch (e) {
     if (context.mounted) {
@@ -53,20 +52,15 @@ Future<void> _performCopyCLIArguments(
   }
 }
 
-List<String> copyToClipboard(List<String> command, BuildContext context) {
-  //String commandString = command.join(' ');
-  String formattedCommand = command.map((cmd) => '"$cmd"').toList().toString();
+void copyToClipboard(List<String> command, BuildContext context) {
+  String commandString = command.join(' ');
 
-  Clipboard.setData(ClipboardData(text: formattedCommand)).then((result) {
+  Clipboard.setData(ClipboardData(text: commandString)).then((result) {
     const snackBar = SnackBar(content: Text('Command copied to clipboard'));
-    globalLog("Copied Command List: $formattedCommand");
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }).catchError((e) {
     globalLog("Error copying to clipboard: $e");
   });
-
-  // Return the original command list
-  return command;
 }

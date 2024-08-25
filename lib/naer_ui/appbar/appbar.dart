@@ -58,6 +58,7 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        AppIcons.copyArguments(context, ref),
                         AppIcons.informationIcon(context, ref),
                         const SizedBox(width: 16.0),
                         DonateButton(url: dotenv.env['DONATE_URL']!),

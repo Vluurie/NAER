@@ -1,5 +1,6 @@
 import 'package:NAER/naer_ui/setup/config_list/config_data_container.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
+
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -169,11 +170,7 @@ class SetupCard extends ConsumerWidget {
                     shape: BoxShape.circle,
                     color: Colors.red.withOpacity(0.1),
                   ),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.red,
-                    size: 18.0,
-                  ),
+                  child: const Icon(Icons.close, color: Colors.red, size: 18.0),
                 ),
               ),
             ),

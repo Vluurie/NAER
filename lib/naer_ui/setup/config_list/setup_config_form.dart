@@ -31,15 +31,28 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
     Map<String, bool> levelMap = globalState.levelMap;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Setup Configuration'),
+        title: Text(
+          'ADD SETUP CONFIGURATION',
+          style: TextStyle(
+            fontSize: 38.0,
+            color: AutomatoThemeColors.primaryColor(ref),
+            fontWeight: FontWeight.w700,
+            shadows: [
+              Shadow(
+                  offset: const Offset(5.0, 5),
+                  color: AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5)),
+            ],
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: ElevatedButton(
               onPressed: () => _saveConfig(context),
-              child: const Text(
+              child: Text(
                 'Save Configuration',
-                style: TextStyle(fontSize: 24),
+                style: TextStyle(
+                    fontSize: 24, color: AutomatoThemeColors.primaryColor(ref)),
               ),
             ),
           ),

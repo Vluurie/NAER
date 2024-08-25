@@ -26,7 +26,9 @@ class LeftSideSelection extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Flexible(
+              const PlayButton(),
+              const SizedBox(width: 16),
+              Expanded(
                 child: DirectorySelectionCard(
                   title: "Input Directory:",
                   path: globalState.input,
@@ -37,12 +39,11 @@ class LeftSideSelection extends ConsumerWidget {
                     );
                   },
                   icon: Icons.folder_open,
-                  hints: "Hints: Your Game data folder.",
                   uniqueSuffix: '1',
                 ),
               ),
-              const SizedBox(width: 16),
-              Flexible(
+              const SizedBox(width: 8),
+              Expanded(
                 child: DirectorySelectionCard(
                   title: "Output Directory:",
                   path: globalState.specialDatOutputPath,
@@ -53,111 +54,51 @@ class LeftSideSelection extends ConsumerWidget {
                     );
                   },
                   icon: Icons.folder_open,
-                  hints: "Hints: Also Game data folder.",
                   uniqueSuffix: '2',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              bool isNarrow = constraints.maxWidth < 450;
-
-              return Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                alignment: WrapAlignment.start,
-                children: [
-                  const PlayButton(),
-                  if (isNarrow) ...[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: ToggleButton(
-                            isSelected: globalState.customSelection,
-                            onLabel: 'Predefined Setup',
-                            offLabel: 'Custom Modify',
-                            selectedColor: AutomatoThemeColors.darkBrown(ref),
-                            unselectedColor: AutomatoThemeColors.darkBrown(ref),
-                            onToggle: () =>
-                                globalStateNotifier.toggleCustomSelection(),
-                          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ToggleButton(
+                isSelected: globalState.customSelection,
+                onLabel: 'Predefined Setup',
+                offLabel: 'Custom Modify',
+                selectedColor: AutomatoThemeColors.darkBrown(ref),
+                unselectedColor: AutomatoThemeColors.darkBrown(ref),
+                onToggle: () => globalStateNotifier.toggleCustomSelection(),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Tooltip(
+                  message: 'Add new configuration',
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SetupConfigFormScreen(),
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const SetupConfigFormScreen(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AutomatoThemeColors.darkBrown(ref),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0, vertical: 12.0),
-                            elevation: 3.0,
-                          ),
-                          child: Text(
-                            'Add Setup',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AutomatoThemeColors.primaryColor(ref),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ] else ...[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: ToggleButton(
-                        isSelected: globalState.customSelection,
-                        onLabel: 'Predefined Setup',
-                        offLabel: 'Custom Modify',
-                        selectedColor: AutomatoThemeColors.darkBrown(ref),
-                        unselectedColor: AutomatoThemeColors.darkBrown(ref),
-                        onToggle: () =>
-                            globalStateNotifier.toggleCustomSelection(),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AutomatoThemeColors.darkBrown(ref),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(80.0),
                       ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 12.0),
+                      elevation: 3.0,
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const SetupConfigFormScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AutomatoThemeColors.darkBrown(ref),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24.0, vertical: 12.0),
-                        elevation: 3.0,
-                      ),
-                      child: Text(
-                        'Add Setup',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AutomatoThemeColors.primaryColor(ref),
-                        ),
-                      ),
+                    child: Icon(
+                      Icons.add,
+                      color: AutomatoThemeColors.primaryColor(ref),
                     ),
-                  ],
-                ],
-              );
-            },
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

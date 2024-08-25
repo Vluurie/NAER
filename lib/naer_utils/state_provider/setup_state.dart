@@ -52,12 +52,27 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
     List<String>? configs = prefs.getStringList('setupConfigs');
 
     if (configs != null && configs.isNotEmpty) {
-      state = configs
-          .map((config) => SetupConfigData.fromJson(jsonDecode(config)))
-          .toList();
+      state = configs.map((config) {
+        final setup = SetupConfigData.fromJson(jsonDecode(config));
+        final isChecked = prefs.getBool('${setup.id}_checkboxState') ?? false;
+        ref.read(setup.checkboxStateProvider.notifier).toggle(isChecked);
+        return setup;
+      }).toList();
     } else {
       state = SetupData.setups;
       _saveConfigs();
+    }
+  }
+
+  Future<void> _saveConfigs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> configs =
+        state.map((config) => jsonEncode(config.toJson())).toList();
+    await prefs.setStringList('setupConfigs', configs);
+
+    for (var setup in state) {
+      final isChecked = ref.read(setup.checkboxStateProvider);
+      await prefs.setBool('${setup.id}_checkboxState', isChecked);
     }
   }
 
@@ -90,13 +105,6 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
     } catch (e) {
       return null;
     }
-  }
-
-  Future<void> _saveConfigs() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> configs =
-        state.map((config) => jsonEncode(config.toJson())).toList();
-    await prefs.setStringList('setupConfigs', configs);
   }
 }
 
