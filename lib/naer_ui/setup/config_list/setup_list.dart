@@ -12,6 +12,32 @@ class SetupList extends ConsumerStatefulWidget {
   SetupListState createState() => SetupListState();
 }
 
+/// TODO: Implement the new "Additions" feature to enhance the flexibility of setup configurations.
+///
+/// 1. **Add UI Support:**
+///    - Introduce a new parameter `isAddition` in the data model to differentiate between setups and additions.
+///    - Modify the UI rendering logic to visually distinguish additions from regular setups based on the `isAddition` flag.
+///
+/// 2. **Ensure Persistence:**
+///    - Update the logic to include additions in the ignore list to prevent setups from overwriting or undoing deletion of additions.
+///
+/// 3. **Handle Setup Changes:**
+///    - When a setup is modified, check if any additions are linked to it. If so, call `handleAddition` to associate the addition with the updated setup.
+///
+/// 4. **Separate Logic for Additions:**
+///    - If `isAddition` is true, ensure the logic separates setup states from addition states to avoid unintended interactions.
+///
+/// 5. **Enable User Customization:**
+///    - Add a new UI button that allows users to create and manage additions directly, enhancing user control over their setup configurations.
+///
+/// 6. **Create an Additions List:**
+///    - Implement a new `AdditionsList` to handle additions independently from setups.
+///    - Refactor the card component to be dynamic, creating a `CardList` that can manage both setups and additions with minimal duplication of code.
+///
+/// 7. **Track File Changes:**
+///    - Extend the file change tracking system by adding a `bool isAddition` parameter. This will ensure that the system correctly tracks and handles additions, particularly when deletions are involved.
+///    - Ensure that deleting a setup does not unintentionally remove related additions unless explicitly specified by the user.
+
 class SetupListState extends ConsumerState<SetupList> {
   @override
   Widget build(BuildContext context) {

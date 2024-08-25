@@ -74,11 +74,17 @@ class SetupUtils {
   }
 
   void deleteSetup(SetupConfigData setup) async {
-    final setupNotifier = ref.read(setupConfigProvider.notifier);
-    setupNotifier.removeConfig(setup);
+    if (!setup.isSelected) {
+      final setupNotifier = ref.read(setupConfigProvider.notifier);
+      setupNotifier.removeConfig(setup);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Setup deleted successfully!')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Setup deleted successfully!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Undo the Setup before deleting.')),
+      );
+    }
   }
 }
