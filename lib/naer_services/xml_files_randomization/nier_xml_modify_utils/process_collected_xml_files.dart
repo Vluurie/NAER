@@ -34,5 +34,5 @@ Future<void> processCollectedXmlFileForRandomization(
         sortedEnemyData, file, isSpawnActionTooSmall, mainData);
   }
 
-  file.writeAsString(document.toPrettyString());
+  await file.writeAsString(document.toPrettyString());
 }

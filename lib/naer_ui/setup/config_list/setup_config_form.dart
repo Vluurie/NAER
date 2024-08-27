@@ -108,7 +108,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
                           FormBuilderTextField(
                             name: "imageUrl",
                             decoration: const InputDecoration(
-                              labelText: "Image URL",
+                              labelText: "Image URL (jpg, gif, png, jpeg)",
                               border: OutlineInputBorder(),
                             ),
                             validator: FormBuilderValidators.compose([

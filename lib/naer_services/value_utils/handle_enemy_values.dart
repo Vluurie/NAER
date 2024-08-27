@@ -88,14 +88,14 @@ Future<void> _updateElement(
   int levelRangeIndex = _findLevelRangeIndex(parentValueElement);
   int insertIndex = rateIndex != -1 ? rateIndex + 1 : objIdIndex + 1;
 
-  XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
+  await XmlElementHandler.removeSpecifiedChildElements(parentValueElement,
       ['setRtn', selection.key == 'setType' ? 'setFlag' : 'setType']);
 
   XmlElementHandler.updateOrCreateElement(
       parentValueElement, selection.key, null, insertIndex, selection.value);
 
   if (levelRangeIndex != -1 && levelRangeIndex != objIdIndex + 2) {
-    _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
+    await _ensureLevelRangeIsCorrectlyPositioned(objIdElement);
   }
 }
 

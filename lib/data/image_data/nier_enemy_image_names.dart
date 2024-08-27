@@ -3,9 +3,9 @@ import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NierEnemyImageNames {
-  static List<String> getDLCFilteredNames(WidgetRef ref) {
+  static List<String> getDLCFilteredNames(final WidgetRef ref) {
     final hasDLC = ref.watch(globalStateProvider).hasDLC;
-    return names.where((name) {
+    return names.where((final name) {
       String enemyId = name.split('.').first;
       return hasDLC || !SpecialEntities.dlcEnemies.contains(enemyId);
     }).toList();

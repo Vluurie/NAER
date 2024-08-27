@@ -1,19 +1,23 @@
-import 'package:NAER/naer_ui/setup/config_list/config_data_container.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
-import 'package:NAER/naer_utils/state_provider/global_state.dart';
-import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:NAER/naer_ui/setup/config_list/config_data_container.dart';
+import 'package:automato_theme/automato_theme.dart';
 
-class SetupCard extends ConsumerStatefulWidget {
+final setupLoadingProvider = StateProvider<String?>((ref) => null);
+final additionLoadingProvider = StateProvider<String?>((ref) => null);
+
+class DynamicCard extends ConsumerStatefulWidget {
   final ConfigDataContainer configData;
   final VoidCallback? onToggleSelection;
   final VoidCallback? onDelete;
   final bool showCheckbox;
   final ValueChanged<bool>? onCheckboxChanged;
   final String? checkboxText;
+  final bool isSetup;
+  final bool isAddition;
 
-  const SetupCard({
+  const DynamicCard({
     super.key,
     required this.configData,
     this.onToggleSelection,
@@ -21,13 +25,15 @@ class SetupCard extends ConsumerStatefulWidget {
     this.showCheckbox = false,
     this.onCheckboxChanged,
     this.checkboxText,
+    this.isSetup = false,
+    this.isAddition = false,
   });
 
   @override
-  SetupCardState createState() => SetupCardState();
+  DynamicCardState createState() => DynamicCardState();
 }
 
-class SetupCardState extends ConsumerState<SetupCard>
+class DynamicCardState extends ConsumerState<DynamicCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -53,18 +59,26 @@ class SetupCardState extends ConsumerState<SetupCard>
 
   @override
   Widget build(BuildContext context) {
-    final globalState = ref.watch(globalStateProvider);
-    final isLoading = globalState.isLoading;
+    final setupLoadingId = ref.watch(setupLoadingProvider);
+    final additionLoadingId = ref.watch(additionLoadingProvider);
+
+    final isSetupLoading =
+        widget.isSetup && setupLoadingId == widget.configData.id;
+    final isAdditionLoading =
+        widget.isAddition && additionLoadingId == widget.configData.id;
+    final isLoading = setupLoadingId != null || additionLoadingId != null;
+
     final isSelected = widget.configData.isSelected;
 
-    bool isButtonDisabled = isLoading && !isSelected;
+    // Determine if interaction should be disabled
+    bool isButtonDisabled = isLoading && !isSetupLoading && !isAdditionLoading;
 
     return Opacity(
       opacity: isButtonDisabled ? 0.5 : 1.0,
       child: Stack(
         children: [
           Card(
-            color: AutomatoThemeColors.darkBrown(ref),
+            color: _getCardColor(isSetupLoading, isAdditionLoading),
             margin: const EdgeInsets.all(8.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
@@ -83,12 +97,19 @@ class SetupCardState extends ConsumerState<SetupCard>
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      widget.configData.imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 90,
-                    ),
+                    child: widget.configData.imageUrl.startsWith('http')
+                        ? Image.network(
+                            widget.configData.imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 90,
+                          )
+                        : Image.asset(
+                            widget.configData.imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 90,
+                          ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -99,27 +120,9 @@ class SetupCardState extends ConsumerState<SetupCard>
                     ),
                   ),
                   const SizedBox(height: 6),
-                  if (widget.configData.level == '1')
-                    const Text(
-                      'Levels: Unchanged',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  if (widget.configData.level != '1')
-                    Text(
-                      'Levels: ${widget.configData.level}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                  _buildLevelInfo(),
                   const SizedBox(height: 6),
-                  if (widget.configData.stats == '0.0')
-                    const Text(
-                      'Stats: Unchanged',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  if (widget.configData.stats != '0.0')
-                    Text(
-                      'Stats: ${widget.configData.stats}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                  _buildStatsInfo(),
                   const SizedBox(height: 6),
                   Expanded(
                     child: SizedBox(
@@ -166,30 +169,29 @@ class SetupCardState extends ConsumerState<SetupCard>
                     child: SizedBox(
                       width: double.infinity,
                       child: AutomatoButton(
-                        stopColorAnimation:
-                            isButtonDisabled || (isSelected && isLoading),
-                        stopBorderAnimation:
-                            isButtonDisabled || (isSelected && isLoading),
-                        stopFillAnimation:
-                            isButtonDisabled || (isSelected && isLoading),
+                        stopColorAnimation: isButtonDisabled ||
+                            isLoading && !isSetupLoading && !isAdditionLoading,
+                        stopBorderAnimation: isButtonDisabled ||
+                            isLoading && !isSetupLoading && !isAdditionLoading,
+                        stopFillAnimation: isButtonDisabled ||
+                            isLoading && !isSetupLoading && !isAdditionLoading,
                         fontSize: 30,
                         letterSpacing: 1.5,
-                        baseColor: isSelected && isLoading
-                            ? AutomatoThemeColors.primaryColor(ref)
-                                .withOpacity(0.6)
-                            : AutomatoThemeColors.primaryColor(ref),
-                        startColor: isSelected && isLoading
-                            ? AutomatoThemeColors.saveZone(ref)
-                            : widget.configData.isSelected
-                                ? AutomatoThemeColors.dangerZone(ref)
-                                : AutomatoThemeColors.darkBrown(ref),
+                        baseColor:
+                            isLoading && (isSetupLoading || isAdditionLoading)
+                                ? AutomatoThemeColors.primaryColor(ref)
+                                    .withOpacity(0.6)
+                                : AutomatoThemeColors.primaryColor(ref),
+                        startColor:
+                            isLoading && (isSetupLoading || isAdditionLoading)
+                                ? AutomatoThemeColors.saveZone(ref)
+                                : widget.configData.isSelected
+                                    ? AutomatoThemeColors.dangerZone(ref)
+                                    : AutomatoThemeColors.darkBrown(ref),
                         maxScale: 0.8,
                         showPointer: false,
-                        label: isSelected && isLoading
-                            ? 'Installing...'
-                            : widget.configData.isSelected
-                                ? 'Undo Setup'
-                                : 'Start Setup',
+                        label: _buildButtonLabel(
+                            isSelected, isSetupLoading, isAdditionLoading),
                         onPressed: isButtonDisabled
                             ? () {} // do nothing :)
                             : () => widget.onToggleSelection!(),
@@ -201,7 +203,7 @@ class SetupCardState extends ConsumerState<SetupCard>
               ),
             ),
           ),
-          if (isSelected && isLoading)
+          if (isSelected && (isSetupLoading || isAdditionLoading))
             Positioned.fill(
               child: AnimatedBuilder(
                 animation: _animation,
@@ -277,5 +279,69 @@ class SetupCardState extends ConsumerState<SetupCard>
         ],
       ),
     );
+  }
+
+  Color _getCardColor(bool isSetupLoading, bool isAdditionLoading) {
+    if (isSetupLoading || isAdditionLoading) {
+      return AutomatoThemeColors.darkBrown(ref);
+    } else if (widget.isSetup) {
+      return AutomatoThemeColors.darkBrown(ref);
+    } else if (widget.isAddition) {
+      return AutomatoThemeColors.brown25(ref);
+    }
+    return AutomatoThemeColors.darkBrown(ref);
+  }
+
+  String _buildButtonLabel(
+      bool isSelected, bool isSetupLoading, bool isAdditionLoading) {
+    if (isSetupLoading || isAdditionLoading) {
+      return isSelected ? 'Installing...' : 'Applying...';
+    } else if (isSelected) {
+      return widget.isSetup ? 'Undo Setup' : 'Remove Addition';
+    } else {
+      return widget.isSetup ? 'Start Setup' : 'Apply Addition';
+    }
+  }
+
+  Widget _buildLevelInfo() {
+    if (widget.isSetup) {
+      return widget.configData.level == '1'
+          ? const Text(
+              'Levels: Unchanged',
+              style: TextStyle(fontSize: 16),
+            )
+          : Text(
+              'Levels: ${widget.configData.level}',
+              style: const TextStyle(fontSize: 16),
+            );
+    } else if (widget.isAddition) {
+      return const Text(
+        'Additional Feature',
+        style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+      );
+    } else {
+      return Container(); // Return an empty container if neither setup nor addition
+    }
+  }
+
+  Widget _buildStatsInfo() {
+    if (widget.isSetup) {
+      return widget.configData.stats == '0.0'
+          ? const Text(
+              'Stats: Unchanged',
+              style: TextStyle(fontSize: 16),
+            )
+          : Text(
+              'Stats: ${widget.configData.stats}',
+              style: const TextStyle(fontSize: 16),
+            );
+    } else if (widget.isAddition) {
+      return const Text(
+        'Enhances Setup',
+        style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+      );
+    } else {
+      return Container(); // Return an empty container if neither setup nor addition
+    }
   }
 }

@@ -1,9 +1,13 @@
 import 'package:NAER/data/setup_data/setup_data.dart';
+import 'package:NAER/naer_ui/setup/config_list/addition_utils.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_card.dart';
+import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_utils.dart';
+import 'package:NAER/naer_utils/state_provider/addition_state.dart';
 import 'package:NAER/naer_utils/state_provider/setup_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:automato_theme/automato_theme.dart';
 
 class SetupList extends ConsumerStatefulWidget {
   const SetupList({super.key});
@@ -12,38 +16,22 @@ class SetupList extends ConsumerStatefulWidget {
   SetupListState createState() => SetupListState();
 }
 
-/// TODO: Implement the new "Additions" feature to enhance the flexibility of setup configurations.
-///
-/// 1. **Add UI Support:**
-///    - Introduce a new parameter `isAddition` in the data model to differentiate between setups and additions.
-///    - Modify the UI rendering logic to visually distinguish additions from regular setups based on the `isAddition` flag.
-///
-/// 2. **Ensure Persistence:**
-///    - Update the logic to include additions in the ignore list to prevent setups from overwriting or undoing deletion of additions.
-///
-/// 3. **Handle Setup Changes:**
-///    - When a setup is modified, check if any additions are linked to it. If so, call `handleAddition` to associate the addition with the updated setup.
-///
-/// 4. **Separate Logic for Additions:**
-///    - If `isAddition` is true, ensure the logic separates setup states from addition states to avoid unintended interactions.
-///
-/// 5. **Enable User Customization:**
-///    - Add a new UI button that allows users to create and manage additions directly, enhancing user control over their setup configurations.
-///
-/// 6. **Create an Additions List:**
-///    - Implement a new `AdditionsList` to handle additions independently from setups.
-///    - Refactor the card component to be dynamic, creating a `CardList` that can manage both setups and additions with minimal duplication of code.
-///
-/// 7. **Track File Changes:**
-///    - Extend the file change tracking system by adding a `bool isAddition` parameter. This will ensure that the system correctly tracks and handles additions, particularly when deletions are involved.
-///    - Ensure that deleting a setup does not unintentionally remove related additions unless explicitly specified by the user.
-
 class SetupListState extends ConsumerState<SetupList> {
+  late final SetupUtils setupUtils;
+  late final AdditionsUtils additionsUtils;
+
+  @override
+  void initState() {
+    super.initState();
+    setupUtils = SetupUtils(ref, context);
+    additionsUtils = AdditionsUtils(ref, context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final setups = ref.watch(setupConfigProvider);
+    final additions = ref.watch(additionConfigProvider);
     final selectedSetupId = ref.watch(setupStateProvider);
-    final SetupUtils setupUtils = SetupUtils(ref, context);
 
     for (var setup in setups) {
       setup.isSelected = setup.id == selectedSetupId;
@@ -57,6 +45,50 @@ class SetupListState extends ConsumerState<SetupList> {
       return 0;
     });
 
+    additions.sort((a, b) {
+      final isCustomA = !SetupData.additions.any((s) => s.id == a.id);
+      final isCustomB = !SetupData.additions.any((s) => s.id == b.id);
+      if (isCustomA && !isCustomB) return -1;
+      if (!isCustomA && isCustomB) return 1;
+      return 0;
+    });
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            child: _buildItemsGrid(context, setups, isSetup: true),
+          ),
+          _buildHeader(context, "Additions"),
+          // Container for additions
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: _buildItemsGrid(context, additions, isSetup: false),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, String title) {
+    return Container(
+      width: double.infinity,
+      color: AutomatoThemeColors.darkBrown(ref),
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: AutomatoThemeColors.primaryColor(ref),
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemsGrid(BuildContext context, List<SetupConfigData> items,
+      {required bool isSetup}) {
     return LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount;
@@ -99,6 +131,8 @@ class SetupListState extends ConsumerState<SetupList> {
 
         if (crossAxisCount > 1) {
           return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8.0),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
@@ -106,36 +140,72 @@ class SetupListState extends ConsumerState<SetupList> {
               mainAxisSpacing: 8.0,
               childAspectRatio: childAspectRatio,
             ),
-            itemCount: setups.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final setup = setups[index];
-              final isCustom = !SetupData.setups.any((s) => s.id == setup.id);
+              final item = items[index];
+              final isCustom = !SetupData.setups.any((s) => s.id == item.id) &&
+                  !SetupData.additions.any((s) => s.id == item.id);
 
-              return SetupCard(
-                configData: setup,
-                onToggleSelection: () => setupUtils.toggleSetupSelection(setup),
-                onDelete: isCustom ? () => setupUtils.deleteSetup(setup) : null,
-                showCheckbox: setup.showCheckbox,
-                onCheckboxChanged: setup.onCheckboxChanged,
-                checkboxText: setup.checkboxText,
+              return DynamicCard(
+                configData: item,
+                onToggleSelection: () {
+                  if (isSetup) {
+                    setupUtils.toggleSetupSelection(item);
+                  } else {
+                    additionsUtils.toggleAdditionSelection(item);
+                  }
+                },
+                onDelete: isCustom
+                    ? () {
+                        if (isSetup) {
+                          setupUtils.deleteSetup(item);
+                        } else {
+                          additionsUtils.deleteAddition(item);
+                        }
+                      }
+                    : null,
+                showCheckbox: item.showCheckbox,
+                onCheckboxChanged: item.onCheckboxChanged,
+                checkboxText: item.checkboxText,
+                isSetup: isSetup,
+                isAddition: !isSetup,
               );
             },
           );
         } else {
           return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8.0),
-            itemCount: setups.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final setup = setups[index];
-              final isCustom = !SetupData.setups.any((s) => s.id == setup.id);
+              final item = items[index];
+              final isCustom = !SetupData.setups.any((s) => s.id == item.id) &&
+                  !SetupData.additions.any((s) => s.id == item.id);
 
-              return SetupCard(
-                configData: setup,
-                onToggleSelection: () => setupUtils.toggleSetupSelection(setup),
-                onDelete: isCustom ? () => setupUtils.deleteSetup(setup) : null,
-                showCheckbox: setup.showCheckbox,
-                onCheckboxChanged: setup.onCheckboxChanged,
-                checkboxText: setup.checkboxText,
+              return DynamicCard(
+                configData: item,
+                onToggleSelection: () {
+                  if (isSetup) {
+                    setupUtils.toggleSetupSelection(item);
+                  } else {
+                    additionsUtils.toggleAdditionSelection(item);
+                  }
+                },
+                onDelete: isCustom
+                    ? () {
+                        if (isSetup) {
+                          setupUtils.deleteSetup(item);
+                        } else {
+                          additionsUtils.deleteAddition(item);
+                        }
+                      }
+                    : null,
+                showCheckbox: item.showCheckbox,
+                onCheckboxChanged: item.onCheckboxChanged,
+                checkboxText: item.checkboxText,
+                isSetup: isSetup,
+                isAddition: !isSetup,
               );
             },
           );

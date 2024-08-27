@@ -26,7 +26,7 @@ AutomatoButton navigateButton(BuildContext context, WidgetRef ref) {
           ModStateManager(ModService(), modInstallHandler);
 
       if (context.mounted) {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) =>
                 provider.ChangeNotifierProvider<ModStateManager>(

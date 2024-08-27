@@ -1,3 +1,4 @@
+import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -25,7 +26,7 @@ class SplashScreenState extends ConsumerState<SplashScreen>
       vsync: this,
     );
 
-    // animation for the Lottie file
+    // Animation for the Lottie file
     _bounceAnimation = Tween<double>(begin: 0.0, end: -30.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -33,7 +34,7 @@ class SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    // animation for the text that appears after the Lottie animation
+    // Animation for the text that appears after the Lottie animation
     _textOpacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -70,60 +71,82 @@ class SplashScreenState extends ConsumerState<SplashScreen>
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedBuilder(
-              animation: _bounceAnimation,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: Offset(0, _bounceAnimation.value),
-                  child: child,
-                );
-              },
-              child: Lottie.asset(
-                'assets/animations/splash_animation.json',
-                width: 300,
-                height: 300,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Opacity(
+            opacity: 0.2,
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                AutomatoThemeColors.darkBrown(ref),
+                BlendMode.darken,
+              ),
+              child: Image.asset(
+                'assets/animations/glitch_effect.gif',
                 fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
               ),
             ),
-            const SizedBox(height: 20),
-            FadeTransition(
-              opacity: _textOpacityAnimation,
-              child: Column(
-                children: [
-                  Text(
-                    'NAER',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedBuilder(
+                  animation: _bounceAnimation,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, _bounceAnimation.value),
+                      child: child,
+                    );
+                  },
+                  child: Lottie.asset(
+                    'assets/animations/splash_animation.json',
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.cover,
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Enhancing Your Experience',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
-                    ),
+                ),
+                const SizedBox(height: 20),
+                FadeTransition(
+                  opacity: _textOpacityAnimation,
+                  child: Column(
+                    children: [
+                      Text(
+                        'NAER',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Enhancing Your Experience',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color:
+                              isDarkMode ? Colors.grey[400] : Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Created by Vluurie, RaiderB, For the Community of Mankind',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color:
+                              isDarkMode ? Colors.grey[400] : Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Created by Vluurie, RaiderB, For the Community of Mankind',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

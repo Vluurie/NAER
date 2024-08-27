@@ -19,6 +19,7 @@ import 'package:NAER/naer_ui/setup/naer_main_page_setup.dart';
 import 'package:NAER/naer_ui/setup/options_panel.dart';
 import 'package:NAER/naer_ui/setup/splash_screen.dart';
 import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/naer_utils/update_util.dart';
@@ -101,7 +102,7 @@ void main(List<String> arguments) async {
     await windowManager.ensureInitialized();
     await dotenv.load(fileName: ".env");
     final themeNotifier = await AutomatoThemeNotifier.loadFromPreferences();
-    windowManager.setPreventClose(true);
+    unawaited(windowManager.setPreventClose(true));
 
     runApp(
       ProviderScope(
@@ -188,9 +189,9 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   Future<void> _initializeApp() async {
-    updateItemsByType(SideQuest, true, ref);
-    updateItemsByType(MapLocation, true, ref);
-    updateItemsByType(ScriptingPhase, true, ref);
+    unawaited(updateItemsByType(SideQuest, true, ref));
+    unawaited(updateItemsByType(MapLocation, true, ref));
+    unawaited(updateItemsByType(ScriptingPhase, true, ref));
 
     await FileChange.loadChanges();
     await FileChange.loadDLCOption(ref);
@@ -280,11 +281,11 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
           AutomatoBackground(
             ref: ref,
             showRepeatingBorders: false,
-            gradientColor: globalState.input.isEmpty
+            gradientColor: !validateInputOutput(globalState)
                 ? AutomatoThemeColors.dangerZone(ref)
                 : AutomatoThemeColors.gradient(ref),
             linesConfig: LinesConfig(
-              lineColor: globalState.input.isEmpty
+              lineColor: !validateInputOutput(globalState)
                   ? AutomatoThemeColors.dangerZone(ref)
                   : AutomatoThemeColors.bright(ref),
               strokeWidth: 2.5,

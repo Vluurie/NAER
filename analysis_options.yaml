@@ -24,7 +24,38 @@ linter:
     avoid_print: false
     file_names: false
     package_names: false
+    unawaited_futures: true
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+
+    # Additional lint rules
+    always_declare_return_types: true       # Enforces explicit return types for functions and methods
+    avoid_as: true                          # Discourages the use of `as` for type casting, promoting `is` checks instead
+    avoid_empty_else: true                  # Flags empty else blocks to avoid redundant code
+    avoid_function_literals_in_foreach_calls: true # Suggests using a normal `for` loop instead of `.forEach` for better readability
+    avoid_init_to_null: true                # Discourages initializing variables to `null`, as it’s redundant
+    avoid_null_checks_in_equality_operators: true # Discourages explicit `null` checks in equality operators
+    avoid_positional_boolean_parameters: true # Promotes the use of named parameters for boolean values for better readability
+    avoid_redundant_argument_values: true    # Flags arguments passed with their default value
+    avoid_setters_without_getters: true      # Discourages creating setters without corresponding getters
+    avoid_single_cascade_in_expression_statements: true # Discourages the use of single cascade operators, which can be confusing
+    camel_case_types: true                   # Ensures types are named using camel case
+    constant_identifier_names: true          # Enforces naming conventions for constants
+    empty_constructor_bodies: true           # Flags empty constructor bodies that can be removed
+    join_return_with_assignment: true        # Suggests combining return statements with assignments
+    no_duplicate_case_values: true           # Flags duplicate values in switch cases
+    prefer_asserts_in_initializer_lists: true # Encourages using asserts in initializer lists for constructors
+    prefer_collection_literals: true         # Encourages using collection literals (e.g., `[]`, `{}`) instead of constructors
+    prefer_conditional_assignment: true      # Suggests using conditional assignment (`??=`) where applicable
+    prefer_const_constructors_in_immutables: true # Suggests using const constructors in immutable classes
+    prefer_is_not_empty: true                # Recommends using `isNotEmpty` instead of length checks for collections
+    type_annotate_public_apis: true          # Requires type annotations for public API members
+    use_full_hex_values_for_flutter_colors: true # Requires full 8-digit hex color values in Flutter to include opacity
+    use_key_in_widget_constructors: true     # Ensures custom widgets have a key parameter in their constructors
+    use_rethrow_when_possible: true          # Promotes using `rethrow` in catch blocks when the exception is rethrown
+    prefer_final_parameters: true            # Enforces the use of `final` for parameters to avoid unintended mutations
+    avoid_escaping_inner_quotes: true        # Encourages avoiding unnecessary escaping of quotes
+    unnecessary_overrides: true              # Flags methods that override a superclass method without changing behavior
+    unnecessary_brace_in_string_interps: true # Flags unnecessary braces in string interpolations
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

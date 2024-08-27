@@ -17,9 +17,9 @@ class ScriptingPhase {
   ];
 
   // Helper function to get a scripting phase by ID
-  static ScriptingPhase? getScriptingPhaseById(String id) {
+  static ScriptingPhase? getScriptingPhaseById(final String id) {
     try {
-      return scriptingPhases.firstWhere((phase) => phase.id == id);
+      return scriptingPhases.firstWhere((final phase) => phase.id == id);
     } catch (e) {
       // If no scripting phase is found with the given id, return null or handle it as you see fit
       return null;

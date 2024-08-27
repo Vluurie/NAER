@@ -60,7 +60,7 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
       }).toList();
     } else {
       state = SetupData.setups;
-      _saveConfigs();
+      await _saveConfigs();
     }
   }
 

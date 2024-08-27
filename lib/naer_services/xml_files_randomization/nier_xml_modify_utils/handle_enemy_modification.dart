@@ -33,7 +33,7 @@ Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
       action.userSelectedEnemyData[group]?.isNotEmpty == true) {
     // Handle randomization and setting of new enemy number if requested
     if (action.randomizeAndSetValues) {
-      randomizeEnemyNumber(action, group);
+      await randomizeEnemyNumber(action, group);
     }
   }
 
@@ -66,7 +66,7 @@ Future<void> handleShootingEnemyCurveAction(
       );
     }
   }
-  setSpecificValues(action.objIdElement, action.objIdElement.innerText);
+  await setSpecificValues(action.objIdElement, action.objIdElement.innerText);
 }
 
 /// Calls [handleEnemyEntityObject] with the [handleLevels] and [randomizeAndSetValues] parameters set to true.

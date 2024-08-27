@@ -17,9 +17,9 @@ class Enemy {
 }
 
 class EnemyList {
-  static List<Enemy> getDLCFilteredEnemies(WidgetRef ref) {
+  static List<Enemy> getDLCFilteredEnemies(final WidgetRef ref) {
     final hasDLC = ref.watch(globalStateProvider).hasDLC;
-    return allEmForStatsChangeList.where((enemy) {
+    return allEmForStatsChangeList.where((final enemy) {
       return hasDLC || enemy.dlcEnemy != true;
     }).toList();
   }

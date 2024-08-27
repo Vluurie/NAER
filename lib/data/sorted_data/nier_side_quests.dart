@@ -97,9 +97,9 @@ class SideQuest {
   ];
 
   // Helper function to get side quest by ID
-  static SideQuest? getSideQuestById(String id) {
+  static SideQuest? getSideQuestById(final String id) {
     try {
-      return sideQuests.firstWhere((quest) => quest.id == id);
+      return sideQuests.firstWhere((final quest) => quest.id == id);
     } catch (e) {
       // If no side quest is found with the given id, return null or handle it as you see fit
       return null;

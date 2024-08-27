@@ -4,7 +4,7 @@ import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
 class SetupData {
   static SetupConfigData getCurrentSelectedSetup() {
     return setups.firstWhere(
-      (setup) => setup.isSelected,
+      (final setup) => setup.isSelected,
       orElse: () => throw StateError('No setup is currently selected'),
     );
   }
@@ -12,8 +12,7 @@ class SetupData {
   static List<SetupConfigData> setups = [
     SetupConfigData(
       id: '1',
-      imageUrl:
-          'https://asset.vg247.com/NieR-Switch-Screen-2.jpg/BROK/resize/1920x1920%3E/format/jpg/quality/80/NieR-Switch-Screen-2.jpg',
+      imageUrl: 'assets/setups_images/full_randomized.jpg',
       title: 'FULL RANDOMIZED',
       description: 'All possible enemies will be randomized.',
       level: 'Unchanged',
@@ -34,7 +33,7 @@ class SetupData {
     ),
     SetupConfigData(
       id: '2',
-      imageUrl: 'https://giffiles.alphacoders.com/121/121877.gif',
+      imageUrl: 'assets/setups_images/android_massacre.gif',
       title: 'ANDROID MASSACRE',
       description: 'All possible enemies in the game will be Androids',
       level: 'Unchanged',
@@ -63,17 +62,15 @@ class SetupData {
         "--category=default",
         "{ignore}"
       ],
-      isSelected: false,
       showCheckbox: true,
       checkboxText: "Add 9S",
-      onCheckboxChanged: (bool isChecked) {
+      onCheckboxChanged: (final bool isChecked) {
         setups[1].updateGroundArgument(isChecked, "em1040");
       },
     ),
     SetupConfigData(
         id: '4',
-        imageUrl:
-            'https://lparchive.org/NieR-Automata/Update%2020/39-intoner_(48).jpg',
+        imageUrl: 'assets/setups_images/nightmare.jpg',
         title: 'NIGHTMARE',
         description:
             'All enemies max level and highest multiplier. No randomization.',
@@ -91,12 +88,10 @@ class SetupData {
           "--level=99",
           "--category=onlylevel",
           "{ignore}"
-        ],
-        isSelected: false),
+        ]),
     SetupConfigData(
         id: '5',
-        imageUrl:
-            'https://64.media.tumblr.com/cae34b09f91f7fc74a2f43627a9c84c3/tumblr_omixx0Y4SI1uq6svio2_r1_540.gif',
+        imageUrl: 'assets/setups_images/boss_bloodpath.gif',
         title: 'BOSS BLOODBATH',
         description:
             'All possible enemies that can be randomized will be Bosses that can be used for modification.',
@@ -118,15 +113,18 @@ class SetupData {
           "--category=default",
           "{ignore}"
         ],
-        isSelected: false,
-        isAddition: true),
+        isSelected: true,
+        isAddition: false),
+  ];
+
+  static List<SetupConfigData> additions = [
     SetupConfigData(
         id: '6',
-        imageUrl: 'https://i.imgur.com/nrkU0lH.png',
-        title: 'Higher Stats Only',
-        description: 'Changes only enemy stats to x2.',
+        imageUrl: 'assets/setups_images/lesser_stats.png',
+        title: 'Lesser Stats',
+        description: 'Reduce Enemy Stats by 15%.',
         level: '1',
-        stats: 'x2.0',
+        stats: '-15%',
         arguments: [
           "{input}",
           "--output",
@@ -140,11 +138,10 @@ class SetupData {
           "--category=onlylevel",
           "{ignore}"
         ],
-        isSelected: false,
         isAddition: true),
     SetupConfigData(
         id: '7',
-        imageUrl: 'https://i.imgur.com/nrkU0lH.png',
+        imageUrl: 'assets/setups_images/higher_stats.png',
         title: 'Higher Stats Only',
         description: 'Changes only enemy stats to x3.',
         level: '1',
@@ -162,11 +159,10 @@ class SetupData {
           "--category=onlylevel",
           "{ignore}"
         ],
-        isSelected: false,
         isAddition: true),
     SetupConfigData(
         id: '8',
-        imageUrl: 'https://i.imgur.com/nrkU0lH.png',
+        imageUrl: 'assets/setups_images/higher_stats.png',
         title: 'Higher Stats Only',
         description: 'Changes only enemy stats to x4.',
         level: '1',
@@ -184,11 +180,10 @@ class SetupData {
           "--category=onlylevel",
           "{ignore}"
         ],
-        isSelected: false,
         isAddition: true),
     SetupConfigData(
         id: '9',
-        imageUrl: 'https://i.imgur.com/nrkU0lH.png',
+        imageUrl: 'assets/setups_images/higher_stats.png',
         title: 'Higher Stats Only',
         description: 'Changes only enemy stats to x5.',
         level: '1',
@@ -206,7 +201,6 @@ class SetupData {
           "--category=onlylevel",
           "{ignore}"
         ],
-        isSelected: false,
         isAddition: true),
   ];
 }

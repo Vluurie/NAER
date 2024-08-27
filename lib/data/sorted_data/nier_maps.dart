@@ -39,9 +39,9 @@ class MapLocation {
   ];
 
   // Helper function to get resource location by ID
-  static MapLocation? getMapLocationById(String id) {
+  static MapLocation? getMapLocationById(final String id) {
     try {
-      return mapLocations.firstWhere((location) => location.id == id);
+      return mapLocations.firstWhere((final location) => location.id == id);
     } catch (e) {
       // If no resource location is found with the given id, return null or handle it as you see fit
       return null;

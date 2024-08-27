@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> showInvalidDirectoryDialog(
     BuildContext context, WidgetRef ref) async {
-  AutomatoDialogManager().showInfoDialog(
+  await AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "Invalid Directory",
@@ -31,7 +31,7 @@ Future<void> showNoDlcDirectoryDialog(
     BuildContext context, WidgetRef ref) async {
   final globalState = ref.read(globalStateProvider.notifier);
 
-  AutomatoDialogManager().showInfoDialog(
+  await AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "DLC Not Found",
@@ -55,7 +55,7 @@ Future<void> showAsyncInfoDialog(BuildContext context, WidgetRef ref) async {
   final Completer<void> completer = Completer<void>();
   final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
-  AutomatoDialogManager().showInfoDialog(
+  await AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "DLC Found!",
@@ -115,6 +115,8 @@ void showModsMessage(
     BuildContext context,
     WidgetRef ref) {
   void showRemoveConfirmation(int? index) {
+    final globalStateNotifier = ref.read(globalStateProvider.notifier);
+
     AutomatoDialogManager().showYesNoDialog(
       context: context,
       ref: ref,
@@ -142,6 +144,10 @@ void showModsMessage(
           await FileChange.saveIgnoredFiles();
         }
         onModFilesUpdated(modFiles);
+
+        // Update the state before closing the dialog
+        globalStateNotifier.setWasModManamentDialogShown(true);
+
         if (context.mounted) {
           Navigator.of(context).pop();
 
@@ -154,6 +160,8 @@ void showModsMessage(
         }
       },
       onNoPressed: () {
+        // Update the state before closing the dialog
+        globalStateNotifier.setWasModManamentDialogShown(true);
         Navigator.of(context).pop();
       },
       yesLabel: "Remove",
@@ -179,27 +187,40 @@ void showModsMessage(
     ),
     onYesPressed: () {
       onModFilesUpdated(modFiles);
+
+      // Update the state before closing the dialog
+      final globalStateNotifier = ref.read(globalStateProvider.notifier);
+      globalStateNotifier.setWasModManamentDialogShown(true);
+
       Navigator.of(context).pop();
     },
-    onNoPressed: () => showRemoveConfirmation(null),
+    onNoPressed: () {
+      // Handle removal confirmation for all mods
+      showRemoveConfirmation(null);
+    },
     yesLabel: "OK",
     noLabel: "Remove All",
   );
 }
 
 void showNoModFilesDialog(BuildContext context, WidgetRef ref) {
+  final globalStateNotifier = ref.read(globalStateProvider.notifier);
+
   AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "No Mod Files Found",
     content: Text(
-      "Awesome, no mods found that NAER also uses. You can savely modify.",
+      "Awesome, no mods found that NAER also uses. You can safely modify.",
       style: TextStyle(
         color: AutomatoThemeColors.textDialogColor(ref),
         fontSize: 20,
       ),
     ),
     onOkPressed: () {
+      // Update the state before closing the dialog
+      globalStateNotifier.setWasModManamentDialogShown(true);
+
       Navigator.of(context).pop();
     },
     okLabel: "OK",

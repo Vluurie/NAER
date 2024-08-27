@@ -33,8 +33,8 @@ Future<bool> startNierAutomataExecutable(
                 'NierAutomata.exe', const Duration(seconds: 60));
 
         if (processStarted) {
-          ProcessService.monitorProcessByName(
-              'NierAutomata.exe', onProcessStopped);
+          unawaited(ProcessService.monitorProcessByName(
+              'NierAutomata.exe', onProcessStopped));
           return true; // Process started successfully
         } else {
           globalLog(

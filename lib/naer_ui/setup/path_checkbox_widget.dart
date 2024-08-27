@@ -18,6 +18,7 @@ class PathCheckBoxWidget extends ConsumerWidget {
             if (!value) {
               await clearPathsFromSharedPreferences();
               ref.read(globalStateProvider.notifier).clearSavePaths();
+              ref.read(globalStateProvider.notifier).setIsPanelVisible(false);
             }
             ref.read(globalStateProvider.notifier).updateSavePaths(value);
           },

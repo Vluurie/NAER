@@ -63,7 +63,7 @@ void copyToClipboard(List<String> command, BuildContext context) {
       return cmd
           .replaceAll(' ', '')
           .replaceAll('",', '",')
-          .replaceAll('\'', '\"');
+          .replaceAll('\'', '"');
     } else {
       return cmd.startsWith('"') && cmd.endsWith('"') ? cmd : '"$cmd"';
     }

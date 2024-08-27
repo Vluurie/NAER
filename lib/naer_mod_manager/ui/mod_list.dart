@@ -758,7 +758,7 @@ class _ModsListState extends ConsumerState<ModsList>
       LogState logState) async {
     final modInstallHandler = ModInstallHandler(widget.cliArguments);
     try {
-      modInstallHandler.uninstallMod(selectedMod.id);
+      await modInstallHandler.uninstallMod(selectedMod.id);
       modStateManager.uninstallMod(selectedMod.id);
       List<String> filenamesToRemove = selectedMod.files
           .map((fileMap) => fileMap['path'] ?? '')

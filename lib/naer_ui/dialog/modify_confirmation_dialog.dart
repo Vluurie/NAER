@@ -54,7 +54,7 @@ void showModifyDialogAndModify(
       CLIArguments cliArgs = await getGlobalArguments(ref);
       List<String> arguments = cliArgs.processArgs;
       if (context.mounted) {
-        handleStartModification(context, ref, modifyMethod, arguments);
+        await handleStartModification(context, ref, modifyMethod, arguments);
       }
     },
     onNoPressed: () {

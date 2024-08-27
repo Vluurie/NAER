@@ -8,34 +8,34 @@ import 'package:NAER/naer_utils/handle_start_modification.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
-import 'package:NAER/naer_utils/state_provider/setup_state.dart';
+import 'package:NAER/naer_utils/state_provider/addition_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SetupUtils {
+class AdditionsUtils {
   final WidgetRef ref;
   final BuildContext context;
 
-  const SetupUtils(this.ref, this.context);
+  const AdditionsUtils(this.ref, this.context);
 
-  Future<void> installSetup(SetupConfigData setup) async {
-    ref.read(setupLoadingProvider.notifier).state = setup.id;
-    final selectedSetup =
-        ref.read(setupConfigProvider.notifier).getCurrentSelectedSetup();
-    if (selectedSetup != null) {
-      final arguments = selectedSetup.generateArguments(ref);
+  void installAddition(SetupConfigData addition) async {
+    ref.read(additionLoadingProvider.notifier).state = addition.id;
+    final selectedAddition =
+        ref.read(additionConfigProvider.notifier).getCurrentSelectedAddition();
+    if (selectedAddition != null) {
+      final arguments = selectedAddition.generateArguments(ref);
       await handleStartModification(
           context, ref, startModificationProcess, arguments);
-      ref.read(setupLoadingProvider.notifier).state = null;
+      ref.read(additionLoadingProvider.notifier).state = null;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No setup is currently selected!')),
+        const SnackBar(content: Text('No addition is currently selected!')),
       );
-      ref.read(setupLoadingProvider.notifier).state = null;
+      ref.read(additionLoadingProvider.notifier).state = null;
     }
   }
 
-  void toggleSetupSelection(SetupConfigData setup) async {
+  void toggleAdditionSelection(SetupConfigData addition) async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     final globalState = ref.read(globalStateProvider);
 
@@ -43,11 +43,11 @@ class SetupUtils {
       return;
     }
 
-    if (!setup.isSelected) {
+    if (!addition.isSelected) {
       if (isNierRunning) {
         showNierIsRunningDialog(context, ref);
       } else {
-        _selectSetup(setup);
+        _selectAddition(addition);
       }
     } else {
       if (isNierRunning) {
@@ -55,45 +55,46 @@ class SetupUtils {
       } else {
         bool confirmUndo = await showUndoConfirmation(context, ref);
         if (confirmUndo) {
-          _deselectSetup(setup);
+          _deselectAddition(addition);
         }
       }
     }
   }
 
-  void _selectSetup(SetupConfigData setup) async {
+  void _selectAddition(SetupConfigData addition) async {
     final globalState = ref.read(globalStateProvider);
     if (!validateInputOutput(globalState)) {
       globalLog("Error: Please select both input and output directories. 💋 ");
       return;
     }
-    bool? shouldStartSetup = await showStartSetupDialog(ref, context, setup);
-    if (shouldStartSetup!) {
-      ref.read(setupConfigProvider.notifier).selectSetup(setup.id);
-      globalLog('STARTED NEW MODIFICATION SETUP.');
-      await installSetup(setup);
+    bool? shouldStartAddition =
+        await showStartSetupDialog(ref, context, addition);
+    if (shouldStartAddition!) {
+      ref.read(additionConfigProvider.notifier).selectAddition(addition.id);
+      installAddition(addition);
+      globalLog('STARTED NEW MODIFICATION ADDITION.');
     } else {
-      ref.read(setupLoadingProvider.notifier).state = null;
+      ref.read(additionLoadingProvider.notifier).state = null;
     }
   }
 
-  void _deselectSetup(SetupConfigData setup) {
-    ref.read(setupStateProvider.notifier).deselectSetup();
-    globalLog('SETUP DESELECTED.');
-    ref.read(setupLoadingProvider.notifier).state = null;
+  void _deselectAddition(SetupConfigData addition) {
+    ref.read(additionConfigProvider.notifier).deselectAddition();
+    ref.read(additionLoadingProvider.notifier).state = null;
+    globalLog('ADDITION DESELECTED.');
   }
 
-  void deleteSetup(SetupConfigData setup) async {
-    if (!setup.isSelected) {
-      final setupNotifier = ref.read(setupConfigProvider.notifier);
-      setupNotifier.removeConfig(setup);
+  void deleteAddition(SetupConfigData addition) async {
+    if (!addition.isSelected) {
+      final additionNotifier = ref.read(additionConfigProvider.notifier);
+      additionNotifier.removeAddition(addition);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Setup deleted successfully!')),
+        const SnackBar(content: Text('Addition deleted successfully!')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Undo the Setup before deleting.')),
+        const SnackBar(content: Text('Undo the Addition before deleting.')),
       );
     }
   }

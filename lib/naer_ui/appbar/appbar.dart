@@ -1,5 +1,7 @@
 import 'package:NAER/naer_ui/appbar/appbar_icon.dart';
 import 'package:NAER/naer_ui/button/donate_button.dart';
+import 'package:NAER/naer_utils/start_modification_process.dart';
+import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -23,6 +25,8 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final globalState = ref.watch(globalStateProvider);
+    bool checkPaths = validateInputOutput(globalState);
     return Stack(
       children: [
         Positioned(
@@ -58,6 +62,9 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        if (!validateInputOutput(globalState))
+                          AppIcons.searchPaths(context, ref),
+                        AppIcons.showIgnoredFiles(context, ref),
                         AppIcons.copyArguments(context, ref),
                         AppIcons.informationIcon(context, ref),
                         const SizedBox(width: 16.0),
@@ -69,38 +76,39 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
               },
             ),
           ),
-          leading: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AutomatoThemeColors.textDialogColor(ref),
-                    AutomatoThemeColors.darkBrown(ref),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: AutomatoThemeColors.brown25(ref),
-                    offset: const Offset(2, 4),
-                  ),
-                ],
-              ),
-              child: IconButton(
-                hoverColor: AutomatoThemeColors.textDialogColor(ref),
-                highlightColor: AutomatoThemeColors.darkBrown(ref),
-                color: AutomatoThemeColors.dangerZone(ref),
-                icon: Icon(
-                  Icons.menu_outlined,
-                  color: AutomatoThemeColors.primaryColor(ref),
-                ),
-                onPressed: onMenuPressed,
-              ),
-            ),
-          ),
+          leading: checkPaths
+              ? Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AutomatoThemeColors.textDialogColor(ref),
+                            AutomatoThemeColors.darkBrown(ref),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AutomatoThemeColors.brown25(ref),
+                            offset: const Offset(2, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        hoverColor: AutomatoThemeColors.textDialogColor(ref),
+                        highlightColor: AutomatoThemeColors.darkBrown(ref),
+                        color: AutomatoThemeColors.dangerZone(ref),
+                        icon: Icon(
+                          Icons.menu_outlined,
+                          color: AutomatoThemeColors.primaryColor(ref),
+                        ),
+                        onPressed: onMenuPressed,
+                      )),
+                )
+              : const SizedBox(),
         )
       ],
     );

@@ -219,7 +219,7 @@ class OptionsPanel extends ConsumerWidget {
                                   onYesPressed: () async {
                                     Navigator.of(context).pop(false);
 
-                                    showDialog(
+                                    await showDialog(
                                       context: context,
                                       barrierDismissible: false,
                                       builder: (BuildContext context) {

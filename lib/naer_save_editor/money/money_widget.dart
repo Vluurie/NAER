@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:NAER/naer_save_editor/money/money_service.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -60,10 +62,13 @@ class MoneyWidgetState extends ConsumerState<MoneyWidget>
   Future<void> _updateMoney(int newMoneyAmount) async {
     if (newMoneyAmount >= 1 && newMoneyAmount <= 9999999) {
       await MoneyService.updateMoneyInFile(widget.filePath, newMoneyAmount);
-      _controller.forward().then((value) => _controller.reverse());
-      _opacityController.forward().then((_) => _opacityController.reverse());
-      _colorController.forward().then((_) => _colorController.reverse());
-      _getMoney();
+      unawaited(_controller.forward().then((value) => _controller.reverse()));
+      unawaited(_opacityController
+          .forward()
+          .then((_) => _opacityController.reverse()));
+      unawaited(
+          _colorController.forward().then((_) => _colorController.reverse()));
+      await _getMoney();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(

@@ -19,7 +19,12 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return setupImageGrid(context);
+    final globalStateNotifer = ref.read(globalStateProvider.notifier);
+    Map<String, bool> levelMap = globalStateNotifer.readLevelMap();
+    if (levelMap['All Enemies without Randomization'] == false) {
+      return setupImageGrid(context);
+    }
+    return Container();
   }
 
   Widget setupImageGrid(BuildContext context) {

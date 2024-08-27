@@ -16,12 +16,12 @@ class WindowsCloseListener with WindowListener {
   void onWindowClose() async {
     final globalState = ref.watch(globalStateProvider.notifier);
     if (globalState.readIsLoading()) {
-      windowManager.setPreventClose(true);
+      unawaited(windowManager.setPreventClose(true));
       await _showProcessingWarningDialog(ref);
     } else {
       final shouldClose = await _showExitConfirmationDialog(ref) ?? false;
       if (shouldClose) {
-        windowManager.destroy();
+        await windowManager.destroy();
       }
     }
   }

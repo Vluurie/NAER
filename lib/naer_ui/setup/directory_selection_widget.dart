@@ -10,12 +10,12 @@ class DirectorySelection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LeftSideSelection(),
-          SizedBox(width: 16),
-          Expanded(child: LogOutput()),
+          const SizedBox(width: 16),
+          const Expanded(child: LogOutput()),
         ],
       ),
     );

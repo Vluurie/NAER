@@ -35,7 +35,7 @@ class InputDirectoryHandler {
 
     if (granted) {
       if (context.mounted) {
-        showDialog(
+        await showDialog(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
@@ -103,7 +103,7 @@ class InputDirectoryHandler {
 
     // Spawn an isolate for each drive
     for (String drive in drives) {
-      Isolate.spawn(_isolateSearchEntry, [drive, receivePort.sendPort])
+      await Isolate.spawn(_isolateSearchEntry, [drive, receivePort.sendPort])
           .then((isolate) {
         activeIsolates.add(isolate);
       });

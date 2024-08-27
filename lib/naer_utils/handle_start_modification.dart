@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:NAER/naer_ui/dialog/backup_dialog.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
@@ -38,10 +40,10 @@ Future<void> handleStartModification(
 
         globalLog('Total modification time: ${stopwatch.elapsed}');
       } catch (e, stackTrace) {
-        LogState.logError(
+        unawaited(LogState.logError(
           'Error during modification: $e',
           Trace.from(stackTrace),
-        );
+        ));
       } finally {
         if (context.mounted) {
           globalState.setIsLoading(false);

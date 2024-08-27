@@ -56,6 +56,7 @@ class GlobalState {
   final Map<String, bool> categories;
   final Map<String, bool> levelMap;
   final bool isPanelVisible;
+  final bool wasModManamentDialogShown;
 
   GlobalState({
     Completer<void>? completer,
@@ -101,6 +102,7 @@ class GlobalState {
     Map<String, bool>? categories,
     Map<String, bool>? levelMap,
     bool? isPanelVisible,
+    bool? wasModManamentDialogShown,
   })  : completer = completer ?? Completer<void>(),
         setupDirectorySelectionKey = setupDirectorySelectionKey ?? GlobalKey(),
         setupImageGridKey = setupImageGridKey ?? GlobalKey(),
@@ -142,6 +144,7 @@ class GlobalState {
         stats = stats ?? const {"None": true, "Select All": false},
         categories = categories ?? const {},
         isPanelVisible = isPanelVisible ?? false,
+        wasModManamentDialogShown = wasModManamentDialogShown ?? false,
         levelMap = levelMap ??
             const {
               "All Enemies": false,
@@ -192,7 +195,8 @@ class GlobalState {
       Map<String, bool>? stats,
       Map<String, bool>? categories,
       Map<String, bool>? levelMap,
-      bool? isPanelVisible}) {
+      bool? isPanelVisible,
+      bool? wasModManamentDialogShown}) {
     return GlobalState(
         completer: completer ?? this.completer,
         setupDirectorySelectionKey:
@@ -242,7 +246,9 @@ class GlobalState {
         stats: stats ?? this.stats,
         categories: categories ?? this.categories,
         levelMap: levelMap ?? this.levelMap,
-        isPanelVisible: isPanelVisible ?? this.isPanelVisible);
+        isPanelVisible: isPanelVisible ?? this.isPanelVisible,
+        wasModManamentDialogShown:
+            wasModManamentDialogShown ?? this.wasModManamentDialogShown);
   }
 }
 
@@ -295,6 +301,7 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
   Map<String, bool> readCategories() => state.categories;
   Map<String, bool> readLevelMap() => state.levelMap;
   bool readIsPanelVisible() => state.isPanelVisible;
+  bool readWasModManamentDialogShown() => state.wasModManamentDialogShown;
 
   // WRITE STATE METHODS
   void setSelectedImages(List<String> selectedImages) {
@@ -444,6 +451,11 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
 
   void setIsPanelVisible(bool isPanelVisible) {
     state = state.copyWith(isPanelVisible: isPanelVisible);
+  }
+
+  void setWasModManamentDialogShown(bool wasModManamentDialogShown) {
+    state =
+        state.copyWith(wasModManamentDialogShown: wasModManamentDialogShown);
   }
 
   // CLEAR STATE METHODS
