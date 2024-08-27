@@ -22,7 +22,8 @@ import 'dart:async';
 import 'dart:isolate';
 
 class InputDirectoryHandler {
-  Future<void> openInputFileDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> openInputFileDialog(
+      final BuildContext context, final WidgetRef ref) async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (context.mounted) {
@@ -30,15 +31,16 @@ class InputDirectoryHandler {
     }
   }
 
-  Future<void> autoSearchInputPath(BuildContext context, WidgetRef ref) async {
+  Future<void> autoSearchInputPath(
+      final BuildContext context, final WidgetRef ref) async {
     bool granted = await askForDeepSearchPermission(context, ref);
 
     if (granted) {
       if (context.mounted) {
-        await showDialog(
+        unawaited(showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Center(
               child: AutomatoLoading(
                 color: AutomatoThemeColors.bright(ref),
@@ -47,7 +49,7 @@ class InputDirectoryHandler {
               ),
             );
           },
-        );
+        ));
       }
 
       try {
@@ -82,12 +84,12 @@ class InputDirectoryHandler {
   }
 
   // Manages isolates and search across all drives
-  Future<String?> _searchAcrossDrives(List<String> drives) async {
+  Future<String?> _searchAcrossDrives(final List<String> drives) async {
     final completer = Completer<String?>();
     final receivePort = ReceivePort();
     List<Isolate> activeIsolates = [];
 
-    receivePort.listen((message) {
+    receivePort.listen((final message) {
       if (message != null) {
         completer.complete(message);
         for (Isolate isolate in activeIsolates) {
@@ -104,7 +106,7 @@ class InputDirectoryHandler {
     // Spawn an isolate for each drive
     for (String drive in drives) {
       await Isolate.spawn(_isolateSearchEntry, [drive, receivePort.sendPort])
-          .then((isolate) {
+          .then((final isolate) {
         activeIsolates.add(isolate);
       });
     }
@@ -112,7 +114,7 @@ class InputDirectoryHandler {
     return completer.future;
   }
 
-  static Future<void> _isolateSearchEntry(List<dynamic> args) async {
+  static Future<void> _isolateSearchEntry(final List<dynamic> args) async {
     final String drive = args[0];
     final SendPort sendPort = args[1];
 
@@ -120,12 +122,13 @@ class InputDirectoryHandler {
     sendPort.send(foundDirectory);
   }
 
-  static Future<String?> _searchForNierAutomataDirectory(String drive) async {
+  static Future<String?> _searchForNierAutomataDirectory(
+      final String drive) async {
     Directory rootDir = Directory(drive);
     return await _bfsSearchDirectory(rootDir);
   }
 
-  static Future<String?> _bfsSearchDirectory(Directory directory) async {
+  static Future<String?> _bfsSearchDirectory(final Directory directory) async {
     Queue<Directory> queue = Queue<Directory>();
     queue.add(directory);
 
@@ -177,8 +180,8 @@ class InputDirectoryHandler {
     return drives;
   }
 
-  Future<void> _handleSelectedDirectory(
-      BuildContext context, WidgetRef ref, String? selectedDirectory) async {
+  Future<void> _handleSelectedDirectory(final BuildContext context,
+      final WidgetRef ref, final String? selectedDirectory) async {
     if (selectedDirectory != null) {
       var containsValidFile = await containsValidFiles(selectedDirectory);
       bool isInDataDirectory =
@@ -212,7 +215,8 @@ class InputDirectoryHandler {
 }
 
 class OutputDirectoryHandler {
-  Future<void> openOutputFileDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> openOutputFileDialog(
+      final BuildContext context, final WidgetRef ref) async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (context.mounted) {
@@ -220,8 +224,8 @@ class OutputDirectoryHandler {
     }
   }
 
-  static Future<void> handleSelectedDirectory(
-      BuildContext context, WidgetRef ref, String? selectedDirectory) async {
+  static Future<void> handleSelectedDirectory(final BuildContext context,
+      final WidgetRef ref, final String? selectedDirectory) async {
     if (selectedDirectory != null) {
       final globalState = ref.read(globalStateProvider.notifier);
       String escapedPath = selectedDirectory.convertAndEscapePath();
@@ -230,7 +234,7 @@ class OutputDirectoryHandler {
       var modFiles = await findModFiles(escapedPath);
       if (modFiles.isNotEmpty) {
         if (context.mounted) {
-          showModsMessage(modFiles, (updatedModFiles) async {
+          showModsMessage(modFiles, (final updatedModFiles) async {
             if (updatedModFiles.isEmpty) {
               globalState.updateIgnoredModFiles([]);
             } else {

@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<bool> showBackupDialog(BuildContext context, WidgetRef ref) async {
+Future<bool> showBackupDialog(
+    final BuildContext context, final WidgetRef ref) async {
   final globalState = ref.watch(globalStateProvider.notifier);
   String outputDir = path.dirname(globalState.readInput());
 
@@ -28,17 +29,15 @@ Future<bool> showBackupDialog(BuildContext context, WidgetRef ref) async {
         ),
       ),
       onYesPressed: () {
-        globalState.setIsExtractCopyEnabled(true);
+        globalState.setIsExtractCopyEnabled(isExtractCopyEnabled: true);
         completer.complete(true);
         Navigator.of(context).pop();
       },
       onNoPressed: () {
-        globalState.setIsExtractCopyEnabled(false);
+        globalState.setIsExtractCopyEnabled(isExtractCopyEnabled: false);
         completer.complete(false);
         Navigator.of(context).pop();
       },
-      yesLabel: "Yes",
-      noLabel: "No",
     );
 
     return completer.future;

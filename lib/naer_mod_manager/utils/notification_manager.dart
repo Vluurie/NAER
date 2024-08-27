@@ -11,7 +11,7 @@ class NotificationManager {
   static Stream<NotificationEvent> get notificationStream =>
       _notificationStreamController.stream;
 
-  static void notify(String message) {
+  static void notify(final String message) {
     _notificationStreamController.add(NotificationEvent(message));
   }
 }

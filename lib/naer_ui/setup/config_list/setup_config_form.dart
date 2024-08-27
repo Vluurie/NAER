@@ -26,7 +26,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
     Map<String, bool> levelMap = globalState.levelMap;
     return Scaffold(
@@ -152,7 +152,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
     );
   }
 
-  Future<void> _saveConfig(BuildContext context) async {
+  Future<void> _saveConfig(final BuildContext context) async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formValues = _formKey.currentState!.value;
       final globalState = ref.watch(globalStateProvider);
@@ -182,7 +182,6 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
         level: globalState.enemyLevel.toString(),
         stats: globalState.enemyStats.toString(),
         arguments: arguments,
-        isSelected: false,
       );
 
       print("${newConfig.arguments}");

@@ -16,14 +16,14 @@ class EnemyStatsSelection extends ConsumerStatefulWidget {
 class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
   String getSelectedEnemiesArgument() {
     List<List<String>> selectedEnemies = EnemyList.getDLCFilteredEnemies(ref)
-        .where((enemy) => enemy.isSelected)
-        .map((enemy) => enemy.emIdentifiers)
+        .where((final enemy) => enemy.isSelected)
+        .map((final enemy) => enemy.emIdentifiers)
         .toList();
     return selectedEnemies.join(',');
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
     final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
@@ -81,10 +81,9 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                                 AutomatoThemeColors.dangerZone(ref),
                                 globalState.enemyStats / 5.0),
                             value: globalState.enemyStats,
-                            min: 0.0,
                             max: 5.0,
                             label: globalState.enemyStats.toStringAsFixed(1),
-                            onChanged: (double newValue) {
+                            onChanged: (final double newValue) {
                               globalStateNotifier.updateEnemyStats(newValue);
                             },
                           )
@@ -105,7 +104,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                     style: TextStyle(color: AutomatoThemeColors.textColor(ref)),
                   ),
                   value: globalState.stats["Select All"],
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       //ill need a copy here
                       final updatedStats =
@@ -124,13 +123,12 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
               ),
               Expanded(
                 child: CheckboxListTile(
-                  tristate: false,
                   activeColor: AutomatoThemeColors.dangerZone(ref),
                   title: Text("None",
                       style:
                           TextStyle(color: AutomatoThemeColors.textColor(ref))),
                   value: globalState.stats["None"],
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       // also copy
                       final updatedStats =
@@ -161,12 +159,11 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
                     child: Column(
                       children: EnemyList.getDLCFilteredEnemies(ref)
                           .asMap()
                           .entries
-                          .map((entry) {
+                          .map((final entry) {
                         int index = entry.key;
                         var enemy = entry.value;
                         final GlobalKey<ShakeAnimationWidgetState> shakeKey =
@@ -199,17 +196,17 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                           ),
                           trailing: Checkbox(
                             value: enemy.isSelected,
-                            onChanged: (bool? newValue) {
+                            onChanged: (final bool? newValue) {
                               setState(() {
                                 enemy.isSelected = newValue ?? false;
                                 final updatedStats =
                                     Map<String, bool>.from(globalState.stats);
                                 updatedStats["Select All"] =
                                     EnemyList.getDLCFilteredEnemies(ref)
-                                        .every((b) => b.isSelected);
+                                        .every((final b) => b.isSelected);
                                 updatedStats["None"] =
                                     EnemyList.getDLCFilteredEnemies(ref)
-                                        .every((b) => !b.isSelected);
+                                        .every((final b) => !b.isSelected);
                                 globalStateNotifier.setStats(updatedStats);
                               });
                               getSelectedEnemiesArgument();

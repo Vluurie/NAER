@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:flutter/material.dart';
 
-void getOutputPath(BuildContext context, String outputPath) async {
+void getOutputPath(final BuildContext context, String outputPath) async {
   if (outputPath.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Output path is empty')),
@@ -39,7 +39,7 @@ void getOutputPath(BuildContext context, String outputPath) async {
   }
 }
 
-void getNaerSettings(BuildContext context) async {
+void getNaerSettings(final BuildContext context) async {
   String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
 
   if (Platform.isWindows) {

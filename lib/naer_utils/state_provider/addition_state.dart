@@ -14,7 +14,7 @@ class AdditionStateNotifier extends StateNotifier<String?> {
     state = prefs.getString('selectedAdditionId');
   }
 
-  Future<void> _saveSelectedAddition(String? additionId) async {
+  Future<void> _saveSelectedAddition(final String? additionId) async {
     final prefs = await SharedPreferences.getInstance();
     if (additionId == null) {
       await prefs.remove('selectedAdditionId');
@@ -23,7 +23,7 @@ class AdditionStateNotifier extends StateNotifier<String?> {
     }
   }
 
-  void selectAddition(String? additionId) {
+  void selectAddition(final String? additionId) {
     state = additionId;
     _saveSelectedAddition(additionId);
   }
@@ -35,7 +35,7 @@ class AdditionStateNotifier extends StateNotifier<String?> {
 }
 
 final additionStateProvider =
-    StateNotifierProvider<AdditionStateNotifier, String?>((ref) {
+    StateNotifierProvider<AdditionStateNotifier, String?>((final ref) {
   return AdditionStateNotifier();
 });
 
@@ -51,11 +51,13 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
     List<String>? configs = prefs.getStringList('additionConfigs');
 
     if (configs != null && configs.isNotEmpty) {
-      state = configs.map((config) {
+      state = configs.map((final config) {
         final addition = SetupConfigData.fromJson(jsonDecode(config));
         final isChecked =
             prefs.getBool('${addition.id}_checkboxState') ?? false;
-        ref.read(addition.checkboxStateProvider.notifier).toggle(isChecked);
+        ref
+            .read(addition.checkboxStateProvider.notifier)
+            .toggle(shouldToggle: isChecked);
         return addition;
       }).toList();
     } else {
@@ -67,7 +69,7 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
   Future<void> _saveAdditions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> configs =
-        state.map((config) => jsonEncode(config.toJson())).toList();
+        state.map((final config) => jsonEncode(config.toJson())).toList();
     await prefs.setStringList('additionConfigs', configs);
 
     for (var addition in state) {
@@ -76,23 +78,23 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
     }
   }
 
-  void addAddition(SetupConfigData addition) {
+  void addAddition(final SetupConfigData addition) {
     bool exists =
-        state.any((existingConfig) => existingConfig.id == addition.id);
+        state.any((final existingConfig) => existingConfig.id == addition.id);
     if (!exists) {
       state = [...state, addition];
       _saveAdditions();
     }
   }
 
-  void removeAddition(SetupConfigData addition) {
-    state = state.where((c) => c.id != addition.id).toList();
+  void removeAddition(final SetupConfigData addition) {
+    state = state.where((final c) => c.id != addition.id).toList();
     _saveAdditions();
   }
 
-  void selectAddition(String id) {
+  void selectAddition(final String id) {
     ref.read(additionStateProvider.notifier).selectAddition(id);
-    state = state.map((addition) {
+    state = state.map((final addition) {
       addition.isSelected = addition.id == id;
       return addition;
     }).toList();
@@ -101,7 +103,7 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
 
   void deselectAddition() {
     ref.read(additionStateProvider.notifier).deselectAddition();
-    state = state.map((addition) {
+    state = state.map((final addition) {
       addition.isSelected = false;
       return addition;
     }).toList();
@@ -111,7 +113,8 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
   SetupConfigData? getCurrentSelectedAddition() {
     final selectedAdditionId = ref.read(additionStateProvider);
     try {
-      return state.firstWhere((addition) => addition.id == selectedAdditionId);
+      return state
+          .firstWhere((final addition) => addition.id == selectedAdditionId);
     } catch (e) {
       return null;
     }
@@ -120,4 +123,4 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
 
 final additionConfigProvider =
     StateNotifierProvider<AdditionConfigNotifier, List<SetupConfigData>>(
-        (ref) => AdditionConfigNotifier(ref));
+        (final ref) => AdditionConfigNotifier(ref));

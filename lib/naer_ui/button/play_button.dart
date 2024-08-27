@@ -23,13 +23,13 @@ class PlayButtonStateNotifier extends StateNotifier<PlayButtonState> {
 
 final playButtonStateProvider =
     StateNotifierProvider<PlayButtonStateNotifier, PlayButtonState>(
-        (ref) => PlayButtonStateNotifier());
+        (final ref) => PlayButtonStateNotifier());
 
 class PlayButton extends ConsumerWidget {
   const PlayButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.watch(globalStateProvider);
     final buttonState = ref.watch(playButtonStateProvider);
     final playButtonNotifier = ref.read(playButtonStateProvider.notifier);
@@ -101,10 +101,10 @@ class PlayButton extends ConsumerWidget {
   }
 
   Future<void> _handleProcessButtonState(
-      PlayButtonState buttonState,
-      PlayButtonStateNotifier playButtonNotifier,
-      GlobalState globalState,
-      void Function() onNierAutomataStopped) async {
+      final PlayButtonState buttonState,
+      final PlayButtonStateNotifier playButtonNotifier,
+      final GlobalState globalState,
+      final void Function() onNierAutomataStopped) async {
     if (buttonState == PlayButtonState.idle) {
       playButtonNotifier.startLoading();
       try {

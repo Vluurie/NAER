@@ -5,13 +5,13 @@ import 'package:NAER/naer_utils/state_provider/selected_enemy_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<Map<String, List<String>>> sortSelectedEnemiesState(
-    List<String> selectedImages, WidgetRef ref) async {
+    final List<String> selectedImages, final WidgetRef ref) async {
   final globalState = ref.watch(globalStateProvider);
   var enemyGroups =
-      SortedEnemyGroup.getDLCFilteredEnemyData(globalState.hasDLC);
+      SortedEnemyGroup.getDLCFilteredEnemyData(hasDLC: globalState.hasDLC);
 
   var formattedSelectedImages =
-      selectedImages.map((image) => image.split('.').first).toList();
+      selectedImages.map((final image) => image.split('.').first).toList();
 
   var sortedSelection = {
     "Ground": <String>[],
@@ -40,10 +40,10 @@ Future<Map<String, List<String>>> sortSelectedEnemiesState(
   return sortedSelection;
 }
 
-String getSelectedEnemiesArgument(WidgetRef ref) {
+String getSelectedEnemiesArgument(final WidgetRef ref) {
   List<List<String>> selectedEnemies = EnemyList.getDLCFilteredEnemies(ref)
-      .where((enemy) => enemy.isSelected)
-      .map((enemy) => enemy.emIdentifiers)
+      .where((final enemy) => enemy.isSelected)
+      .map((final enemy) => enemy.emIdentifiers)
       .toList();
   return selectedEnemies.join(',');
 }

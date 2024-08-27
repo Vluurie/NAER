@@ -29,7 +29,7 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
   @override
   void initState() {
     super.initState();
-    _loadExperience().then((_) {
+    _loadExperience().then((final _) {
       _initializeDropdownItems();
     });
   }
@@ -52,7 +52,7 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
 
   /// Initializes dropdown menu items based on the levels defined in experienceTable.
   void _initializeDropdownItems() {
-    dropdownItems = ExpTable.experienceTable.map((entry) {
+    dropdownItems = ExpTable.experienceTable.map((final entry) {
       return DropdownMenuItem<int>(
         value: entry["Level"],
         child: Text('Level ${entry["Level"]}'),
@@ -61,7 +61,7 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
   }
 
   /// Handles changes to the selected level from the dropdown menu, updating the experience accordingly.
-  void _handleLevelChanged(int newLevel) {
+  void _handleLevelChanged(final int newLevel) {
     int newExperience = ExperienceService.getExperienceForLevel(newLevel);
     setState(() {
       _level = newLevel;
@@ -99,9 +99,9 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
   }
 
   /// Persists the updated experience value to the file and shows a confirmation snackbar.
-  void _persistExperienceChange(int experience) {
+  void _persistExperienceChange(final int experience) {
     ExperienceService.updateExperienceInFile(widget.filePath, experience)
-        .then((_) {
+        .then((final _) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -113,7 +113,7 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
           ),
         );
       }
-    }).catchError((error) {
+    }).catchError((final error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -129,7 +129,7 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     ThemeData theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -151,7 +151,6 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
                 children: [
                   const Text('Note: Changes are directly modified and saved.'),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const SizedBox(
                         child: Text(
@@ -238,12 +237,12 @@ class DropdownMenu extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     return DropdownButton<int>(
       value: selectedLevel,
       items: dropdownMenuEntries,
       dropdownColor: AutomatoThemeColors.darkBrown(ref),
-      onChanged: (value) {
+      onChanged: (final value) {
         if (value != null) {
           onLevelChanged(value);
         }

@@ -5,7 +5,7 @@ import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void undoLastModification(WidgetRef ref) async {
+void undoLastModification(final WidgetRef ref) async {
   final globalState = ref.read(globalStateProvider.notifier);
   await FileChange.loadChanges();
   await FileChange.undoChanges();
@@ -29,14 +29,14 @@ void undoLastModification(WidgetRef ref) async {
     }
 
     globalLog("Last modification undone.");
-    globalState.setIsLoading(false);
-    globalState.setIsProcessing(false);
+    globalState.setIsLoading(isLoading: false);
+    globalState.setIsProcessing(isProcessing: false);
 
     globalState.clearCreatedFiles();
   } catch (e) {
     globalLog("An error occurred during undo: $e");
     globalLog("Error during undo: $e");
-    globalState.setIsLoading(false);
-    globalState.setIsProcessing(false);
+    globalState.setIsLoading(isLoading: false);
+    globalState.setIsProcessing(isProcessing: false);
   }
 }

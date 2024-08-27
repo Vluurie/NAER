@@ -29,15 +29,15 @@ class CLIArguments {
 }
 
 Future<CLIArguments> gatherCLIArguments(
-    {List<String>? selectedImages,
-    required Map<String, bool> categories,
-    required Map<String, bool> level,
-    required List<String> ignoredModFiles,
-    required String input,
-    required String specialDatOutputPath,
-    required double enemyStats,
-    required int enemyLevel,
-    required WidgetRef ref}) async {
+    {final List<String>? selectedImages,
+    required final Map<String, bool> categories,
+    required final Map<String, bool> level,
+    required final List<String> ignoredModFiles,
+    required final String input,
+    required final String specialDatOutputPath,
+    required final double enemyStats,
+    required final int enemyLevel,
+    required final WidgetRef ref}) async {
   final globalState = ref.watch(globalStateProvider);
   String sortedEnemyGroupsIdentifierMap;
   Map<String, List<String>> customSelectedEnemies = {
@@ -62,9 +62,10 @@ Future<CLIArguments> gatherCLIArguments(
 
   String enemyList = getSelectedEnemiesArgument(ref);
 
-  List<String> customEnemiesArgs = customSelectedEnemies.entries.map((entry) {
+  List<String> customEnemiesArgs =
+      customSelectedEnemies.entries.map((final entry) {
     String group = entry.key;
-    String enemies = entry.value.map((e) => '"$e"').join(', ');
+    String enemies = entry.value.map((final e) => '"$e"').join(', ');
     return '--$group=[$enemies]';
   }).toList();
 
@@ -78,9 +79,8 @@ Future<CLIArguments> gatherCLIArguments(
     '--enemyStats',
     globalState.enemyStats.toString(),
     '--level=$enemyLevel',
-    ...globalState.categories.entries
-        .where((entry) => entry.value)
-        .map((entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
+    ...globalState.categories.entries.where((final entry) => entry.value).map(
+        (final entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),
     ...customEnemiesArgs
   ];
 
@@ -121,7 +121,7 @@ Future<CLIArguments> gatherCLIArguments(
       ignoreList: ignoredModFiles);
 }
 
-Future<CLIArguments> getGlobalArguments(WidgetRef ref) async {
+Future<CLIArguments> getGlobalArguments(final WidgetRef ref) async {
   final globalState = ref.watch(globalStateProvider.notifier);
   CLIArguments cliArgs = await gatherCLIArguments(
       selectedImages: globalState.readSelectedImages(),

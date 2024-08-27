@@ -38,10 +38,10 @@ class DottedLineProgressIndicatorState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
+      builder: (final context, final child) {
         return CustomPaint(
           painter: _DottedLinePainter(
             color: widget.color,
@@ -70,7 +70,7 @@ class _DottedLinePainter extends CustomPainter {
   });
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     var paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
@@ -89,5 +89,5 @@ class _DottedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 }

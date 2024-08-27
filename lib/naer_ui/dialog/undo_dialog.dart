@@ -4,7 +4,8 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<bool> showUndoConfirmation(BuildContext context, WidgetRef ref) {
+Future<bool> showUndoConfirmation(
+    final BuildContext context, final WidgetRef ref) {
   Completer<bool> completer = Completer<bool>();
 
   AutomatoDialogManager().showYesNoDialog(

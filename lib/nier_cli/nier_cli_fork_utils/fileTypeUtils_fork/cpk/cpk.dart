@@ -14,7 +14,7 @@ class CpkSection {
 
   CpkSection(this.id, this.flags, this.tableLength, this.unknown, this.table);
 
-  CpkSection.read(ByteDataWrapper bytes) {
+  CpkSection.read(final ByteDataWrapper bytes) {
     bytes.endian = Endian.little;
     id = bytes.readString(4);
     flags = bytes.readUint32();
@@ -39,7 +39,7 @@ class CpkTableHeader {
   late String tableName;
   late CpkTableDataPool dataPool;
 
-  CpkTableHeader.read(ByteDataWrapper bytes) {
+  CpkTableHeader.read(final ByteDataWrapper bytes) {
     int startPos = bytes.position;
     id = bytes.readString(4);
     length = bytes.readUint32();
@@ -61,17 +61,17 @@ class CpkTable {
   late CpkTableHeader header;
   late List<List<CpkField>> rows;
 
-  CpkTable.read(ByteDataWrapper bytes, int tableLength) {
+  CpkTable.read(final ByteDataWrapper bytes, final int tableLength) {
     bytes.endian = Endian.big;
     header = CpkTableHeader.read(bytes);
     int rowsStart = bytes.position;
     rows = List.generate(
       header.rowCount,
-      (index) {
+      (final index) {
         bytes.position = rowsStart;
         var row = List.generate(
           header.fieldCount,
-          (index2) => CpkField.read(bytes, header),
+          (final index2) => CpkField.read(bytes, header),
         );
         header.dataPool.nextRow();
         return row;
@@ -79,7 +79,7 @@ class CpkTable {
     );
   }
 
-  CpkField? getField(int row, String name) {
+  CpkField? getField(final int row, final String name) {
     for (var field in rows[row]) {
       if (field.name == name) {
         return field;
@@ -99,13 +99,14 @@ class CpkTableDataPool {
   int row = 0;
   int offset = 0;
 
-  CpkTableDataPool(this.bytes, this.tableStartOffset, CpkTableHeader header)
+  CpkTableDataPool(
+      this.bytes, this.tableStartOffset, final CpkTableHeader header)
       : stringPoolPosition = tableStartOffset + 8 + header.stringPoolPosition,
         dataPoolPosition = tableStartOffset + 8 + header.dataPoolPosition,
         rowsStoreOffset = header.rowsPosition,
         rowsStoreRowLength = header.rowLength;
 
-  String readString(int offset) {
+  String readString(final int offset) {
     int pos = bytes.position;
     bytes.position = stringPoolPosition + offset;
     String str = bytes.readStringZeroTerminated();
@@ -113,7 +114,7 @@ class CpkTableDataPool {
     return str;
   }
 
-  List<int> readData(int offset, int length) {
+  List<int> readData(final int offset, final int length) {
     int pos = bytes.position;
     bytes.position = dataPoolPosition + offset;
     List<int> data;
@@ -138,7 +139,7 @@ class CpkTableDataPool {
     offset = 0;
   }
 
-  void incrementOffset(int length) {
+  void incrementOffset(final int length) {
     offset += length;
   }
 
@@ -164,7 +165,7 @@ class CpkField {
   int? dataLength;
   List<int>? data;
 
-  CpkField.read(ByteDataWrapper bytes, CpkTableHeader header) {
+  CpkField.read(final ByteDataWrapper bytes, final CpkTableHeader header) {
     flags = bytes.readUint8();
     var dataPool = header.dataPool;
 
@@ -190,8 +191,8 @@ class CpkField {
     }
   }
 
-  void _readValue(
-      ByteDataWrapper bytes, CpkTableDataPool dataPool, bool isRowStore) {
+  void _readValue(final ByteDataWrapper bytes, final CpkTableDataPool dataPool,
+      final bool isRowStore) {
     var typeFlag = flags & CpkFieldFlag.TypeMask.value;
     switch (CpkFieldType.values[typeFlag]) {
       case CpkFieldType.UInt8:
@@ -287,7 +288,8 @@ class CpkFile {
 
   CpkFile(this.path, this.name);
 
-  CpkFile.read(this.path, this.name, ByteDataWrapper bytes, int size) {
+  CpkFile.read(
+      this.path, this.name, final ByteDataWrapper bytes, final int size) {
     _data = bytes.asUint8List(size);
   }
 
@@ -311,7 +313,7 @@ class CpkFileCompressed extends CpkFile {
   late final Uint8List compressedData;
   late final Uint8List uncompressedHeader;
 
-  CpkFileCompressed.read(super.path, super.name, ByteDataWrapper bytes) {
+  CpkFileCompressed.read(super.path, super.name, final ByteDataWrapper bytes) {
     bytes.endian = Endian.little;
     id = bytes.readString(8);
     uncompressedSize = bytes.readUint32();
@@ -376,7 +378,8 @@ class CpkFileCompressed extends CpkFile {
     return result;
   }
 
-  int getNextBits(Uint8List input, int bitCount, CriLaylaBitInfo bitsInfo) {
+  int getNextBits(final Uint8List input, final int bitCount,
+      final CriLaylaBitInfo bitsInfo) {
     int outBits = 0;
     int numBitsProduced = 0;
     int bitsThisRound;
@@ -412,7 +415,7 @@ class Cpk {
   CpkSection? toc;
   List<CpkFile> files = [];
 
-  Cpk.read(ByteDataWrapper bytes) : header = CpkSection.read(bytes) {
+  Cpk.read(final ByteDataWrapper bytes) : header = CpkSection.read(bytes) {
     var contentOffsetField = header.table.getField(0, "ContentOffset");
     if (contentOffsetField == null) {
       throw Exception("ContentOffset field not found in header table");

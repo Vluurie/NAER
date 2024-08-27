@@ -14,7 +14,7 @@ class ModService {
     return modIds.toSet();
   }
 
-  Future<void> saveInstalledMods(List<String> modIds) async {
+  Future<void> saveInstalledMods(final List<String> modIds) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('installedModsIds', modIds);
   }
@@ -30,7 +30,7 @@ class ModService {
       final decoded = jsonDecode(metadataContent);
 
       List<dynamic> modsJson = decoded['mods'];
-      return modsJson.map((modJson) => Mod.fromJson(modJson)).toList();
+      return modsJson.map((final modJson) => Mod.fromJson(modJson)).toList();
     } else {
       return [];
     }

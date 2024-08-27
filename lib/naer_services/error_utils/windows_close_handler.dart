@@ -26,7 +26,7 @@ class WindowsCloseListener with WindowListener {
     }
   }
 
-  Future<void> _showProcessingWarningDialog(WidgetRef ref) async {
+  Future<void> _showProcessingWarningDialog(final WidgetRef ref) async {
     final completer = Completer<void>();
     AutomatoDialogManager().showYesNoDialog(
       context: context,
@@ -47,14 +47,12 @@ class WindowsCloseListener with WindowListener {
         completer.complete();
         Navigator.of(context).pop();
       },
-      yesLabel: "Yes",
-      noLabel: "No",
       ref: ref,
     );
     return completer.future;
   }
 
-  Future<bool?> _showExitConfirmationDialog(WidgetRef ref) async {
+  Future<bool?> _showExitConfirmationDialog(final WidgetRef ref) async {
     final completer = Completer<bool>();
     AutomatoDialogManager().showYesNoDialog(
       context: context,
@@ -74,8 +72,6 @@ class WindowsCloseListener with WindowListener {
         completer.complete(false);
         Navigator.of(context).pop();
       },
-      yesLabel: "Yes",
-      noLabel: "No",
       ref: ref,
     );
     return completer.future;

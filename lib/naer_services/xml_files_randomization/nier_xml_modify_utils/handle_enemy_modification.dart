@@ -17,7 +17,8 @@ import 'package:xml/xml.dart' as xml;
 ///   specific values for the new enemy number if [randomizeAndSetValues] is true by calling [randomizeEnemyNumber].
 /// - Handles enemy levels if [handleLevels] is true.
 ///
-Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
+Future<void> handleEnemyEntityObject(
+    final EnemyEntityObjectAction action) async {
   // Check if part of ShootingEnemyCurveAction
   var actionElement = findRootActionElement(action.objIdElement);
   // Find the group corresponding to the enemy number in the XML element
@@ -40,8 +41,7 @@ Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
   // Handle enemy levels if requested
   if (action.handleLevels) {
     await handleLevel(
-        action.objIdElement, action.enemyLevel, SortedEnemyGroup.enemyData,
-        isBoss: false);
+        action.objIdElement, action.enemyLevel, SortedEnemyGroup.enemyData);
   }
 }
 
@@ -50,7 +50,7 @@ Future<void> handleEnemyEntityObject(EnemyEntityObjectAction action) async {
 /// - By default, it sets [setSpecificValues].
 ///
 Future<void> handleShootingEnemyCurveAction(
-    EnemyEntityObjectAction action, String? group) async {
+    final EnemyEntityObjectAction action, final String? group) async {
   if (action.handleLevels) {
     if (group != null &&
         !isExcludedGroup(group) &&
@@ -62,7 +62,6 @@ Future<void> handleShootingEnemyCurveAction(
         action.objIdElement,
         action.enemyLevel,
         SortedEnemyGroup.enemyData,
-        isBoss: false,
       );
     }
   }
@@ -71,11 +70,10 @@ Future<void> handleShootingEnemyCurveAction(
 
 /// Calls [handleEnemyEntityObject] with the [handleLevels] and [randomizeAndSetValues] parameters set to true.
 Future<void> handleSelectedObjectIdEnemies(
-  xml.XmlElement objIdElement,
-  Map<String, List<String>> userSelectedEnemyData,
-  String enemyLevel,
-  bool isSpawnActionTooSmall,
-) async {
+    final xml.XmlElement objIdElement,
+    final Map<String, List<String>> userSelectedEnemyData,
+    final String enemyLevel,
+    {required final bool isSpawnActionTooSmall}) async {
   await handleEnemyEntityObject(
     EnemyEntityObjectAction(
       objIdElement: objIdElement,
@@ -90,9 +88,9 @@ Future<void> handleSelectedObjectIdEnemies(
 
 /// Calls [handleEnemyEntityObject] with the [handleLevels] parameter set to true.
 Future<void> handleOnlyObjectIdLevel(
-  xml.XmlElement objIdElement,
-  Map<String, List<String>> userSelectedEnemyData,
-  String enemyLevel,
+  final xml.XmlElement objIdElement,
+  final Map<String, List<String>> userSelectedEnemyData,
+  final String enemyLevel,
 ) async {
   await handleEnemyEntityObject(
     EnemyEntityObjectAction(
@@ -106,11 +104,9 @@ Future<void> handleOnlyObjectIdLevel(
 }
 
 /// Calls [handleEnemyEntityObject] with the [randomizeAndSetValues] parameter set to true, and an empty [enemyLevel].
-Future<void> handleDefaultObjectId(
-  xml.XmlElement objIdElement,
-  Map<String, List<String>> userSelectedEnemyData,
-  bool isSpawnActionTooSmall,
-) async {
+Future<void> handleDefaultObjectId(final xml.XmlElement objIdElement,
+    final Map<String, List<String>> userSelectedEnemyData,
+    {required final bool isSpawnActionTooSmall}) async {
   await handleEnemyEntityObject(
     EnemyEntityObjectAction(
       objIdElement: objIdElement,

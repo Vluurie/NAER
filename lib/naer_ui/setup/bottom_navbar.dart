@@ -12,7 +12,7 @@ class NaerBottomNavigationBar extends ConsumerWidget {
   const NaerBottomNavigationBar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     final globalState = ref.watch(globalStateProvider);
 
@@ -68,10 +68,12 @@ class NaerBottomNavigationBar extends ConsumerWidget {
                       items: [
                         BottomNavigationBarItem(
                           icon: MouseRegion(
-                            onEnter: (_) => globalStateNotifier
-                                .updateHoverState('selectAll', true),
-                            onExit: (_) => globalStateNotifier.updateHoverState(
-                                'selectAll', false),
+                            onEnter: (final _) => globalStateNotifier
+                                .updateHoverState('selectAll',
+                                    isHovering: true),
+                            onExit: (final _) => globalStateNotifier
+                                .updateHoverState('selectAll',
+                                    isHovering: false),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: globalStateNotifier
@@ -92,10 +94,12 @@ class NaerBottomNavigationBar extends ConsumerWidget {
                         ),
                         BottomNavigationBarItem(
                           icon: MouseRegion(
-                            onEnter: (_) => globalStateNotifier
-                                .updateHoverState('unselectAll', true),
-                            onExit: (_) => globalStateNotifier.updateHoverState(
-                                'unselectAll', false),
+                            onEnter: (final _) => globalStateNotifier
+                                .updateHoverState('unselectAll',
+                                    isHovering: true),
+                            onExit: (final _) => globalStateNotifier
+                                .updateHoverState('unselectAll',
+                                    isHovering: false),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: globalStateNotifier
@@ -116,10 +120,10 @@ class NaerBottomNavigationBar extends ConsumerWidget {
                         ),
                         BottomNavigationBarItem(
                           icon: MouseRegion(
-                            onEnter: (_) => globalStateNotifier
-                                .updateHoverState('undo', true),
-                            onExit: (_) => globalStateNotifier.updateHoverState(
-                                'undo', false),
+                            onEnter: (final _) => globalStateNotifier
+                                .updateHoverState('undo', isHovering: true),
+                            onExit: (final _) => globalStateNotifier
+                                .updateHoverState('undo', isHovering: false),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: globalStateNotifier.readIsHoveringUndo()
@@ -139,10 +143,10 @@ class NaerBottomNavigationBar extends ConsumerWidget {
                         ),
                         BottomNavigationBarItem(
                           icon: MouseRegion(
-                            onEnter: (_) => globalStateNotifier
-                                .updateHoverState('modify', true),
-                            onExit: (_) => globalStateNotifier.updateHoverState(
-                                'modify', false),
+                            onEnter: (final _) => globalStateNotifier
+                                .updateHoverState('modify', isHovering: true),
+                            onExit: (final _) => globalStateNotifier
+                                .updateHoverState('modify', isHovering: false),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: globalStateNotifier
@@ -165,7 +169,8 @@ class NaerBottomNavigationBar extends ConsumerWidget {
                       currentIndex: globalStateNotifier.readSelectedIndex(),
                       selectedItemColor: AutomatoThemeColors.selected(ref),
                       unselectedItemColor: AutomatoThemeColors.darkBrown(ref),
-                      onTap: (index) => _onItemTapped(context, ref, index),
+                      onTap: (final index) =>
+                          _onItemTapped(context, ref, index),
                       backgroundColor:
                           AutomatoThemeColors.transparentColor(ref),
                       type: BottomNavigationBarType.fixed,
@@ -181,7 +186,8 @@ class NaerBottomNavigationBar extends ConsumerWidget {
     );
   }
 
-  void _onItemTapped(BuildContext context, WidgetRef ref, int index) {
+  void _onItemTapped(
+      final BuildContext context, final WidgetRef ref, final int index) {
     final globalState = ref.read(globalStateProvider.notifier);
     globalState.setSelectedIndex(index);
 
@@ -209,7 +215,7 @@ class NaerBottomNavigationBar extends ConsumerWidget {
     }
   }
 
-  void _onPressedAction(BuildContext context, WidgetRef ref) {
+  void _onPressedAction(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.read(globalStateProvider);
     if (globalState.isButtonEnabled) {
       showModifyDialogAndModify(context, ref, startModificationProcess);

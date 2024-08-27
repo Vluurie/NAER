@@ -6,7 +6,8 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppIcons {
-  static Widget informationIcon(BuildContext context, WidgetRef ref) {
+  static Widget informationIcon(
+      final BuildContext context, final WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -20,7 +21,7 @@ class AppIcons {
     );
   }
 
-  static Widget copyArguments(BuildContext context, WidgetRef ref) {
+  static Widget copyArguments(final BuildContext context, final WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -33,7 +34,7 @@ class AppIcons {
     );
   }
 
-  static Widget searchPaths(BuildContext context, WidgetRef ref) {
+  static Widget searchPaths(final BuildContext context, final WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -47,7 +48,8 @@ class AppIcons {
     );
   }
 
-  static Widget showIgnoredFiles(BuildContext context, WidgetRef ref) {
+  static Widget showIgnoredFiles(
+      final BuildContext context, final WidgetRef ref) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

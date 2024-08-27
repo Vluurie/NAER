@@ -8,7 +8,8 @@ import 'package:args/args.dart';
 ///
 /// [args] are the parsed command-line arguments.
 /// [output] is the output path for the processed files.
-Map<String, dynamic> initializeArgumentVars(ArgResults args, String output) {
+Map<String, dynamic> initializeArgumentVars(
+    final ArgResults args, final String output) {
   try {
     /// Input path argument gotten from the very first arg
     /// Example path: ?:\SteamLibrary\steamapps\common\NieRAutomata\data

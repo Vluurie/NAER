@@ -27,7 +27,7 @@ class _FileEntry {
         compressedData = [],
         compressedSize = -1;
 
-  Future<void> init(File file) async {
+  Future<void> init(final File file) async {
     uncompressedSize = await file.length();
     data = await file.readAsBytes();
     var paddingEndLength = (4 - (uncompressedSize % 4)) % 4;
@@ -44,13 +44,13 @@ class _FileEntry {
     }
   }
 
-  void writeHeaderEntry(ByteDataWrapper bytes) {
+  void writeHeaderEntry(final ByteDataWrapper bytes) {
     bytes.writeUint32(type);
     bytes.writeUint32(uncompressedSize);
     bytes.writeUint32(offset);
   }
 
-  void writeFileEntryToFile(ByteDataWrapper bytes) {
+  void writeFileEntryToFile(final ByteDataWrapper bytes) {
     if (compressedData.isNotEmpty) {
       bytes.writeUint32(compressedSize);
       bytes.writeBytes(compressedData);
@@ -75,7 +75,7 @@ class _FileEntry {
 }
 
 // Function to guess the type of a yax file, similar to the extractor
-Future<int> guessType(String yaxPath, String xmlPath) async {
+Future<int> guessType(final String yaxPath, final String xmlPath) async {
   var fileSize = await File(yaxPath).length();
   int value = (fileSize <= 1024) ? 1 : 4;
 
@@ -94,7 +94,7 @@ Future<int> guessType(String yaxPath, String xmlPath) async {
   return value;
 }
 
-Future<void> repackPak(String pakDir, String? pakFilePath) async {
+Future<void> repackPak(final String pakDir, String? pakFilePath) async {
   var infoJsonFile = File(path.join(pakDir, "pakInfo.json"));
   var pakInfo = jsonDecode(await infoJsonFile.readAsString());
 

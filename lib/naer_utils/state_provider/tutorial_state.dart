@@ -9,6 +9,6 @@ class TutorialStateNotifier extends StateNotifier<bool> {
 }
 
 final tutorialAttemptedProvider =
-    StateNotifierProvider<TutorialStateNotifier, bool>((ref) {
+    StateNotifierProvider<TutorialStateNotifier, bool>((final ref) {
   return TutorialStateNotifier();
 });

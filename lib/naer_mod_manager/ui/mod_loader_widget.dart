@@ -42,7 +42,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
     initMetaData();
   }
 
-  initMetaData() async {
+  void initMetaData() async {
     final directoryPath =
         "${await tracker.FileChange.ensureSettingsDirectory()}/ModPackage";
 
@@ -66,15 +66,15 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
     }
 
     return DropTarget(
-      onDragEntered: (details) {
+      onDragEntered: (final details) {
         setState(() => _isDraggingOver = true);
         _animationController.forward();
       },
-      onDragExited: (details) {
+      onDragExited: (final details) {
         setState(() => _isDraggingOver = false);
         _animationController.reverse();
       },
-      onDragDone: (details) async {
+      onDragDone: (final details) async {
         bool isFileSupported = false;
         String filePath = details.files.first.path;
         if (filePath.endsWith("ModPackage.zip")) {
@@ -85,7 +85,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
           setState(() => _isLoadingMods = true);
 
           var mods = await ModHandler.handleZipFile(
-              details.files.map((file) => file.path).toList());
+              details.files.map((final file) => file.path).toList());
 
           if (mods != null && mods.isNotEmpty) {
             setState(() {
@@ -158,7 +158,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
   final bool _isLoading = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: [
         if (_isDragDropEnabled)

@@ -4,7 +4,7 @@ import 'package:NAER/naer_utils/global_log.dart';
 
 /// Util class for counting runtime of single methods or full processing time.
 class CountRuntime {
-  String timeStr(Duration d) {
+  String timeStr(final Duration d) {
     var ms = d.inMilliseconds;
     if (ms < 1000) {
       return "${ms}ms";
@@ -17,8 +17,8 @@ class CountRuntime {
     }
   }
 
-  void processTime(DateTime t1, Set<String> processedFiles,
-      List<String> errorFiles, SendPort sendPort) {
+  void processTime(final DateTime t1, final Set<String> processedFiles,
+      final List<String> errorFiles, final SendPort sendPort) {
     var tD = DateTime.now().difference(t1);
     if (processedFiles.length == 1) {
       sendPort.send("Done (${timeStr(tD)}) :D");
@@ -43,8 +43,9 @@ class CountRuntime {
   /// - [function]: The function to be executed and timed.
   /// - [arguments]: A list of arguments to be passed to the function.
   /// - [sendPort]: An optional [SendPort] to handle messages from the isolate.
-  Future<void> runWithTimer(Function function, List<dynamic> arguments,
-      {SendPort? sendPort}) async {
+  Future<void> runWithTimer(
+      final Function function, final List<dynamic> arguments,
+      {final SendPort? sendPort}) async {
     Stopwatch stopwatch = Stopwatch()..start();
 
     String functionName = _extractFunctionName(function.toString());
@@ -69,7 +70,7 @@ class CountRuntime {
   }
 
   /// Extracts the function name from its string representation.
-  String _extractFunctionName(String functionString) {
+  String _extractFunctionName(final String functionString) {
     final regex = RegExp(r"'(.*?)'");
     final match = regex.firstMatch(functionString);
     return match != null ? match.group(1) ?? 'Unknown' : 'Unknown';

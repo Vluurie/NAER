@@ -33,12 +33,12 @@ class UpdateService {
     return null;
   }
 
-  bool isUpdateAvailable(String latestVersion) {
+  bool isUpdateAvailable(final String latestVersion) {
     return latestVersion.compareTo(currentVersion) > 0;
   }
 
-  void showUpdateDialog(BuildContext context, WidgetRef ref,
-      String latestVersion, String description) {
+  void showUpdateDialog(final BuildContext context, final WidgetRef ref,
+      final String latestVersion, final String description) {
     AutomatoDialogManager().showInfoDialog(
       context: context,
       titleColor: AutomatoThemeColors.textDialogColor(ref),
@@ -84,7 +84,6 @@ class UpdateService {
           ),
           FractionallySizedBox(
             widthFactor: 1.0,
-            alignment: Alignment.center,
             child: Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Container(
@@ -128,7 +127,7 @@ class UpdateService {
     );
   }
 
-  Future<void> _launchURL(String urlStr) async {
+  Future<void> _launchURL(final String urlStr) async {
     final Uri url = Uri.parse(urlStr);
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.inAppWebView);

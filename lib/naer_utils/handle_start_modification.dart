@@ -12,11 +12,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 Future<void> handleStartModification(
-  BuildContext context,
-  WidgetRef ref,
-  Future<void> Function(BuildContext, bool, List<String>, WidgetRef)
+  final BuildContext context,
+  final WidgetRef ref,
+  final Future<void> Function(BuildContext, List<String>, WidgetRef,
+          {required bool backUp})
       modifyMethod,
-  List<String> arguments,
+  final List<String> arguments,
 ) async {
   bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
   if (!isNierRunning) {
@@ -26,14 +27,14 @@ Future<void> handleStartModification(
 
     final globalState = ref.read(globalStateProvider.notifier);
     if (!globalState.readIsLoading()) {
-      globalState.setIsLoading(true);
-      globalState.setIsButtonEnabled(false);
+      globalState.setIsLoading(isLoading: true);
+      globalState.setIsButtonEnabled(isButtonEnabled: false);
 
       try {
         await FileChange.savePreRandomizationTime();
         final stopwatch = Stopwatch()..start();
         if (context.mounted) {
-          await modifyMethod(context, backUp, arguments, ref);
+          await modifyMethod(context, arguments, ref, backUp: backUp);
         }
         await FileChange.saveChanges();
         stopwatch.stop();
@@ -46,8 +47,8 @@ Future<void> handleStartModification(
         ));
       } finally {
         if (context.mounted) {
-          globalState.setIsLoading(false);
-          globalState.setIsButtonEnabled(true);
+          globalState.setIsLoading(isLoading: false);
+          globalState.setIsButtonEnabled(isButtonEnabled: true);
         }
       }
     }

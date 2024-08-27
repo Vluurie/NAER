@@ -36,20 +36,16 @@ ArgParser allArguments() {
 
     // Add flags for quest, map, phase, and enemy file options
     for (var option in GameFileOptions.questOptions) {
-      argParser.addFlag(option,
-          help: "Quest Identifier.", negatable: false, defaultsTo: false);
+      argParser.addFlag(option, help: "Quest Identifier.", negatable: false);
     }
     for (var option in GameFileOptions.mapOptions) {
-      argParser.addFlag(option,
-          help: "Map Identifier.", negatable: false, defaultsTo: false);
+      argParser.addFlag(option, help: "Map Identifier.", negatable: false);
     }
     for (var option in GameFileOptions.phaseOptions) {
-      argParser.addFlag(option,
-          help: "Phase Identifier.", negatable: false, defaultsTo: false);
+      argParser.addFlag(option, help: "Phase Identifier.", negatable: false);
     }
     for (var option in GameFileOptions.enemyOptions) {
-      argParser.addFlag(option,
-          help: "Enemy Identifier.", negatable: false, defaultsTo: false);
+      argParser.addFlag(option, help: "Enemy Identifier.", negatable: false);
     }
 
     // Output option: specifies the output file or folder
@@ -150,7 +146,8 @@ ArgParser allArguments() {
 ///
 /// Combines quest options, map options, and phase options, and generates a list of paths
 /// for options that are active. Additionally, processes any specified enemies and their paths.
-List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
+List<String> getActiveGameOptionPaths(
+    final ArgResults argResults, final String output) {
   List<String> allOptions = [
     ...GameFileOptions.questOptions,
     ...GameFileOptions.mapOptions,
@@ -159,10 +156,10 @@ List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
   ];
 
   var activePaths = allOptions
-      .where((option) =>
+      .where((final option) =>
           argResults[option] == true && FilePaths.paths.containsKey(option))
-      .map((option) => FilePaths.paths[option]!)
-      .map((path) => '$output\\$path')
+      .map((final option) => FilePaths.paths[option]!)
+      .map((final path) => '$output\\$path')
       .toList();
 
   String? enemiesArgument = argResults["enemies"] as String?;
@@ -171,14 +168,14 @@ List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
     RegExp exp = RegExp(r'\[(.*?)\]');
     var matches = exp.allMatches(enemiesArgument);
     for (var match in matches) {
-      enemyList.addAll(match.group(1)!.split(',').map((s) => s.trim()));
+      enemyList.addAll(match.group(1)!.split(',').map((final s) => s.trim()));
     }
   }
 
   var enemyPaths = enemyList
-      .where((enemy) => FilePaths.paths.containsKey(enemy))
-      .map((enemy) => FilePaths.paths[enemy]!)
-      .map((path) => '$output\\$path')
+      .where((final enemy) => FilePaths.paths.containsKey(enemy))
+      .map((final enemy) => FilePaths.paths[enemy]!)
+      .map((final path) => '$output\\$path')
       .toList();
 
   var fullPaths = (activePaths + enemyPaths).toSet().toList();
@@ -187,20 +184,21 @@ List<String> getActiveGameOptionPaths(ArgResults argResults, String output) {
 
 /// Get all possible options of the GameFileOptions with the [input] + [GameFileOptions] + [FilePaths.paths] combined path toList.
 /// Can be used to extract everything from the data input directory that can be modified (Stats or Randomization).
-List<String> getAllPossibleOptions(String input) {
+List<String> getAllPossibleOptions(final String input) {
   return [
     ...GameFileOptions.questOptions,
     ...GameFileOptions.mapOptions,
     ...GameFileOptions.phaseOptions,
     ...GameFileOptions.enemyOptions,
   ]
-      .where((option) => FilePaths.paths.containsKey(option))
-      .map((option) => '$input/${FilePaths.paths[option]!}')
+      .where((final option) => FilePaths.paths.containsKey(option))
+      .map((final option) => '$input/${FilePaths.paths[option]!}')
       .toList();
 }
 
 /// Creates the needed map based on --Ground, --Fly, and --Delete arguments.
-Map<String, List<String>> createCustomSelectedEnemiesMap(ArgResults? args) {
+Map<String, List<String>> createCustomSelectedEnemiesMap(
+    final ArgResults? args) {
   Map<String, List<String>> customSelectedEnemies = {
     "Ground": _parseJsonArray(args?['Ground']),
     "Fly": _parseJsonArray(args?['Fly']),
@@ -210,7 +208,7 @@ Map<String, List<String>> createCustomSelectedEnemiesMap(ArgResults? args) {
   return customSelectedEnemies;
 }
 
-List<String> _parseJsonArray(String? arg) {
+List<String> _parseJsonArray(final String? arg) {
   if (arg == null) {
     return [];
   }
@@ -223,13 +221,15 @@ List<String> _parseJsonArray(String? arg) {
       cleanedArg = cleanedArg.substring(1, cleanedArg.length - 1);
     }
 
-    List<String> elements = cleanedArg.split(',').map((e) {
-      String element = e.trim();
-      if (element.startsWith('"') && element.endsWith('"')) {
-        element = element.substring(1, element.length - 1);
-      }
-      return element;
+    // Split the string by commas and remove any quotes from each element
+    List<String> elements = cleanedArg.split(',').map((final e) {
+      return e.trim().replaceAll(RegExp(r'^"|"$'), '');
     }).toList();
+
+    // Check if the list contains only an empty string and return an empty list if true
+    if (elements.length == 1 && elements[0].isEmpty) {
+      return [];
+    }
 
     return elements;
   } catch (e) {
@@ -238,7 +238,7 @@ List<String> _parseJsonArray(String? arg) {
 }
 
 /// Parses command-line arguments into a [CliOptions] object.
-CliOptions parseArguments(ArgResults args) {
+CliOptions parseArguments(final ArgResults args) {
   return CliOptions(
     output: null,
     folderMode: args["folder"],
@@ -251,9 +251,9 @@ CliOptions parseArguments(ArgResults args) {
   );
 }
 
-void checkOptionsCompatibility(CliOptions options) {
+void checkOptionsCompatibility(final CliOptions options) {
   var fileModeOptionsCount =
-      [options.recursiveMode, options.folderMode].where((b) => b).length;
+      [options.recursiveMode, options.folderMode].where((final b) => b).length;
   if (fileModeOptionsCount > 1) {
     logState
         .addLog("Only one of --folder, or --recursive can be used at a time");

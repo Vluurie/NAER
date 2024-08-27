@@ -14,19 +14,22 @@ class FileCategoryManager {
   /// A set of enemy file names to include for processing.
   final Set<String> includeEnemies;
 
-  FileCategoryManager(ArgResults args)
+  FileCategoryManager(final ArgResults args)
       : includeQuests = _extractFlags(args, GameFileOptions.questOptions),
         includeMaps = _extractFlags(args, GameFileOptions.mapOptions),
         includePhaseLogic = _extractFlags(args, GameFileOptions.phaseOptions),
         includeEnemies = _extractFlags(args, GameFileOptions.enemyOptions);
 
   /// Extracts flags from the command-line arguments.
-  static Set<String> _extractFlags(ArgResults args, List<String> options) {
-    return options.where((option) => args[option] as bool? ?? false).toSet();
+  static Set<String> _extractFlags(
+      final ArgResults args, final List<String> options) {
+    return options
+        .where((final option) => args[option] as bool? ?? false)
+        .toSet();
   }
 
   /// Determines if the file should be processed based on its base name.
-  bool shouldProcessFile(String baseName) {
+  bool shouldProcessFile(final String baseName) {
     if (includeQuests.contains(baseName)) {
       return true; // If it's a quest and it's included, process the file
     } else if (includeMaps.contains(baseName)) {

@@ -8,13 +8,14 @@ import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 import 'datHashGenerator.dart';
 
-Future<void> repackDat(
-    String datDir, String exportPath, SendPort sendPort) async {
+Future<void> repackDat(final String datDir, final String exportPath,
+    final SendPort sendPort) async {
   try {
     var fileList = await getDatFileList(datDir, sendPort);
-    var fileNames = fileList.map((e) => path.basename(e)).toList();
+    var fileNames = fileList.map((final e) => path.basename(e)).toList();
     var fileSizes =
-        (await Future.wait(fileList.map((e) => File(e).length()))).toList();
+        (await Future.wait(fileList.map((final e) => File(e).length())))
+            .toList();
     var fileNumber = fileList.length;
     var hashData = HashInfo(fileNames);
 

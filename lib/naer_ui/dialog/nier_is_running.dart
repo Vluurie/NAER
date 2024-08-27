@@ -2,7 +2,7 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void showNierIsRunningDialog(BuildContext context, WidgetRef ref) {
+void showNierIsRunningDialog(final BuildContext context, final WidgetRef ref) {
   AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,

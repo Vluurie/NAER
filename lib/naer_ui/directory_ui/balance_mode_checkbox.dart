@@ -29,12 +29,14 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
     final prefs = await SharedPreferences.getInstance();
     bool? savedValue = prefs.getBool('balance_mode');
     if (savedValue != null) {
-      globalState.setBalanceModeCheckBoxValue(savedValue);
-      globalState.setIsBalanceMode(globalState.readBalanceModeCheckBoxValue());
+      globalState.setBalanceModeCheckBoxValue(
+          balanceModeCheckBoxValue: savedValue);
+      globalState.setIsBalanceMode(
+          isBalanceMode: globalState.readBalanceModeCheckBoxValue());
     }
   }
 
-  Future<void> _saveBalanceMode(bool value) async {
+  Future<void> _saveBalanceMode(final bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('balance_mode', value);
   }
@@ -70,10 +72,10 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FutureBuilder<void>(
       future: _loadBalanceModeFuture,
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
@@ -83,11 +85,12 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
           return AutomatoCheckBox(
             initialValue: globalState.readBalanceModeCheckBoxValue(),
             textColorUnchecked: AutomatoThemeColors.primaryColor(ref),
-            onChanged: (bool? newValue) async {
+            onChanged: (final bool? newValue) async {
               setState(() {
-                globalState.setBalanceModeCheckBoxValue(newValue ?? false);
+                globalState.setBalanceModeCheckBoxValue(
+                    balanceModeCheckBoxValue: newValue ?? false);
                 globalState.setIsBalanceMode(
-                    globalState.readBalanceModeCheckBoxValue());
+                    isBalanceMode: globalState.readBalanceModeCheckBoxValue());
                 _saveBalanceMode(globalState.readBalanceModeCheckBoxValue());
               });
 

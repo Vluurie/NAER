@@ -6,12 +6,12 @@ import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:xml/xml.dart' as xml;
 
 Future<void> handleObjIdProcessing(
-    Iterable<xml.XmlElement> codeElements,
-    bool isActionImportant,
-    Map<String, List<String>> sortedEnemyData,
-    File file,
-    bool isSpawnActionTooSmall,
-    MainData mainData) async {
+    final Iterable<xml.XmlElement> codeElements,
+    final Map<String, List<String>> sortedEnemyData,
+    final File file,
+    final MainData mainData,
+    {required final bool isActionImportant,
+    required final bool isSpawnActionTooSmall}) async {
   for (var codeElement in codeElements) {
     // Check if the parent of the code element is an XML element
     if (codeElement.parent is xml.XmlElement) {
@@ -21,8 +21,8 @@ Future<void> handleObjIdProcessing(
         // If the action is important, process descendant 'objId' elements
         parentElement.descendants
             .whereType<xml.XmlElement>()
-            .where((element) => element.name.local == 'objId')
-            .forEach((objIdElement) async {
+            .where((final element) => element.name.local == 'objId')
+            .forEach((final objIdElement) async {
           await modifyEnemyObjId(
               objIdElement,
               sortedEnemyData,
@@ -37,8 +37,9 @@ Future<void> handleObjIdProcessing(
         var relevantElements =
             parentElement.children.whereType<xml.XmlElement>();
         for (var element in relevantElements) {
-          await handleSpecialCaseEnemies(element, sortedEnemyData, file.path,
-              mainData, isSpawnActionTooSmall);
+          await handleSpecialCaseEnemies(
+              element, sortedEnemyData, file.path, mainData,
+              isSpawnActionTooSmall: isSpawnActionTooSmall);
         }
       }
     }

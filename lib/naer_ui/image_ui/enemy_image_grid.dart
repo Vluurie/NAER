@@ -18,7 +18,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
   bool isImageClicked = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalStateNotifer = ref.read(globalStateProvider.notifier);
     Map<String, bool> levelMap = globalStateNotifer.readLevelMap();
     if (levelMap['All Enemies without Randomization'] == false) {
@@ -27,7 +27,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     return Container();
   }
 
-  Widget setupImageGrid(BuildContext context) {
+  Widget setupImageGrid(final BuildContext context) {
     const folderPath = 'assets/nier_image_folders/nier_enemy_images/';
     final imageWidgets = populateImageGrid(folderPath);
 
@@ -92,7 +92,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
               mainAxisSpacing: 8.0,
             ),
             itemCount: imageWidgets.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Card(
@@ -115,7 +115,6 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
 
     return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           headerSection,
           gridSection,
@@ -124,13 +123,13 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  List<Widget> populateImageGrid(String folderPath) {
-    return NierEnemyImageNames.getDLCFilteredNames(ref).map((imageName) {
+  List<Widget> populateImageGrid(final String folderPath) {
+    return NierEnemyImageNames.getDLCFilteredNames(ref).map((final imageName) {
       return createClickableImage('$folderPath$imageName');
     }).toList();
   }
 
-  Widget createClickableImage(String imagePath) {
+  Widget createClickableImage(final String imagePath) {
     final globalState = ref.read(globalStateProvider.notifier);
     final baseName = Uri.parse(imagePath).pathSegments.last;
     bool isSelected = globalState.readSelectedImages().contains(baseName);
@@ -168,10 +167,10 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
 
     return ValueListenableBuilder(
       valueListenable: isHovered,
-      builder: (context, value, child) {
+      builder: (final context, final value, final child) {
         return MouseRegion(
-          onEnter: (_) => isHovered.value = true,
-          onExit: (_) => isHovered.value = false,
+          onEnter: (final _) => isHovered.value = true,
+          onExit: (final _) => isHovered.value = false,
           child: InkWell(
             onTap: () {
               onImageClick(baseName);
@@ -242,7 +241,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  void onImageClick(String imageName) {
+  void onImageClick(final String imageName) {
     final globalState = ref.read(globalStateProvider.notifier);
     if (globalState.readSelectedImages().contains(imageName)) {
       globalState.removeSelectedImage(imageName);
@@ -262,7 +261,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     globalState.unselectAllImages();
   }
 
-  void showImageInformation(String imageName) {
+  void showImageInformation(final String imageName) {
     setState(() {
       clickedImage = imageName;
       isImageClicked = true;
@@ -277,7 +276,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
@@ -299,7 +298,6 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
                   children: [
                     AutomatoBackground(
                       showBackgroundSVG: false,
-                      showMenuLines: true,
                       showRepeatingBorders: false,
                       backgroundColor: const Color.fromARGB(255, 99, 95, 80),
                       linesConfig: const LinesConfig(
@@ -320,8 +318,8 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             MouseRegion(
-                              onEnter: (_) => isHovered.value = true,
-                              onExit: (_) => isHovered.value = false,
+                              onEnter: (final _) => isHovered.value = true,
+                              onExit: (final _) => isHovered.value = false,
                               child: LevitatingImage(
                                 imagePath:
                                     'assets/nier_image_folders/nier_enemies_ingame_images/$imageName',
@@ -370,7 +368,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     );
   }
 
-  void showEnemyInformation(BuildContext context, WidgetRef ref) {
+  void showEnemyInformation(final BuildContext context, final WidgetRef ref) {
     AutomatoDialogManager().showInfoDialog(
       context: context,
       ref: ref,
@@ -417,7 +415,6 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
       onOkPressed: () {
         Navigator.of(context).pop();
       },
-      okLabel: "OK",
     );
   }
 }

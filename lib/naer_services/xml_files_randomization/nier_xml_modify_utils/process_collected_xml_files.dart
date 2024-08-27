@@ -9,10 +9,10 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/xml/xml_ext
 import 'package:xml/xml.dart' as xml;
 
 Future<void> processCollectedXmlFileForRandomization(
-    File file,
-    Map<String, List<String>> sortedEnemyData,
-    ImportantIDs importantIds,
-    MainData mainData) async {
+    final File file,
+    final Map<String, List<String>> sortedEnemyData,
+    final ImportantIDs importantIds,
+    final MainData mainData) async {
   String content = await file.readAsString();
   var document = xml.XmlDocument.parse(content);
 
@@ -27,11 +27,13 @@ Future<void> processCollectedXmlFileForRandomization(
     bool isActionImportant = false;
 
     isSpawnActionTooSmall = await checkTooSmallSpawnAction(
-        actionId, SpecialEntities.bigSpawnEnemySkipIds, isSpawnActionTooSmall);
-    isActionImportant =
-        await checkImportantIds(actionId, importantIds, isActionImportant);
-    await handleObjIdProcessing(codeElements, isActionImportant,
-        sortedEnemyData, file, isSpawnActionTooSmall, mainData);
+        actionId, SpecialEntities.bigSpawnEnemySkipIds,
+        isSpawnActionTooSmall: isSpawnActionTooSmall);
+    isActionImportant = await checkImportantIds(actionId, importantIds,
+        isActionImportant: isActionImportant);
+    await handleObjIdProcessing(codeElements, sortedEnemyData, file, mainData,
+        isActionImportant: isActionImportant,
+        isSpawnActionTooSmall: isSpawnActionTooSmall);
   }
 
   await file.writeAsString(document.toPrettyString());

@@ -24,7 +24,7 @@ class MetaDataFormFields extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final dlcValue = ref.watch(dlcControllerProvider);
 
     return Column(
@@ -35,7 +35,7 @@ class MetaDataFormFields extends StatelessWidget {
             ref: ref,
             controller: idController,
             label: 'ID',
-            validator: (value) => value?.validateId(value),
+            validator: (final value) => value?.validateId(value),
           ),
         ),
         const SizedBox(height: 10),
@@ -45,7 +45,8 @@ class MetaDataFormFields extends StatelessWidget {
             ref: ref,
             controller: nameController,
             label: 'Name',
-            validator: (value) => value?.validateText(value, fieldName: 'Name'),
+            validator: (final value) =>
+                value?.validateText(value, fieldName: 'Name'),
           ),
         ),
         const SizedBox(height: 10),
@@ -55,7 +56,7 @@ class MetaDataFormFields extends StatelessWidget {
             ref: ref,
             controller: versionController,
             label: 'Version',
-            validator: (value) => value?.validateVersion(value),
+            validator: (final value) => value?.validateVersion(value),
           ),
         ),
         const SizedBox(height: 10),
@@ -65,7 +66,7 @@ class MetaDataFormFields extends StatelessWidget {
             ref: ref,
             controller: authorController,
             label: 'Author',
-            validator: (value) =>
+            validator: (final value) =>
                 value?.validateText(value, fieldName: 'Author'),
           ),
         ),
@@ -76,7 +77,7 @@ class MetaDataFormFields extends StatelessWidget {
             ref: ref,
             controller: descriptionController,
             label: 'Description',
-            validator: (value) =>
+            validator: (final value) =>
                 value?.validateText(value, fieldName: 'Description'),
           ),
         ),
@@ -85,7 +86,7 @@ class MetaDataFormFields extends StatelessWidget {
           padding: const EdgeInsets.only(right: 20, left: 20),
           child: MetadataDLCDropdown(
             initialValue: dlcValue,
-            onChanged: (value) {
+            onChanged: (final value) {
               ref.read(dlcControllerProvider.notifier).state = value;
             },
           ),

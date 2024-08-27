@@ -58,7 +58,7 @@ List<String> backupNames = [
 ///   "nier2blender_extracted",
 /// ]);
 /// ```
-Future<void> deleteExtractedGameFolders(String directoryPath) async {
+Future<void> deleteExtractedGameFolders(final String directoryPath) async {
   const int maxRetries = 3;
   const Duration retryDelay = Duration(seconds: 1);
 
@@ -100,7 +100,7 @@ Future<void> deleteExtractedGameFolders(String directoryPath) async {
   }
 }
 
-Future<void> deleteBackupGameFolders(String directoryPath) async {
+Future<void> deleteBackupGameFolders(final String directoryPath) async {
   var parentDirectory = Directory(directoryPath).parent.path;
   for (var folderName in backupNames) {
     var folderPath = Directory(join(parentDirectory, folderName));
@@ -116,7 +116,7 @@ Future<void> deleteBackupGameFolders(String directoryPath) async {
 }
 
 /// Validates if the extracted game folders have been deleted.
-Future<bool> validateExtractedFolderDeletion(String directoryPath) async {
+Future<bool> validateExtractedFolderDeletion(final String directoryPath) async {
   for (var folderName in folderNames) {
     var folderPath = Directory(join(directoryPath, folderName));
     if (await folderPath.exists()) {

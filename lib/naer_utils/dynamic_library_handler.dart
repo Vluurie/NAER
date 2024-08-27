@@ -27,8 +27,9 @@ final ExtractDatFilesFFI extractDatFilesFFI = dylib
 /// 3. Converts the returned C-style UTF-8 string to a Dart string.
 /// 4. Frees the allocated memory for the C-style strings and the returned result.
 /// 5. Parses the JSON result to get a list of extracted file paths.
-Future<List<String>> extractDatFiles(String datFilePath, String extractDirPath,
-    bool shouldExtractPakFiles) async {
+Future<List<String>> extractDatFiles(
+    final String datFilePath, final String extractDirPath,
+    {required final bool shouldExtractPakFiles}) async {
   final Pointer<Utf8> datFilePathPtr = datFilePath.toNativeUtf8();
   final Pointer<Utf8> extractDirPathPtr = extractDirPath.toNativeUtf8();
 

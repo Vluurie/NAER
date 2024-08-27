@@ -2,7 +2,7 @@
 
 import 'package:args/args.dart';
 
-void displayHelp(ArgParser argParser, [String? option]) {
+void displayHelp(final ArgParser argParser, [final String? option]) {
   if (option == null) {
     print(argParser.usage);
   } else {

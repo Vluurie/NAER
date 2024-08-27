@@ -3,53 +3,54 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Providers for form key and text controllers
 final formKeyProvider =
-    Provider<GlobalKey<FormState>>((ref) => GlobalKey<FormState>());
+    Provider<GlobalKey<FormState>>((final ref) => GlobalKey<FormState>());
 
 final idControllerProvider =
-    Provider<TextEditingController>((ref) => TextEditingController());
+    Provider<TextEditingController>((final ref) => TextEditingController());
 final nameControllerProvider =
-    Provider<TextEditingController>((ref) => TextEditingController());
+    Provider<TextEditingController>((final ref) => TextEditingController());
 final versionControllerProvider =
-    Provider<TextEditingController>((ref) => TextEditingController());
+    Provider<TextEditingController>((final ref) => TextEditingController());
 final authorControllerProvider =
-    Provider<TextEditingController>((ref) => TextEditingController());
+    Provider<TextEditingController>((final ref) => TextEditingController());
 final descriptionControllerProvider =
-    Provider<TextEditingController>((ref) => TextEditingController());
-final dlcControllerProvider = StateProvider<String?>((ref) => 'false');
+    Provider<TextEditingController>((final ref) => TextEditingController());
+final dlcControllerProvider = StateProvider<String?>((final ref) => 'false');
 
 final enemySetActionControllersProvider =
     StateNotifierProvider<ControllerNotifier, List<TextEditingController>>(
-        (ref) {
+        (final ref) {
   return ControllerNotifier();
 });
 
 final enemySetAreaControllersProvider =
     StateNotifierProvider<ControllerNotifier, List<TextEditingController>>(
-        (ref) {
+        (final ref) {
   return ControllerNotifier();
 });
 
 final enemyGeneratorControllersProvider =
     StateNotifierProvider<ControllerNotifier, List<TextEditingController>>(
-        (ref) {
+        (final ref) {
   return ControllerNotifier();
 });
 
 final enemyLayoutActionControllersProvider =
     StateNotifierProvider<ControllerNotifier, List<TextEditingController>>(
-        (ref) {
+        (final ref) {
   return ControllerNotifier();
 });
 
 // Providers for state variables
-final selectedDirectoryProvider = StateProvider<String?>((ref) => null);
-final showModFolderWarningProvider = StateProvider<bool>((ref) => false);
-final directoryContentsInfoProvider = StateProvider<List<String>>((ref) => []);
+final selectedDirectoryProvider = StateProvider<String?>((final ref) => null);
+final showModFolderWarningProvider = StateProvider<bool>((final ref) => false);
+final directoryContentsInfoProvider =
+    StateProvider<List<String>>((final ref) => []);
 final selectedImagePathProvider =
     StateNotifierProvider<SelectedImagePathNotifier, String?>(
-        (ref) => SelectedImagePathNotifier());
+        (final ref) => SelectedImagePathNotifier());
 
-final validFolderNamesProvider = Provider<List<String>>((ref) => [
+final validFolderNamesProvider = Provider<List<String>>((final ref) => [
       "ph4",
       "st5",
       "wd5",
@@ -96,7 +97,7 @@ class MetadataProvider {
   final String? selectedDirectory;
   final String? dlcValue;
 
-  MetadataProvider(WidgetRef ref)
+  MetadataProvider(final WidgetRef ref)
       : formKey = ref.read(formKeyProvider),
         idController = ref.read(idControllerProvider),
         nameController = ref.read(nameControllerProvider),
@@ -118,7 +119,7 @@ class MetadataProvider {
 class SelectedImagePathNotifier extends StateNotifier<String?> {
   SelectedImagePathNotifier() : super(null);
 
-  void setImagePath(String? path) {
+  void setImagePath(final String? path) {
     state = path;
   }
 }
@@ -130,7 +131,7 @@ class ControllerNotifier extends StateNotifier<List<TextEditingController>> {
     state = [...state, TextEditingController()];
   }
 
-  void removeController(int index) {
+  void removeController(final int index) {
     if (state.length > 1) {
       state.removeAt(index);
       state = [...state];
@@ -140,6 +141,6 @@ class ControllerNotifier extends StateNotifier<List<TextEditingController>> {
 
 final controllerProvider =
     StateNotifierProvider<ControllerNotifier, List<TextEditingController>>(
-        (ref) {
+        (final ref) {
   return ControllerNotifier();
 });

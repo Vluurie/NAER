@@ -2,9 +2,9 @@ import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SpecialEntities {
-  static List<String> getDLCFilteredEnemiesToBalance(WidgetRef ref) {
+  static List<String> getDLCFilteredEnemiesToBalance(final WidgetRef ref) {
     final hasDLC = ref.watch(globalStateProvider).hasDLC;
-    return enemiesToBalance.where((enemy) {
+    return enemiesToBalance.where((final enemy) {
       return hasDLC || !dlcEnemies.contains(enemy);
     }).toList();
   }

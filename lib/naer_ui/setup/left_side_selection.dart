@@ -18,7 +18,7 @@ class LeftSideSelection extends ConsumerWidget {
   LeftSideSelection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.watch(globalStateProvider);
     final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     final tutorialAttempted = ref.watch(tutorialAttemptedProvider);
@@ -27,7 +27,7 @@ class LeftSideSelection extends ConsumerWidget {
         globalStateNotifier.readWasModManamentDialogShown();
 
     if (!tutorialAttempted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addPostFrameCallback((final _) async {
         if (globalState.input.isNotEmpty &&
             globalState.specialDatOutputPath.isNotEmpty &&
             wasModListDetectionDialogManaged) {
@@ -37,7 +37,6 @@ class LeftSideSelection extends ConsumerWidget {
     }
 
     return Flexible(
-      flex: 1,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -50,7 +49,7 @@ class LeftSideSelection extends ConsumerWidget {
                 child: DirectorySelectionCard(
                   title: "Input Directory:",
                   path: globalState.input,
-                  onBrowse: (updatePath) async {
+                  onBrowse: (final updatePath) async {
                     await InputDirectoryHandler().openInputFileDialog(
                       context,
                       ref,
@@ -65,7 +64,7 @@ class LeftSideSelection extends ConsumerWidget {
                 child: DirectorySelectionCard(
                   title: "Output Directory:",
                   path: globalState.specialDatOutputPath,
-                  onBrowse: (updatePath) async {
+                  onBrowse: (final updatePath) async {
                     await OutputDirectoryHandler().openOutputFileDialog(
                       context,
                       ref,
@@ -98,7 +97,8 @@ class LeftSideSelection extends ConsumerWidget {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const SetupConfigFormScreen(),
+                          builder: (final context) =>
+                              const SetupConfigFormScreen(),
                         ),
                       );
                     },
@@ -126,7 +126,7 @@ class LeftSideSelection extends ConsumerWidget {
   }
 
   Future<void> _checkAndShowTutorial(
-      BuildContext context, WidgetRef ref) async {
+      final BuildContext context, final WidgetRef ref) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool tutorialShown = prefs.getBool('tutorial_shown') ?? false;
 
@@ -143,24 +143,21 @@ class LeftSideSelection extends ConsumerWidget {
     }
   }
 
-  void _showTutorial(BuildContext context, WidgetRef ref) {
+  void _showTutorial(final BuildContext context, final WidgetRef ref) {
     final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     print("Showing tutorial");
 
     TutorialCoachMark(
       targets: _createTargets(),
-      colorShadow: Colors.black,
-      textSkip: "SKIP",
-      opacityShadow: 0.8,
       onFinish: () {
         print("Tutorial finished");
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const SetupConfigFormScreen(),
+            builder: (final context) => const SetupConfigFormScreen(),
           ),
         );
       },
-      onClickTarget: (target) {
+      onClickTarget: (final target) {
         print(target);
         globalStateNotifier.toggleCustomSelection();
       },
@@ -181,7 +178,6 @@ class LeftSideSelection extends ConsumerWidget {
         paddingFocus: 2.0,
         contents: [
           TargetContent(
-            align: ContentAlign.bottom,
             child: const Padding(
               padding: EdgeInsets.all(2.0),
               child: Text(
@@ -201,7 +197,6 @@ class LeftSideSelection extends ConsumerWidget {
         keyTarget: _addButtonKey,
         contents: [
           TargetContent(
-            align: ContentAlign.bottom,
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(

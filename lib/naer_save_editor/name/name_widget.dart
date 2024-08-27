@@ -21,7 +21,7 @@ class _SaveFileNameState extends State<SaveFileName> {
   @override
   void initState() {
     super.initState();
-    readInGameName().then((name) {
+    readInGameName().then((final name) {
       setState(() {
         ingameName = name;
       });
@@ -34,7 +34,7 @@ class _SaveFileNameState extends State<SaveFileName> {
       return "File not found";
     }
 
-    RandomAccessFile raf = await file.open(mode: FileMode.read);
+    RandomAccessFile raf = await file.open();
     await raf.setPosition(startNamePosition);
     List<int> bytes = await raf.read(nameLength);
     await raf.close();
@@ -48,7 +48,7 @@ class _SaveFileNameState extends State<SaveFileName> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedNameDisplay(ingameName: ingameName);
   }
 }

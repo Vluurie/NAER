@@ -6,11 +6,11 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:win32/win32.dart';
 
-Future<T> runProcessServiceInZone<T>(Future<T> Function() body) {
+Future<T> runProcessServiceInZone<T>(final Future<T> Function() body) {
   final completer = Completer<T>();
   runZonedGuarded(() async {
     completer.complete(await body());
-  }, (error, stackTrace) {
+  }, (final error, final stackTrace) {
     globalLog("Unhandled error: $error\n$stackTrace");
     completer.completeError(error, stackTrace);
   });
@@ -18,7 +18,7 @@ Future<T> runProcessServiceInZone<T>(Future<T> Function() body) {
 }
 
 Future<bool> startNierAutomataExecutable(
-    String directoryPath, VoidCallback onProcessStopped) {
+    final String directoryPath, final VoidCallback onProcessStopped) {
   return runProcessServiceInZone(() async {
     var parentDirectory = Directory(directoryPath).parent.path;
     var processPath = '$parentDirectory\\NierAutomata.exe';
@@ -54,7 +54,7 @@ Future<bool> startNierAutomataExecutable(
 }
 
 class ProcessService {
-  static bool isProcessRunning(String processName) {
+  static bool isProcessRunning(final String processName) {
     final processIds = calloc<Uint32>(1024);
     final cb = sizeOf<Uint32>() * 1024;
     final cbNeeded = calloc<Uint32>();
@@ -99,12 +99,12 @@ class ProcessService {
   }
 
   static Future<bool> checkProcessStartedWithinTime(
-      String processName, Duration timeout) async {
+      final String processName, final Duration timeout) async {
     final completer = Completer<bool>();
     Timer? checkTimer;
     Timer? timeoutTimer;
 
-    checkTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    checkTimer = Timer.periodic(const Duration(seconds: 1), (final timer) {
       if (isProcessRunning(processName)) {
         timer.cancel();
         timeoutTimer?.cancel();
@@ -125,8 +125,8 @@ class ProcessService {
   }
 
   static Future<void> monitorProcessByName(
-      String processName, VoidCallback onProcessStopped) async {
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
+      final String processName, final VoidCallback onProcessStopped) async {
+    Timer.periodic(const Duration(seconds: 1), (final timer) async {
       if (!isProcessRunning(processName)) {
         await Future.delayed(const Duration(seconds: 2));
 
@@ -138,7 +138,7 @@ class ProcessService {
     });
   }
 
-  static Future<Process> startProcess(String processPath) async {
+  static Future<Process> startProcess(final String processPath) async {
     try {
       Process process = await Process.start(processPath, []);
       return process;
@@ -148,7 +148,7 @@ class ProcessService {
     }
   }
 
-  static bool terminateProcess(String processName) {
+  static bool terminateProcess(final String processName) {
     final processIds = calloc<Uint32>(1024);
     final cb = sizeOf<Uint32>() * 1024;
     final cbNeeded = calloc<Uint32>();
@@ -195,4 +195,4 @@ class ProcessService {
   }
 }
 
-Pointer<Utf16> wsalloc(int size) => calloc<Uint16>(size).cast<Utf16>();
+Pointer<Utf16> wsalloc(final int size) => calloc<Uint16>(size).cast<Utf16>();

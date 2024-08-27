@@ -12,7 +12,7 @@ class EnemyLevelSelection extends ConsumerStatefulWidget {
 }
 
 class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
-  IconData getIconForLevel(String levelEnemy) {
+  IconData getIconForLevel(final String levelEnemy) {
     switch (levelEnemy) {
       case "All Enemies":
         return Icons.emoji_events;
@@ -26,7 +26,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
 
     return Align(
@@ -68,7 +68,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                       max: 99,
                       divisions: 98,
                       label: globalState.enemyLevel.toString(),
-                      onChanged: (double newValue) {
+                      onChanged: (final double newValue) {
                         ref
                             .read(globalStateProvider.notifier)
                             .updateEnemyLevel(newValue.round());
@@ -77,7 +77,7 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                 ],
               ),
             ),
-            ...globalState.levelMap.keys.map((levelKey) {
+            ...globalState.levelMap.keys.map((final levelKey) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: CheckboxListTile(
@@ -89,11 +89,11 @@ class _EnemyLevelSelectionState extends ConsumerState<EnemyLevelSelection> {
                     ),
                   ),
                   value: globalState.levelMap[levelKey],
-                  onChanged: (bool? newValue) {
+                  onChanged: (final bool? newValue) {
                     if (newValue != null) {
                       ref
                           .read(globalStateProvider.notifier)
-                          .updateLevel(levelKey, newValue);
+                          .updateLevel(levelKey, shouldUpdate: newValue);
                     }
                   },
                   secondary: Icon(getIconForLevel(levelKey),

@@ -56,7 +56,7 @@ class SetupData {
           "em1050",
           "em1030",
           "em1074"
-        ], false, "em1040"),
+        ], "em1040", isChecked: false),
         "--Fly=[]",
         generateDeleteGroupArgument(),
         "--category=default",
@@ -65,7 +65,7 @@ class SetupData {
       showCheckbox: true,
       checkboxText: "Add 9S",
       onCheckboxChanged: (final bool isChecked) {
-        setups[1].updateGroundArgument(isChecked, "em1040");
+        setups[1].updateGroundArgument("em1040", isChecked: isChecked);
       },
     ),
     SetupConfigData(

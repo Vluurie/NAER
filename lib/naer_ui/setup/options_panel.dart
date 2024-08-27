@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:NAER/naer_save_editor/save_editor.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
@@ -29,7 +31,7 @@ class OptionsPanel extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.watch(globalStateProvider);
 
     return AnimatedPositioned(
@@ -105,7 +107,7 @@ class OptionsPanel extends ConsumerWidget {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
+                                        builder: (final context) =>
                                             const SaveEditor(),
                                       ),
                                     );
@@ -219,13 +221,13 @@ class OptionsPanel extends ConsumerWidget {
                                   onYesPressed: () async {
                                     Navigator.of(context).pop(false);
 
-                                    await showDialog(
+                                    unawaited(showDialog(
                                       context: context,
                                       barrierDismissible: false,
-                                      builder: (BuildContext context) {
+                                      builder: (final BuildContext context) {
                                         return PopScope(
-                                          onPopInvokedWithResult:
-                                              (canPop, result) async {},
+                                          onPopInvokedWithResult: (final canPop,
+                                              final result) async {},
                                           child: Dialog(
                                             backgroundColor: Colors.transparent,
                                             child: Center(
@@ -244,7 +246,7 @@ class OptionsPanel extends ConsumerWidget {
                                           ),
                                         );
                                       },
-                                    );
+                                    ));
 
                                     await deleteBackupGameFolders(
                                         globalState.input);

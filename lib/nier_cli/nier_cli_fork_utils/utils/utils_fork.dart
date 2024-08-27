@@ -24,11 +24,11 @@ const pakExtractSubDir = "pakExtracted";
 // }
 
 final _crc32 = Crc32();
-int crc32(String str) {
+int crc32(final String str) {
   return _crc32.convert(utf8.encode(str)).toBigInt().toInt();
 }
 
-bool isInt(String str) {
+bool isInt(final String str) {
   return int.tryParse(str) != null;
 }
 
@@ -89,7 +89,8 @@ bool isInt(String str) {
 //   return int == d ? int.toString() : d.toString();
 // }
 
-Future<List<String>> getDatFiles(String extractedDir, SendPort sendPort) async {
+Future<List<String>> getDatFiles(
+    final String extractedDir, final SendPort sendPort) async {
   var pakInfo = path.join(extractedDir, "dat_info.json");
   if (await File(pakInfo).exists()) {
     var datInfoJson = jsonDecode(await File(pakInfo).readAsString());
@@ -101,18 +102,20 @@ Future<List<String>> getDatFiles(String extractedDir, SendPort sendPort) async {
         await ByteDataWrapper.fromFile(fileOrderMetadata, sendPort);
     var numFiles = filesBytes.readUint32();
     var nameLength = filesBytes.readUint32();
-    List<String> datFiles = List.generate(
-        numFiles, (i) => filesBytes.readString(nameLength).split("\u0000")[0]);
+    List<String> datFiles = List.generate(numFiles,
+        (final i) => filesBytes.readString(nameLength).split("\u0000")[0]);
     return datFiles;
   }
 
   return await (Directory(extractedDir).list())
-      .where((file) => file is File && path.extension(file.path).length <= 3)
-      .map((file) => file.path)
+      .where(
+          (final file) => file is File && path.extension(file.path).length <= 3)
+      .map((final file) => file.path)
       .toList();
 }
 
-Future<Tuple2<String?, String>> getDatNameParts(String extractedDir) async {
+Future<Tuple2<String?, String>> getDatNameParts(
+    final String extractedDir) async {
   var pakInfo = path.join(extractedDir, "dat_info.json");
   if (await File(pakInfo).exists()) {
     var datInfoJson = jsonDecode(await File(pakInfo).readAsString()) as Map;
@@ -203,8 +206,8 @@ Future<Tuple2<String?, String>> getDatNameParts(String extractedDir) async {
 //       .writeAsString(const JsonEncoder.withIndent("\t").convert(pakInfoJson));
 // }
 
-bool isStringAscii(String s) {
-  return utf8.encode(s).every((byte) => byte < 128);
+bool isStringAscii(final String s) {
+  return utf8.encode(s).every((final byte) => byte < 128);
 }
 
 const _basicFolders = {
@@ -229,7 +232,7 @@ const Map<String, String> _nameStartToFolder = {
   "subtitle": "subtitle",
   "txt": "txtmess",
 };
-String getDatFolder(String datName) {
+String getDatFolder(final String datName) {
   var c2 = datName.substring(0, 2);
   if (_basicFolders.contains(c2)) return c2;
   var c1 = datName[0];
@@ -246,7 +249,8 @@ String getDatFolder(String datName) {
   return path.withoutExtension(datName);
 }
 
-Future<List<String>> getDatFileList(String datDir, SendPort sendPort) async {
+Future<List<String>> getDatFileList(
+    final String datDir, final SendPort sendPort) async {
   var datInfoPath = path.join(datDir, "dat_info.json");
   if (await File(datInfoPath).exists()) {
     return _getDatFileListFromJson(datInfoPath);
@@ -259,7 +263,7 @@ Future<List<String>> getDatFileList(String datDir, SendPort sendPort) async {
   throw Exception("No dat_info.json or file_order.metadata found in $datDir");
 }
 
-Future<List<String>> _getDatFileListFromJson(String datInfoPath) async {
+Future<List<String>> _getDatFileListFromJson(final String datInfoPath) async {
   var datInfoJson = jsonDecode(await File(datInfoPath).readAsString());
   List<String> files = [];
   var dir = path.dirname(datInfoPath);
@@ -267,13 +271,13 @@ Future<List<String>> _getDatFileListFromJson(String datInfoPath) async {
     files.add(path.join(dir, file));
   }
   files = files.toSet().toList();
-  files.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  files.sort((final a, final b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
   return files;
 }
 
 Future<List<String>> _getDatFileListFromMetadata(
-    String metadataPath, SendPort sendPort) async {
+    final String metadataPath, final SendPort sendPort) async {
   var metadataBytes = await ByteDataWrapper.fromFile(metadataPath, sendPort);
   var numFiles = metadataBytes.readUint32();
   var nameLength = metadataBytes.readUint32();
@@ -282,11 +286,10 @@ Future<List<String>> _getDatFileListFromMetadata(
     files.add(metadataBytes.readString(nameLength).trimNull());
   }
   files = files.toSet().toList();
-  files.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  files.sort((final a, final b) => a.toLowerCase().compareTo(b.toLowerCase()));
   var dir = path.dirname(metadataPath);
-  files = files.map((file) => path.join(dir, file)).toList();
 
-  return files;
+  return files = files.map((final file) => path.join(dir, file)).toList();
 }
 
 // String pluralStr(int number, String label, [String numberSuffix = ""]) {
@@ -315,7 +318,7 @@ Future<List<String>> _getDatFileListFromMetadata(
 // }
 
 const datExtensions = {".dat", ".dtt", ".evn", ".eff", ".eft"};
-bool strEndsWithDat(String str) {
+bool strEndsWithDat(final String str) {
   for (var ext in datExtensions) {
     if (str.endsWith(ext)) return true;
   }
@@ -381,7 +384,7 @@ bool strEndsWithDat(String str) {
 //   return newList;
 // }
 
-Future<void> backupFile(String file) async {
+Future<void> backupFile(final String file) async {
   var backupName = "$file.backup";
   if (!await File(backupName).exists() && await File(file).exists()) {
     await File(file).copy(backupName);

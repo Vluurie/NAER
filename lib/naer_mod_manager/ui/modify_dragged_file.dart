@@ -18,7 +18,7 @@ class ModifyDraggedFile {
   ModifyDraggedFile(
       {required this.cliArguments, required this.context, required this.ref});
 
-  Future<void> randomizeDraggedFile(List<String> droppedFolders) async {
+  Future<void> randomizeDraggedFile(final List<String> droppedFolders) async {
     final globalState = ref.read(globalStateProvider.notifier);
     final logState = provider.Provider.of<LogState>(context, listen: false);
     if (cliArguments.input.isEmpty ||
@@ -39,7 +39,7 @@ class ModifyDraggedFile {
         try {
           final receivePort = ReceivePort();
 
-          receivePort.listen((message) {
+          receivePort.listen((final message) {
             if (message is String) {
               logState.addLog(message);
             }
@@ -53,13 +53,16 @@ class ModifyDraggedFile {
             'isBalanceMode': globalState.readIsBalanceMode(),
             'hasDLC': globalState.readHasDLC()
           };
-          globalState.setIsModManagerPageProcessing(true);
+          globalState.setIsModManagerPageProcessing(
+              isModManagerPageProcessing: true);
           await compute(runNierCliIsolated, args);
-          globalState.setIsModManagerPageProcessing(false);
+          globalState.setIsModManagerPageProcessing(
+              isModManagerPageProcessing: false);
           globalLog(
               "Randomization process finished the dragged file successfully.");
         } catch (e) {
-          globalState.setIsModManagerPageProcessing(false);
+          globalState.setIsModManagerPageProcessing(
+              isModManagerPageProcessing: false);
           logState.addLog("Failed to process folder $folderPath: $e");
         }
       }

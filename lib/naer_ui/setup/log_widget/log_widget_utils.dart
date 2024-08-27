@@ -44,7 +44,7 @@ class LogWidgetUtils {
     return false;
   }
 
-  Color messageColor(String message) {
+  Color messageColor(final String message) {
     if (message.toLowerCase().contains('error') ||
         message.toLowerCase().contains('failed') ||
         message.toLowerCase().contains('deleted')) {
@@ -70,8 +70,8 @@ class LogWidgetUtils {
     }
   }
 
-  void scrollToBottom(ScrollController scrollController) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void scrollToBottom(final ScrollController scrollController) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
@@ -82,10 +82,10 @@ class LogWidgetUtils {
     });
   }
 
-  List<InlineSpan> buildLogMessageSpans(BuildContext context) {
+  List<InlineSpan> buildLogMessageSpans(final BuildContext context) {
     final logState = LogState();
     final consoleHandler = ConsoleMessageHandler();
-    return logState.logs.map((message) {
+    return logState.logs.map((final message) {
       String logIcon;
       if (message.toLowerCase().contains('error') ||
           message.toLowerCase().contains('failed')) {

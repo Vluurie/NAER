@@ -28,7 +28,7 @@ class SetupListState extends ConsumerState<SetupList> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final setups = ref.watch(setupConfigProvider);
     final additions = ref.watch(additionConfigProvider);
     final selectedSetupId = ref.watch(setupStateProvider);
@@ -37,17 +37,17 @@ class SetupListState extends ConsumerState<SetupList> {
       setup.isSelected = setup.id == selectedSetupId;
     }
 
-    setups.sort((a, b) {
-      final isCustomA = !SetupData.setups.any((s) => s.id == a.id);
-      final isCustomB = !SetupData.setups.any((s) => s.id == b.id);
+    setups.sort((final a, final b) {
+      final isCustomA = !SetupData.setups.any((final s) => s.id == a.id);
+      final isCustomB = !SetupData.setups.any((final s) => s.id == b.id);
       if (isCustomA && !isCustomB) return -1;
       if (!isCustomA && isCustomB) return 1;
       return 0;
     });
 
-    additions.sort((a, b) {
-      final isCustomA = !SetupData.additions.any((s) => s.id == a.id);
-      final isCustomB = !SetupData.additions.any((s) => s.id == b.id);
+    additions.sort((final a, final b) {
+      final isCustomA = !SetupData.additions.any((final s) => s.id == a.id);
+      final isCustomB = !SetupData.additions.any((final s) => s.id == b.id);
       if (isCustomA && !isCustomB) return -1;
       if (!isCustomA && isCustomB) return 1;
       return 0;
@@ -71,7 +71,7 @@ class SetupListState extends ConsumerState<SetupList> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String title) {
+  Widget _buildHeader(final BuildContext context, final String title) {
     return Container(
       width: double.infinity,
       color: AutomatoThemeColors.darkBrown(ref),
@@ -87,10 +87,11 @@ class SetupListState extends ConsumerState<SetupList> {
     );
   }
 
-  Widget _buildItemsGrid(BuildContext context, List<SetupConfigData> items,
-      {required bool isSetup}) {
+  Widget _buildItemsGrid(
+      final BuildContext context, final List<SetupConfigData> items,
+      {required final bool isSetup}) {
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (final context, final constraints) {
         int crossAxisCount;
         double childAspectRatio;
 
@@ -141,10 +142,11 @@ class SetupListState extends ConsumerState<SetupList> {
               childAspectRatio: childAspectRatio,
             ),
             itemCount: items.length,
-            itemBuilder: (context, index) {
+            itemBuilder: (final context, final index) {
               final item = items[index];
-              final isCustom = !SetupData.setups.any((s) => s.id == item.id) &&
-                  !SetupData.additions.any((s) => s.id == item.id);
+              final isCustom =
+                  !SetupData.setups.any((final s) => s.id == item.id) &&
+                      !SetupData.additions.any((final s) => s.id == item.id);
 
               return DynamicCard(
                 configData: item,
@@ -178,10 +180,11 @@ class SetupListState extends ConsumerState<SetupList> {
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8.0),
             itemCount: items.length,
-            itemBuilder: (context, index) {
+            itemBuilder: (final context, final index) {
               final item = items[index];
-              final isCustom = !SetupData.setups.any((s) => s.id == item.id) &&
-                  !SetupData.additions.any((s) => s.id == item.id);
+              final isCustom =
+                  !SetupData.setups.any((final s) => s.id == item.id) &&
+                      !SetupData.additions.any((final s) => s.id == item.id);
 
               return DynamicCard(
                 configData: item,

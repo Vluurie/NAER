@@ -14,9 +14,9 @@ class ExperienceService {
   static const int experienceLength = 4;
 
   static Future<int> readExperienceFromPosition(
-      String filePath, int position, int length) async {
+      final String filePath, final int position, final int length) async {
     var file = File(filePath);
-    RandomAccessFile raf = await file.open(mode: FileMode.read);
+    RandomAccessFile raf = await file.open();
 
     await raf.setPosition(position);
     Uint8List bytes = await raf.read(length);
@@ -35,7 +35,7 @@ class ExperienceService {
   }
 
   static Future<void> updateExperienceInFile(
-      String filePath, int newExperience) async {
+      final String filePath, int newExperience) async {
     if (newExperience < 0) {
       throw ArgumentError("Experience cannot be negative.");
     }
@@ -56,12 +56,12 @@ class ExperienceService {
     await raf.close();
   }
 
-  static Future<int> getExperienceFromFile(String filePath) async {
+  static Future<int> getExperienceFromFile(final String filePath) async {
     return await readExperienceFromPosition(
         filePath, startExperiencePosition, experienceLength);
   }
 
-  static int getLevelFromExperience(int experience) {
+  static int getLevelFromExperience(final int experience) {
     if (experience < 0) {
       throw ArgumentError("experience cannot be a negative integer.");
     }
@@ -74,7 +74,7 @@ class ExperienceService {
     return 1; // Defaults to level 1 if no matching level is found.
   }
 
-  static int getExperienceForLevel(int level) {
+  static int getExperienceForLevel(final int level) {
     int experienceForLevel = 0;
     for (var entry in ExpTable.experienceTable) {
       if (entry["Level"] == level) {
@@ -85,7 +85,7 @@ class ExperienceService {
     return experienceForLevel;
   }
 
-  static int getExperienceToNextLevel(int experience) {
+  static int getExperienceToNextLevel(final int experience) {
     if (experience < 0) {
       throw ArgumentError("experience cannot be a negative integer.");
     }

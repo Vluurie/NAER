@@ -12,8 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> startModificationProcess(BuildContext context, bool backUp,
-    List<String> arguments, WidgetRef ref) async {
+Future<void> startModificationProcess(final BuildContext context,
+    final List<String> arguments, final WidgetRef ref,
+    {required final bool backUp}) async {
   final globalState = ref.read(globalStateProvider.notifier);
   final globalStateRiverPod = ref.read(globalStateProvider);
 
@@ -29,7 +30,7 @@ Future<void> startModificationProcess(BuildContext context, bool backUp,
   globalLog("Starting modification process... 🏃‍➡️");
 
   try {
-    await runProcessInIsolate(arguments, backUp, globalStateRiverPod);
+    await runProcessInIsolate(arguments, globalStateRiverPod, backUp: backUp);
     LogState().clearLogs();
   } on Exception catch (e) {
     globalLog("Error occurred: $e");
@@ -40,24 +41,27 @@ Future<void> startModificationProcess(BuildContext context, bool backUp,
   }
 }
 
-bool validateInputOutput(GlobalState globalState) {
+bool validateInputOutput(final GlobalState globalState) {
   return globalState.input.isNotEmpty &&
       globalState.specialDatOutputPath.isNotEmpty;
 }
 
-void initializeProcess(GlobalStateNotifier globalState) {
-  globalState.setHasError(true);
-  globalState.setIsLoading(true);
+void initializeProcess(final GlobalStateNotifier globalState) {
+  globalState.setHasError(hasError: true);
+  globalState.setIsLoading(isLoading: true);
   globalState.clearLoggedStages();
   globalState.scrollToSetup();
 }
 
 Future<void> runProcessInIsolate(
-    List<String> arguments, bool backUp, GlobalState globalState) async {
+  final List<String> arguments,
+  final GlobalState globalState, {
+  required final bool backUp,
+}) async {
   bool isManagerFile = false;
   final receivePort = ReceivePort();
 
-  receivePort.listen((message) {
+  receivePort.listen((final message) {
     handleIsolateMessage(message);
   });
 
@@ -74,7 +78,7 @@ Future<void> runProcessInIsolate(
   await compute(runNierCliIsolated, args);
 }
 
-void handleIsolateMessage(dynamic message) {
+void handleIsolateMessage(final dynamic message) {
   if (message is Map<String, dynamic>) {
     if (message['event'] == 'file_change') {
       logState.addLog("File created: ${message['filePath']}");
@@ -91,9 +95,9 @@ void handleIsolateMessage(dynamic message) {
   }
 }
 
-void finalizeProcess(
-    BuildContext context, WidgetRef ref, GlobalStateNotifier globalState) {
-  globalState.setIsLoading(false);
+void finalizeProcess(final BuildContext context, final WidgetRef ref,
+    final GlobalStateNotifier globalState) {
+  globalState.setIsLoading(isLoading: false);
   globalLog(asciiArt2B);
   globalLog("Modification process finished.");
   if (context.mounted) {

@@ -75,7 +75,7 @@ class ModStateManager extends ChangeNotifier {
 
     // Schedule periodic checks every 3 seconds
     verificationTimer =
-        Timer.periodic(const Duration(seconds: 3), (timer) async {
+        Timer.periodic(const Duration(seconds: 3), (final timer) async {
       if (!_isVerificationInProgress) {
         _isVerificationInProgress = true;
         await _verifyInstalledMods();
@@ -100,7 +100,7 @@ class ModStateManager extends ChangeNotifier {
           await modInstallHandler.verifyModFiles(modId);
       if (affectedFiles.isNotEmpty) {
         String modName = mods
-            .firstWhere((mod) => mod.id == modId,
+            .firstWhere((final mod) => mod.id == modId,
                 orElse: () => Mod(
                     id: modId,
                     name: 'Unknown Mod',
@@ -110,14 +110,14 @@ class ModStateManager extends ChangeNotifier {
                     files: []))
             .name;
 
-        allFilePathsToUnignore
-            .addAll(affectedFiles.map((file) => p.basename(file)).toList());
+        allFilePathsToUnignore.addAll(
+            affectedFiles.map((final file) => p.basename(file)).toList());
         affectedModsInfo.add("$modName: (${affectedFiles.join(', ')})");
         affectedModName = modName;
 
         await modInstallHandler.removeModFiles(modId, allFilePathsToUnignore);
 
-        Mod currentMod = mods.firstWhere((mod) => mod.id == modId,
+        Mod currentMod = mods.firstWhere((final mod) => mod.id == modId,
             orElse: () => Mod(
                 id: modId,
                 name: 'Unknown Mod',
@@ -126,9 +126,9 @@ class ModStateManager extends ChangeNotifier {
                 description: '',
                 files: []));
         List<String> filenamesToRemove = currentMod.files
-            .map((fileMap) => fileMap['path'] ?? '')
-            .where((path) => path.isNotEmpty)
-            .map((path) => p.basename(path))
+            .map((final fileMap) => fileMap['path'] ?? '')
+            .where((final path) => path.isNotEmpty)
+            .map((final path) => p.basename(path))
             .toList();
         await FileChange.removeIgnoreFiles(filenamesToRemove);
 
@@ -157,9 +157,9 @@ class ModStateManager extends ChangeNotifier {
     }
   }
 
-  Future<List<String>> getModFilePaths(String modId) async {
+  Future<List<String>> getModFilePaths(final String modId) async {
     Mod targetMod = mods.firstWhere(
-      (mod) => mod.id == modId,
+      (final mod) => mod.id == modId,
       orElse: () => Mod(
         id: 'default',
         name: 'Unknown Mod',
@@ -171,23 +171,23 @@ class ModStateManager extends ChangeNotifier {
     );
 
     return targetMod.files.isNotEmpty
-        ? targetMod.files.map((fileMap) => fileMap['path'] ?? '').toList()
+        ? targetMod.files.map((final fileMap) => fileMap['path'] ?? '').toList()
         : [];
   }
 
-  void installMod(String modId) async {
+  void installMod(final String modId) async {
     _installedModsIds.add(modId);
     await _saveInstalledMods();
     notifyListeners();
   }
 
-  void uninstallMod(String modId) async {
+  void uninstallMod(final String modId) async {
     _installedModsIds.remove(modId);
     await _saveInstalledMods();
     notifyListeners();
   }
 
-  bool isModInstalled(String modId) {
+  bool isModInstalled(final String modId) {
     return _installedModsIds.contains(modId);
   }
 

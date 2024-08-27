@@ -15,7 +15,7 @@ class LogState with ChangeNotifier {
 
   List<String> get logs => List.unmodifiable(_logs);
 
-  void addLog(String log) {
+  void addLog(final String log) {
     _logs.add(log);
     notifyListeners();
   }
@@ -25,7 +25,7 @@ class LogState with ChangeNotifier {
     notifyListeners();
   }
 
-  static String processLog(String log) {
+  static String processLog(final String log) {
     return log;
   }
 
@@ -33,7 +33,8 @@ class LogState with ChangeNotifier {
     return _instance._logs;
   }
 
-  static Future<void> logError(String error, StackTrace stackTrace) async {
+  static Future<void> logError(
+      final String error, final StackTrace stackTrace) async {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage =
         '[$timestamp] Error: $error\nStack trace:\n$stackTrace\n';

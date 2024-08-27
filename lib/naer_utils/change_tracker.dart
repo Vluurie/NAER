@@ -31,8 +31,8 @@ class FileChange {
     return settingsDirectory.path;
   }
 
-  static void logChange(String filePath, String action,
-      [String? originalFilePath]) {
+  static void logChange(final String filePath, final String action,
+      [final String? originalFilePath]) {
     changes.add(FileChange(filePath, action, originalFilePath));
   }
 
@@ -45,13 +45,13 @@ class FileChange {
   static Future<List<String>> loadIgnoredFiles() async {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = prefs.getString('ignored_files') ?? '[]';
-    ignoredFiles = List<String>.from(jsonDecode(jsonData));
-    return ignoredFiles;
+    return ignoredFiles = List<String>.from(jsonDecode(jsonData));
   }
 
-  static Future<void> removeIgnoreFiles(List<String> filesToRemove) async {
+  static Future<void> removeIgnoreFiles(
+      final List<String> filesToRemove) async {
     await loadIgnoredFiles();
-    ignoredFiles.removeWhere((file) => filesToRemove.contains(file));
+    ignoredFiles.removeWhere((final file) => filesToRemove.contains(file));
     await saveIgnoredFiles();
     //print('Removed files and updated ignoredFiles');
   }
@@ -84,7 +84,7 @@ class FileChange {
 
   static Future<void> saveChanges() async {
     final prefs = await SharedPreferences.getInstance();
-    String jsonData = jsonEncode(changes.map((c) => c.toJson()).toList());
+    String jsonData = jsonEncode(changes.map((final c) => c.toJson()).toList());
     await prefs.setString('file_changes', jsonData);
     //print("Saved changed $changes");
   }
@@ -93,7 +93,7 @@ class FileChange {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = prefs.getString('file_changes') ?? '[]';
     List<dynamic> data = jsonDecode(jsonData);
-    changes = data.map((json) => FileChange.fromJson(json)).toList();
+    changes = data.map((final json) => FileChange.fromJson(json)).toList();
   }
 
   Map<String, dynamic> toJson() => {
@@ -102,7 +102,7 @@ class FileChange {
         'originalFilePath': originalFilePath,
       };
 
-  static FileChange fromJson(Map<String, dynamic> json) {
+  static FileChange fromJson(final Map<String, dynamic> json) {
     return FileChange(
       json['filePath'],
       json['action'],
@@ -153,11 +153,11 @@ class FileChange {
     }
   }
 
-  static String formatKey(String key) {
+  static String formatKey(final String key) {
     return key
         .replaceAll('_', ' ')
         .split(' ')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .map((final word) => word[0].toUpperCase() + word.substring(1))
         .join(' ');
   }
 
@@ -186,16 +186,17 @@ class FileChange {
     }
   }
 
-  static Future<void> loadDLCOption(WidgetRef ref) async {
+  static Future<void> loadDLCOption(final WidgetRef ref) async {
     final prefs = await SharedPreferences.getInstance();
     bool hasDLC = prefs.getBool('dlc') ?? false;
-    ref.watch(globalStateProvider.notifier).updateDLCOption(hasDLC);
+    ref.watch(globalStateProvider.notifier).updateDLCOption(update: hasDLC);
   }
 
-  static Future<void> saveDLCOption(WidgetRef ref, bool value) async {
+  static Future<void> saveDLCOption(final WidgetRef ref,
+      {required final bool shouldSave}) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dlc', value);
-    ref.watch(globalStateProvider.notifier).updateDLCOption(value);
+    await prefs.setBool('dlc', shouldSave);
+    ref.watch(globalStateProvider.notifier).updateDLCOption(update: shouldSave);
   }
 
   static Future<Map<String, dynamic>> getPathsFromPreferences() async {

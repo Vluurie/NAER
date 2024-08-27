@@ -18,7 +18,7 @@ class NaerMainPageSetup extends StatelessWidget {
   final GlobalKey<LogOutputState> logOutputKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
     return SingleChildScrollView(
       child: Column(

@@ -12,12 +12,11 @@ import 'package:xml/xml.dart' as xml;
 /// handles leveled enemies with aliases.
 
 Future<void> handleSpecialCaseEnemies(
-  xml.XmlElement element,
-  Map<String, List<String>> sortedEnemyData,
-  String filePath,
-  MainData mainData,
-  bool isSpawnActionTooSmall,
-) async {
+    final xml.XmlElement element,
+    final Map<String, List<String>> sortedEnemyData,
+    final String filePath,
+    final MainData mainData,
+    {required final bool isSpawnActionTooSmall}) async {
   String category = mainData.argument['enemyCategory'];
   String level = mainData.argument['enemyLevel'];
   if (category != 'onlylevel') {
@@ -27,7 +26,7 @@ Future<void> handleSpecialCaseEnemies(
   }
 
   // Recursive function to find and process all objId elements in the current element and its descendants
-  Future<void> processObjIdElements(xml.XmlElement elem) async {
+  Future<void> processObjIdElements(final xml.XmlElement elem) async {
     final objIdElements = elem.findAllElements('objId').toList();
 
     for (var objIdElement in objIdElements) {
@@ -44,8 +43,7 @@ Future<void> handleSpecialCaseEnemies(
         // Check if the enemy has an alias ancestor and belongs to specific categories
         if (category == 'allenemies' || category == 'onlylevel') {
           // Handle the level for enemies with alias
-          await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData,
-              isBoss: false);
+          await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData);
         }
       } else {
         // Modify the objId for no boss or alias enemy

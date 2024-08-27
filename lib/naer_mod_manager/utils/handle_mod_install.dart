@@ -21,8 +21,8 @@ class ModInstallHandler {
     required this.sharedPreferencesUtils,
   });
 
-  factory ModInstallHandler(CLIArguments cliArguments,
-      {ModStateManager? modStateManager}) {
+  factory ModInstallHandler(final CLIArguments cliArguments,
+      {final ModStateManager? modStateManager}) {
     final fileUtils = FileUtils();
     final sharedPreferencesUtils = SharedPreferencesUtils();
     return ModInstallHandler._internal(
@@ -33,7 +33,7 @@ class ModInstallHandler {
     );
   }
 
-  Future<List<String>> verifyModFiles(String modId) async {
+  Future<List<String>> verifyModFiles(final String modId) async {
     final filePaths = await _extractFilePathsFromMetadata(modId);
     final fileHashes = await _fetchStoredFileHashes(modId, filePaths);
 
@@ -50,7 +50,7 @@ class ModInstallHandler {
   }
 
   Future<Map<String, String>> _fetchStoredFileHashes(
-      String modId, List<String> filePaths) async {
+      final String modId, final List<String> filePaths) async {
     final fileHashes = <String, String>{};
     for (final filePath in filePaths) {
       final storedHash =
@@ -62,7 +62,7 @@ class ModInstallHandler {
     return fileHashes;
   }
 
-  Future<void> copyModToInstallPath(String modId) async {
+  Future<void> copyModToInstallPath(final String modId) async {
     final filePaths = await _extractFilePathsFromMetadata(modId);
     final directoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage";
@@ -82,7 +82,7 @@ class ModInstallHandler {
     }
   }
 
-  Future<void> uninstallMod(String modId) async {
+  Future<void> uninstallMod(final String modId) async {
     final filePaths = await _extractFilePathsFromMetadata(modId);
     final installPaths = await createModInstallPaths(filePaths);
 
@@ -98,7 +98,8 @@ class ModInstallHandler {
     await SharedPreferencesUtils.removeModHashes(modId);
   }
 
-  Future<void> removeModFiles(String modId, List<String> invalidFiles) async {
+  Future<void> removeModFiles(
+      final String modId, final List<String> invalidFiles) async {
     final filePaths = await _extractFilePathsFromMetadata(modId);
     var deletedFiles = false;
 
@@ -122,7 +123,7 @@ class ModInstallHandler {
     }
   }
 
-  Future<void> saveHashesForModFiles(String modId) async {
+  Future<void> saveHashesForModFiles(final String modId) async {
     final filePaths = await _extractFilePathsFromMetadata(modId);
 
     for (final filePath in filePaths) {
@@ -136,7 +137,7 @@ class ModInstallHandler {
     }
   }
 
-  Future<bool> deleteModMetadata(String modId) async {
+  Future<bool> deleteModMetadata(final String modId) async {
     final directoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage";
     final metadataPath = path.join(directoryPath, 'mod_metadata.json');
@@ -146,19 +147,19 @@ class ModInstallHandler {
       final metadataContent = await metadataFile.readAsString();
       final metadata = jsonDecode(metadataContent) as Map<String, dynamic>;
       final mods = metadata['mods'] as List<dynamic>;
-      mods.removeWhere((mod) => mod['id'] == modId);
+      mods.removeWhere((final mod) => mod['id'] == modId);
       metadata['mods'] = mods;
 
       const encoder = JsonEncoder.withIndent('  ');
       final prettyJson = encoder.convert(metadata);
 
-      await metadataFile.writeAsString(prettyJson, mode: FileMode.write);
+      await metadataFile.writeAsString(prettyJson);
       return true;
     }
     return false;
   }
 
-  Future<bool> deleteModDirectory(String modId) async {
+  Future<bool> deleteModDirectory(final String modId) async {
     final modDirectoryPath = path.join(
         await FileChange.ensureSettingsDirectory(), "ModPackage", modId);
     final modDirectory = Directory(modDirectoryPath);
@@ -169,7 +170,7 @@ class ModInstallHandler {
     return false;
   }
 
-  Future<List<String>> _extractFilePathsFromMetadata(String modId) async {
+  Future<List<String>> _extractFilePathsFromMetadata(final String modId) async {
     final directoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage";
     final metadataPath = path.join(directoryPath, 'mod_metadata.json');
@@ -180,7 +181,7 @@ class ModInstallHandler {
       final modsData = jsonDecode(metadataContent)['mods'] as List<dynamic>;
       for (final mod in modsData) {
         if (mod['id'] == modId) {
-          return (mod['files'] as List<dynamic>).map<String>((file) {
+          return (mod['files'] as List<dynamic>).map<String>((final file) {
             final filePath = file['path'];
             if (filePath is String) {
               return filePath;
@@ -194,7 +195,7 @@ class ModInstallHandler {
     return [];
   }
 
-  Future<String> createModInstallPath(String filePath) async {
+  Future<String> createModInstallPath(final String filePath) async {
     final parts = path.split(filePath);
     if (parts.isNotEmpty) {
       parts.removeAt(0);
@@ -203,7 +204,8 @@ class ModInstallHandler {
     return '';
   }
 
-  Future<List<String>> createModInstallPaths(List<String> filePaths) async {
+  Future<List<String>> createModInstallPaths(
+      final List<String> filePaths) async {
     final modifiedPaths = <String>[];
     for (final filePath in filePaths) {
       final parts = path.split(filePath);
@@ -219,7 +221,7 @@ class ModInstallHandler {
 }
 
 // The function that runs in the isolate every 15 seconds.
-void _verifyFilesInIsolate(List<dynamic> args) async {
+void _verifyFilesInIsolate(final List<dynamic> args) async {
   final sendPort = args[0] as SendPort;
   final filePaths = args[1] as List<String>;
   final fileHashes = args[2] as Map<String, String>;

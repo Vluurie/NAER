@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 /// Searches the [currentDir] for files and directories
 /// with extensions (.yax, .pak, .dat) and categorizes them into lists.
 /// Additionally, it searches for data%%%.cpk_extracted and categorizes them.
-Map<String, List<String>> collectExtractedGameFiles(String currentDir) {
+Map<String, List<String>> collectExtractedGameFiles(final String currentDir) {
   List<String> yaxFiles = [];
   List<String> xmlFiles = [];
   List<String> pakFolders = [];
@@ -49,7 +49,8 @@ Map<String, List<String>> collectExtractedGameFiles(String currentDir) {
 /// randomized = Extracted Files that only get modified for the default randomization without level change.
 /// randomized and level = Extracted Files that only get modified for the default randomization and level change.
 Future<void> copyCollectedGameFiles(
-    Map<String, List<String>> collectedFiles, String inputDir) async {
+    final Map<String, List<String>> collectedFiles,
+    final String inputDir) async {
   final outputDir = path.dirname(inputDir);
 
   final onlyLevelDir = Directory(path.join(outputDir, 'naer_onlylevel'));
@@ -86,12 +87,13 @@ Future<void> copyCollectedGameFiles(
 /// [source] is the directory to copy from.
 /// [destination] is the directory to copy to.
 ///
-Future<void> copyDirectory(Directory source, Directory destination) async {
+Future<void> copyDirectory(
+    final Directory source, final Directory destination) async {
   if (!await destination.exists()) {
     await destination.create(recursive: true);
   }
 
-  await for (var entity in source.list(recursive: false)) {
+  await for (var entity in source.list()) {
     if (entity is Directory) {
       var newDirectory =
           Directory(path.join(destination.path, path.basename(entity.path)));

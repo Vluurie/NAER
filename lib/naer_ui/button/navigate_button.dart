@@ -9,7 +9,7 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 
-AutomatoButton navigateButton(BuildContext context, WidgetRef ref) {
+AutomatoButton navigateButton(final BuildContext context, final WidgetRef ref) {
   return AutomatoButton(
     label: 'Mod Manager',
     uniqueId: 'modManagerButton',
@@ -28,9 +28,9 @@ AutomatoButton navigateButton(BuildContext context, WidgetRef ref) {
       if (context.mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
+            builder: (final context) =>
                 provider.ChangeNotifierProvider<ModStateManager>(
-              create: (_) => modStateManager,
+              create: (final _) => modStateManager,
               child: SecondPage(cliArguments: cliArgs),
             ),
           ),

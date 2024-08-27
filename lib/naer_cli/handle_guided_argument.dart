@@ -174,8 +174,8 @@ void clearConsole() {
   }
 }
 
-String promptUser(String message,
-    {bool isRequired = false, String? defaultValue}) {
+String promptUser(final String message,
+    {final bool isRequired = false, final String? defaultValue}) {
   String prompt = defaultValue != null ? " [$defaultValue]: " : ": ";
   stdout.write(message + prompt);
   String? input = stdin.readLineSync(encoding: utf8);
@@ -190,29 +190,29 @@ String promptUser(String message,
   return input;
 }
 
-bool confirmUserChoice(String message) {
+bool confirmUserChoice(final String message) {
   stdout.write(message);
   String? input = stdin.readLineSync(encoding: utf8);
   return input?.toLowerCase() == 'y';
 }
 
-void defaultValueStats(List<String> arguments) {
+void defaultValueStats(final List<String> arguments) {
   String defaultStat = '0.0';
   arguments.add('--enemyStats');
   arguments.add(defaultStat);
 }
 
-void defaultValueLevel(List<String> arguments) {
+void defaultValueLevel(final List<String> arguments) {
   String defaultLvL = '1';
   arguments.add('--level=$defaultLvL');
 }
 
-void defaultValueSelectedEnemies(List<String> arguments) {
+void defaultValueSelectedEnemies(final List<String> arguments) {
   String sortedEnemies = 'ALL';
   arguments.add(sortedEnemies);
 }
 
-Future<bool> defaultValuePaths(PathHolder paths) async {
+Future<bool> defaultValuePaths(final PathHolder paths) async {
   bool doPathsExist = await loadPathsFromSharedPreferencesForConsole(paths);
 
   if (doPathsExist) {
@@ -236,7 +236,8 @@ Future<bool> defaultValuePaths(PathHolder paths) async {
   }
 }
 
-Future<bool> loadPathsFromSharedPreferencesForConsole(PathHolder paths) async {
+Future<bool> loadPathsFromSharedPreferencesForConsole(
+    final PathHolder paths) async {
   final prefs = await SharedPreferences.getInstance();
 
   String? savedInput = prefs.getString('input');

@@ -11,9 +11,9 @@ class MoneyService {
   /// The length (in bytes) of the money data to read from the save file.
   static const int moneyLength = 4;
 
-  static Future<int> getMoneyFromFile(String filePath) async {
+  static Future<int> getMoneyFromFile(final String filePath) async {
     var file = File(filePath);
-    RandomAccessFile raf = await file.open(mode: FileMode.read);
+    RandomAccessFile raf = await file.open();
 
     await raf.setPosition(startMoneyPosition);
     Uint8List bytes = await raf.read(moneyLength);
@@ -22,7 +22,8 @@ class MoneyService {
     return money;
   }
 
-  static Future<void> updateMoneyInFile(String filePath, int newMoney) async {
+  static Future<void> updateMoneyInFile(
+      final String filePath, final int newMoney) async {
     if (newMoney < 0) {
       throw ArgumentError("Money cannot be negative.");
     }

@@ -100,18 +100,19 @@ void main(List<String> arguments) async {
   } else {
     WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
-    await dotenv.load(fileName: ".env");
+    await dotenv.load();
     final themeNotifier = await AutomatoThemeNotifier.loadFromPreferences();
     unawaited(windowManager.setPreventClose(true));
 
     runApp(
       ProviderScope(
         overrides: [
-          automatoThemeNotifierProvider.overrideWith((ref) => themeNotifier),
+          automatoThemeNotifierProvider
+              .overrideWith((final ref) => themeNotifier),
         ],
         child: MultiProvider(
           providers: [
-            provider.ChangeNotifierProvider(create: (_) => LogState()),
+            provider.ChangeNotifierProvider(create: (final _) => LogState()),
           ],
           child: const EnemyRandomizerApp(),
         ),
@@ -126,7 +127,7 @@ class EnemyRandomizerApp extends ConsumerWidget {
   const EnemyRandomizerApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final theme = ref.watch(automatoThemeNotifierProvider).theme;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -164,7 +165,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
       reverseDuration: const Duration(milliseconds: 1000),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       _initializeApp();
     });
 
@@ -175,7 +176,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       Future.delayed(const Duration(seconds: 1), () async {
         final globalState = ref.read(globalStateProvider);
 
@@ -189,9 +190,9 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   Future<void> _initializeApp() async {
-    unawaited(updateItemsByType(SideQuest, true, ref));
-    unawaited(updateItemsByType(MapLocation, true, ref));
-    unawaited(updateItemsByType(ScriptingPhase, true, ref));
+    unawaited(updateItemsByType(SideQuest, ref, checkAllItems: true));
+    unawaited(updateItemsByType(MapLocation, ref, checkAllItems: true));
+    unawaited(updateItemsByType(ScriptingPhase, ref, checkAllItems: true));
 
     await FileChange.loadChanges();
     await FileChange.loadDLCOption(ref);
@@ -202,7 +203,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
 
   void startBlinkAnimation() {
     if (!_blinkController.isAnimating) {
-      _blinkController.forward(from: 0).then((_) {
+      _blinkController.forward(from: 0).then((final _) {
         _blinkController.reverse();
       });
     }
@@ -210,7 +211,8 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
 
   void _togglePanel() {
     final globalState = ref.read(globalStateProvider.notifier);
-    globalState.setIsPanelVisible(!globalState.readIsPanelVisible());
+    globalState.setIsPanelVisible(
+        isPanelVisible: !globalState.readIsPanelVisible());
   }
 
   Future<void> _checkForUpdate() async {
@@ -237,7 +239,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     final globalState = ref.watch(globalStateProvider);
 

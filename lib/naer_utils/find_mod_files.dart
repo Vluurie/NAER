@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:path/path.dart' as path;
 
-Future<List<String>> findModFiles(String outputDirectory) async {
+Future<List<String>> findModFiles(final String outputDirectory) async {
   List<String> modFiles = [];
   DateTime preRandomizationTime = await FileChange.getPreRandomizationTime();
   try {
@@ -44,7 +44,7 @@ Future<List<String>> findModFiles(String outputDirectory) async {
   return modFiles;
 }
 
-Future<bool> containsValidFiles(String directoryPath) async {
+Future<bool> containsValidFiles(final String directoryPath) async {
   var directory = Directory(directoryPath);
   var files = directory.listSync();
   for (var file in files) {

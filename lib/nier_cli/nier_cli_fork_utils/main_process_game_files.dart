@@ -19,8 +19,8 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders
 /// 8. Reversing the enemy stats back to their original state.
 ///
 /// [mainData] contains the necessary data and configuration for processing the game files.
-Future<void> mainFuncProcessGameFiles(MainData mainData) async {
-  final isolateService = IsolateService(autoInitialize: false);
+Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
+  final isolateService = IsolateService();
 
   String inputDir = mainData.argument['input'];
   String outputDir = path.dirname(inputDir);
@@ -58,7 +58,7 @@ Future<void> mainFuncProcessGameFiles(MainData mainData) async {
 
   // Process enemy stats for the specified enemies from the enemy list.
   bool reverseStats = false;
-  await processEnemyStats(inputDir, mainData, reverseStats);
+  await processEnemyStats(inputDir, mainData, reverseStats: reverseStats);
 
   // Check all modified files against the ignore list or enemy list, etc.
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked.

@@ -21,10 +21,10 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
     required this.onMenuPressed,
   });
 
-  bool isScreenLarge(double maxWidth) => maxWidth > 600;
+  bool isScreenLarge(final double maxWidth) => maxWidth > 600;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.watch(globalStateProvider);
     bool checkPaths = validateInputOutput(globalState);
     return Stack(
@@ -49,18 +49,15 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
           title: SizedBox(
             height: 70,
             child: LayoutBuilder(
-              builder: (context, constraints) {
+              builder: (final context, final constraints) {
                 bool isLargeScreen = isScreenLarge(constraints.maxWidth);
                 return Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     const SizedBox(width: 8.0),
-                    logoText(isLargeScreen, context, ref),
+                    logoText(context, ref, isLargeScreen: isLargeScreen),
                     const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (!validateInputOutput(globalState))
                           AppIcons.searchPaths(context, ref),
@@ -114,7 +111,8 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
     );
   }
 
-  Text logoText(bool isLargeScreen, BuildContext context, WidgetRef ref) {
+  Text logoText(final BuildContext context, final WidgetRef ref,
+      {required final bool isLargeScreen}) {
     return Text(
       'NAER v3.6a',
       style: TextStyle(

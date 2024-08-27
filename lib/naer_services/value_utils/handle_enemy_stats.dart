@@ -1,7 +1,7 @@
 import 'dart:io';
 
 /// Finds enemy CSV files containing enemy stats in the specified directory.
-Future<List<File>> findEnemyStatFiles(String directoryPath) async {
+Future<List<File>> findEnemyStatFiles(final String directoryPath) async {
   var directory = Directory(directoryPath);
   List<File> enemyFiles = [];
 
@@ -22,8 +22,8 @@ Future<List<File>> findEnemyStatFiles(String directoryPath) async {
   return enemyFiles;
 }
 
-Future<void> processCsvFile(
-    File file, double enemyStats, bool reverseStats) async {
+Future<void> processCsvFile(final File file, final double enemyStats,
+    {required final bool reverseStats}) async {
   try {
     if (enemyStats == 0.0) {
       return;
@@ -47,7 +47,7 @@ Future<void> processCsvFile(
   }
 }
 
-String modifyLine(String line, double enemyStats) {
+String modifyLine(final String line, final double enemyStats) {
   const double maxFactorColumn2 = 2.30;
   const double maxFactorColumn3 = 1.90;
 
@@ -79,7 +79,7 @@ String modifyLine(String line, double enemyStats) {
   return values.join(',');
 }
 
-String reverseModifyLine(String line, double enemyStats) {
+String reverseModifyLine(final String line, final double enemyStats) {
   const double maxFactorColumn2 = 2.30;
   const double maxFactorColumn3 = 1.90;
 
@@ -113,7 +113,7 @@ String reverseModifyLine(String line, double enemyStats) {
 
 /// Filters the enemy files based on the list of enemies to balance.
 Future<List<File>> filterEnemyFiles(
-    List<File> enemyFiles, List<String> enemiesToBalance) async {
+    final List<File> enemyFiles, final List<String> enemiesToBalance) async {
   List<File> filteredFiles = [];
 
   for (var file in enemyFiles) {
@@ -130,7 +130,7 @@ Future<List<File>> filterEnemyFiles(
 
 /// Balances enemy stats in the CSV file by reducing values by balanceFactor
 Future<void> balanceEnemyToBalanceCsvFiles(
-    File file, double balanceFactor) async {
+    final File file, final double balanceFactor) async {
   try {
     final lines = await file.readAsLines();
     List<String> modifiedLines = [];
@@ -170,7 +170,7 @@ Future<void> balanceEnemyToBalanceCsvFiles(
 
 /// Normalizes enemy stats in the CSV file by reverting balanced values to original.
 Future<void> normalizeEnemyToBalanceCsvFiles(
-    File file, double balanceFactor) async {
+    final File file, final double balanceFactor) async {
   try {
     final lines = await file.readAsLines();
     List<String> modifiedLines = [];

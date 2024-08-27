@@ -29,7 +29,7 @@ class ShakeAnimationWidgetState extends State<ShakeAnimationWidget>
     setState(() {
       _isShaking = true;
     });
-    _controller.forward(from: 0.0).then((_) => setState(() {
+    _controller.forward(from: 0.0).then((final _) => setState(() {
           _isShaking = false;
         }));
   }
@@ -38,7 +38,7 @@ class ShakeAnimationWidgetState extends State<ShakeAnimationWidget>
   void initState() {
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this)
-      ..addStatusListener((status) {
+      ..addStatusListener((final status) {
         if (status == AnimationStatus.completed) {
           widget.onEnd();
         }
@@ -48,14 +48,14 @@ class ShakeAnimationWidgetState extends State<ShakeAnimationWidget>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: [
         AnimatedBuilder(
           animation: _animation,
           child: widget.child,
-          builder: (context, child) {
+          builder: (final context, final child) {
             return Transform.translate(
               offset: Offset(0, math.sin(_animation.value * math.pi) * 4),
               child: child,

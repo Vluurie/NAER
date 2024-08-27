@@ -4,7 +4,7 @@ import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final warningProvider = StateProvider<bool>((ref) => false);
+final warningProvider = StateProvider<bool>((final ref) => false);
 
 class SaveMetadataButton extends ConsumerWidget {
   final MetadataProvider metadata;
@@ -17,13 +17,12 @@ class SaveMetadataButton extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     bool warning = ref.watch(warningProvider);
 
     return Row(
       children: [
         Align(
-          alignment: Alignment.center,
           child: ButtonTheme(
             minWidth: 100,
             child: ElevatedButton(
@@ -63,7 +62,6 @@ class SaveMetadataButton extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(5.0),
                 border: Border.all(
                   color: Colors.red,
-                  width: 1.0,
                 ),
               ),
               child: const Row(

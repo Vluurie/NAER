@@ -7,7 +7,7 @@ class DirectorySelection extends ConsumerWidget {
   const DirectorySelection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Row(

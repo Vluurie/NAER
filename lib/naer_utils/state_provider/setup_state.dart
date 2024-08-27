@@ -15,7 +15,7 @@ class SetupStateNotifier extends StateNotifier<String?> {
     state = prefs.getString('selectedSetupId');
   }
 
-  Future<void> _saveSelectedSetup(String? setupId) async {
+  Future<void> _saveSelectedSetup(final String? setupId) async {
     final prefs = await SharedPreferences.getInstance();
     if (setupId == null) {
       await prefs.remove('selectedSetupId');
@@ -24,7 +24,7 @@ class SetupStateNotifier extends StateNotifier<String?> {
     }
   }
 
-  void selectSetup(String? setupId) {
+  void selectSetup(final String? setupId) {
     state = setupId;
     _saveSelectedSetup(setupId);
   }
@@ -36,7 +36,7 @@ class SetupStateNotifier extends StateNotifier<String?> {
 }
 
 final setupStateProvider =
-    StateNotifierProvider<SetupStateNotifier, String?>((ref) {
+    StateNotifierProvider<SetupStateNotifier, String?>((final ref) {
   return SetupStateNotifier();
 });
 
@@ -52,10 +52,12 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
     List<String>? configs = prefs.getStringList('setupConfigs');
 
     if (configs != null && configs.isNotEmpty) {
-      state = configs.map((config) {
+      state = configs.map((final config) {
         final setup = SetupConfigData.fromJson(jsonDecode(config));
         final isChecked = prefs.getBool('${setup.id}_checkboxState') ?? false;
-        ref.read(setup.checkboxStateProvider.notifier).toggle(isChecked);
+        ref
+            .read(setup.checkboxStateProvider.notifier)
+            .toggle(shouldToggle: isChecked);
         return setup;
       }).toList();
     } else {
@@ -67,7 +69,7 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
   Future<void> _saveConfigs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> configs =
-        state.map((config) => jsonEncode(config.toJson())).toList();
+        state.map((final config) => jsonEncode(config.toJson())).toList();
     await prefs.setStringList('setupConfigs', configs);
 
     for (var setup in state) {
@@ -76,22 +78,23 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
     }
   }
 
-  void addConfig(SetupConfigData config) {
-    bool exists = state.any((existingConfig) => existingConfig.id == config.id);
+  void addConfig(final SetupConfigData config) {
+    bool exists =
+        state.any((final existingConfig) => existingConfig.id == config.id);
     if (!exists) {
       state = [...state, config];
       _saveConfigs();
     }
   }
 
-  void removeConfig(SetupConfigData config) {
-    state = state.where((c) => c.id != config.id).toList();
+  void removeConfig(final SetupConfigData config) {
+    state = state.where((final c) => c.id != config.id).toList();
     _saveConfigs();
   }
 
-  void selectSetup(String id) {
+  void selectSetup(final String id) {
     ref.read(setupStateProvider.notifier).selectSetup(id);
-    state = state.map((setup) {
+    state = state.map((final setup) {
       setup.isSelected = setup.id == id;
       return setup;
     }).toList();
@@ -101,7 +104,7 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
   SetupConfigData? getCurrentSelectedSetup() {
     final selectedSetupId = ref.read(setupStateProvider);
     try {
-      return state.firstWhere((setup) => setup.id == selectedSetupId);
+      return state.firstWhere((final setup) => setup.id == selectedSetupId);
     } catch (e) {
       return null;
     }
@@ -110,4 +113,4 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
 
 final setupConfigProvider =
     StateNotifierProvider<SetupConfigNotifier, List<SetupConfigData>>(
-        (ref) => SetupConfigNotifier(ref));
+        (final ref) => SetupConfigNotifier(ref));

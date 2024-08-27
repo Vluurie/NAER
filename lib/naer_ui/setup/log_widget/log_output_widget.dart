@@ -34,11 +34,11 @@ class LogOutputState extends ConsumerState<LogOutput> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return provider.ChangeNotifierProvider.value(
       value: LogState(),
       child: LayoutBuilder(
-        builder: (context, constraints) {
+        builder: (final context, final constraints) {
           return Container(
             height: 200,
             width: double.infinity,
@@ -53,7 +53,6 @@ class LogOutputState extends ConsumerState<LogOutput> {
                       const Color.fromARGB(255, 255, 255, 255).withOpacity(0.3),
                   spreadRadius: 2,
                   blurRadius: 50,
-                  offset: const Offset(0, 0),
                 ),
               ],
             ),
@@ -68,7 +67,7 @@ class LogOutputState extends ConsumerState<LogOutput> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     provider.Consumer<LogState>(
-                      builder: (context, logState, _) {
+                      builder: (final context, final logState, final _) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

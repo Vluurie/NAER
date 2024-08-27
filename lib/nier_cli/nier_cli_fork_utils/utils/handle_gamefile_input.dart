@@ -9,17 +9,11 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_repack.d
 import 'package:flutter/foundation.dart';
 
 const List<
-    Future<bool> Function(
-        String,
-        String?,
-        CliOptions,
-        bool,
-        bool,
-        ListQueue<String>,
-        Set<String>,
-        List<String>,
-        bool? ismanagerFile,
-        SendPort sendPort)> _handlers = [
+    Future<bool> Function(String, String?, CliOptions, ListQueue<String>,
+        Set<String>, List<String>, SendPort sendPort,
+        {required bool isFile,
+        required bool isDirectory,
+        required bool? isManagerFile})> _handlers = [
   handleSingleDatExtract,
   handleDatRepack,
   handlePakRepack,
@@ -27,33 +21,24 @@ const List<
 ];
 
 Future<void> handleInput(
-    String input,
-    String? output,
-    CliOptions args,
-    ListQueue<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> enemyList,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+    final String input,
+    final String? output,
+    final CliOptions args,
+    final ListQueue<String> pendingFiles,
+    final Set<String> processedFiles,
+    final List<String> enemyList,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool? isManagerFile}) async {
   bool isFile = await FileSystemEntity.isFile(input);
   bool isDirectory = await FileSystemEntity.isDirectory(input);
   if (!isFile && !isDirectory) {
     throw FileHandlingException(
         "Input file or directory does not exist ($input)");
   }
-  await handleSingleCpkExtract(
-      input,
-      output,
-      args,
-      isFile,
-      isDirectory,
-      pendingFiles,
-      processedFiles,
-      enemyList,
-      activeOptions,
-      ismanagerFile,
-      sendPort);
+  await handleSingleCpkExtract(input, output, args, pendingFiles,
+      processedFiles, enemyList, activeOptions, sendPort,
+      isFile: isFile, isDirectory: isDirectory, isManagerFile: isManagerFile);
   for (var handler in _handlers) {
     String? currentOutput = output;
     if (handler == handleDatRepack && args.specialDatOutputPath != null) {
@@ -62,8 +47,11 @@ Future<void> handleInput(
           "Using special output path for .dat repacking: $currentOutput");
     }
 
-    if (await handler(input, currentOutput, args, isFile, isDirectory,
-        pendingFiles, processedFiles, activeOptions, ismanagerFile, sendPort)) {
+    if (await handler(input, currentOutput, args, pendingFiles, processedFiles,
+        activeOptions, sendPort,
+        isFile: isFile,
+        isDirectory: isDirectory,
+        isManagerFile: isManagerFile)) {
       return;
     }
   }

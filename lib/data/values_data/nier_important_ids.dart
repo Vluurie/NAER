@@ -17,7 +17,7 @@ class ImportantIDs {
   /// Parameters:
   /// - [category]: The category to which the ID should be added.
   /// - [id]: The ID to add to the category.
-  void addId(String category, String id) {
+  void addId(final String category, final String id) {
     if (!ids.containsKey(category)) {
       ids[category] = [];
     }
@@ -31,7 +31,7 @@ class ImportantIDs {
   /// - [id]: The ID to remove from the category.
   ///
   /// Returns true if the ID was removed, false otherwise.
-  bool removeId(String category, String id) {
+  bool removeId(final String category, final String id) {
     return ids[category]?.remove(id) ?? false;
   }
 
@@ -41,7 +41,7 @@ class ImportantIDs {
   /// - [category]: The category for which to retrieve the IDs.
   ///
   /// Returns a list of IDs for the specified category, or null if the category does not exist.
-  List<String>? getIdsForCategory(String category) {
+  List<String>? getIdsForCategory(final String category) {
     return ids[category];
   }
 
@@ -52,7 +52,7 @@ class ImportantIDs {
   /// - [id]: The ID to check for existence.
   ///
   /// Returns true if the ID exists in the category, false otherwise.
-  bool idExists(String category, String id) {
+  bool idExists(final String category, final String id) {
     if (!ids.containsKey(category)) {
       return false;
     }
@@ -69,7 +69,8 @@ class ImportantIDs {
   /// - [metadataPath]: The path to the metadata file.
   ///
   /// Returns a Future that completes with an instance of [ImportantIDs] loaded from the metadata file.
-  static Future<ImportantIDs> loadIdsFromMetadata(String metadataPath) async {
+  static Future<ImportantIDs> loadIdsFromMetadata(
+      final String metadataPath) async {
     try {
       final File metadataFile = File(metadataPath);
       if (await metadataFile.exists()) {
@@ -84,12 +85,13 @@ class ImportantIDs {
               as Map<String, dynamic>)['importantIDs'] as Map<String, dynamic>?;
 
           if (modImportantIDs != null) {
-            modImportantIDs.forEach((category, ids) {
+            modImportantIDs.forEach((final category, final ids) {
               var newIds = List<String>.from(ids as List? ?? []);
               if (loadedIds.containsKey(category)) {
                 loadedIds[category] = [
                   ...loadedIds[category]!,
-                  ...newIds.where((id) => !loadedIds[category]!.contains(id))
+                  ...newIds
+                      .where((final id) => !loadedIds[category]!.contains(id))
                 ];
               } else {
                 loadedIds[category] = newIds;

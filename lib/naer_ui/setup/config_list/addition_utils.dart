@@ -18,7 +18,7 @@ class AdditionsUtils {
 
   const AdditionsUtils(this.ref, this.context);
 
-  void installAddition(SetupConfigData addition) async {
+  void installAddition(final SetupConfigData addition) async {
     ref.read(additionLoadingProvider.notifier).state = addition.id;
     final selectedAddition =
         ref.read(additionConfigProvider.notifier).getCurrentSelectedAddition();
@@ -35,7 +35,7 @@ class AdditionsUtils {
     }
   }
 
-  void toggleAdditionSelection(SetupConfigData addition) async {
+  void toggleAdditionSelection(final SetupConfigData addition) async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     final globalState = ref.read(globalStateProvider);
 
@@ -61,7 +61,7 @@ class AdditionsUtils {
     }
   }
 
-  void _selectAddition(SetupConfigData addition) async {
+  void _selectAddition(final SetupConfigData addition) async {
     final globalState = ref.read(globalStateProvider);
     if (!validateInputOutput(globalState)) {
       globalLog("Error: Please select both input and output directories. 💋 ");
@@ -78,13 +78,13 @@ class AdditionsUtils {
     }
   }
 
-  void _deselectAddition(SetupConfigData addition) {
+  void _deselectAddition(final SetupConfigData addition) {
     ref.read(additionConfigProvider.notifier).deselectAddition();
     ref.read(additionLoadingProvider.notifier).state = null;
     globalLog('ADDITION DESELECTED.');
   }
 
-  void deleteAddition(SetupConfigData addition) async {
+  void deleteAddition(final SetupConfigData addition) async {
     if (!addition.isSelected) {
       final additionNotifier = ref.read(additionConfigProvider.notifier);
       additionNotifier.removeAddition(addition);

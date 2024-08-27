@@ -42,7 +42,7 @@ class _AnimatedNameDisplayState extends ConsumerState<AnimatedNameDisplay>
 
   void _startAnimating() {
     _animationTimer =
-        Timer.periodic(Duration(seconds: Random().nextInt(5) + 5), (_) {
+        Timer.periodic(Duration(seconds: Random().nextInt(5) + 5), (final _) {
       if (_controller.isAnimating) {
         _controller.reset();
       }
@@ -58,10 +58,10 @@ class _AnimatedNameDisplayState extends ConsumerState<AnimatedNameDisplay>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, child) => Opacity(
+      builder: (final _, final child) => Opacity(
         opacity: _opacityAnimation.value,
         child: Transform.scale(
           scale: _scaleAnimation.value,

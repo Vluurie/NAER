@@ -1,7 +1,7 @@
 import 'dart:io';
 
 extension StringExtensions on String {
-  String? validateId(String? value) {
+  String? validateId(final String? value) {
     final RegExp idRegExp = RegExp(r'^[a-z0-9_]+$');
     if (value == null || value.isEmpty || !idRegExp.hasMatch(value)) {
       return 'Please enter a valid ID (lowercase, numbers, underscore only)';
@@ -9,7 +9,7 @@ extension StringExtensions on String {
     return null;
   }
 
-  String? validateText(String? value, {required String fieldName}) {
+  String? validateText(final String? value, {required final String fieldName}) {
     if (value == null || value.isEmpty) {
       return 'Please enter $fieldName';
     }
@@ -20,7 +20,7 @@ extension StringExtensions on String {
     return null;
   }
 
-  String? validateVersion(String? value) {
+  String? validateVersion(final String? value) {
     final RegExp versionRegExp = RegExp(r'^\d+\.\d+\.\d+$');
     if (value == null || value.isEmpty || !versionRegExp.hasMatch(value)) {
       return 'Please enter a valid version (e.g., 1.0.0)';

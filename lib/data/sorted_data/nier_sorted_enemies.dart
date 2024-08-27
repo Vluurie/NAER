@@ -1,12 +1,13 @@
 import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 
 class SortedEnemyGroup {
-  static Map<String, List<String>> getDLCFilteredEnemyData(bool? hasDLC) {
+  static Map<String, List<String>> getDLCFilteredEnemyData(
+      {required final bool? hasDLC}) {
     if (hasDLC!) {
       return enemyData;
     } else {
-      return enemyData.map((key, enemies) {
-        List<String> filteredEnemies = enemies.where((enemy) {
+      return enemyData.map((final key, final enemies) {
+        List<String> filteredEnemies = enemies.where((final enemy) {
           return !SpecialEntities.dlcEnemies.contains(enemy);
         }).toList();
         return MapEntry(key, filteredEnemies);

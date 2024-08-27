@@ -7,7 +7,7 @@ class DirectoryStructureWidget extends ConsumerWidget {
   const DirectoryStructureWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final selectedDirectory = ref.watch(selectedDirectoryProvider);
     final directoryContentsInfo = ref.watch(directoryContentsInfoProvider);
 
@@ -44,7 +44,7 @@ class DirectoryStructureWidget extends ConsumerWidget {
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: directoryContentsInfo.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (final context, final index) {
                 String filePath = directoryContentsInfo[index];
                 String displayPath = filePath
                     .replaceAll(selectedDirectory, '')

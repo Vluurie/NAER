@@ -13,18 +13,20 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 int conversionCounter = 0;
 
 Future<bool> handleSingleCpkExtract(
-    String input,
+    final String input,
     String? output,
-    CliOptions args,
-    bool isFile,
-    bool isDirectory,
-    ListQueue<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> enemyList,
-    List<String> activeOptions,
-    bool? isManagerFile,
-    SendPort sendPort) async {
-  if (!isCpkExtractionValid(input, isFile, args, enemyList)) return false;
+    final CliOptions args,
+    final ListQueue<String> pendingFiles,
+    final Set<String> processedFiles,
+    final List<String> enemyList,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool isFile,
+    required final bool isDirectory,
+    required final bool? isManagerFile}) async {
+  if (!isCpkExtractionValid(input, args, enemyList, isFile: isFile)) {
+    return false;
+  }
   output ??= join(dirname(input), "${basename(input)}_extracted");
   globalLog("Extracting CPK to $output...");
   await Directory(output).create(recursive: true);
@@ -36,18 +38,18 @@ Future<bool> handleSingleCpkExtract(
 }
 
 Future<bool> handleSingleDatExtract(
-    String input,
+    final String input,
     String? output,
-    CliOptions args,
-    bool isFile,
-    bool isDirectory,
-    ListQueue<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> activeOptions,
-    bool? isManagerFile,
-    SendPort sendPort) async {
-  if (!isDatExtractionValid(
-      input, isFile, args, isManagerFile, activeOptions)) {
+    final CliOptions args,
+    final ListQueue<String> pendingFiles,
+    final Set<String> processedFiles,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool isFile,
+    required final bool isDirectory,
+    required final bool? isManagerFile}) async {
+  if (!isDatExtractionValid(input, args, activeOptions,
+      isFile: isFile, isManagerFile: isManagerFile)) {
     return false;
   }
 
@@ -57,7 +59,8 @@ Future<bool> handleSingleDatExtract(
     await Directory(output).create(recursive: true);
   }
 
-  var extractedFiles = await extractDatFiles(input, output, true);
+  var extractedFiles =
+      await extractDatFiles(input, output, shouldExtractPakFiles: true);
   // sendPort.send('Extracted files from $input: ${extractedFiles.length} files.');
 
   if (args.autoExtractChildren) {

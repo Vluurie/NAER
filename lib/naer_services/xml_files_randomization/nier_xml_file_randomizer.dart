@@ -14,6 +14,7 @@ import 'package:xml/xml.dart';
 
 int processedFileCount = 0;
 
+///TODO: Fly group needs to be empy since it will change em0030 to ""
 /// Randomizes and sets a new enemy number for the given action XML element.
 ///
 /// Selects a new random enemy number from the user-selected data map and
@@ -21,7 +22,7 @@ int processedFileCount = 0;
 /// an infinite loop is avoided by limiting the number of iterations.
 /// After it modifies also the set values of the specific em element if present in the em value map.
 Future<void> randomizeEnemyNumber(
-    EnemyEntityObjectAction action, String group) async {
+    final EnemyEntityObjectAction action, final String group) async {
   if (action.randomizeAndSetValues) {
     final List<String> enemyNumbers = action.userSelectedEnemyData[group]!;
     String newEmNumber;
@@ -35,7 +36,7 @@ Future<void> randomizeEnemyNumber(
 
     // Filter valid enemy numbers beforehand
     final List<String> validEnemyNumbers = enemyNumbers
-        .where((enemyNum) => !invalidNumbers.contains(enemyNum))
+        .where((final enemyNum) => !invalidNumbers.contains(enemyNum))
         .toList();
 
     // Check if there are any valid enemy numbers available
@@ -54,8 +55,10 @@ Future<void> randomizeEnemyNumber(
 }
 
 /// main enemy modify method
-Future<void> processEnemies(MainData mainData,
-    Map<String, List<String>> collectedFiles, String currentDir) async {
+Future<void> processEnemies(
+    final MainData mainData,
+    final Map<String, List<String>> collectedFiles,
+    final String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
       await getSortedEnemyData(mainData);
   await findEnemiesAndModify(
@@ -68,10 +71,11 @@ Future<void> processEnemies(MainData mainData,
 /// Otherwise, it reads the sorted enemy data groups from the provider.
 ///
 /// Returns a map where the keys are enemy IDs and the values are lists of enemy attributes.
-Future<Map<String, List<String>>> getSortedEnemyData(MainData mainData) async {
+Future<Map<String, List<String>>> getSortedEnemyData(
+    final MainData mainData) async {
   if (mainData.sortedEnemyGroupsIdentifierMap == 'ALL') {
     // If "ALL", return the entire enemy data map, possibly filtered by DLC
-    return SortedEnemyGroup.getDLCFilteredEnemyData(mainData.hasDLC);
+    return SortedEnemyGroup.getDLCFilteredEnemyData(hasDLC: mainData.hasDLC);
   } else if (mainData.sortedEnemyGroupsIdentifierMap == 'CUSTOM_SELECTED') {
     final sortedEnemyData = mainData.argument['customSelectedEnemies'];
     if (sortedEnemyData.isEmpty) {
@@ -88,10 +92,10 @@ Future<Map<String, List<String>>> getSortedEnemyData(MainData mainData) async {
 /// Searches the given directory for enemy files, loads important IDs,
 /// and modifies the enemies based on the sorted enemy data, level, and category.
 Future<void> findEnemiesAndModify(
-    Map<String, List<String>> collectedFiles,
-    String directoryPath,
-    Map<String, List<String>> sortedEnemyData,
-    MainData mainData) async {
+    final Map<String, List<String>> collectedFiles,
+    final String directoryPath,
+    final Map<String, List<String>> sortedEnemyData,
+    final MainData mainData) async {
   // Start the timer
   final stopwatch = Stopwatch()..start();
 
@@ -118,17 +122,17 @@ Future<void> findEnemiesAndModify(
 /// according to the provided sorted enemy data, level, and category, and counts the processed files.
 
 Future<int> traverseDirectory(
-  Map<String, List<String>> collectedFiles,
-  Directory directory,
-  Map<String, List<String>> sortedEnemyData,
-  ImportantIDs ids,
-  MainData mainData,
+  final Map<String, List<String>> collectedFiles,
+  final Directory directory,
+  final Map<String, List<String>> sortedEnemyData,
+  final ImportantIDs ids,
+  final MainData mainData,
 ) async {
   // Instantiate IsolateService without auto-initialization.
-  final isolateService = IsolateService(autoInitialize: false);
+  final isolateService = IsolateService();
 
   final List<String> xmlFiles = collectedFiles['xmlFiles']
-          ?.where((file) => file.endsWith('.xml'))
+          ?.where((final file) => file.endsWith('.xml'))
           .toList() ??
       [];
 
@@ -141,8 +145,8 @@ Future<int> traverseDirectory(
   await isolateService.initialize();
 
   // Create tasks to process XML files in parallel using isolates
-  final tasks = distributedFiles.entries.map((entry) {
-    return (dynamic _) async {
+  final tasks = distributedFiles.entries.map((final entry) {
+    return (final dynamic _) async {
       for (var file in entry.value) {
         await processCollectedXmlFileForRandomization(
             File(file), sortedEnemyData, ids, mainData);

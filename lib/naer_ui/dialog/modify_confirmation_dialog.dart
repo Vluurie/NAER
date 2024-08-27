@@ -9,9 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void showModifyDialogAndModify(
-    BuildContext context,
-    WidgetRef ref,
-    Future<void> Function(BuildContext, bool, List<String>, WidgetRef)
+    final BuildContext context,
+    final WidgetRef ref,
+    final Future<void> Function(BuildContext, List<String>, WidgetRef,
+            {required bool backUp})
         modifyMethod) {
   List<Widget> modificationDetails = generateModificationDetails(ref);
 
@@ -69,8 +70,8 @@ void showModifyDialogAndModify(
   );
 }
 
-Future<bool?> showStartSetupDialog(
-    WidgetRef ref, BuildContext context, SetupConfigData setup) async {
+Future<bool?> showStartSetupDialog(final WidgetRef ref,
+    final BuildContext context, final SetupConfigData setup) async {
   final completer = Completer<bool>();
   final currSetup = setup.title;
   AutomatoDialogManager().showYesNoDialog(
@@ -93,8 +94,6 @@ Future<bool?> showStartSetupDialog(
       completer.complete(false);
       Navigator.of(context).pop();
     },
-    yesLabel: "Yes",
-    noLabel: "No",
     ref: ref,
   );
   return completer.future;

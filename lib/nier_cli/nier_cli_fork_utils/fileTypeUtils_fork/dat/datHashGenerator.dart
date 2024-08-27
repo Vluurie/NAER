@@ -41,15 +41,15 @@ class HashInfo {
           [filenames[i], i, (crc32(filenames[i].toLowerCase()) & 0x7fffffff)]);
     }
 
-    namesIndicesHashes.sort((a, b) {
+    namesIndicesHashes.sort((final a, final b) {
       int kA = a[2] >> preHashShift;
       int kB = b[2] >> preHashShift;
       return kA.compareTo(kB);
     });
 
-    hashes = namesIndicesHashes.map((e) => e[2] as int).toList();
+    hashes = namesIndicesHashes.map((final e) => e[2] as int).toList();
 
-    hashes.sort((a, b) {
+    hashes.sort((final a, final b) {
       int kA = a >> preHashShift;
       int kB = b >> preHashShift;
       return kA.compareTo(kB);

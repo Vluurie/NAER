@@ -17,7 +17,7 @@ class MetaDataIDField extends ConsumerWidget {
   final VoidCallback onRemoved;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Row(
@@ -29,7 +29,7 @@ class MetaDataIDField extends ConsumerWidget {
                 labelText: "$label ${index + 1}",
                 border: const OutlineInputBorder(),
               ),
-              validator: (value) {
+              validator: (final value) {
                 if (value == null || value.isEmpty) {
                   return null;
                 } else {

@@ -22,7 +22,7 @@ class ToggleButton extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     return ElevatedButton(
       onPressed: onToggle,
       style: ElevatedButton.styleFrom(
@@ -48,14 +48,13 @@ class CustomSetupToggle extends ConsumerWidget {
   const CustomSetupToggle({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     final globalState = ref.watch(globalStateProvider);
 
     return Padding(
       padding: const EdgeInsets.only(left: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           ToggleButton(
             isSelected: globalState.customSelection,

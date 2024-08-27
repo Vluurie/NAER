@@ -8,24 +8,28 @@ class PathCheckBoxWidget extends ConsumerWidget {
   const PathCheckBoxWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final loadPathsFuture = ref.watch(loadPathsFromSharedPreferencesProvider);
 
     return loadPathsFuture.when(
-      data: (isLoaded) {
+      data: (final isLoaded) {
         return SavePathsWidget(
-          onCheckboxChanged: (bool value) async {
+          onCheckboxChanged: (final bool value) async {
             if (!value) {
               await clearPathsFromSharedPreferences();
               ref.read(globalStateProvider.notifier).clearSavePaths();
-              ref.read(globalStateProvider.notifier).setIsPanelVisible(false);
+              ref
+                  .read(globalStateProvider.notifier)
+                  .setIsPanelVisible(isPanelVisible: false);
             }
-            ref.read(globalStateProvider.notifier).updateSavePaths(value);
+            ref
+                .read(globalStateProvider.notifier)
+                .updateSavePaths(newSavePaths: value);
           },
         );
       },
       loading: () => const CircularProgressIndicator(),
-      error: (err, stack) => Text('Error: $err'),
+      error: (final err, final stack) => Text('Error: $err'),
     );
   }
 

@@ -12,9 +12,9 @@ class DirectorySelectionCardState {
   });
 
   DirectorySelectionCardState copyWith({
-    bool? isSelected,
-    bool? isHovered,
-    String? selectedPath,
+    final bool? isSelected,
+    final bool? isHovered,
+    final String? selectedPath,
   }) {
     return DirectorySelectionCardState(
       isSelected: isSelected ?? this.isSelected,
@@ -26,21 +26,21 @@ class DirectorySelectionCardState {
 
 class DirectorySelectionCardStateNotifier
     extends StateNotifier<DirectorySelectionCardState> {
-  DirectorySelectionCardStateNotifier(String initialPath)
+  DirectorySelectionCardStateNotifier(final String initialPath)
       : super(DirectorySelectionCardState(
           isSelected: initialPath.isNotEmpty,
           isHovered: false,
           selectedPath: initialPath,
         ));
 
-  void updatePath(String newPath) {
+  void updatePath(final String newPath) {
     state = state.copyWith(
       isSelected: newPath.isNotEmpty,
       selectedPath: newPath,
     );
   }
 
-  void setHovered(bool hovered) {
+  void setHovered({required final bool hovered}) {
     state = state.copyWith(isHovered: hovered);
   }
 }

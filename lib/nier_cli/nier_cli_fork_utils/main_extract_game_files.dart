@@ -14,7 +14,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 /// If the bool [isManagerFile] is true, it skips the extracting.
 ///
 Future<void> extractGameFilesProcess(
-    String outputDir, MainData mainData) async {
+    final String outputDir, final MainData mainData) async {
   bool extractedFoldersExist = checkIfExtractedFoldersExist(outputDir);
   if (extractedFoldersExist && (!mainData.isManagerFile!)) {
     mainData.sendPort
@@ -42,8 +42,8 @@ Future<void> extractGameFilesProcess(
       List.from(mainData.argument['activeOptions'])
         ..addAll(getAllPossibleOptions(mainData.argument[
             'input'])), // <--- Sneaky workaround to get all extracted, no matter what was selected as the active option. ;)
-      mainData.isManagerFile,
-      mainData.sendPort);
+      mainData.sendPort,
+      isManagerFile: mainData.isManagerFile);
 
   final endTime = DateTime.now();
   final duration = endTime.difference(startTime);

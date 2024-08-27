@@ -4,7 +4,7 @@ import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli.dart';
 
 /// Runs the Nier CLI with the given arguments in an isolate.
-Future<void> runNierCliIsolated(Map<String, dynamic> arguments) async {
+Future<void> runNierCliIsolated(final Map<String, dynamic> arguments) async {
   List<String> processArgs = arguments['processArgs'];
   bool isManagerFile = arguments['isManagerFile'];
   SendPort sendPort = arguments['sendPort'];

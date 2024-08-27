@@ -34,7 +34,7 @@ class ModFilesListState extends State<ModFilesList> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,7 +57,7 @@ class ModFilesListState extends State<ModFilesList> {
               controller: scrollController,
               physics: const BouncingScrollPhysics(),
               itemCount: widget.modFiles.length,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return Card(
                   color: AutomatoThemeColors.darkBrown(widget.ref),
                   margin: const EdgeInsets.symmetric(vertical: 4.0),

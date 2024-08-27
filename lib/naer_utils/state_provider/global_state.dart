@@ -8,7 +8,7 @@ import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 
 final globalStateProvider =
-    StateNotifierProvider<GlobalStateNotifier, GlobalState>((ref) {
+    StateNotifierProvider<GlobalStateNotifier, GlobalState>((final ref) {
   return GlobalStateNotifier();
 });
 
@@ -59,50 +59,50 @@ class GlobalState {
   final bool wasModManamentDialogShown;
 
   GlobalState({
-    Completer<void>? completer,
-    GlobalKey? setupDirectorySelectionKey,
-    GlobalKey? setupImageGridKey,
-    GlobalKey? setupCategorySelectionKey,
-    GlobalKey? setupLogOutputKey,
-    GlobalKey<EnemyImageGridState>? enemyImageGridKey,
-    List<String>? selectedImages,
-    List<String>? createdFiles,
-    List<String>? createdDatFiles,
-    List<String>? ignoredModFiles,
-    List<String>? logMessages,
-    Set<String>? loggedStages,
-    bool? isLoading,
-    bool? isButtonEnabled,
-    bool? isLogIconBlinking,
-    bool? hasError,
-    bool? isProcessing,
-    bool? selectAllQuests,
-    bool? selectAllMaps,
-    bool? selectAllPhases,
-    bool? savePaths,
-    bool? isHoveringSelectAll,
-    bool? isHoveringUnselectAll,
-    bool? isHoveringUndo,
-    bool? isHoveringModify,
-    bool? isExtractCopyEnabled,
-    bool? isModManagerPageProcessing,
-    bool? isBalanceMode,
-    bool? balanceModeCheckBoxValue,
-    bool? hasDLC,
-    bool? dlcCheckBoxValue,
-    String? input,
-    String? specialDatOutputPath,
+    final Completer<void>? completer,
+    final GlobalKey? setupDirectorySelectionKey,
+    final GlobalKey? setupImageGridKey,
+    final GlobalKey? setupCategorySelectionKey,
+    final GlobalKey? setupLogOutputKey,
+    final GlobalKey<EnemyImageGridState>? enemyImageGridKey,
+    final List<String>? selectedImages,
+    final List<String>? createdFiles,
+    final List<String>? createdDatFiles,
+    final List<String>? ignoredModFiles,
+    final List<String>? logMessages,
+    final Set<String>? loggedStages,
+    final bool? isLoading,
+    final bool? isButtonEnabled,
+    final bool? isLogIconBlinking,
+    final bool? hasError,
+    final bool? isProcessing,
+    final bool? selectAllQuests,
+    final bool? selectAllMaps,
+    final bool? selectAllPhases,
+    final bool? savePaths,
+    final bool? isHoveringSelectAll,
+    final bool? isHoveringUnselectAll,
+    final bool? isHoveringUndo,
+    final bool? isHoveringModify,
+    final bool? isExtractCopyEnabled,
+    final bool? isModManagerPageProcessing,
+    final bool? isBalanceMode,
+    final bool? balanceModeCheckBoxValue,
+    final bool? hasDLC,
+    final bool? dlcCheckBoxValue,
+    final String? input,
+    final String? specialDatOutputPath,
     this.lastLogProcessed,
-    bool? customSelection,
-    int? enemyLevel,
-    int? selectedIndex,
-    double? enemyStats,
-    bool? checkboxValueForPaths,
-    Map<String, bool>? stats,
-    Map<String, bool>? categories,
-    Map<String, bool>? levelMap,
-    bool? isPanelVisible,
-    bool? wasModManamentDialogShown,
+    final bool? customSelection,
+    final int? enemyLevel,
+    final int? selectedIndex,
+    final double? enemyStats,
+    final bool? checkboxValueForPaths,
+    final Map<String, bool>? stats,
+    final Map<String, bool>? categories,
+    final Map<String, bool>? levelMap,
+    final bool? isPanelVisible,
+    final bool? wasModManamentDialogShown,
   })  : completer = completer ?? Completer<void>(),
         setupDirectorySelectionKey = setupDirectorySelectionKey ?? GlobalKey(),
         setupImageGridKey = setupImageGridKey ?? GlobalKey(),
@@ -153,50 +153,50 @@ class GlobalState {
             };
 
   GlobalState copyWith(
-      {Completer<void>? completer,
-      GlobalKey? setupDirectorySelectionKey,
-      GlobalKey? setupImageGridKey,
-      GlobalKey? setupCategorySelectionKey,
-      GlobalKey? setupLogOutputKey,
-      GlobalKey<EnemyImageGridState>? enemyImageGridKey,
-      List<String>? selectedImages,
-      List<String>? createdFiles,
-      List<String>? createdDatFiles,
-      List<String>? ignoredModFiles,
-      List<String>? logMessages,
-      Set<String>? loggedStages,
-      bool? isLoading,
-      bool? isButtonEnabled,
-      bool? isLogIconBlinking,
-      bool? hasError,
-      bool? isProcessing,
-      bool? selectAllQuests,
-      bool? selectAllMaps,
-      bool? selectAllPhases,
-      bool? savePaths,
-      bool? isHoveringSelectAll,
-      bool? isHoveringUnselectAll,
-      bool? isHoveringUndo,
-      bool? isHoveringModify,
-      bool? isExtractCopyEnabled,
-      bool? isModManagerPageProcessing,
-      bool? isBalanceMode,
-      bool? balanceModeCheckBoxValue,
-      bool? hasDLC,
-      bool? dlcCheckBoxValue,
-      String? input,
-      String? specialDatOutputPath,
-      String? lastLogProcessed,
-      bool? customSelection,
-      int? enemyLevel,
-      int? selectedIndex,
-      double? enemyStats,
-      bool? checkboxValueForPaths,
-      Map<String, bool>? stats,
-      Map<String, bool>? categories,
-      Map<String, bool>? levelMap,
-      bool? isPanelVisible,
-      bool? wasModManamentDialogShown}) {
+      {final Completer<void>? completer,
+      final GlobalKey? setupDirectorySelectionKey,
+      final GlobalKey? setupImageGridKey,
+      final GlobalKey? setupCategorySelectionKey,
+      final GlobalKey? setupLogOutputKey,
+      final GlobalKey<EnemyImageGridState>? enemyImageGridKey,
+      final List<String>? selectedImages,
+      final List<String>? createdFiles,
+      final List<String>? createdDatFiles,
+      final List<String>? ignoredModFiles,
+      final List<String>? logMessages,
+      final Set<String>? loggedStages,
+      final bool? isLoading,
+      final bool? isButtonEnabled,
+      final bool? isLogIconBlinking,
+      final bool? hasError,
+      final bool? isProcessing,
+      final bool? selectAllQuests,
+      final bool? selectAllMaps,
+      final bool? selectAllPhases,
+      final bool? savePaths,
+      final bool? isHoveringSelectAll,
+      final bool? isHoveringUnselectAll,
+      final bool? isHoveringUndo,
+      final bool? isHoveringModify,
+      final bool? isExtractCopyEnabled,
+      final bool? isModManagerPageProcessing,
+      final bool? isBalanceMode,
+      final bool? balanceModeCheckBoxValue,
+      final bool? hasDLC,
+      final bool? dlcCheckBoxValue,
+      final String? input,
+      final String? specialDatOutputPath,
+      final String? lastLogProcessed,
+      final bool? customSelection,
+      final int? enemyLevel,
+      final int? selectedIndex,
+      final double? enemyStats,
+      final bool? checkboxValueForPaths,
+      final Map<String, bool>? stats,
+      final Map<String, bool>? categories,
+      final Map<String, bool>? levelMap,
+      final bool? isPanelVisible,
+      final bool? wasModManamentDialogShown}) {
     return GlobalState(
         completer: completer ?? this.completer,
         setupDirectorySelectionKey:
@@ -252,7 +252,7 @@ class GlobalState {
   }
 }
 
-Future<void> resetGlobalState(WidgetRef ref) async {
+Future<void> resetGlobalState(final WidgetRef ref) async {
   ref.read(globalStateProvider.notifier).resetState();
 }
 
@@ -304,158 +304,161 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
   bool readWasModManamentDialogShown() => state.wasModManamentDialogShown;
 
   // WRITE STATE METHODS
-  void setSelectedImages(List<String> selectedImages) {
+  void setSelectedImages(final List<String> selectedImages) {
     state = state.copyWith(selectedImages: selectedImages);
   }
 
-  void setCreatedFiles(List<String> createdFiles) {
+  void setCreatedFiles(final List<String> createdFiles) {
     state = state.copyWith(createdFiles: createdFiles);
   }
 
-  void setCreatedDatFiles(List<String> createdDatFiles) {
+  void setCreatedDatFiles(final List<String> createdDatFiles) {
     state = state.copyWith(createdDatFiles: createdDatFiles);
   }
 
-  void setIgnoredModFiles(List<String> ignoredModFiles) {
+  void setIgnoredModFiles(final List<String> ignoredModFiles) {
     state = state.copyWith(ignoredModFiles: ignoredModFiles);
   }
 
-  void setLogMessages(List<String> logMessages) {
+  void setLogMessages(final List<String> logMessages) {
     state = state.copyWith(logMessages: logMessages);
   }
 
-  void setLoggedStages(Set<String> loggedStages) {
+  void setLoggedStages(final Set<String> loggedStages) {
     state = state.copyWith(loggedStages: loggedStages);
   }
 
-  void setIsLoading(bool isLoading) {
+  void setIsLoading({required final bool isLoading}) {
     state = state.copyWith(isLoading: isLoading);
   }
 
-  void setIsButtonEnabled(bool isButtonEnabled) {
+  void setIsButtonEnabled({required final bool isButtonEnabled}) {
     state = state.copyWith(isButtonEnabled: isButtonEnabled);
   }
 
-  void setIsLogIconBlinking(bool isLogIconBlinking) {
+  void setIsLogIconBlinking({required final bool isLogIconBlinking}) {
     state = state.copyWith(isLogIconBlinking: isLogIconBlinking);
   }
 
-  void setHasError(bool hasError) {
+  void setHasError({required final bool hasError}) {
     state = state.copyWith(hasError: hasError);
   }
 
-  void setIsProcessing(bool isProcessing) {
+  void setIsProcessing({required final bool isProcessing}) {
     state = state.copyWith(isProcessing: isProcessing);
   }
 
-  void setSelectAllQuests(bool selectAllQuests) {
+  void setSelectAllQuests({required final bool selectAllQuests}) {
     state = state.copyWith(selectAllQuests: selectAllQuests);
   }
 
-  void setSelectAllMaps(bool selectAllMaps) {
+  void setSelectAllMaps({required final bool selectAllMaps}) {
     state = state.copyWith(selectAllMaps: selectAllMaps);
   }
 
-  void setSelectAllPhases(bool selectAllPhases) {
+  void setSelectAllPhases({required final bool selectAllPhases}) {
     state = state.copyWith(selectAllPhases: selectAllPhases);
   }
 
-  void setSavePaths(bool savePaths) {
+  void setSavePaths({required final bool savePaths}) {
     state = state.copyWith(savePaths: savePaths);
   }
 
-  void setIsHoveringSelectAll(bool isHoveringSelectAll) {
+  void setIsHoveringSelectAll({required final bool isHoveringSelectAll}) {
     state = state.copyWith(isHoveringSelectAll: isHoveringSelectAll);
   }
 
-  void setIsHoveringUnselectAll(bool isHoveringUnselectAll) {
+  void setIsHoveringUnselectAll({required final bool isHoveringUnselectAll}) {
     state = state.copyWith(isHoveringUnselectAll: isHoveringUnselectAll);
   }
 
-  void setIsHoveringUndo(bool isHoveringUndo) {
+  void setIsHoveringUndo({required final bool isHoveringUndo}) {
     state = state.copyWith(isHoveringUndo: isHoveringUndo);
   }
 
-  void setIsHoveringModify(bool isHoveringModify) {
+  void setIsHoveringModify({required final bool isHoveringModify}) {
     state = state.copyWith(isHoveringModify: isHoveringModify);
   }
 
-  void setIsExtractCopyEnabled(bool isExtractCopyEnabled) {
+  void setIsExtractCopyEnabled({required final bool isExtractCopyEnabled}) {
     state = state.copyWith(isExtractCopyEnabled: isExtractCopyEnabled);
   }
 
-  void setIsModManagerPageProcessing(bool isModManagerPageProcessing) {
+  void setIsModManagerPageProcessing(
+      {required final bool isModManagerPageProcessing}) {
     state =
         state.copyWith(isModManagerPageProcessing: isModManagerPageProcessing);
   }
 
-  void setIsBalanceMode(bool? isBalanceMode) {
+  void setIsBalanceMode({required final bool isBalanceMode}) {
     state = state.copyWith(isBalanceMode: isBalanceMode);
   }
 
-  void setBalanceModeCheckBoxValue(bool balanceModeCheckBoxValue) {
+  void setBalanceModeCheckBoxValue(
+      {required final bool balanceModeCheckBoxValue}) {
     state = state.copyWith(balanceModeCheckBoxValue: balanceModeCheckBoxValue);
   }
 
-  void setHasDLC(bool hasDLC) {
+  void setHasDLC({required final bool hasDLC}) {
     state = state.copyWith(hasDLC: hasDLC);
   }
 
-  void setDLCCheckBoxValue(bool dlcCheckBoxValue) {
+  void setDLCCheckBoxValue({required final bool dlcCheckBoxValue}) {
     state = state.copyWith(dlcCheckBoxValue: dlcCheckBoxValue);
   }
 
-  void setInput(String input) {
+  void setInput(final String input) {
     state = state.copyWith(input: input);
   }
 
-  void setSpecialDatOutputPath(String specialDatOutputPath) {
+  void setSpecialDatOutputPath(final String specialDatOutputPath) {
     state = state.copyWith(specialDatOutputPath: specialDatOutputPath);
   }
 
-  void setLastLogProcessed(String? lastLogProcessed) {
+  void setLastLogProcessed(final String? lastLogProcessed) {
     state = state.copyWith(lastLogProcessed: lastLogProcessed);
   }
 
-  void setCustomSelection(bool customSelection) {
+  void setCustomSelection({required final bool customSelection}) {
     state = state.copyWith(customSelection: customSelection);
   }
 
-  void setEnemyLevel(int enemyLevel) {
+  void setEnemyLevel(final int enemyLevel) {
     state = state.copyWith(enemyLevel: enemyLevel);
   }
 
-  void setSelectedIndex(int selectedIndex) {
+  void setSelectedIndex(final int selectedIndex) {
     state = state.copyWith(selectedIndex: selectedIndex);
   }
 
-  void setEnemyStats(double enemyStats) {
+  void setEnemyStats(final double enemyStats) {
     state = state.copyWith(enemyStats: enemyStats);
   }
 
-  void setCheckboxValueForPaths(bool checkboxValueForPaths) {
-    state = state.copyWith(checkboxValueForPaths: checkboxValueForPaths);
+  void setCheckboxValueForPaths({required final bool checkBoxValueForPaths}) {
+    state = state.copyWith(checkboxValueForPaths: checkBoxValueForPaths);
   }
 
-  void setStats(Map<String, bool> stats) {
+  void setStats(final Map<String, bool> stats) {
     state = state.copyWith(stats: stats);
   }
 
-  void setCategories(Map<String, bool> categories) {
+  void setCategories(final Map<String, bool> categories) {
     state = state.copyWith(categories: categories);
   }
 
-  void setLevel(Map<String, bool> level) {
+  void setLevel(final Map<String, bool> level) {
     state = state.copyWith(levelMap: level);
   }
 
-  void setIsPanelVisible(bool isPanelVisible) {
+  void setIsPanelVisible({required final bool isPanelVisible}) {
     state = state.copyWith(isPanelVisible: isPanelVisible);
   }
 
-  void setWasModManamentDialogShown(bool wasModManamentDialogShown) {
+  void setWasModManamentDialogShown(
+      {required final bool wasModManagmentDialogShown}) {
     state =
-        state.copyWith(wasModManamentDialogShown: wasModManamentDialogShown);
+        state.copyWith(wasModManamentDialogShown: wasModManagmentDialogShown);
   }
 
   // CLEAR STATE METHODS
@@ -568,7 +571,7 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
   }
 
   void clearLastLogProcessed() {
-    state = state.copyWith(lastLogProcessed: null);
+    state = state.copyWith();
   }
 
   void clearCustomSelection() {
@@ -628,19 +631,19 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
     state = state.copyWith(categories: newCategories);
   }
 
-  void updateDLCOption(bool value) {
-    state = state.copyWith(hasDLC: value, dlcCheckBoxValue: value);
+  void updateDLCOption({required final bool update}) {
+    state = state.copyWith(hasDLC: update, dlcCheckBoxValue: update);
   }
 
-  void updateEnemyStats(double newValue) {
+  void updateEnemyStats(final double newValue) {
     state = state.copyWith(enemyStats: newValue);
   }
 
-  void updateSelectedImages(List<String> newSelectedImages) {
+  void updateSelectedImages(final List<String> newSelectedImages) {
     state = state.copyWith(selectedImages: newSelectedImages);
   }
 
-  void addSelectedImage(String imageName) {
+  void addSelectedImage(final String imageName) {
     if (!state.selectedImages.contains(imageName)) {
       state = state.copyWith(
           selectedImages: List.from(state.selectedImages)..add(imageName));
@@ -659,14 +662,14 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
   GlobalKey<EnemyImageGridState> get enemyImageGridKey =>
       state.enemyImageGridKey;
 
-  void removeSelectedImage(String imageName) {
+  void removeSelectedImage(final String imageName) {
     if (state.selectedImages.contains(imageName)) {
       state = state.copyWith(
           selectedImages: List.from(state.selectedImages)..remove(imageName));
     }
   }
 
-  void selectAllImages(List<String> allImageNames) {
+  void selectAllImages(final List<String> allImageNames) {
     state = state.copyWith(selectedImages: List.from(allImageNames));
   }
 
@@ -674,20 +677,20 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
     state = state.copyWith(selectedImages: []);
   }
 
-  void updateEnemyLevel(int newLevel) {
+  void updateEnemyLevel(final int newLevel) {
     state = state.copyWith(enemyLevel: newLevel);
   }
 
-  void updateLevel(String levelKey, bool value) {
-    if (value || state.levelMap.values.every((v) => !v)) {
+  void updateLevel(final String levelKey, {required final bool shouldUpdate}) {
+    if (shouldUpdate || state.levelMap.values.every((final v) => !v)) {
       final newLevel = Map<String, bool>.from(state.levelMap)
-        ..updateAll((key, value) => false)
-        ..update(levelKey, (v) => value);
+        ..updateAll((final key, final value) => false)
+        ..update(levelKey, (final v) => shouldUpdate);
       state = state.copyWith(levelMap: newLevel);
     }
   }
 
-  void updateSelectedCategories(Map<String, bool> newCategories) {
+  void updateSelectedCategories(final Map<String, bool> newCategories) {
     state = state.copyWith(categories: newCategories);
   }
 
@@ -697,7 +700,8 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
     }
   }
 
-  void updateHoverState(String hoverItem, bool isHovering) {
+  void updateHoverState(final String hoverItem,
+      {required final bool isHovering}) {
     switch (hoverItem) {
       case 'selectAll':
         state = state.copyWith(isHoveringSelectAll: isHovering);
@@ -716,29 +720,30 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
     }
   }
 
-  void updateIgnoredModFiles(List<String> updatedModFiles) {
+  void updateIgnoredModFiles(final List<String> updatedModFiles) {
     state = state.copyWith(ignoredModFiles: updatedModFiles);
   }
 
-  void updateInputPath(String newPath) {
+  void updateInputPath(final String newPath) {
     state = state.copyWith(input: newPath);
   }
 
-  void updateOutputPath(String newPath) {
+  void updateOutputPath(final String newPath) {
     state = state.copyWith(specialDatOutputPath: newPath);
   }
 
-  void updateSavePaths(bool newSavePaths) {
+  void updateSavePaths({required final bool newSavePaths}) {
     state = state.copyWith(savePaths: newSavePaths);
   }
 
   List<dynamic> getAllItems() {
     return [
       ...ScriptingPhase.scriptingPhases
-          .where((item) => state.hasDLC || item.dlc != true),
+          .where((final item) => state.hasDLC || item.dlc != true),
       ...MapLocation.mapLocations
-          .where((item) => state.hasDLC || item.dlc != true),
-      ...SideQuest.sideQuests.where((item) => state.hasDLC || item.dlc != true),
+          .where((final item) => state.hasDLC || item.dlc != true),
+      ...SideQuest.sideQuests
+          .where((final item) => state.hasDLC || item.dlc != true),
     ];
   }
 
@@ -754,7 +759,7 @@ class GlobalStateNotifier extends StateNotifier<GlobalState> {
 }
 
 final loadPathsFromSharedPreferencesProvider =
-    FutureProvider.autoDispose<bool>((ref) async {
+    FutureProvider.autoDispose<bool>((final ref) async {
   final globalState = ref.read(globalStateProvider.notifier);
   final prefs = await SharedPreferences.getInstance();
 
@@ -764,7 +769,7 @@ final loadPathsFromSharedPreferencesProvider =
 
   globalState.updateInputPath(input ?? '');
   globalState.updateOutputPath(specialDatOutputPath ?? '');
-  globalState.updateSavePaths(savePaths);
+  globalState.updateSavePaths(newSavePaths: savePaths);
 
   return input != null || specialDatOutputPath != null;
 });

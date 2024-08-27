@@ -10,7 +10,7 @@ extension XmlExtension on XmlNode {
   ///
   /// Returns:
   /// A pretty-printed string representation of the XML node.
-  String toPrettyString({int? level}) {
-    return "${toXmlString(pretty: true, indent: "\t", level: level, preserveWhitespace: (node) => node.children.whereType<XmlText>().isNotEmpty)}\n";
+  String toPrettyString({final int? level}) {
+    return "${toXmlString(pretty: true, indent: "\t", level: level, preserveWhitespace: (final node) => node.children.whereType<XmlText>().isNotEmpty)}\n";
   }
 }

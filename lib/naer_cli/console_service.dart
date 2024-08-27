@@ -9,8 +9,8 @@ class ConsoleMessageHandler {
   /// Add the [receivePort] to get the isolate messages.
   /// [_handleExportedFilesMessage] saves exported files in [FileChange] with [saveChanges()]
   /// This ensures that [undoChanges()] works in the GUI.
-  void listenToReceivePort(ReceivePort receivePort) {
-    receivePort.listen((message) {
+  void listenToReceivePort(final ReceivePort receivePort) {
+    receivePort.listen((final message) {
       if (message is Map<String, dynamic>) {
         _handleExportedFilesMessage(message);
         _logPortMessage(message);
@@ -21,7 +21,7 @@ class ConsoleMessageHandler {
   }
 
   /// Filters non ascii chars with RegEx and prints the message for console.
-  void printAsciiMessage(String message) {
+  void printAsciiMessage(final String message) {
     String asciiMessage = message.replaceAll(RegExp(r'[^\x00-\x7F]'), '');
     print(asciiMessage);
   }
@@ -29,7 +29,7 @@ class ConsoleMessageHandler {
   /// Saves the exported modified files in [SharedPreferences]:
   ///  ['filePath'],
   ///  ['action'],
-  void _handleExportedFilesMessage(Map<String, dynamic> message) {
+  void _handleExportedFilesMessage(final Map<String, dynamic> message) {
     if (message['event'] == 'file_change') {
       FileChange.changes.add(FileChange(
         message['filePath'],
@@ -38,7 +38,7 @@ class ConsoleMessageHandler {
     }
   }
 
-  void _logPortMessage(dynamic message) {
+  void _logPortMessage(final dynamic message) {
     if (message is Map<String, dynamic> && message['event'] == 'error') {
       printAsciiMessage(
           "Error: ${message['details']}\nStack Trace: ${message['stackTrace']}");

@@ -15,14 +15,14 @@ class MetadataIDList extends ConsumerWidget {
       controllersProvider;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final controllers = ref.watch(controllersProvider);
 
     return Column(
       children: [
         ...List.generate(
           controllers.length,
-          (i) => MetaDataIDField(
+          (final i) => MetaDataIDField(
             label: label,
             controllers: controllers,
             index: i,

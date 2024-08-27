@@ -37,19 +37,19 @@ class LevitatingImageState extends State<LevitatingImage>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
         AnimatedBuilder(
           animation: _animation,
-          builder: (context, child) {
+          builder: (final context, final child) {
             return Transform.translate(
               offset: Offset(0, -_animation.value),
               child: Image.asset(
                 widget.imagePath,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
+                errorBuilder: (final context, final error, final stackTrace) {
                   return const Icon(
                     Icons.broken_image,
                     size: 250,

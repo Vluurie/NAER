@@ -43,7 +43,7 @@ class SecondPageState extends ConsumerState<SecondPage>
       });
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       final modStateManager =
           provider.Provider.of<ModStateManager>(context, listen: false);
       modStateManager.toggleVerification();
@@ -61,7 +61,7 @@ class SecondPageState extends ConsumerState<SecondPage>
         provider.Provider.of<ModStateManager>(context, listen: false);
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return Dialog(
           child: MetadataForm(
             cliArguments: widget.cliArguments,
@@ -73,7 +73,7 @@ class SecondPageState extends ConsumerState<SecondPage>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final canPop = Navigator.of(context).canPop();
     final outputPath = widget.cliArguments.specialDatOutputPath;
     final inputPath = widget.cliArguments.input;
@@ -81,7 +81,7 @@ class SecondPageState extends ConsumerState<SecondPage>
 
     final actionButtons = <Widget>[
       provider.Consumer<ModStateManager>(
-        builder: (context, modStateManager, child) {
+        builder: (final context, final modStateManager, final child) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Padding(
@@ -144,7 +144,7 @@ class SecondPageState extends ConsumerState<SecondPage>
     ];
 
     return PopScope(
-      onPopInvokedWithResult: (canPop, result) async {
+      onPopInvokedWithResult: (final canPop, final result) async {
         if (globalState.readIsModManagerPageProcessing()) {
           return;
         }
@@ -215,7 +215,8 @@ class SecondPageState extends ConsumerState<SecondPage>
                       width: MediaQuery.of(context).size.width * 0.8,
                       height: MediaQuery.of(context).size.height * 0.5,
                       child: provider.Consumer<ModStateManager>(
-                        builder: (context, modStateManager, child) {
+                        builder: (final context, final modStateManager,
+                            final child) {
                           return ModLoaderWidget(
                             cliArguments: widget.cliArguments,
                             modStateManager: modStateManager,
@@ -243,7 +244,7 @@ class SecondPageState extends ConsumerState<SecondPage>
                         ),
                       ),
                     ),
-                    const Spacer(flex: 1),
+                    const Spacer(),
                     Flexible(
                       flex: 3,
                       child: Padding(
@@ -279,7 +280,7 @@ class SecondPageState extends ConsumerState<SecondPage>
     );
   }
 
-  Future<void> openPaths(String path) async {
+  Future<void> openPaths(final String path) async {
     if (path.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Path is empty')),

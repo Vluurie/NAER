@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_positional_boolean_parameters
+
 import 'package:NAER/data/enemy_lists_data/nier_all_em_for_stats_list.dart';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
@@ -18,19 +20,19 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       final globalStateNotifier = ref.read(globalStateProvider.notifier);
       globalStateNotifier.updateCategories();
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalStateNotifier = ref.read(globalStateProvider.notifier);
     final categories = ref.watch(globalStateProvider).categories;
 
-    Widget specialCheckbox(
-        String title, bool value, void Function(bool?) onChanged) {
+    Widget specialCheckbox(final String title, final bool value,
+        final void Function(bool?) onChanged) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
@@ -53,7 +55,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
       );
     }
 
-    IconData getIconForItem(dynamic item) {
+    IconData getIconForItem(final dynamic item) {
       if (item is MapLocation) {
         return Icons.map;
       } else if (item is SideQuest) {
@@ -95,36 +97,37 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
           specialCheckbox(
             "All Quests",
             globalStateNotifier.readSelectAllQuests(),
-            (newValue) {
-              globalStateNotifier.setSelectAllQuests(newValue!);
-              updateItemsByType(SideQuest, newValue, ref);
+            (final newValue) {
+              globalStateNotifier.setSelectAllQuests(
+                  selectAllQuests: newValue!);
+              updateItemsByType(SideQuest, ref, checkAllItems: newValue);
               globalStateNotifier.updateCategories();
             },
           ),
           specialCheckbox(
             "All Maps",
             globalStateNotifier.readSelectAllMaps(),
-            (newValue) {
-              globalStateNotifier.setSelectAllMaps(newValue!);
-              updateItemsByType(MapLocation, newValue, ref);
+            (final newValue) {
+              globalStateNotifier.setSelectAllMaps(selectAllMaps: newValue!);
+              updateItemsByType(MapLocation, ref, checkAllItems: newValue);
               globalStateNotifier.updateCategories();
             },
           ),
           specialCheckbox(
             "All Phases",
             globalStateNotifier.readSelectAllPhases(),
-            (newValue) {
-              globalStateNotifier.setSelectAllPhases(newValue!);
-              updateItemsByType(ScriptingPhase, newValue, ref);
+            (final newValue) {
+              globalStateNotifier.setSelectAllPhases(
+                  selectAllPhases: newValue!);
+              updateItemsByType(ScriptingPhase, ref, checkAllItems: newValue);
               globalStateNotifier.updateCategories();
             },
           ),
           SizedBox(
             height: 375,
             child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
               child: Column(
-                children: globalStateNotifier.getAllItems().map((item) {
+                children: globalStateNotifier.getAllItems().map((final item) {
                   IconData icon = getIconForItem(item);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -148,7 +151,7 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
                                   : false),
                           activeColor: AutomatoThemeColors.primaryColor(ref),
                           checkColor: AutomatoThemeColors.darkBrown(ref),
-                          onChanged: (bool? newValue) {
+                          onChanged: (final bool? newValue) {
                             final modifiableCategories = Map.of(categories);
                             modifiableCategories[item.id] = newValue!;
                             globalStateNotifier
@@ -169,23 +172,24 @@ class CategorySelectionState extends ConsumerState<CategorySelection> {
   }
 }
 
-Future<void> updateItemsByType(Type type, bool value, WidgetRef ref) async {
+Future<void> updateItemsByType(final Type type, final WidgetRef ref,
+    {required final bool checkAllItems}) async {
   final globalStateNotifier = ref.read(globalStateProvider.notifier);
   List<dynamic> allItems = globalStateNotifier.getAllItems();
   final modifiableCategories = Map.of(globalStateNotifier.readCategories());
 
-  for (var item in allItems.where((item) => item.runtimeType == type)) {
-    modifiableCategories[item.id] = value;
+  for (var item in allItems.where((final item) => item.runtimeType == type)) {
+    modifiableCategories[item.id] = checkAllItems;
   }
 
   globalStateNotifier.setCategories(modifiableCategories);
   globalStateNotifier.updateCategories();
 }
 
-String getSelectedEnemiesNames(WidgetRef ref) {
+String getSelectedEnemiesNames(final WidgetRef ref) {
   List<String> selectedEnemies = EnemyList.getDLCFilteredEnemies(ref)
-      .where((enemy) => enemy.isSelected)
-      .map((enemy) => enemy.name)
+      .where((final enemy) => enemy.isSelected)
+      .map((final enemy) => enemy.name)
       .toList();
   return selectedEnemies.join(',');
 }

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:NAER/naer_ui/setup/config_list/config_data_container.dart';
 import 'package:automato_theme/automato_theme.dart';
 
-final setupLoadingProvider = StateProvider<String?>((ref) => null);
-final additionLoadingProvider = StateProvider<String?>((ref) => null);
+final setupLoadingProvider = StateProvider<String?>((final ref) => null);
+final additionLoadingProvider = StateProvider<String?>((final ref) => null);
 
 class DynamicCard extends ConsumerStatefulWidget {
   final ConfigDataContainer configData;
@@ -58,7 +58,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final setupLoadingId = ref.watch(setupLoadingProvider);
     final additionLoadingId = ref.watch(additionLoadingProvider);
 
@@ -153,10 +153,10 @@ class DynamicCardState extends ConsumerState<DynamicCard>
                         value: ref.watch(checkboxStateProvider),
                         onChanged: isButtonDisabled
                             ? null
-                            : (bool? value) {
+                            : (final bool? value) {
                                 ref
                                     .read(checkboxStateProvider.notifier)
-                                    .toggle(value ?? false);
+                                    .toggle(shouldToggle: value ?? false);
 
                                 if (widget.onCheckboxChanged != null) {
                                   widget.onCheckboxChanged!(value ?? false);
@@ -207,7 +207,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
             Positioned.fill(
               child: AnimatedBuilder(
                 animation: _animation,
-                builder: (context, _) {
+                builder: (final context, final _) {
                   return Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12.0),
@@ -217,7 +217,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
                       ),
                     ),
                     child: ShaderMask(
-                      shaderCallback: (rect) {
+                      shaderCallback: (final rect) {
                         return LinearGradient(
                           colors: [
                             AutomatoThemeColors.bright(ref),
@@ -281,7 +281,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
     );
   }
 
-  Color _getCardColor(bool isSetupLoading, bool isAdditionLoading) {
+  Color _getCardColor(final bool isSetupLoading, final bool isAdditionLoading) {
     if (isSetupLoading || isAdditionLoading) {
       return AutomatoThemeColors.darkBrown(ref);
     } else if (widget.isSetup) {
@@ -292,8 +292,8 @@ class DynamicCardState extends ConsumerState<DynamicCard>
     return AutomatoThemeColors.darkBrown(ref);
   }
 
-  String _buildButtonLabel(
-      bool isSelected, bool isSetupLoading, bool isAdditionLoading) {
+  String _buildButtonLabel(final bool isSelected, final bool isSetupLoading,
+      final bool isAdditionLoading) {
     if (isSetupLoading || isAdditionLoading) {
       return isSelected ? 'Installing...' : 'Applying...';
     } else if (isSelected) {

@@ -8,12 +8,13 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:xml/xml.dart' as xml;
 
 Future<void> modifyEnemyObjId(
-  xml.XmlElement objIdElement,
-  Map<String, List<String>> userSelectedEnemyData,
-  String filePath,
-  MainData mainData,
-  bool isSpawnActionTooSmall, {
-  bool isImportantId = false,
+  final xml.XmlElement objIdElement,
+  final Map<String, List<String>> userSelectedEnemyData,
+  final String filePath,
+  final MainData mainData,
+  // ignore: avoid_positional_boolean_parameters
+  final bool isSpawnActionTooSmall, {
+  final bool isImportantId = false,
 }) async {
   final objIdValue = objIdElement.innerText;
   if (objIdValue.isEmpty) return;
@@ -23,8 +24,7 @@ Future<void> modifyEnemyObjId(
   String category = mainData.argument['enemyCategory'];
   try {
     if (isImportantId && category == 'allenemies') {
-      await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData,
-          isBoss: false);
+      await handleLevel(objIdElement, level, SortedEnemyGroup.enemyData);
       return;
     }
     switch (category) {
@@ -32,8 +32,9 @@ Future<void> modifyEnemyObjId(
         await (isBossObj
             ? handleLevel(objIdElement, level, SortedEnemyGroup.enemyData,
                 isBoss: true)
-            : handleSelectedObjectIdEnemies(objIdElement, userSelectedEnemyData,
-                level, isSpawnActionTooSmall));
+            : handleSelectedObjectIdEnemies(
+                objIdElement, userSelectedEnemyData, level,
+                isSpawnActionTooSmall: isSpawnActionTooSmall));
         break;
       case 'onlylevel':
         await (isBossObj
@@ -45,8 +46,8 @@ Future<void> modifyEnemyObjId(
       default:
         if (isImportantId) return;
         if (category != 'onlylevel') {
-          await handleDefaultObjectId(
-              objIdElement, userSelectedEnemyData, isSpawnActionTooSmall);
+          await handleDefaultObjectId(objIdElement, userSelectedEnemyData,
+              isSpawnActionTooSmall: isSpawnActionTooSmall);
         }
     }
   } catch (e, stackTrace) {

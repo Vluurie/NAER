@@ -75,7 +75,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
     }
   }
 
-  void _onFileSelected(File? file) async {
+  void _onFileSelected(final File? file) async {
     if (file != null) {
       var fileSize = await file.length();
       if (fileSize == 235980) {
@@ -147,7 +147,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
     }
   }
 
-  void snackBar(String text) {
+  void snackBar(final String text) {
     if (_scaffoldKey.currentContext != null) {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(content: Text(text)),
@@ -156,7 +156,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -196,7 +196,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
           selectedFile != null
               ? PageView(
                   controller: _pageController,
-                  onPageChanged: (index) {
+                  onPageChanged: (final index) {
                     setState(() {
                       selectedIndex = index;
                     });
@@ -261,7 +261,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
                                   color: AutomatoThemeColors.textColor(ref),
                                 ),
                               ),
-                              items: slotDataFiles.map((File file) {
+                              items: slotDataFiles.map((final File file) {
                                 return DropdownMenuItem<File>(
                                   value: file,
                                   child: Text(

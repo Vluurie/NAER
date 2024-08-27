@@ -7,11 +7,11 @@ class XmlElementHandler {
   /// If it doesn't exist, a new element is created and inserted at the specified [insertionPosition].
   /// The value of the element can be specified by either [numericalValue] or [textualValue].
   static void updateOrCreateElement(
-      xml.XmlElement parentElement,
-      String targetElementName,
-      int? numericalValue,
-      int insertionPosition,
-      String? textualValue) {
+      final xml.XmlElement parentElement,
+      final String targetElementName,
+      final int? numericalValue,
+      final int insertionPosition,
+      final String? textualValue) {
     // Find the existing element if any
     var existingElement =
         parentElement.findElements(targetElementName).firstOrNull;
@@ -39,14 +39,17 @@ class XmlElementHandler {
   }
 
   /// Updates the text value of the specified XML element.
-  static void updateElementText(xml.XmlElement targetElement, String newText) {
+  static void updateElementText(
+      final xml.XmlElement targetElement, final String newText) {
     targetElement.children.clear();
     targetElement.children.add(xml.XmlText(newText));
   }
 
   /// Applies an action to all elements with the specified name within the parent element.
-  static void applyActionToElements(xml.XmlElement parentElement,
-      String targetElementName, void Function(xml.XmlElement) action) {
+  static void applyActionToElements(
+      final xml.XmlElement parentElement,
+      final String targetElementName,
+      final void Function(xml.XmlElement) action) {
     var elements = parentElement.findElements(targetElementName);
     for (var element in elements) {
       action(element);
@@ -55,11 +58,11 @@ class XmlElementHandler {
 
   /// Conditionally replaces or skips the value of elements based on an attribute match.
   static void conditionallyReplaceOrSkipElementValue(
-      xml.XmlElement parentElement,
-      String elementName,
-      String attributeName,
-      String attributeValueToMatch,
-      String newValue) {
+      final xml.XmlElement parentElement,
+      final String elementName,
+      final String attributeName,
+      final String attributeValueToMatch,
+      final String newValue) {
     var elements = parentElement.findElements(elementName);
     for (var element in elements) {
       if (element.getAttribute(attributeName) == attributeValueToMatch) {
@@ -73,8 +76,9 @@ class XmlElementHandler {
   /// before removing the child elements.
 
   static Future<void> removeSpecifiedChildElements(
-      xml.XmlElement startingElement, List<String> elementNamesToRemove,
-      [String? climbToParentWithName]) async {
+      final xml.XmlElement startingElement,
+      final List<String> elementNamesToRemove,
+      [final String? climbToParentWithName]) async {
     xml.XmlNode? targetNode = startingElement;
 
     if (climbToParentWithName != null) {
@@ -101,7 +105,8 @@ class XmlElementHandler {
   }
 
   /// "text" -> "" -> "newText"
-  static void replaceTextInXmlElement(xml.XmlElement element, String newText) {
+  static void replaceTextInXmlElement(
+      final xml.XmlElement element, final String newText) {
     element.children.clear();
     element.children.add(xml.XmlText(newText));
   }

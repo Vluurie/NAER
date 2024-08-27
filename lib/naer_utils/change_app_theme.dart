@@ -24,10 +24,10 @@ class HoverTextIconState extends ConsumerState<HoverTextIcon> {
   bool _isHovered = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
+      onEnter: (final _) => setState(() => _isHovered = true),
+      onExit: (final _) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
@@ -58,7 +58,7 @@ class HoverTextIconState extends ConsumerState<HoverTextIcon> {
   }
 }
 
-void changeAppThemePopup(BuildContext context, WidgetRef ref) {
+void changeAppThemePopup(final BuildContext context, final WidgetRef ref) {
   final textColor = AutomatoThemeColors.textDialogColor(ref);
 
   AutomatoDialogManager().showInfoDialog(

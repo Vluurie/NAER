@@ -36,7 +36,7 @@ class MetadataFormState extends ConsumerState<MetadataForm> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final metadata = metadataProvider;
     return Scaffold(
         body: Stack(children: [
@@ -98,7 +98,7 @@ class MetadataFormState extends ConsumerState<MetadataForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Consumer(
-                        builder: (context, ref, child) {
+                        builder: (final context, final ref, final child) {
                           final selectedImagePath =
                               ref.watch(selectedImagePathProvider);
 
@@ -112,7 +112,6 @@ class MetadataFormState extends ConsumerState<MetadataForm> {
                   Row(
                     children: [
                       Align(
-                          alignment: Alignment.center,
                           child: ButtonTheme(
                               minWidth: 300,
                               child: ElevatedButton(

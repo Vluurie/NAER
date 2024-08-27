@@ -32,11 +32,11 @@ class DonateButtonState extends ConsumerState<DonateButton>
     );
   }
 
-  void _onEnter(PointerEvent details) {
+  void _onEnter(final PointerEvent details) {
     _controller.forward();
   }
 
-  void _onExit(PointerEvent details) {
+  void _onExit(final PointerEvent details) {
     _controller.reverse();
   }
 
@@ -56,7 +56,7 @@ class DonateButtonState extends ConsumerState<DonateButton>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MouseRegion(
       onEnter: _onEnter,
       onExit: _onExit,

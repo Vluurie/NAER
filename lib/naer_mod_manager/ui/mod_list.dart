@@ -50,11 +50,12 @@ class Mod {
       this.canBeRandomized,
       this.dlc});
 
-  factory Mod.fromJson(Map<String, dynamic> json) {
+  factory Mod.fromJson(final Map<String, dynamic> json) {
     var filesList = json['files'] as List<dynamic>;
-    List<Map<String, String>> parsedFiles = filesList.map((fileItem) {
+    List<Map<String, String>> parsedFiles = filesList.map((final fileItem) {
       Map<String, dynamic> fileMap = fileItem as Map<String, dynamic>;
-      return fileMap.map((key, value) => MapEntry(key, value.toString()));
+      return fileMap
+          .map((final key, final value) => MapEntry(key, value.toString()));
     }).toList();
 
     return Mod(
@@ -115,11 +116,11 @@ class _ModsListState extends ConsumerState<ModsList>
       });
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       verifyAllModFiles();
     });
 
-    NotificationManager.notificationStream.listen((event) {
+    NotificationManager.notificationStream.listen((final event) {
       if (mounted && event.message == "Affected mods have been handled") {
         _showStyledPopup();
       }
@@ -129,7 +130,7 @@ class _ModsListState extends ConsumerState<ModsList>
   void _showStyledPopup() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return ModPopup(
           currentlyIgnored: FileChange.ignoredFiles,
           affectedModsInfo: widget.modStateManager.affectedModsInfo,
@@ -148,7 +149,7 @@ class _ModsListState extends ConsumerState<ModsList>
     super.dispose();
   }
 
-  Future<void> toggleInstallUninstallMod(int index) async {
+  Future<void> toggleInstallUninstallMod(final int index) async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     if (!isNierRunning) {
       setState(() {
@@ -185,9 +186,9 @@ class _ModsListState extends ConsumerState<ModsList>
           await modInstallHandler.uninstallMod(mod.id);
           widget.modStateManager.uninstallMod(mod.id);
           List<String> filenamesToRemove = mod.files
-              .map((fileMap) => fileMap['path'] ?? '')
-              .where((path) => path.isNotEmpty)
-              .map((path) => p.basename(path))
+              .map((final fileMap) => fileMap['path'] ?? '')
+              .where((final path) => path.isNotEmpty)
+              .map((final path) => p.basename(path))
               .toList();
           await FileChange.removeIgnoreFiles(filenamesToRemove);
         } else {
@@ -239,9 +240,9 @@ class _ModsListState extends ConsumerState<ModsList>
       if (invalidFiles.isNotEmpty &&
           widget.modStateManager.isModInstalled(mod.id)) {
         List<String> filenamesToRemove = mod.files
-            .map((fileMap) => fileMap['path'] ?? '')
-            .where((path) => path.isNotEmpty)
-            .map((path) => p.basename(path))
+            .map((final fileMap) => fileMap['path'] ?? '')
+            .where((final path) => path.isNotEmpty)
+            .map((final path) => p.basename(path))
             .toList();
         await FileChange.removeIgnoreFiles(filenamesToRemove);
         await modInstallHandler.removeModFiles(mod.id, invalidFiles);
@@ -258,8 +259,8 @@ class _ModsListState extends ConsumerState<ModsList>
   }
 
   @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Widget build(final BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       if (shouldShowMissingFilesSnackbar) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -274,12 +275,12 @@ class _ModsListState extends ConsumerState<ModsList>
     final modInstallHandler = ModInstallHandler(widget.cliArguments);
 
     return provider.Consumer<ModStateManager>(
-        builder: (context, modStateManager, child) {
+        builder: (final context, final modStateManager, final child) {
       final modStateManager = provider.Provider.of<ModStateManager>(context);
       final mods = modStateManager.mods;
       return ListView.builder(
         itemCount: mods.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (final context, final index) {
           Mod mod = mods[index];
           bool modIsInstalled = modStateManager.isModInstalled(mod.id);
           return Card(
@@ -313,14 +314,16 @@ class _ModsListState extends ConsumerState<ModsList>
                               width: 150,
                               height: 150,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
+                              errorBuilder: (final context, final error,
+                                  final stackTrace) {
                                 return Image.asset(
                                   'assets/mods/mod${mod.id}.png',
                                   width: 150,
                                   height: 150,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (BuildContext context,
-                                      Object error, StackTrace? stackTrace) {
+                                  errorBuilder: (final BuildContext context,
+                                      final Object error,
+                                      final StackTrace? stackTrace) {
                                     return Container(
                                       width: 100,
                                       height: 100,
@@ -341,8 +344,9 @@ class _ModsListState extends ConsumerState<ModsList>
                               width: 150,
                               height: 150,
                               fit: BoxFit.cover,
-                              errorBuilder: (BuildContext context, Object error,
-                                  StackTrace? stackTrace) {
+                              errorBuilder: (final BuildContext context,
+                                  final Object error,
+                                  final StackTrace? stackTrace) {
                                 return Container(
                                   width: 150,
                                   height: 150,
@@ -394,7 +398,8 @@ class _ModsListState extends ConsumerState<ModsList>
                                     .deleteModDirectory(mod.id);
                             if (deletedSuccessfully && deleteModsSuccessfully) {
                               setState(() {
-                                mods.removeWhere((item) => item.id == mod.id);
+                                mods.removeWhere(
+                                    (final item) => item.id == mod.id);
                               });
                             } else {
                               //  print("Failed to delete mod metadata.");
@@ -414,7 +419,7 @@ class _ModsListState extends ConsumerState<ModsList>
     });
   }
 
-  _iconButton(index, bool modIsInstalled) {
+  IconButton _iconButton(final index, final bool modIsInstalled) {
     bool isLoading = _loadingMap[index] ?? false;
 
     return IconButton(
@@ -444,7 +449,7 @@ class _ModsListState extends ConsumerState<ModsList>
     );
   }
 
-  _iconUninstallButton(int index, bool isInstalled) {
+  Widget _iconUninstallButton(final int index, final bool isInstalled) {
     if (!isInstalled) {
       return const SizedBox.shrink();
     }
@@ -455,10 +460,11 @@ class _ModsListState extends ConsumerState<ModsList>
     );
   }
 
-  Future<bool?> showConditionalPopup(BuildContext context, String mod) async {
+  Future<bool?> showConditionalPopup(
+      final BuildContext context, final String mod) async {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (final context) => AlertDialog(
         title: const Text('Confirmation',
             style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
         content: Text('Are you sure you want to delete metadata for: $mod',
@@ -480,10 +486,9 @@ class _ModsListState extends ConsumerState<ModsList>
     );
   }
 
-  Widget installRandomizeButton(int modIndex) {
+  Widget installRandomizeButton(final int modIndex) {
     final mods = widget.modStateManager.mods;
-    final modStateManager =
-        provider.Provider.of<ModStateManager>(context, listen: true);
+    final modStateManager = provider.Provider.of<ModStateManager>(context);
     final bool isInstalled = modStateManager.isModInstalled(mods[modIndex].id);
     final bool isInstalling = _installingMods[mods[modIndex].id] ?? false;
 
@@ -499,7 +504,6 @@ class _ModsListState extends ConsumerState<ModsList>
                 height: 50,
                 child: AutomatoLoading(
                   color: AutomatoThemeColors.bright(ref),
-                  translateX: 50,
                   svgString: AutomatoSvgStrings.automatoSvgStrHead,
                 ),
               ),
@@ -509,7 +513,7 @@ class _ModsListState extends ConsumerState<ModsList>
               label:
                   isInstalled ? "Uninstall Mod" : "Install and Randomize Mod",
               onPressed: () async =>
-                  await installAndRandomize(modIndex, isInstalled),
+                  await installAndRandomize(modIndex, isInstalled: isInstalled),
               uniqueId: 'install_$modIndex',
               pointerColor: AutomatoThemeColors.bright(ref),
               startColor: isInstalled
@@ -522,14 +526,14 @@ class _ModsListState extends ConsumerState<ModsList>
                   ? Colors.grey
                   : AutomatoThemeColors.darkBrown(ref),
               fontSize: 18,
-              fontFamily: 'Arial',
             ),
         ],
       ),
     );
   }
 
-  Future<void> installAndRandomize(int modIndex, bool isInstalled) async {
+  Future<void> installAndRandomize(final int modIndex,
+      {required final bool isInstalled}) async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     if (!isNierRunning) {
       final logState = provider.Provider.of<LogState>(context, listen: false);
@@ -577,9 +581,9 @@ class _ModsListState extends ConsumerState<ModsList>
       }
 
       List<String> fileNames = selectedMod.files
-          .map((fileMap) => fileMap['path'] ?? '')
-          .where((path) => path.isNotEmpty)
-          .map((path) => p.basename(path))
+          .map((final fileMap) => fileMap['path'] ?? '')
+          .where((final path) => path.isNotEmpty)
+          .map((final path) => p.basename(path))
           .toList();
       await FileChange.removeIgnoreFiles(fileNames);
 
@@ -589,9 +593,9 @@ class _ModsListState extends ConsumerState<ModsList>
       if (success) {
         modStateManager.installMod(selectedMod.id);
         List<String> filenamesToSave = selectedMod.files
-            .map((fileMap) => fileMap['path'] ?? '')
-            .where((path) => path.isNotEmpty)
-            .map((path) => p.basename(path))
+            .map((final fileMap) => fileMap['path'] ?? '')
+            .where((final path) => path.isNotEmpty)
+            .map((final path) => p.basename(path))
             .toList();
 
         await FileChange.removeIgnoreFiles(fileNames);
@@ -616,8 +620,10 @@ class _ModsListState extends ConsumerState<ModsList>
     }
   }
 
-  Future<bool> _processModFiles(Mod selectedMod,
-      ModInstallHandler modInstallHandler, LogState logState) async {
+  Future<bool> _processModFiles(
+      final Mod selectedMod,
+      final ModInstallHandler modInstallHandler,
+      final LogState logState) async {
     Set<String> uniqueDirectories = {};
     List<String> filesToHash = [];
 
@@ -687,7 +693,7 @@ class _ModsListState extends ConsumerState<ModsList>
   }
 
   bool _shouldProcessFileBasedOnGameOptions(
-      String baseNameWithoutExtension, String filePath) {
+      final String baseNameWithoutExtension, final String filePath) {
     final extension = p.extension(filePath).toLowerCase();
     if (extension != '.dat') {
       return false;
@@ -704,13 +710,13 @@ class _ModsListState extends ConsumerState<ModsList>
   }
 
   Future<bool> _executeCLICommand(
-      LogState logState, List<String> arguments) async {
+      final LogState logState, final List<String> arguments) async {
     final globalState = ref.read(globalStateProvider.notifier);
     try {
       arguments.modifyArgumentsForForcedEnemyList();
       final receivePort = ReceivePort();
 
-      receivePort.listen((message) {
+      receivePort.listen((final message) {
         if (message is String) {
           logState.addLog(message);
         }
@@ -724,21 +730,28 @@ class _ModsListState extends ConsumerState<ModsList>
         'isBalanceMode': globalState.readIsBalanceMode(),
         'hasDLC': globalState.readHasDLC(),
       };
-      globalState.setIsModManagerPageProcessing(true);
+      globalState.setIsModManagerPageProcessing(
+          isModManagerPageProcessing: true);
       await compute(runNierCliIsolated, args);
       globalLog("Randomization process finished the mod file successfully.");
-      globalState.setIsModManagerPageProcessing(false);
+      globalState.setIsModManagerPageProcessing(
+          isModManagerPageProcessing: false);
       return true;
     } catch (e, stacktrace) {
       logState.addLog("Error executing CLI command: $e");
-      globalState.setIsModManagerPageProcessing(false);
+      globalState.setIsModManagerPageProcessing(
+          isModManagerPageProcessing: false);
       globalLog(Trace.from(stacktrace).toString());
       return false;
     }
   }
 
-  Future<bool> _copyFile(LogState logState, String createdPath, String filePath,
-      ModInstallHandler modInstallHandler, String modId) async {
+  Future<bool> _copyFile(
+      final LogState logState,
+      final String createdPath,
+      final String filePath,
+      final ModInstallHandler modInstallHandler,
+      final String modId) async {
     try {
       String targetPath =
           await modInstallHandler.createModInstallPath(filePath);
@@ -754,16 +767,16 @@ class _ModsListState extends ConsumerState<ModsList>
     }
   }
 
-  Future<void> _uninstallMod(Mod selectedMod, ModStateManager modStateManager,
-      LogState logState) async {
+  Future<void> _uninstallMod(final Mod selectedMod,
+      final ModStateManager modStateManager, final LogState logState) async {
     final modInstallHandler = ModInstallHandler(widget.cliArguments);
     try {
       await modInstallHandler.uninstallMod(selectedMod.id);
       modStateManager.uninstallMod(selectedMod.id);
       List<String> filenamesToRemove = selectedMod.files
-          .map((fileMap) => fileMap['path'] ?? '')
-          .where((path) => path.isNotEmpty)
-          .map((path) => p.basename(path))
+          .map((final fileMap) => fileMap['path'] ?? '')
+          .where((final path) => path.isNotEmpty)
+          .map((final path) => p.basename(path))
           .toList();
       await FileChange.removeIgnoreFiles(filenamesToRemove);
       ScaffoldMessenger.of(context).showSnackBar(

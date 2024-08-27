@@ -8,7 +8,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart' as path;
 
 /// Retrieves the sorted enemies path from the list of arguments.
-String? getSortedEnemyGroupsIdentifierMap(List<String> arguments) {
+String? getSortedEnemyGroupsIdentifierMap(final List<String> arguments) {
   if (arguments.length >= 4) {
     return arguments[3];
   }
@@ -20,7 +20,7 @@ String? getSortedEnemyGroupsIdentifierMap(List<String> arguments) {
 /// This function checks if the `sortedEnemyGroupsIdentifierMap` and `output` paths are valid.
 /// If either path is null or invalid, it throws a [FileHandlingException] message.
 void validateIdentifierAndOutput(
-    String? sortedEnemyGroupsIdentifierMap, String? output) {
+    final String? sortedEnemyGroupsIdentifierMap, final String? output) {
   try {
     if (sortedEnemyGroupsIdentifierMap == null ||
         sortedEnemyGroupsIdentifierMap.isEmpty) {
@@ -82,7 +82,7 @@ Future<String> getMetaDataPath() async {
 
 /// Checks if the three folders (`naer_onlylevel`, `naer_randomized`,
 /// `naer_randomized_and_level`) already exist in the given [baseDir].
-bool checkIfExtractedFoldersExist(String baseDir) {
+bool checkIfExtractedFoldersExist(final String baseDir) {
   final onlyLevelDir = Directory(path.join(baseDir, 'naer_onlylevel'));
   final randomizedDir = Directory(path.join(baseDir, 'naer_randomized'));
   final randomizedAndLevelDir =
@@ -96,7 +96,8 @@ bool checkIfExtractedFoldersExist(String baseDir) {
 /// Takes the [baseDir] and a [category] and returns the path
 /// of the corresponding target directory. The category can be one of the
 /// following: "onlylevel", "randomized", or "randomized_and_level".
-String getTargetOptionDirectoryPath(String baseDir, String category) {
+String getTargetOptionDirectoryPath(
+    final String baseDir, final String category) {
   switch (category) {
     case 'onlylevel':
       return path.join(baseDir, 'naer_onlylevel');
@@ -111,8 +112,8 @@ String getTargetOptionDirectoryPath(String baseDir, String category) {
 }
 
 /// Determines the input directory for extracted game files based on enemy category.
-String getExtractedOptionDirectories(
-    String outputDir, String inputDir, Map<String, dynamic> argument) {
+String getExtractedOptionDirectories(final String outputDir, String inputDir,
+    final Map<String, dynamic> argument) {
   final onlyLevelPath = getTargetOptionDirectoryPath(outputDir, 'onlylevel');
   final randomizedPath = getTargetOptionDirectoryPath(outputDir, 'default');
   final randomizedAndLevelPath =
@@ -130,7 +131,7 @@ String getExtractedOptionDirectories(
 
 /// Takes the [directory] and checks if the following .cpk files exist:
 /// 'data100.cpk', 'data006.cpk', 'data016.cpk', 'data002.cpk', 'data012.cpk'.
-Future<bool> checkNotAllCpkFilesExist(String directory) async {
+Future<bool> checkNotAllCpkFilesExist(final String directory) async {
   // Define the list of required file names
   final requiredFiles = [
     'data006.cpk',
@@ -154,7 +155,7 @@ Future<bool> checkNotAllCpkFilesExist(String directory) async {
 
 /// Checks if the DLC file 'data100.cpk' exists in the given directory and
 /// if its size is approximately 928 MB (973,603,536 bytes) to determine if the DLC is present.
-Future<bool> hasDLC(String directoryPath) async {
+Future<bool> hasDLC(final String directoryPath) async {
   final Directory directory = Directory(directoryPath);
   const String fileName = 'data100.cpk';
   final File file = File('${directory.path}/$fileName');

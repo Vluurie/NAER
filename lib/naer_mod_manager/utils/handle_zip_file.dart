@@ -6,7 +6,7 @@ import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
 
 class ModHandler {
-  static Future<List<Mod>?> handleZipFile(List<String> filePaths) async {
+  static Future<List<Mod>?> handleZipFile(final List<String> filePaths) async {
     if (filePaths.isEmpty) return null;
     var zipFilePath = filePaths.first;
     var package = path.basename(zipFilePath).contains("ModPackage");
@@ -25,7 +25,7 @@ class ModHandler {
     }
   }
 
-  static bool validateModPackageWithKeyFromArchive(Archive archive) {
+  static bool validateModPackageWithKeyFromArchive(final Archive archive) {
     const String keyFileName = 'validate_key.bin';
     const String knownValidKey = "b59f63a2efbeabcbc4b00780897c6b8a";
     for (final file in archive) {
@@ -42,7 +42,7 @@ class ModHandler {
   }
 
   static Future<bool> extractZipToDirectory(
-      Archive archive, String directoryPath) async {
+      final Archive archive, final String directoryPath) async {
     final modDirectory = Directory(directoryPath);
     if (!await modDirectory.exists()) {
       await modDirectory.create(recursive: true);
@@ -64,7 +64,8 @@ class ModHandler {
     return true;
   }
 
-  static Future<List<dynamic>?> readModMetadata(String directoryPath) async {
+  static Future<List<dynamic>?> readModMetadata(
+      final String directoryPath) async {
     final metadataPath = path.join(directoryPath, 'mod_metadata.json');
     final metadataFile = File(metadataPath);
     if (await metadataFile.exists()) {
@@ -76,13 +77,13 @@ class ModHandler {
     }
   }
 
-  static Future<List<Mod>> parseModMetadata(String directoryPath) async {
+  static Future<List<Mod>> parseModMetadata(final String directoryPath) async {
     final List<dynamic>? modsData = await readModMetadata(directoryPath);
     if (modsData == null) {
       return [];
     } else {
       final List<Mod> mods =
-          modsData.map((modJson) => Mod.fromJson(modJson)).toList();
+          modsData.map((final modJson) => Mod.fromJson(modJson)).toList();
       return mods;
     }
   }

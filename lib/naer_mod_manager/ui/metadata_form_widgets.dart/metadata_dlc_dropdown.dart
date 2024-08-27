@@ -13,7 +13,7 @@ class MetadataDLCDropdown extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final dlcValue = ref.watch(dlcControllerProvider);
     return DropdownButtonFormField<String>(
       value: initialValue ?? dlcValue,
@@ -23,17 +23,17 @@ class MetadataDLCDropdown extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
-      items: <String>['true', 'false'].map((String value) {
+      items: <String>['true', 'false'].map((final String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
         );
       }).toList(),
-      onChanged: (String? newValue) {
+      onChanged: (final String? newValue) {
         onChanged(newValue);
         ref.read(dlcControllerProvider.notifier).state = newValue;
       },
-      validator: (value) {
+      validator: (final value) {
         if (value == null || value.isEmpty) {
           return 'Please select a value';
         }

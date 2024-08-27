@@ -4,7 +4,8 @@ import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
 
 bool isCpkExtractionValid(
-    String input, bool isFile, CliOptions args, List<String> enemyList) {
+    final String input, final CliOptions args, final List<String> enemyList,
+    {required final bool isFile}) {
   if (args.fileTypeIsKnown && !args.isCpk) return false;
   if (!input.endsWith(".cpk")) return false;
   if (!isFile) return false;
@@ -21,7 +22,8 @@ bool isCpkExtractionValid(
   return true;
 }
 
-bool isYaxToXmlValid(String input, bool isFile, CliOptions args) {
+bool isYaxToXmlValid(final String input, final CliOptions args,
+    {required final bool isFile}) {
   if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".yax")) return false;
   if (!isFile) return false;
@@ -29,7 +31,8 @@ bool isYaxToXmlValid(String input, bool isFile, CliOptions args) {
   return true;
 }
 
-bool isPakExtractionValid(String input, bool isFile, CliOptions args) {
+bool isPakExtractionValid(final String input, final CliOptions args,
+    {required final bool isFile}) {
   if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isFile) return false;
@@ -37,9 +40,10 @@ bool isPakExtractionValid(String input, bool isFile, CliOptions args) {
   return true;
 }
 
-bool isDatExtractionValid(String input, bool isFile, CliOptions args,
-    bool? isManagerFile, List<String> activeOptions) {
-  String normalizePath(String filePath) {
+bool isDatExtractionValid(
+    final String input, final CliOptions args, final List<String> activeOptions,
+    {required final bool isFile, required final bool? isManagerFile}) {
+  String normalizePath(final String filePath) {
     return path.normalize(filePath).toLowerCase();
   }
 

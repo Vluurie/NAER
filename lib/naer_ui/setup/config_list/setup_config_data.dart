@@ -7,14 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class CheckboxStateNotifier extends StateNotifier<bool> {
   CheckboxStateNotifier() : super(false);
 
-  void toggle(bool value) {
-    state = value;
+  void toggle({required final bool shouldToggle}) {
+    state = shouldToggle;
   }
 }
 
 final checkboxStateProvider =
     StateNotifierProvider<CheckboxStateNotifier, bool>(
-  (ref) => CheckboxStateNotifier(),
+  (final ref) => CheckboxStateNotifier(),
 );
 
 class SetupConfigData implements ConfigDataContainer {
@@ -59,7 +59,7 @@ class SetupConfigData implements ConfigDataContainer {
     this.onCheckboxChanged,
   }) : checkboxStateProvider =
             StateNotifierProvider<CheckboxStateNotifier, bool>(
-          (ref) => CheckboxStateNotifier(),
+          (final ref) => CheckboxStateNotifier(),
         );
 
   Map<String, dynamic> toJson() {
@@ -77,7 +77,7 @@ class SetupConfigData implements ConfigDataContainer {
     };
   }
 
-  static SetupConfigData fromJson(Map<String, dynamic> json) {
+  static SetupConfigData fromJson(final Map<String, dynamic> json) {
     return SetupConfigData(
       id: json['id'],
       imageUrl: json['imageUrl'],
@@ -97,30 +97,31 @@ class SetupConfigData implements ConfigDataContainer {
     isSelected = !isSelected;
   }
 
-  void updateGroundArgument(bool isChecked, String enemyId) {
+  void updateGroundArgument(final String enemyId,
+      {required final bool isChecked}) {
     final groundIndex =
-        arguments.indexWhere((arg) => arg.startsWith('--Ground='));
+        arguments.indexWhere((final arg) => arg.startsWith('--Ground='));
     if (groundIndex != -1) {
-      // Parse the current ground list
       final currentGroundList = arguments[groundIndex]
           .substring('--Ground=['.length, arguments[groundIndex].length - 1)
-          .split(', ')
-          .map((e) => e.replaceAll('"', ''))
+          .split(',')
+          .map((final e) => e.replaceAll('"', ''))
           .toList();
 
-      // Generate the new --Ground argument
-      arguments[groundIndex] =
-          generateGroundGroupArgument(currentGroundList, isChecked, enemyId);
+      arguments[groundIndex] = generateGroundGroupArgument(
+          currentGroundList, enemyId,
+          isChecked: isChecked);
     } else {
       // If --Ground doesn't exist, add it
-      arguments.add(generateGroundGroupArgument([], isChecked, enemyId));
+      arguments
+          .add(generateGroundGroupArgument([], enemyId, isChecked: isChecked));
     }
   }
 
-  List<String> generateArguments(WidgetRef ref) {
+  List<String> generateArguments(final WidgetRef ref) {
     final globalState = ref.read(globalStateProvider);
     return arguments
-        .map((arg) {
+        .map((final arg) {
           if (arg == '{input}') {
             return globalState.input;
           } else if (arg == '{output}') {
@@ -134,7 +135,7 @@ class SetupConfigData implements ConfigDataContainer {
           }
           return arg;
         })
-        .where((arg) => arg.isNotEmpty && arg != '{ignore}')
+        .where((final arg) => arg.isNotEmpty && arg != '{ignore}')
         .toList();
   }
 }

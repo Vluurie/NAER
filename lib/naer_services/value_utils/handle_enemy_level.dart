@@ -7,9 +7,9 @@ import 'package:xml/xml.dart' as xml;
 /// Otherwise, it updates or creates the necessary level values in the XML element.
 ///
 /// If `isBoss` is `true`, the function does not update the `levelRange` for 'EnemyGenerator' actions.
-Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
-    Map<String, List<String>> enemyData,
-    {bool isBoss = false}) async {
+Future<void> handleLevel(final xml.XmlElement objIdElement,
+    final String enemyLevel, final Map<String, List<String>> enemyData,
+    {final bool isBoss = false}) async {
   var objIdValue = objIdElement.innerText;
 
   // Check if the enemy belongs to any group
@@ -76,7 +76,7 @@ Future<void> handleLevel(xml.XmlElement objIdElement, String enemyLevel,
 ///
 /// If 'min' and 'max' elements exist within `levelRange`, their text is replaced with `enemyLevel`.
 void updateEnemyLevelRange(
-    xml.XmlElement levelRangeElement, String enemyLevel) {
+    final xml.XmlElement levelRangeElement, final String enemyLevel) {
   var minElement = levelRangeElement.findElements('min').firstOrNull;
   var maxElement = levelRangeElement.findElements('max').firstOrNull;
 
@@ -89,7 +89,7 @@ void updateEnemyLevelRange(
 }
 
 /// Moves the <delay> element to the end of its parent element's children list.
-void moveDelayElementToEnd(xml.XmlElement parentElement) {
+void moveDelayElementToEnd(final xml.XmlElement parentElement) {
   var delayElement = parentElement.findElements('delay').firstOrNull;
   if (delayElement != null) {
     parentElement.children.remove(delayElement);
@@ -100,7 +100,7 @@ void moveDelayElementToEnd(xml.XmlElement parentElement) {
 /// Finds the root 'action' XML element starting from the given `element`.
 ///
 /// Returns the found 'action' element or `null` if not found.
-xml.XmlElement? findRootActionElement(xml.XmlElement element) {
+xml.XmlElement? findRootActionElement(final xml.XmlElement element) {
   var current = element.parent;
   while (current != null) {
     if (current is xml.XmlElement && current.name.local == 'action') {
@@ -115,7 +115,7 @@ xml.XmlElement? findRootActionElement(xml.XmlElement element) {
 ///
 /// If 'min' and 'max' elements exist within `levelRange`, their text is replaced with `enemyLevel`.
 void updateGeneratorLevelRange(
-    xml.XmlElement actionElement, String enemyLevel) {
+    final xml.XmlElement actionElement, final String enemyLevel) {
   var levelRangeElement = actionElement.findElements('levelRange').firstOrNull;
   if (levelRangeElement != null) {
     var minElement = levelRangeElement.findElements('min').firstOrNull;
@@ -133,8 +133,8 @@ void updateGeneratorLevelRange(
 /// Updates or creates a level value with the given `levelName` and `enemyLevel` in the `paramElement`.
 ///
 /// If the level value does not exist, it is created and added to the `paramElement`.
-void updateOrCreateLevelValue(
-    xml.XmlElement paramElement, String levelName, String enemyLevel) {
+void updateOrCreateLevelValue(final xml.XmlElement paramElement,
+    final String levelName, final String enemyLevel) {
   var levelValueElement =
       findLevelValueElementWithName(paramElement, levelName);
 
@@ -149,7 +149,7 @@ void updateOrCreateLevelValue(
 /// Updates the count value in the `paramElement` to '0x1' if the existing count is '0x0'.
 ///
 /// Clears the existing text nodes in the 'count' element and adds a new text node with the updated count value.
-void updateCountForParam(xml.XmlElement paramElement) {
+void updateCountForParam(final xml.XmlElement paramElement) {
   var countElement = paramElement.findElements('count').firstOrNull;
 
   if (countElement != null && countElement.innerText == '0x0') {
@@ -167,8 +167,8 @@ xml.XmlElement createParamElement() {
 /// Updates the level value with the given `levelName` and `enemyLevel` in the `paramElement` if it exists.
 ///
 /// If the level value does not exist, this function does nothing.
-void updateLevelValueIfExists(
-    xml.XmlElement paramElement, String levelName, String enemyLevel) {
+void updateLevelValueIfExists(final xml.XmlElement paramElement,
+    final String levelName, final String enemyLevel) {
   var levelValueElement =
       findLevelValueElementWithName(paramElement, levelName);
 
@@ -181,9 +181,9 @@ void updateLevelValueIfExists(
 ///
 /// Returns the found 'value' element or `null` if not found.
 xml.XmlElement? findLevelValueElementWithName(
-    xml.XmlElement paramElement, String levelName) {
+    final xml.XmlElement paramElement, final String levelName) {
   try {
-    return paramElement.findElements('value').firstWhere((element) =>
+    return paramElement.findElements('value').firstWhere((final element) =>
         element.findElements('name').firstOrNull?.innerText == levelName);
   } catch (e) {
     return null;
@@ -193,7 +193,7 @@ xml.XmlElement? findLevelValueElementWithName(
 /// Updates or creates the 'count' element in the `paramElement` to reflect the number of 'value' elements.
 ///
 /// If the 'count' element does not exist, it is created and added to the `paramElement`.
-void updateOrCreateCountElement(xml.XmlElement paramElement) {
+void updateOrCreateCountElement(final xml.XmlElement paramElement) {
   var countElement = paramElement.findElements('count').firstOrNull;
 
   // Calculate the number of value elements
@@ -226,7 +226,8 @@ xml.XmlElement? findParentValueElement(xml.XmlNode node) {
 
 /// Creates and returns a new 'value' XML element with the specified `levelName` and `enemyLevel`.
 /// 0x1451dab1 is the param element hex identifier
-xml.XmlElement createLevelValueElement(String levelName, String enemyLevel) {
+xml.XmlElement createLevelValueElement(
+    final String levelName, final String enemyLevel) {
   return xml.XmlElement(xml.XmlName('value'), [], [
     xml.XmlElement(xml.XmlName('name'), [], [xml.XmlText(levelName)]),
     xml.XmlElement(
@@ -241,7 +242,7 @@ xml.XmlElement createLevelValueElement(String levelName, String enemyLevel) {
 ///
 /// Clears the existing children of the 'body' element and adds a new text node with the updated level value.
 void updateLevelValueElement(
-    xml.XmlElement levelValueElement, String enemyLevel) {
+    final xml.XmlElement levelValueElement, final String enemyLevel) {
   var bodyElement = levelValueElement.findElements('body').firstOrNull;
   if (bodyElement != null) {
     bodyElement.children.clear();

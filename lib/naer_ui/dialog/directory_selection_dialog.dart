@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> showInvalidDirectoryDialog(
-    BuildContext context, WidgetRef ref) async {
-  await AutomatoDialogManager().showInfoDialog(
+    final BuildContext context, final WidgetRef ref) async {
+  unawaited(AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "Invalid Directory",
@@ -23,15 +23,14 @@ Future<void> showInvalidDirectoryDialog(
     onOkPressed: () {
       Navigator.of(context).pop();
     },
-    okLabel: "OK",
-  );
+  ));
 }
 
 Future<void> showNoDlcDirectoryDialog(
-    BuildContext context, WidgetRef ref) async {
+    final BuildContext context, final WidgetRef ref) async {
   final globalState = ref.read(globalStateProvider.notifier);
 
-  await AutomatoDialogManager().showInfoDialog(
+  unawaited(AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "DLC Not Found",
@@ -42,20 +41,20 @@ Future<void> showNoDlcDirectoryDialog(
         fontSize: 20,
       ),
     ),
-    okLabel: "OK",
     onOkPressed: () {
-      globalState.updateDLCOption(false);
-      FileChange.saveDLCOption(ref, false);
+      globalState.updateDLCOption(update: false);
+      FileChange.saveDLCOption(ref, shouldSave: false);
       Navigator.of(context).pop();
     },
-  );
+  ));
 }
 
-Future<void> showAsyncInfoDialog(BuildContext context, WidgetRef ref) async {
+Future<void> showAsyncInfoDialog(
+    final BuildContext context, final WidgetRef ref) async {
   final Completer<void> completer = Completer<void>();
   final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
-  await AutomatoDialogManager().showInfoDialog(
+  unawaited(AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
     title: "DLC Found!",
@@ -66,20 +65,19 @@ Future<void> showAsyncInfoDialog(BuildContext context, WidgetRef ref) async {
         fontSize: 20,
       ),
     ),
-    okLabel: "OK",
     onOkPressed: () {
-      globalStateNotifier.updateDLCOption(true);
-      FileChange.saveDLCOption(ref, true);
+      globalStateNotifier.updateDLCOption(update: true);
+      FileChange.saveDLCOption(ref, shouldSave: true);
       completer.complete();
       Navigator.of(context).pop();
     },
-  );
+  ));
 
   return completer.future;
 }
 
 Future<bool> askForDeepSearchPermission(
-    BuildContext context, WidgetRef ref) async {
+    final BuildContext context, final WidgetRef ref) async {
   final completer = Completer<bool>();
 
   AutomatoDialogManager().showYesNoDialog(
@@ -110,11 +108,11 @@ Future<bool> askForDeepSearchPermission(
 }
 
 void showModsMessage(
-    List<String> modFiles,
-    Function(List<String>) onModFilesUpdated,
-    BuildContext context,
-    WidgetRef ref) {
-  void showRemoveConfirmation(int? index) {
+    final List<String> modFiles,
+    final Function(List<String>) onModFilesUpdated,
+    final BuildContext context,
+    final WidgetRef ref) {
+  void showRemoveConfirmation(final int? index) {
     final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
     AutomatoDialogManager().showYesNoDialog(
@@ -146,7 +144,8 @@ void showModsMessage(
         onModFilesUpdated(modFiles);
 
         // Update the state before closing the dialog
-        globalStateNotifier.setWasModManamentDialogShown(true);
+        globalStateNotifier.setWasModManamentDialogShown(
+            wasModManagmentDialogShown: true);
 
         if (context.mounted) {
           Navigator.of(context).pop();
@@ -161,7 +160,8 @@ void showModsMessage(
       },
       onNoPressed: () {
         // Update the state before closing the dialog
-        globalStateNotifier.setWasModManamentDialogShown(true);
+        globalStateNotifier.setWasModManamentDialogShown(
+            wasModManagmentDialogShown: true);
         Navigator.of(context).pop();
       },
       yesLabel: "Remove",
@@ -190,7 +190,8 @@ void showModsMessage(
 
       // Update the state before closing the dialog
       final globalStateNotifier = ref.read(globalStateProvider.notifier);
-      globalStateNotifier.setWasModManamentDialogShown(true);
+      globalStateNotifier.setWasModManamentDialogShown(
+          wasModManagmentDialogShown: true);
 
       Navigator.of(context).pop();
     },
@@ -203,7 +204,7 @@ void showModsMessage(
   );
 }
 
-void showNoModFilesDialog(BuildContext context, WidgetRef ref) {
+void showNoModFilesDialog(final BuildContext context, final WidgetRef ref) {
   final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
   AutomatoDialogManager().showInfoDialog(
@@ -219,10 +220,10 @@ void showNoModFilesDialog(BuildContext context, WidgetRef ref) {
     ),
     onOkPressed: () {
       // Update the state before closing the dialog
-      globalStateNotifier.setWasModManamentDialogShown(true);
+      globalStateNotifier.setWasModManamentDialogShown(
+          wasModManagmentDialogShown: true);
 
       Navigator.of(context).pop();
     },
-    okLabel: "OK",
   );
 }

@@ -5,7 +5,7 @@ import 'package:NAER/naer_utils/state_provider/directory_selection_state.dart';
 
 final directorySelectionCardProvider = StateNotifierProvider.autoDispose.family<
     DirectorySelectionCardStateNotifier, DirectorySelectionCardState, String>(
-  (ref, uniqueId) {
+  (final ref, final uniqueId) {
     return DirectorySelectionCardStateNotifier(uniqueId);
   },
 );
@@ -35,7 +35,7 @@ class DirectorySelectionCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final compositeKey = '${path ?? 'no-path'}-$uniqueSuffix';
 
     final state = ref.watch(directorySelectionCardProvider(compositeKey));
@@ -57,17 +57,17 @@ class DirectorySelectionCard extends ConsumerWidget {
         : AutomatoThemeColors.dangerZone(ref);
 
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (final context, final constraints) {
         final responsiveWidth =
             constraints.maxWidth < width ? constraints.maxWidth : width;
 
         return MouseRegion(
-          onEnter: (_) => notifier.setHovered(true),
-          onExit: (_) => notifier.setHovered(false),
+          onEnter: (final _) => notifier.setHovered(hovered: true),
+          onExit: (final _) => notifier.setHovered(hovered: false),
           child: GestureDetector(
             onTap: enabled
                 ? () async {
-                    await onBrowse((newPath) {
+                    await onBrowse((final newPath) {
                       notifier.updatePath(newPath);
                     });
                   }
@@ -89,7 +89,6 @@ class DirectorySelectionCard extends ConsumerWidget {
                           color: AutomatoThemeColors.darkBrown(ref)
                               .withOpacity(0.5),
                           spreadRadius: 1,
-                          blurRadius: 0,
                           offset: const Offset(1, 2),
                         ),
                       ]
@@ -97,8 +96,6 @@ class DirectorySelectionCard extends ConsumerWidget {
                         BoxShadow(
                           color: AutomatoThemeColors.darkBrown(ref)
                               .withOpacity(0.2),
-                          spreadRadius: 0,
-                          blurRadius: 0,
                           offset: const Offset(1, 1),
                         ),
                       ],

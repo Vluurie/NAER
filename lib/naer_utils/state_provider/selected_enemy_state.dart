@@ -9,13 +9,13 @@ class SelectedEnemyDataNotifier
           "Delete": [],
         });
 
-  void updateSelectedEnemies(Map<String, List<String>> newSortedData) {
+  void updateSelectedEnemies(final Map<String, List<String>> newSortedData) {
     state = newSortedData;
   }
 }
 
 final sortedEnemyDataProvider =
     StateNotifierProvider<SelectedEnemyDataNotifier, Map<String, List<String>>>(
-        (ref) {
+        (final ref) {
   return SelectedEnemyDataNotifier();
 });

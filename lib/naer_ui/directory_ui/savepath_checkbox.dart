@@ -1,10 +1,12 @@
+// ignore_for_file: avoid_positional_boolean_parameters
+
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 
-final checkboxValueProvider = StateProvider<bool>((ref) => false);
+final checkboxValueProvider = StateProvider<bool>((final ref) => false);
 
 class SavePathsWidget extends ConsumerWidget {
   final Function(bool) onCheckboxChanged;
@@ -14,7 +16,7 @@ class SavePathsWidget extends ConsumerWidget {
     required this.onCheckboxChanged,
   });
 
-  Future<void> savePathsToPreferences(WidgetRef ref) async {
+  Future<void> savePathsToPreferences(final WidgetRef ref) async {
     final prefs = await SharedPreferences.getInstance();
     final checkboxValue = ref.read(checkboxValueProvider);
 
@@ -24,7 +26,7 @@ class SavePathsWidget extends ConsumerWidget {
     await prefs.setBool('savePaths', checkboxValue);
   }
 
-  Future<void> clearPathsFromPreferences(WidgetRef ref) async {
+  Future<void> clearPathsFromPreferences(final WidgetRef ref) async {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.remove('input');
@@ -37,7 +39,7 @@ class SavePathsWidget extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.watch(globalStateProvider);
     final checkboxValue = ref.watch(checkboxValueProvider);
 
@@ -62,7 +64,6 @@ class SavePathsWidget extends ConsumerWidget {
           BoxShadow(
             color: AutomatoThemeColors.darkBrown(ref).withOpacity(0.2),
             spreadRadius: 2,
-            blurRadius: 0,
             offset: const Offset(3, 3),
           ),
         ],
@@ -72,7 +73,7 @@ class SavePathsWidget extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Checkbox(
-            fillColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            fillColor: WidgetStateProperty.resolveWith<Color?>((final states) {
               if (!isCheckboxEnabled) {
                 return AutomatoThemeColors.dangerZone(ref);
               }
@@ -82,7 +83,7 @@ class SavePathsWidget extends ConsumerWidget {
             }),
             value: checkboxValue,
             onChanged: isCheckboxEnabled
-                ? (bool? newValue) async {
+                ? (final bool? newValue) async {
                     if (newValue != null) {
                       ref.read(checkboxValueProvider.notifier).state = newValue;
                       onCheckboxChanged(newValue);

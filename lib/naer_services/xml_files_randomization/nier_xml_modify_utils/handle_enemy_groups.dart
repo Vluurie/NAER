@@ -10,7 +10,7 @@ Random random = Random();
 
 /// Finds the group like Fly or Ground that contains the given enemy number.
 String? findGroupForEmNumber(
-    String emNumber, Map<String, List<String>> enemyData) {
+    final String emNumber, final Map<String, List<String>> enemyData) {
   for (var group in enemyData.keys) {
     if (enemyData[group]!.contains(emNumber)) {
       return group;
@@ -20,19 +20,19 @@ String? findGroupForEmNumber(
 }
 
 /// - [group]: The group name to check.
-bool isExcludedGroup(String group) {
+bool isExcludedGroup(final String group) {
   const excludedGroups = {'Delete'};
   return excludedGroups.contains(group);
 }
 
 // Check if any ancestor of objIdElement contains an 'alias' element
-bool hasAliasAncestor(xml.XmlElement objIdElement) {
+bool hasAliasAncestor(final xml.XmlElement objIdElement) {
   return objIdElement.ancestors
-      .any((element) => element.findElements('alias').isNotEmpty);
+      .any((final element) => element.findElements('alias').isNotEmpty);
 }
 
 // Remove alias elements that are in the  RandomizableAliases.aliases
-void removeAliases(xml.XmlElement element, List<String> aliasList) {
+void removeAliases(final xml.XmlElement element, final List<String> aliasList) {
   // Find all alias elements in the current element and its descendants
   final aliasElements = element.findAllElements('alias').toList();
 
@@ -49,31 +49,33 @@ void removeAliases(xml.XmlElement element, List<String> aliasList) {
 }
 
 /// Checks if the given `objId` corresponds to a boss.
-bool isBoss(String objId) {
+bool isBoss(final String objId) {
   return BossData.bossIds.contains(objId);
 }
 
 /// Checks if the given `objId` corresponds to a big enemy.
-bool isBigEnemy(String objId) {
+bool isBigEnemy(final String objId) {
   return SpecialEntities.bigEnemies.contains(objId);
 }
 
 /// Checks if the given `objId` corresponds to a dlc enemy.
-bool isDLCEnemy(String objId) {
+bool isDLCEnemy(final String objId) {
   return SpecialEntities.dlcEnemies.contains(objId);
 }
 
 /// Checks if an enemy with a given `emNumber` is marked for deletion in the `enemyData`.
 ///
 /// Returns `true` if the enemy is in the "Delete" group, `false` otherwise.
-bool isDeletedEnemy(String emNumber, Map<String, List<String>> enemyData) {
+bool isDeletedEnemy(
+    final String emNumber, final Map<String, List<String>> enemyData) {
   return findGroupForEmNumber(emNumber, enemyData) == "Delete";
 }
 
 /// Checks if a given action ID is listed in a collection of important IDs and
 /// updates the importance status of the action.
 Future<bool> checkImportantIds(
-    String? actionId, ImportantIDs importantIds, bool isActionImportant) async {
+    final String? actionId, final ImportantIDs importantIds,
+    {required bool isActionImportant}) async {
   // Check if the actionId is not null
   if (actionId != null) {
     // Iterate through each entry in the importantIds map
@@ -93,9 +95,8 @@ Future<bool> checkImportantIds(
 /// Checks if a given action ID is listed in a collection of bigSpawnEnemySkipIds and
 /// updates the status of the action.
 Future<bool> checkTooSmallSpawnAction(
-    String? actionId,
-    Map<String, Set<String>> bigSpawnEnemySkipIds,
-    bool isSpawnActionTooSmall) async {
+    final String? actionId, final Map<String, Set<String>> bigSpawnEnemySkipIds,
+    {required bool isSpawnActionTooSmall}) async {
   // Check if the actionId is not null
   if (actionId != null) {
     // Iterate through each entry in the big spawn enemies skip map
@@ -129,7 +130,7 @@ Future<bool> checkTooSmallSpawnAction(
 /// An iterable collection of XML elements that match the criteria and are used
 /// to spawn enemies or other object entities in the scripting engine.
 Future<Iterable<xml.XmlElement>> getEnemyCodeElements(
-    xml.XmlElement action) async {
+    final xml.XmlElement action) async {
   const prefixes = [
     'EnemyGenerator',
     'EnemySetAction',
@@ -140,22 +141,22 @@ Future<Iterable<xml.XmlElement>> getEnemyCodeElements(
   ];
 
   // Filter descendants to find 'code' elements with 'str' attributes so it get's the translated str starting with any of the prefixes
-  return action.descendants.whereType<xml.XmlElement>().where((e) =>
+  return action.descendants.whereType<xml.XmlElement>().where((final e) =>
       e.name.local == 'code' &&
-      prefixes.any((p) => e.getAttribute('str')?.startsWith(p) ?? false));
+      prefixes.any((final p) => e.getAttribute('str')?.startsWith(p) ?? false));
 }
 
 /// Checks if the given `actionElement` represents an 'EnemyGenerator'.
 ///
 /// Returns `true` if the 'code' element has the attribute `str` set to 'EnemyGenerator', `false` otherwise.
-bool isEnemyGenerator(xml.XmlElement actionElement) {
+bool isEnemyGenerator(final xml.XmlElement actionElement) {
   var codeElement = actionElement.findElements('code').firstOrNull;
   return codeElement != null &&
       codeElement.getAttribute('str') == 'EnemyGenerator';
 }
 
 /// Checks if the given XML element contains a ShootingEnemyCurveAction by traversing its child elements.
-bool isShootingEnemyCurveAction(xml.XmlElement element) {
+bool isShootingEnemyCurveAction(final xml.XmlElement element) {
   for (var idElement in element.findAllElements('id')) {
     var idText = idElement.innerText;
     if (ShootingEnemyCurveAction.identifierSet.contains(idText)) {
@@ -267,12 +268,16 @@ String getArgForAllEnemiesForStatsChange() {
 }
 
 String generateGroundGroupArgument(
-    List<String> groundList, bool isChecked, String enemyId) {
+    final List<String> groundList, final String enemyId,
+    {required final bool isChecked}) {
   if (isChecked && !groundList.contains(enemyId)) {
     groundList.add(enemyId);
   } else if (!isChecked) {
     groundList.remove(enemyId);
   }
 
-  return '--Ground=[${groundList.map((e) => '"$e"').join(',')}]';
+  final String formattedGroundList =
+      groundList.map((final e) => '"$e"').join(',');
+
+  return '--Ground=[$formattedGroundList]';
 }

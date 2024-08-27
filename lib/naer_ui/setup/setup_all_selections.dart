@@ -5,7 +5,7 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Widget setupAllSelections(BuildContext context, WidgetRef ref) {
+Widget setupAllSelections(final BuildContext context, final WidgetRef ref) {
   return IntrinsicHeight(
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,

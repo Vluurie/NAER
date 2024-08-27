@@ -5,7 +5,7 @@ class LogTracker {
   static final Set<String> _recentLogs = HashSet();
   static const int _logHistoryLimit = 100;
 
-  static bool shouldLog(String message) {
+  static bool shouldLog(final String message) {
     if (_recentLogs.contains(message)) {
       return false;
     }
@@ -19,7 +19,7 @@ class LogTracker {
   }
 }
 
-void globalLog(String message) {
+void globalLog(final String message) {
   if (message.trim().isEmpty) {
     return;
   }

@@ -13,7 +13,7 @@ class IsolateService {
   final List<IsolateRunner> _availableRunners = [];
   bool _isInitialized = false;
 
-  IsolateService({bool autoInitialize = false})
+  IsolateService({final bool autoInitialize = false})
       : numberOfIsolates = Platform.numberOfProcessors {
     if (autoInitialize) {
       _initializeLoadBalancer();
@@ -30,23 +30,24 @@ class IsolateService {
     }
   }
 
-  Future<void> initialize({bool forceReinitialize = false}) async {
+  Future<void> initialize({final bool forceReinitialize = false}) async {
     if (!_isInitialized || forceReinitialize) {
       await _initializeLoadBalancer();
     }
   }
 
-  Future<T> runTask<T>(FutureOr<T> Function(dynamic) task, dynamic arg) async {
+  Future<T> runTask<T>(
+      final FutureOr<T> Function(dynamic) task, final dynamic arg) async {
     await _initializeLoadBalancer();
     return _loadBalancer!.run(task, arg);
   }
 
   Future<Map<int, List<String>>> distributeFilesAsync(
-      List<String> files) async {
+      final List<String> files) async {
     return compute(_distributeFiles, files);
   }
 
-  static Map<int, List<String>> _distributeFiles(List<String> files) {
+  static Map<int, List<String>> _distributeFiles(final List<String> files) {
     final int numberOfCores = Platform.numberOfProcessors;
     final Map<int, List<String>> distributedFiles = {};
 
@@ -62,14 +63,16 @@ class IsolateService {
     return distributedFiles;
   }
 
-  Future<void> runTasks(List<FutureOr<void> Function(dynamic)> tasks) async {
+  Future<void> runTasks(
+      final List<FutureOr<void> Function(dynamic)> tasks) async {
     await _initializeLoadBalancer();
     final taskFutures =
-        tasks.map((task) => _loadBalancer!.run(task, null)).toList();
+        tasks.map((final task) => _loadBalancer!.run(task, null)).toList();
     await Future.wait(taskFutures);
   }
 
-  Future<void> runInIsolate(Function function, List<dynamic> arguments) async {
+  Future<void> runInIsolate(
+      final Function function, final List<dynamic> arguments) async {
     final receivePort = ReceivePort();
     final runner = await _getOrCreateRunner();
     await runner.run(isolateEntry, [function, arguments, receivePort.sendPort]);
@@ -78,7 +81,7 @@ class IsolateService {
   }
 
   Future<void> runInAwaitedIsolate(
-      Function function, List<dynamic> arguments) async {
+      final Function function, final List<dynamic> arguments) async {
     final receivePort = ReceivePort();
     final runner = await _getOrCreateRunner();
     await runner.run(isolateEntry, [function, arguments, receivePort.sendPort]);
@@ -98,7 +101,7 @@ class IsolateService {
     }
   }
 
-  static Future<void> isolateEntry(List<dynamic> args) async {
+  static Future<void> isolateEntry(final List<dynamic> args) async {
     final function = args[0] as Function;
     final arguments = args[1] as List<dynamic>;
     final sendPort = args[2] as SendPort;

@@ -26,7 +26,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
   final List<String> _files = [];
   bool _isLoading = false;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: widget.padding,
       child: _isLoading
@@ -42,9 +42,9 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
               ),
             )
           : DropTarget(
-              onDragEntered: (detail) => setState(() => _dragging = true),
-              onDragExited: (detail) => setState(() => _dragging = false),
-              onDragDone: (details) {
+              onDragEntered: (final detail) => setState(() => _dragging = true),
+              onDragExited: (final detail) => setState(() => _dragging = false),
+              onDragDone: (final details) {
                 AutomatoDialogManager().showYesNoDialog(
                   context: context,
                   ref: ref,
@@ -62,7 +62,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
                   onYesPressed: () {
                     Navigator.of(context).pop();
                     _processDraggedItems(
-                        details.files.map((file) => file.path).toList());
+                        details.files.map((final file) => file.path).toList());
                   },
                   onNoPressed: () {
                     Navigator.of(context).pop();
@@ -72,7 +72,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
                 );
               },
               child: LayoutBuilder(
-                builder: (context, constraints) {
+                builder: (final context, final constraints) {
                   double width =
                       constraints.maxWidth < 300 ? constraints.maxWidth : 300;
                   double height =
@@ -88,7 +88,6 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
                               AutomatoThemeColors.bright(ref).withOpacity(0.3),
                           spreadRadius: 2,
                           blurRadius: 5,
-                          offset: const Offset(0, 0),
                         ),
                       ],
                       color: _dragging
@@ -100,7 +99,6 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
                         color: _dragging
                             ? AutomatoThemeColors.primaryColor(ref)
                             : AutomatoThemeColors.bright(ref),
-                        width: 1,
                       ),
                     ),
                     child: Column(
@@ -131,7 +129,7 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
     );
   }
 
-  Future<void> _processDraggedItems(List<String> paths) async {
+  Future<void> _processDraggedItems(final List<String> paths) async {
     setState(() => _isLoading = true);
 
     final ModifyDraggedFile random = ModifyDraggedFile(

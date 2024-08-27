@@ -17,12 +17,13 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> repackModifiedGameFiles(
-    Map<String, List<String>> collectedFiles, MainData mainData) async {
+    final Map<String, List<String>> collectedFiles,
+    final MainData mainData) async {
   mainData.sendPort.send("Started repacking process of modified game files...");
 
   // Prepare XML files by replacing .yax extension with .xml
   var xmlFiles = collectedFiles['yaxFiles']
-          ?.map((e) => e.replaceAll('.yax', '.xml'))
+          ?.map((final e) => e.replaceAll('.yax', '.xml'))
           .toList() ??
       <String>[];
 
@@ -47,9 +48,9 @@ Future<void> repackModifiedGameFiles(
 /// splitting the task into the number of cores a device has for maximum computation efficiency.
 /// See [IsolateService]
 Future<void> processEntitiesInParallel(
-    Iterable<String> entities, MainData mainData) async {
+    final Iterable<String> entities, final MainData mainData) async {
   // Instantiate IsolateService without auto-initialization.
-  final service = IsolateService(autoInitialize: false);
+  final service = IsolateService();
   mainData.sendPort.send('Creating Isolates for parallel repacking...');
 
   // Initialize isolates explicitly for this task
@@ -61,8 +62,8 @@ Future<void> processEntitiesInParallel(
   final fileBatches = await service.distributeFilesAsync(fileList);
 
   // Prepare tasks to be run in parallel using isolates
-  final tasks = fileBatches.values.map((files) {
-    return (dynamic _) async {
+  final tasks = fileBatches.values.map((final files) {
+    return (final dynamic _) async {
       await processEntities(files, mainData);
     };
   }).toList();
@@ -75,7 +76,7 @@ Future<void> processEntitiesInParallel(
 }
 
 Future<void> processEntities(
-    Iterable<String> entities, MainData mainData) async {
+    final Iterable<String> entities, final MainData mainData) async {
   final processedFiles = mainData.argument['processedFiles'] as Set<String>;
   final pendingFilesQueue =
       ListQueue<String>.from(mainData.argument['pendingFiles'] as List<String>);
@@ -92,8 +93,8 @@ Future<void> processEntities(
           processedFiles,
           mainData.argument['enemyList'] as List<String>,
           mainData.argument['activeOptions'] as List<String>,
-          mainData.isManagerFile,
-          mainData.sendPort);
+          mainData.sendPort,
+          isManagerFile: mainData.isManagerFile);
       processedFiles.add(file);
     } catch (e) {
       mainData.sendPort.send("Input error: $e");
@@ -107,11 +108,11 @@ Future<void> processEntities(
 /// and then processes it till the output path.
 ///
 /// logState adds all created files to the last randomized shared preference list that can be undone with the undo button.
-Future<void> processDatFolders(FileCategoryManager fileManager,
-    List<String>? datFolders, MainData mainData) async {
+Future<void> processDatFolders(final FileCategoryManager fileManager,
+    final List<String>? datFolders, final MainData mainData) async {
   if (datFolders == null) return;
 
-  final tasks = datFolders.map((datFolder) async {
+  final tasks = datFolders.map((final datFolder) async {
     var baseNameWithExtension = path.basename(datFolder);
 
     // Check if the DAT folder should be processed
@@ -132,8 +133,8 @@ Future<void> processDatFolders(FileCategoryManager fileManager,
             mainData.argument['processedFiles'] as Set<String>,
             mainData.argument['enemyList'] as List<String>,
             mainData.argument['activeOptions'] as List<String>,
-            mainData.isManagerFile,
-            mainData.sendPort);
+            mainData.sendPort,
+            isManagerFile: mainData.isManagerFile);
 
         // Log the file change and send it to the main isolate
         FileChange.logChange(datOutput, 'create');
@@ -162,10 +163,10 @@ Future<void> processDatFolders(FileCategoryManager fileManager,
 
 /// Determines whether a .dat folder should be processed.
 bool shouldProcessDatFolder(
-    String baseNameWithExtension,
-    List<String> enemyList,
-    FileCategoryManager fileManager,
-    List<String> ignoreList) {
+    final String baseNameWithExtension,
+    final List<String> enemyList,
+    final FileCategoryManager fileManager,
+    final List<String> ignoreList) {
   // Check if the file should be ignored
   if (ignoreList.contains(baseNameWithExtension) ||
       baseNameWithExtension.startsWith('r5a5')) {
@@ -176,7 +177,7 @@ bool shouldProcessDatFolder(
   if (baseNameWithExtension.startsWith('em')) {
     if (enemyList.isNotEmpty && !enemyList.contains('None')) {
       var cleanedEnemyList = enemyList
-          .map((criteria) =>
+          .map((final criteria) =>
               criteria.replaceAll('[', '').replaceAll(']', '').trim())
           .toList();
       for (var criteria in cleanedEnemyList) {
@@ -202,11 +203,8 @@ bool shouldProcessDatFolder(
 ///
 /// This function modifies enemy stats if the enemy list is not empty and
 /// contains enemies.
-Future<void> processEnemyStats(
-  String currentDir,
-  MainData mainData,
-  bool reverseStats,
-) async {
+Future<void> processEnemyStats(final String currentDir, final MainData mainData,
+    {required final bool reverseStats}) async {
   List<String> enemyList = mainData.argument['enemyList'];
   List<String> enemiesToBalance = SpecialEntities.enemiesToBalance;
   double balanceFactor = 0.1;
@@ -224,7 +222,8 @@ Future<void> processEnemyStats(
 
   if (enemyList.isNotEmpty && !enemyList.contains('None')) {
     for (var file in enemyFiles) {
-      await processCsvFile(file, mainData.argument['enemyStats'], reverseStats);
+      await processCsvFile(file, mainData.argument['enemyStats'],
+          reverseStats: reverseStats);
     }
 
     if (reverseStats && mainData.isBalanceMode == true) {
@@ -243,7 +242,7 @@ Future<void> processEnemyStats(
 /// and adds files to the pending files list.
 ///
 Future<void> getGameFilesForProcessing(
-    String currentDir, MainData mainData) async {
+    final String currentDir, final MainData mainData) async {
   mainData.sendPort.send("Starting processing in directory: $currentDir");
   List<String> pendingFiles = mainData.argument['pendingFiles'];
   Set<String> processedFiles = mainData.argument['processedFiles'];
@@ -251,13 +250,13 @@ Future<void> getGameFilesForProcessing(
   if (mainData.options.recursiveMode) {
     pendingFiles.addAll(Directory(currentDir)
         .listSync(recursive: true)
-        .where((e) => e is File && !processedFiles.contains(e.path))
-        .map((e) => e.path));
+        .where((final e) => e is File && !processedFiles.contains(e.path))
+        .map((final e) => e.path));
   } else {
     pendingFiles.addAll(Directory(currentDir)
         .listSync()
-        .where((e) => e is File && !processedFiles.contains(e.path))
-        .map((e) => e.path));
+        .where((final e) => e is File && !processedFiles.contains(e.path))
+        .map((final e) => e.path));
   }
 }
 
@@ -269,16 +268,15 @@ Future<void> getGameFilesForProcessing(
 /// ALWAYS recursively extracts the child files after extracting the parent.
 /// It uses the [extract_dat_files.dll]
 Future<List<String>> extractGameFiles(
-  List<String> pendingFiles,
-  Set<String> processedFiles,
-  CliOptions options,
-  List<String> enemyList,
-  List<String> activeOptions,
-  bool? isManagerFile,
-  SendPort sendPort,
-) async {
+    final List<String> pendingFiles,
+    final Set<String> processedFiles,
+    final CliOptions options,
+    final List<String> enemyList,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool? isManagerFile}) async {
   // Instantiate IsolateService without auto-initialization.
-  final isolateService = IsolateService(autoInitialize: false);
+  final isolateService = IsolateService();
   final List<String> errorFiles = [];
 
   // Distribute the pending files across the available cores for parallel processing.
@@ -288,8 +286,8 @@ Future<List<String>> extractGameFiles(
   await isolateService.initialize();
 
   // Create tasks to process each batch of files in parallel using isolates.
-  final tasks = fileBatches.values.map((batch) {
-    return (dynamic _) async {
+  final tasks = fileBatches.values.map((final batch) {
+    return (final dynamic _) async {
       final batchErrors = await _processFileBatch(
         batch,
         processedFiles,
@@ -316,14 +314,14 @@ Future<List<String>> extractGameFiles(
 }
 
 Future<List<String>> _processFileBatch(
-  List<String> batch,
-  Set<String> processedFiles,
-  CliOptions options,
-  ListQueue<String> pendingFiles,
-  List<String> enemyList,
-  List<String> activeOptions,
-  bool? ismanagerFile,
-  SendPort sendPort,
+  final List<String> batch,
+  final Set<String> processedFiles,
+  final CliOptions options,
+  final ListQueue<String> pendingFiles,
+  final List<String> enemyList,
+  final List<String> activeOptions,
+  final bool? ismanagerFile,
+  final SendPort sendPort,
 ) async {
   final List<String> errorFiles = [];
 
@@ -333,17 +331,9 @@ Future<List<String>> _processFileBatch(
     final fileType = path.extension(input).toLowerCase();
 
     try {
-      await handleInput(
-        input,
-        null,
-        options,
-        pendingFiles,
-        processedFiles,
-        enemyList,
-        activeOptions,
-        ismanagerFile,
-        sendPort,
-      );
+      await handleInput(input, null, options, pendingFiles, processedFiles,
+          enemyList, activeOptions, sendPort,
+          isManagerFile: ismanagerFile);
       processedFiles.add(input);
     } on FileHandlingException catch (e) {
       globalLog("Invalid input for file $input (File type: $fileType): $e");

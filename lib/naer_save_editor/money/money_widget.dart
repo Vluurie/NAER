@@ -59,15 +59,17 @@ class MoneyWidgetState extends ConsumerState<MoneyWidget>
     });
   }
 
-  Future<void> _updateMoney(int newMoneyAmount) async {
+  Future<void> _updateMoney(final int newMoneyAmount) async {
     if (newMoneyAmount >= 1 && newMoneyAmount <= 9999999) {
       await MoneyService.updateMoneyInFile(widget.filePath, newMoneyAmount);
-      unawaited(_controller.forward().then((value) => _controller.reverse()));
+      unawaited(
+          _controller.forward().then((final value) => _controller.reverse()));
       unawaited(_opacityController
           .forward()
-          .then((_) => _opacityController.reverse()));
-      unawaited(
-          _colorController.forward().then((_) => _colorController.reverse()));
+          .then((final _) => _opacityController.reverse()));
+      unawaited(_colorController
+          .forward()
+          .then((final _) => _colorController.reverse()));
       await _getMoney();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -90,7 +92,7 @@ class MoneyWidgetState extends ConsumerState<MoneyWidget>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SingleChildScrollView(
       child: Center(
         child: Padding(
@@ -123,7 +125,7 @@ class MoneyWidgetState extends ConsumerState<MoneyWidget>
                   AnimatedBuilder(
                     animation: Listenable.merge(
                         [_scaleAnimation, _opacityAnimation, _colorAnimation]),
-                    builder: (context, child) => Transform.scale(
+                    builder: (final context, final child) => Transform.scale(
                       scale: _scaleAnimation.value,
                       child: Opacity(
                         opacity: _opacityAnimation.value,

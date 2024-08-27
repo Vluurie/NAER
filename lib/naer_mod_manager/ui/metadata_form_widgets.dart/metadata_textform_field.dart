@@ -17,7 +17,7 @@ class MetaDataTextFormField extends StatelessWidget {
   final String? Function(String? p1)? validator;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(

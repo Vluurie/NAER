@@ -13,16 +13,16 @@ import 'package:path/path.dart';
 int conversionCounter = 0;
 
 Future<bool> handleXmlToYax(
-    String input,
+    final String input,
     String? output,
-    CliOptions args,
-    bool isFile,
-    bool isDirectory,
-    ListQueue<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+    final CliOptions args,
+    final ListQueue<String> pendingFiles,
+    final Set<String> processedFiles,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool isFile,
+    required final bool isDirectory,
+    required final bool? isManagerFile}) async {
   if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".xml")) return false;
   if (!isFile) return false;
@@ -39,16 +39,16 @@ Future<bool> handleXmlToYax(
 }
 
 Future<bool> handlePakRepack(
-    String input,
-    String? output,
-    CliOptions args,
-    bool isFile,
-    bool isDirectory,
-    ListQueue<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+    final String input,
+    final String? output,
+    final CliOptions args,
+    final ListQueue<String> pendingFiles,
+    final Set<String> processedFiles,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool isFile,
+    required final bool isDirectory,
+    required final bool? isManagerFile}) async {
   if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isDirectory) return false;
@@ -58,16 +58,16 @@ Future<bool> handlePakRepack(
 }
 
 Future<bool> handleDatRepack(
-    String input,
+    final String input,
     String? output,
-    CliOptions args,
-    bool isFile,
-    bool isDirectory,
-    ListQueue<String> pendingFiles,
-    Set<String> processedFiles,
-    List<String> activeOptions,
-    bool? ismanagerFile,
-    SendPort sendPort) async {
+    final CliOptions args,
+    final ListQueue<String> pendingFiles,
+    final Set<String> processedFiles,
+    final List<String> activeOptions,
+    final SendPort sendPort,
+    {required final bool isFile,
+    required final bool isDirectory,
+    required final bool? isManagerFile}) async {
   if (args.fileTypeIsKnown && !args.isDat) return false;
   if (!strEndsWithDat(input)) return false;
   if (!isDirectory) return false;

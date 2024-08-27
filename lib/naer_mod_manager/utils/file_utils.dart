@@ -3,12 +3,12 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final fileUtilsProvider = Provider<FileUtils>((ref) {
+final fileUtilsProvider = Provider<FileUtils>((final ref) {
   return FileUtils();
 });
 
 class FileUtils {
-  static Future<String> computeFileHash(File file) async {
+  static Future<String> computeFileHash(final File file) async {
     try {
       var contents = await file.readAsBytes();
       var digest = await compute(sha256.convert, contents);
@@ -20,7 +20,7 @@ class FileUtils {
   }
 
   static Future<void> deleteEmptyParentDirectories(
-      Directory directory, String rootPath) async {
+      final Directory directory, final String rootPath) async {
     if (directory.path == rootPath) {
       return;
     }

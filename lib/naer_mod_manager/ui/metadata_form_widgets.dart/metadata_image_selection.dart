@@ -6,8 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Column buildMetadataImageSelection(
-    String? selectedImagePath, WidgetRef ref, BuildContext context) {
+Column buildMetadataImageSelection(final String? selectedImagePath,
+    final WidgetRef ref, final BuildContext context) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -63,7 +63,7 @@ Column buildMetadataImageSelection(
   );
 }
 
-void pickImage(WidgetRef ref) async {
+void pickImage(final WidgetRef ref) async {
   final pickedFile = await FilePicker.platform.pickFiles(type: FileType.image);
   if (pickedFile != null) {
     ref

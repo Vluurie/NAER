@@ -4,13 +4,13 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-List<Widget> generateModificationDetails(WidgetRef ref) {
+List<Widget> generateModificationDetails(final WidgetRef ref) {
   final globalState = ref.watch(globalStateProvider);
   List<Widget> details = [];
 
   String enemyList = getSelectedEnemiesNames(ref);
   String categoryDetail = globalState.levelMap.entries
-      .firstWhere((entry) => entry.value,
+      .firstWhere((final entry) => entry.value,
           orElse: () => const MapEntry("None", false))
       .key;
 
@@ -140,7 +140,7 @@ List<Widget> generateModificationDetails(WidgetRef ref) {
                       runSpacing: 10,
                       children: enemyList
                           .split(',')
-                          .map((enemy) => Text("- $enemy",
+                          .map((final enemy) => Text("- $enemy",
                               style: TextStyle(
                                   fontSize: 16,
                                   color: AutomatoThemeColors.textDialogColor(
@@ -186,7 +186,7 @@ List<Widget> generateModificationDetails(WidgetRef ref) {
                       spacing: 10,
                       runSpacing: 10,
                       children: globalState.selectedImages
-                          .map((image) => Text("- $image",
+                          .map((final image) => Text("- $image",
                               style: TextStyle(
                                   fontSize: 16,
                                   color: AutomatoThemeColors.textDialogColor(
@@ -242,8 +242,8 @@ List<Widget> generateModificationDetails(WidgetRef ref) {
 
   // Selected Categories
   List<String> selectedCategories = globalState.categories.entries
-      .where((entry) => entry.value)
-      .map((entry) => entry.key)
+      .where((final entry) => entry.value)
+      .map((final entry) => entry.key)
       .toList();
   details.add(
     Column(
@@ -268,7 +268,7 @@ List<Widget> generateModificationDetails(WidgetRef ref) {
                   spacing: 10,
                   runSpacing: 10,
                   children: selectedCategories
-                      .map((category) => Text("- $category",
+                      .map((final category) => Text("- $category",
                           style: TextStyle(
                               fontSize: 16,
                               color: AutomatoThemeColors.textDialogColor(ref))))

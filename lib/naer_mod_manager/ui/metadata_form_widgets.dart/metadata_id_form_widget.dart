@@ -11,7 +11,7 @@ class MetadataIDFormFieldWidget extends StatelessWidget {
   final MetadataProvider metadata;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: Column(

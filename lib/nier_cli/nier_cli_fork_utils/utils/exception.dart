@@ -9,7 +9,7 @@ class FileHandlingException implements Exception {
   String toString() => message;
 }
 
-void handleExtractErrors(List<String> errorFiles) {
+void handleExtractErrors(final List<String> errorFiles) {
   if (errorFiles.isNotEmpty) {
     logAndPrint("Failed to extract ${errorFiles.length} files:");
     for (var file in errorFiles) {

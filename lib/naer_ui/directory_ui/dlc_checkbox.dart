@@ -24,24 +24,26 @@ class DLCCheckBoxState extends ConsumerState<DLCCheckBox> {
     final prefs = await SharedPreferences.getInstance();
     bool? savedValue = prefs.getBool('dlc');
     if (savedValue != null) {
-      ref.watch(globalStateProvider.notifier).updateDLCOption(savedValue);
+      ref
+          .watch(globalStateProvider.notifier)
+          .updateDLCOption(update: savedValue);
     }
   }
 
-  Future<void> _saveDLCOption(bool value) async {
+  Future<void> _saveDLCOption(final bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('dlc', value);
-    ref.watch(globalStateProvider.notifier).updateDLCOption(value);
+    ref.watch(globalStateProvider.notifier).updateDLCOption(update: value);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     final globalState = ref.watch(globalStateProvider);
 
     return FutureBuilder<void>(
       future: _loadDLCOptionFuture,
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
@@ -50,7 +52,7 @@ class DLCCheckBoxState extends ConsumerState<DLCCheckBox> {
           return AutomatoCheckBox(
             initialValue: globalState.hasDLC,
             textColorUnchecked: AutomatoThemeColors.primaryColor(ref),
-            onChanged: (bool? newValue) async {
+            onChanged: (final bool? newValue) async {
               final updatedValue = newValue ?? false;
               await _saveDLCOption(updatedValue);
               globalStateNotifier.updateCategories();

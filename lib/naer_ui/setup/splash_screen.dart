@@ -48,11 +48,11 @@ class SplashScreenState extends ConsumerState<SplashScreen>
 
     _controller.forward();
 
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((final status) {
       if (status == AnimationStatus.completed) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const EnemyRandomizerAppState(),
+            builder: (final context) => const EnemyRandomizerAppState(),
           ),
         );
       }
@@ -66,7 +66,7 @@ class SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -95,7 +95,7 @@ class SplashScreenState extends ConsumerState<SplashScreen>
               children: [
                 AnimatedBuilder(
                   animation: _bounceAnimation,
-                  builder: (context, child) {
+                  builder: (final context, final child) {
                     return Transform.translate(
                       offset: Offset(0, _bounceAnimation.value),
                       child: child,

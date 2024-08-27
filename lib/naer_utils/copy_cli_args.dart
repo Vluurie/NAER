@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void onCopyArgsPressed(BuildContext context, WidgetRef ref) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
+void onCopyArgsPressed(final BuildContext context, final WidgetRef ref) {
+  WidgetsBinding.instance.addPostFrameCallback((final _) {
     final globalState = ref.watch(globalStateProvider);
 
     if (globalState.customSelection) {
@@ -35,8 +35,8 @@ void onCopyArgsPressed(BuildContext context, WidgetRef ref) {
 }
 
 Future<void> _performCopyCLIArguments(
-  BuildContext context,
-  WidgetRef ref,
+  final BuildContext context,
+  final WidgetRef ref,
 ) async {
   final globalState = ref.watch(globalStateProvider);
   try {
@@ -57,25 +57,25 @@ Future<void> _performCopyCLIArguments(
   }
 }
 
-void copyToClipboard(List<String> command, BuildContext context) {
-  String formattedCommand = command.map((cmd) {
+void copyToClipboard(final List<String> command, final BuildContext context) {
+  String formattedCommand = command.map((final cmd) {
     if (cmd.contains('=') && (cmd.contains('[') && cmd.contains(']'))) {
       return cmd
           .replaceAll(' ', '')
           .replaceAll('",', '",')
-          .replaceAll('\'', '"');
+          .replaceAll("'", '"');
     } else {
       return cmd.startsWith('"') && cmd.endsWith('"') ? cmd : '"$cmd"';
     }
   }).join(' ');
 
-  Clipboard.setData(ClipboardData(text: formattedCommand)).then((result) {
+  Clipboard.setData(ClipboardData(text: formattedCommand)).then((final result) {
     const snackBar = SnackBar(content: Text('Command copied to clipboard'));
     globalLog("Copied Command: $formattedCommand");
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
-  }).catchError((e) {
+  }).catchError((final e) {
     globalLog("Error copying to clipboard: $e");
   });
 }

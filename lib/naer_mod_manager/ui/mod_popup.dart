@@ -13,7 +13,7 @@ class ModPopup extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AlertDialog(
       backgroundColor: const Color.fromARGB(255, 35, 34, 34),
       title: const Text(

@@ -10,8 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 class MetadataUtils {
-  static Future<void> saveMetadata(
-      WidgetRef ref, ModStateManager modStateManager, String? dlcValue) async {
+  static Future<void> saveMetadata(final WidgetRef ref,
+      final ModStateManager modStateManager, final String? dlcValue) async {
     final selectedDirectory = ref.watch(selectedDirectoryProvider);
     final formKey = ref.read(formKeyProvider);
     final idController = ref.read(idControllerProvider);
@@ -33,18 +33,18 @@ class MetadataUtils {
     if (formKey.currentState!.validate() && selectedDirectory != null) {
       final modId = idController.text.trim();
       final List<Map<String, String>> filesMetadata =
-          directoryContentsInfo.map((filePath) {
+          directoryContentsInfo.map((final filePath) {
         String relativePath = p.relative(filePath, from: selectedDirectory);
         String modFilePath = "$modId/${relativePath.replaceAll('\\', '/')}";
         return {"path": modFilePath};
       }).toList();
 
-      List<String> processIds(List<TextEditingController> controllers) {
+      List<String> processIds(final List<TextEditingController> controllers) {
         return controllers
-            .map((controller) => controller.text)
-            .expand((idString) => idString.split(','))
-            .where((id) => id.isNotEmpty)
-            .map((id) => id.trim())
+            .map((final controller) => controller.text)
+            .expand((final idString) => idString.split(','))
+            .where((final id) => id.isNotEmpty)
+            .map((final id) => id.trim())
             .toList();
       }
 
@@ -80,8 +80,8 @@ class MetadataUtils {
     }
   }
 
-  static Future<void> updateMetadata(Map<String, dynamic> newMod,
-      ModStateManager modStateManager, WidgetRef ref) async {
+  static Future<void> updateMetadata(final Map<String, dynamic> newMod,
+      final ModStateManager modStateManager, final WidgetRef ref) async {
     final directoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage";
     final metadataPath = p.join(directoryPath, 'mod_metadata.json');
@@ -104,8 +104,8 @@ class MetadataUtils {
     await modStateManager.fetchAndUpdateModsList();
   }
 
-  static Future<void> copyFilesToModPackage(
-      WidgetRef ref, String modId, List<Map<String, String>> files) async {
+  static Future<void> copyFilesToModPackage(final WidgetRef ref,
+      final String modId, final List<Map<String, String>> files) async {
     final modDirectoryPath =
         "${await FileChange.ensureSettingsDirectory()}/ModPackage/$modId";
     final modDirectory = Directory(modDirectoryPath);
@@ -136,7 +136,7 @@ class MetadataUtils {
     }
   }
 
-  static void addFileField(WidgetRef ref) async {
+  static void addFileField(final WidgetRef ref) async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
     if (selectedDirectory != null) {
       loadDirectoryContents(ref, selectedDirectory);
@@ -146,7 +146,7 @@ class MetadataUtils {
   }
 
   static void loadDirectoryContents(
-      WidgetRef ref, String selectedDirectory) async {
+      final WidgetRef ref, final String selectedDirectory) async {
     final validFolderNames = ref.read(validFolderNamesProvider);
     ref.read(selectedDirectoryProvider.notifier).state = selectedDirectory;
 
@@ -158,10 +158,10 @@ class MetadataUtils {
       if (entity is File) {
         String filePath = entity.path;
         List<String> pathComponents =
-            p.split(entity.path).map((e) => e.toLowerCase()).toList();
+            p.split(entity.path).map((final e) => e.toLowerCase()).toList();
 
         bool isInValidFolder = pathComponents
-            .any((component) => validFolderNames.contains(component));
+            .any((final component) => validFolderNames.contains(component));
         bool isInExcludedDir =
             pathComponents.contains('nier2blender_extracted'.toLowerCase());
 

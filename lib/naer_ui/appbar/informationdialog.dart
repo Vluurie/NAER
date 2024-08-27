@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
@@ -6,7 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void showInformationDialog(BuildContext context, WidgetRef ref) {
+void showInformationDialog(final BuildContext context, final WidgetRef ref) {
   AutomatoDialogManager().showInfoDialog(
     context: context,
     ref: ref,
@@ -138,8 +140,10 @@ void showInformationDialog(BuildContext context, WidgetRef ref) {
   );
 }
 
-Widget _buildLinkButton(WidgetRef ref,
-    {required String label, required String url, required IconData icon}) {
+Widget _buildLinkButton(final WidgetRef ref,
+    {required final String label,
+    required final String url,
+    required final IconData icon}) {
   return ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
       backgroundColor: AutomatoThemeColors.darkBrown(ref),
@@ -161,7 +165,7 @@ Widget _buildLinkButton(WidgetRef ref,
   );
 }
 
-Future<void> _launchURL(String urlStr) async {
+Future<void> _launchURL(final String urlStr) async {
   final Uri url = Uri.parse(urlStr);
   if (await canLaunchUrl(url)) {
     await launchUrl(url, mode: LaunchMode.inAppWebView);
@@ -170,7 +174,8 @@ Future<void> _launchURL(String urlStr) async {
   }
 }
 
-void showIgnoredFilesDialog(BuildContext context, WidgetRef ref) async {
+void showIgnoredFilesDialog(
+    final BuildContext context, final WidgetRef ref) async {
   final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
   // Load ignored files from SharedPreferences
@@ -180,7 +185,7 @@ void showIgnoredFilesDialog(BuildContext context, WidgetRef ref) async {
   globalStateNotifier.updateIgnoredModFiles(ignoredFiles);
 
   if (context.mounted) {
-    await AutomatoDialogManager().showInfoDialog(
+    unawaited(AutomatoDialogManager().showInfoDialog(
       context: context,
       ref: ref,
       title: "Ignored Files",
@@ -195,7 +200,8 @@ void showIgnoredFilesDialog(BuildContext context, WidgetRef ref) async {
               ),
             )
           : StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder:
+                  (final BuildContext context, final StateSetter setState) {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -205,7 +211,7 @@ void showIgnoredFilesDialog(BuildContext context, WidgetRef ref) async {
                           300, // Set a fixed height to make the list scrollable
                       child: ListView.builder(
                         itemCount: ignoredFiles.length,
-                        itemBuilder: (context, index) {
+                        itemBuilder: (final context, final index) {
                           String file = ignoredFiles[index];
                           return Card(
                             margin: const EdgeInsets.symmetric(
@@ -284,7 +290,6 @@ void showIgnoredFilesDialog(BuildContext context, WidgetRef ref) async {
       onOkPressed: () {
         Navigator.of(context).pop();
       },
-      okLabel: "OK",
-    );
+    ));
   }
 }

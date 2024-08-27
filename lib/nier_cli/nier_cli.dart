@@ -12,7 +12,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/modify_arguments.dart';
 import 'package:args/args.dart';
 
 /// The main function for the Nier CLI tool refactored and modified for enemy randomization, level and boss stats.
-Future<void> nierCli(NierCliArgs cliArgs) async {
+Future<void> nierCli(final NierCliArgs cliArgs) async {
   try {
     var t1 = DateTime.now();
 

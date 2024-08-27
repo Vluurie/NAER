@@ -18,7 +18,7 @@ class SetupUtils {
 
   const SetupUtils(this.ref, this.context);
 
-  Future<void> installSetup(SetupConfigData setup) async {
+  Future<void> installSetup(final SetupConfigData setup) async {
     ref.read(setupLoadingProvider.notifier).state = setup.id;
     final selectedSetup =
         ref.read(setupConfigProvider.notifier).getCurrentSelectedSetup();
@@ -35,7 +35,7 @@ class SetupUtils {
     }
   }
 
-  void toggleSetupSelection(SetupConfigData setup) async {
+  void toggleSetupSelection(final SetupConfigData setup) async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     final globalState = ref.read(globalStateProvider);
 
@@ -61,7 +61,7 @@ class SetupUtils {
     }
   }
 
-  void _selectSetup(SetupConfigData setup) async {
+  void _selectSetup(final SetupConfigData setup) async {
     final globalState = ref.read(globalStateProvider);
     if (!validateInputOutput(globalState)) {
       globalLog("Error: Please select both input and output directories. 💋 ");
@@ -77,13 +77,13 @@ class SetupUtils {
     }
   }
 
-  void _deselectSetup(SetupConfigData setup) {
+  void _deselectSetup(final SetupConfigData setup) {
     ref.read(setupStateProvider.notifier).deselectSetup();
     globalLog('SETUP DESELECTED.');
     ref.read(setupLoadingProvider.notifier).state = null;
   }
 
-  void deleteSetup(SetupConfigData setup) async {
+  void deleteSetup(final SetupConfigData setup) async {
     if (!setup.isSelected) {
       final setupNotifier = ref.read(setupConfigProvider.notifier);
       setupNotifier.removeConfig(setup);
