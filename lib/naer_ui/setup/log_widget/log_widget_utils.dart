@@ -26,6 +26,7 @@ class LogWidgetUtils {
           !lastMessage.contains("Affected mods") &&
           !lastMessage.contains("Balance Mode") &&
           !lastMessage.contains("All data") &&
+          !lastMessage.contains("You are on") &&
           !lastMessage.contains("Failed") &&
           !lastMessage.contains("Ignore") &&
           !lastMessage.contains("Loaded") &&

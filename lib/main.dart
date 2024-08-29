@@ -1,14 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:developer';
-import 'dart:isolate';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
-import 'package:NAER/naer_cli/console_service.dart';
-import 'package:NAER/naer_cli/handle_guided_argument.dart';
+import 'package:NAER/naer_cli/handle_cli.dart';
 import 'package:NAER/naer_services/error_utils/windows_close_handler.dart';
 import 'package:NAER/naer_ui/appbar/appbar.dart';
 import 'package:NAER/naer_ui/dialog/input_output_file_dialog.dart';
@@ -23,9 +20,6 @@ import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/naer_utils/update_util.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
-import 'package:NAER/nier_cli/nier_cli_isolation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,68 +29,9 @@ import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:provider/provider.dart' as provider;
 
-void main(List<String> arguments) async {
-  bool isBalanceMode = false;
-  bool hasDLC = false;
-  bool backUp = false;
-  bool guided = arguments.contains('--guided');
-
-  // // Test mode: predefined arguments
-  // if (arguments.isEmpty) {
-  //   arguments = [
-  //     r'D:\SteamLibrary\steamapps\common\NieRAutomata\data',
-  //     '--output',
-  //     r'D:\SteamLibrary\steamapps\common\NieRAutomata\data',
-  //     'ALL',
-  //     '--enemies',
-  //     '[em3000]',
-  //     '--enemyStats',
-  //     '5.0',
-  //     '--level=99',
-  //     '--p100',
-  //     '--category=allenemies',
-  //     '--backUp',
-  //   ];
-  //   print('test arguments: $arguments');
-  // }
-
-  if (guided) {
-    List<String> guidedArgs = await guidedMode();
-    arguments = guidedArgs;
-  }
-
-  // Process the arguments
+void main(final List<String> arguments) async {
   if (arguments.isNotEmpty) {
-    for (String arg in arguments) {
-      if (arg == '--balance') {
-        isBalanceMode = true;
-      } else if (arg == '--dlc') {
-        hasDLC = true;
-      } else if (arg == '--backUp') {
-        backUp = true;
-      }
-    }
-
-    final receivePort = ReceivePort();
-    final cmh = ConsoleMessageHandler();
-    cmh.listenToReceivePort(receivePort);
-    Map<String, dynamic> args = {
-      'processArgs': arguments,
-      'isManagerFile': false,
-      'sendPort': receivePort.sendPort,
-      'isBalanceMode': isBalanceMode,
-      'hasDLC': hasDLC,
-      'backUp': backUp,
-    };
-
-    await compute(runNierCliIsolated, args);
-    cmh.printAsciiMessage("Cleaning Input: ${arguments[0]}");
-    await deleteExtractedGameFolders(arguments[0]);
-    cmh.printAsciiMessage('''
-                                                                                                                                       
-                  All modifications were successfully completed!
-  ''');
-    exit(0);
+    handleCommandLineExecution(arguments);
   } else {
     WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
@@ -217,14 +152,28 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
 
   Future<void> _checkForUpdate() async {
     final updateService = UpdateService();
+
     try {
+      await updateService.showLoadingDialog(context, ref);
+
       final latestRelease = await updateService.getLatestRelease();
+
+      Navigator.of(context).pop();
+
       if (latestRelease != null &&
           updateService.isUpdateAvailable(latestRelease['version']!)) {
-        updateService.showUpdateDialog(context, ref, latestRelease['version']!,
-            latestRelease['description']!);
+        updateService.showUpdateDialog(
+          context,
+          ref,
+          latestRelease['version']!,
+          latestRelease['description']!,
+          latestRelease['installerUrl']!,
+        );
+      } else {
+        globalLog("You are on the latest Version of NAER!");
       }
     } catch (e) {
+      Navigator.of(context).pop();
       globalLog('Failed to check for updates: $e');
     }
   }

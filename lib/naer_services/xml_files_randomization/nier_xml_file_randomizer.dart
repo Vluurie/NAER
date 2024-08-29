@@ -14,7 +14,6 @@ import 'package:xml/xml.dart';
 
 int processedFileCount = 0;
 
-///TODO: Fly group needs to be empy since it will change em0030 to ""
 /// Randomizes and sets a new enemy number for the given action XML element.
 ///
 /// Selects a new random enemy number from the user-selected data map and

@@ -42,12 +42,6 @@ class SecondPageState extends ConsumerState<SecondPage>
         modLoaderWidgetOpacity = 1.0;
       });
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((final _) {
-      final modStateManager =
-          provider.Provider.of<ModStateManager>(context, listen: false);
-      modStateManager.toggleVerification();
-    });
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:NAER/naer_ui/button/donate_button.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,10 +112,15 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
     );
   }
 
-  Text logoText(final BuildContext context, final WidgetRef ref,
+  Widget logoText(final BuildContext context, final WidgetRef ref,
       {required final bool isLargeScreen}) {
-    return Text(
-      'NAER v3.6a',
+    final String currentVersion =
+        dotenv.env['CURRENT_VERSION'] ?? 'Unknown Version';
+
+    const String buildMode = kDebugMode ? 'DEBUG BUILD' : '';
+
+    final Text mainTitle = Text(
+      'NAER',
       style: TextStyle(
         fontSize: isLargeScreen ? 48.0 : 24.0,
         color: AutomatoThemeColors.darkBrown(ref),
@@ -126,6 +132,36 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
           ),
         ],
       ),
+    );
+
+    final Text versionText = Text(
+      '$currentVersion $buildMode',
+      style: TextStyle(
+        fontSize: isLargeScreen ? 16.0 : 20.0,
+        color: AutomatoThemeColors.primaryColor(ref),
+        fontWeight: FontWeight.w700,
+      ),
+    );
+
+    return Row(
+      children: [
+        mainTitle,
+        const SizedBox(width: 8.0),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                offset: const Offset(3.0, 3),
+                color: AutomatoThemeColors.hoverBrown(ref).withOpacity(0.5),
+              )
+            ],
+            color: AutomatoThemeColors.darkBrown(ref),
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          child: versionText,
+        ),
+      ],
     );
   }
 

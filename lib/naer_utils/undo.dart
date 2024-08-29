@@ -5,10 +5,11 @@ import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void undoLastModification(final WidgetRef ref) async {
+void undoLastModification(final WidgetRef ref,
+    {required final bool isAddition}) async {
   final globalState = ref.read(globalStateProvider.notifier);
   await FileChange.loadChanges();
-  await FileChange.undoChanges();
+  await FileChange.undoChanges(isAddition: isAddition);
 
   final createdFiles = globalState.readCreatedFiles();
 

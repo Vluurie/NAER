@@ -51,7 +51,8 @@ class ModifyDraggedFile {
             'sendPort': receivePort.sendPort,
             'backUp': false,
             'isBalanceMode': globalState.readIsBalanceMode(),
-            'hasDLC': globalState.readHasDLC()
+            'hasDLC': globalState.readHasDLC(),
+            'isAddition': false
           };
           globalState.setIsModManagerPageProcessing(
               isModManagerPageProcessing: true);

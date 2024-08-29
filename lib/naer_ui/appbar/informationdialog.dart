@@ -90,7 +90,7 @@ void showInformationDialog(final BuildContext context, final WidgetRef ref) {
           ),
           const SizedBox(height: 16),
           Text(
-            "A special shoutout goes to RaiderB for his incredible work on both NieR CLI and the Scripting Tool (F-Servo), which were essential for creating and debugging the modifications. He also helped on the code for repacking/extracting at the very beginning. Alsothe contributions from the entire modding community have made this tool possible.",
+            "A special shoutout goes to RaiderB for his incredible work on both NieR CLI and the Scripting Tool (F-Servo), which were essential for creating and debugging the modifications. He also helped on the code for repacking/extracting at the very beginning. Also the contributions from the entire modding community have made this tool possible.",
             style: TextStyle(
               color: AutomatoThemeColors.textDialogColor(ref),
               fontSize: 16,

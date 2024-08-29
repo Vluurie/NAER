@@ -12,8 +12,10 @@ class FileChange {
   String filePath;
   String action;
   String? originalFilePath;
+  bool isAddition;
 
-  FileChange(this.filePath, this.action, [this.originalFilePath]);
+  FileChange(this.filePath, this.action, this.isAddition,
+      [this.originalFilePath]);
 
   static String get settingsDirectoryPath {
     return 'NAER_Settings';
@@ -32,8 +34,12 @@ class FileChange {
   }
 
   static void logChange(final String filePath, final String action,
-      [final String? originalFilePath]) {
-    changes.add(FileChange(filePath, action, originalFilePath));
+      {required final bool isAddition, final String? originalFilePath}) {
+    final change = FileChange(filePath, action, isAddition, originalFilePath);
+    changes.add(change);
+    if (isAddition) {
+      ignoredFiles.add(filePath);
+    }
   }
 
   static Future<void> saveIgnoredFiles() async {
@@ -53,24 +59,23 @@ class FileChange {
     await loadIgnoredFiles();
     ignoredFiles.removeWhere((final file) => filesToRemove.contains(file));
     await saveIgnoredFiles();
-    //print('Removed files and updated ignoredFiles');
   }
 
-  static Future<void> undoChanges() async {
+  static Future<void> undoChanges({required final bool isAddition}) async {
     for (FileChange change in changes.reversed) {
       try {
-        if (change.action == 'create' &&
-            !ignoredFiles.contains(change.filePath)) {
-          var file = File(change.filePath);
-          if (await file.exists()) {
-            await file.delete();
-          }
-        } else if (change.action == 'modify' &&
-            change.originalFilePath != null) {
-          var originalFile = File(change.originalFilePath!);
-          await originalFile.copy(change.filePath);
-        } else if (change.action == 'delete') {
-          // ...
+        if (change.isAddition == isAddition) {
+          if (change.action == 'create' &&
+              !ignoredFiles.contains(change.filePath)) {
+            var file = File(change.filePath);
+            if (await file.exists()) {
+              await file.delete();
+            }
+          } else if (change.action == 'modify' &&
+              change.originalFilePath != null) {
+            var originalFile = File(change.originalFilePath!);
+            await originalFile.copy(change.filePath);
+          } else if (change.action == 'delete') {}
         }
       } catch (e) {
         if (kDebugMode) {
@@ -79,14 +84,14 @@ class FileChange {
         }
       }
     }
-    changes.clear();
+    changes.removeWhere((final change) => change.isAddition == isAddition);
+    await saveChanges();
   }
 
   static Future<void> saveChanges() async {
     final prefs = await SharedPreferences.getInstance();
     String jsonData = jsonEncode(changes.map((final c) => c.toJson()).toList());
     await prefs.setString('file_changes', jsonData);
-    //print("Saved changed $changes");
   }
 
   static Future<void> loadChanges() async {
@@ -100,12 +105,14 @@ class FileChange {
         'filePath': filePath,
         'action': action,
         'originalFilePath': originalFilePath,
+        'isAddition': isAddition,
       };
 
   static FileChange fromJson(final Map<String, dynamic> json) {
     return FileChange(
       json['filePath'],
       json['action'],
+      json['isAddition'] ?? false,
       json['originalFilePath'],
     );
   }
@@ -141,8 +148,7 @@ class FileChange {
       DateTime parsedTime =
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(formattedTime);
       if (kDebugMode) {
-        // print(
-        //     "Loaded pre-randomization time from SharedPreferences: $parsedTime");
+        LogState().addLog("Loaded pre-randomization time: $formattedTime");
       }
       return parsedTime;
     } catch (e) {

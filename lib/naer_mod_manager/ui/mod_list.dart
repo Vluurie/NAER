@@ -729,6 +729,7 @@ class _ModsListState extends ConsumerState<ModsList>
         'backUp': false,
         'isBalanceMode': globalState.readIsBalanceMode(),
         'hasDLC': globalState.readHasDLC(),
+        'isAddition': false
       };
       globalState.setIsModManagerPageProcessing(
           isModManagerPageProcessing: true);

@@ -12,13 +12,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 Future<void> handleStartModification(
-  final BuildContext context,
-  final WidgetRef ref,
-  final Future<void> Function(BuildContext, List<String>, WidgetRef,
-          {required bool backUp})
-      modifyMethod,
-  final List<String> arguments,
-) async {
+    final BuildContext context,
+    final WidgetRef ref,
+    final Future<void> Function(BuildContext, List<String>, WidgetRef,
+            {required bool backUp, bool isAddition})
+        modifyMethod,
+    final List<String> arguments,
+    {required final bool isAddition}) async {
   bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
   if (!isNierRunning) {
     bool backUp = await showBackupDialog(context, ref);
@@ -34,7 +34,8 @@ Future<void> handleStartModification(
         await FileChange.savePreRandomizationTime();
         final stopwatch = Stopwatch()..start();
         if (context.mounted) {
-          await modifyMethod(context, arguments, ref, backUp: backUp);
+          await modifyMethod(context, arguments, ref,
+              backUp: backUp, isAddition: isAddition);
         }
         await FileChange.saveChanges();
         stopwatch.stop();

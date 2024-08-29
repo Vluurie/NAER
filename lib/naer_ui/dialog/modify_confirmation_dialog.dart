@@ -12,8 +12,9 @@ void showModifyDialogAndModify(
     final BuildContext context,
     final WidgetRef ref,
     final Future<void> Function(BuildContext, List<String>, WidgetRef,
-            {required bool backUp})
-        modifyMethod) {
+            {required bool backUp, bool isAddition})
+        modifyMethod,
+    {required final bool isAddition}) {
   List<Widget> modificationDetails = generateModificationDetails(ref);
 
   AutomatoDialogManager().showYesNoDialog(
@@ -55,7 +56,8 @@ void showModifyDialogAndModify(
       CLIArguments cliArgs = await getGlobalArguments(ref);
       List<String> arguments = cliArgs.processArgs;
       if (context.mounted) {
-        await handleStartModification(context, ref, modifyMethod, arguments);
+        await handleStartModification(context, ref, modifyMethod, arguments,
+            isAddition: isAddition);
       }
     },
     onNoPressed: () {

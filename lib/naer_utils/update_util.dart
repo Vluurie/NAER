@@ -1,10 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:path/path.dart' as path;
 
 class UpdateService {
   final String currentVersion = dotenv.env['CURRENT_VERSION']!;
@@ -21,10 +23,15 @@ class UpdateService {
       final data = jsonDecode(response.body);
       final version = data['tag_name'] as String?;
       final description = data['body'] as String?;
-      if (version != null && description != null) {
+      final installerUrl = data['assets']?.firstWhere((final asset) =>
+          (asset['name'] as String)
+              .contains('.exe'))['browser_download_url'] as String?;
+
+      if (version != null && description != null && installerUrl != null) {
         return {
           'version': version,
           'description': description,
+          'installerUrl': installerUrl,
         };
       }
     } else {
@@ -37,8 +44,29 @@ class UpdateService {
     return latestVersion.compareTo(currentVersion) > 0;
   }
 
-  void showUpdateDialog(final BuildContext context, final WidgetRef ref,
-      final String latestVersion, final String description) {
+  Future<void> showLoadingDialog(
+      final BuildContext context, final WidgetRef ref) async {
+    unawaited(showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (final BuildContext context) {
+        return Center(
+          child: AutomatoLoading(
+            color: AutomatoThemeColors.bright(ref),
+            translateX: 0,
+            svgString: AutomatoSvgStrings.automatoSvgStrHead,
+          ),
+        );
+      },
+    ));
+  }
+
+  void showUpdateDialog(
+      final BuildContext context,
+      final WidgetRef ref,
+      final String latestVersion,
+      final String description,
+      final String installerUrl) {
     AutomatoDialogManager().showInfoDialog(
       context: context,
       titleColor: AutomatoThemeColors.textDialogColor(ref),
@@ -118,21 +146,86 @@ class UpdateService {
           )
         ],
       ),
-      onOkPressed: () {
-        _launchURL(naerNexusMods);
+      onOkPressed: () async {
         Navigator.of(context).pop();
+        await _downloadAndRunInstaller(context, ref, installerUrl);
       },
-      okLabel: "Get it on Nexusmods",
+      okLabel: "Update Now",
       ref: ref,
     );
   }
 
-  Future<void> _launchURL(final String urlStr) async {
+  Future<void> _downloadAndRunInstaller(final BuildContext context,
+      final WidgetRef ref, final String urlStr) async {
+    await showLoadingDialog(context, ref);
+
     final Uri url = Uri.parse(urlStr);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.inAppWebView);
+    final String installerFileName = path.basename(url.path);
+    final Directory tempDir = Directory.systemTemp;
+    final String installerFilePath = path.join(tempDir.path, installerFileName);
+
+    final http.Client client = http.Client();
+    final http.Request request = http.Request('GET', url);
+    final http.StreamedResponse response = await client.send(request);
+
+    if (response.statusCode == 200) {
+      final File file = File(installerFilePath);
+      final IOSink sink = file.openWrite();
+      await response.stream.pipe(sink);
+      await sink.flush();
+      await sink.close();
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (await file.exists()) {
+        await Process.start(installerFilePath, []).then((final process) {
+          process.exitCode.then((final exitCode) {
+            if (exitCode == 0) {
+              print("Installer executed successfully.");
+            } else {
+              print("Installer execution failed with exit code $exitCode.");
+            }
+          });
+        });
+      }
     } else {
-      throw 'Could not launch $url';
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      throw Exception('Failed to download the installer.');
+    }
+  }
+
+  Future<void> checkForUpdates(
+      final BuildContext context, final WidgetRef ref) async {
+    await showLoadingDialog(context, ref);
+
+    try {
+      final latestRelease = await getLatestRelease();
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (latestRelease != null) {
+        final latestVersion = latestRelease['version']!;
+        final description = latestRelease['description']!;
+        final installerUrl = latestRelease['installerUrl']!;
+
+        if (isUpdateAvailable(latestVersion)) {
+          if (context.mounted) {
+            showUpdateDialog(
+                context, ref, latestVersion, description, installerUrl);
+          }
+        } else {
+          print('No update available.');
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      print('Error checking for updates: $e');
     }
   }
 }

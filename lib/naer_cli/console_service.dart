@@ -29,12 +29,11 @@ class ConsoleMessageHandler {
   /// Saves the exported modified files in [SharedPreferences]:
   ///  ['filePath'],
   ///  ['action'],
+  ///  ['isAddition'],
   void _handleExportedFilesMessage(final Map<String, dynamic> message) {
     if (message['event'] == 'file_change') {
       FileChange.changes.add(FileChange(
-        message['filePath'],
-        message['action'],
-      ));
+          message['filePath'], message['action'], message['isAddition']));
     }
   }
 

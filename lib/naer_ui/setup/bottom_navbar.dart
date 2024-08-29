@@ -202,7 +202,7 @@ class NaerBottomNavigationBar extends ConsumerWidget {
         bool isNierRunning =
             ProcessService.isProcessRunning("NieRAutomata.exe");
         if (!isNierRunning) {
-          showUndoConfirmation(context, ref);
+          showUndoConfirmation(context, ref, isAddition: false);
         } else {
           showNierIsRunningDialog(context, ref);
         }
@@ -218,7 +218,8 @@ class NaerBottomNavigationBar extends ConsumerWidget {
   void _onPressedAction(final BuildContext context, final WidgetRef ref) {
     final globalState = ref.read(globalStateProvider);
     if (globalState.isButtonEnabled) {
-      showModifyDialogAndModify(context, ref, startModificationProcess);
+      showModifyDialogAndModify(context, ref, startModificationProcess,
+          isAddition: false);
     }
   }
 }

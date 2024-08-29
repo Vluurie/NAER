@@ -137,12 +137,14 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
             isManagerFile: mainData.isManagerFile);
 
         // Log the file change and send it to the main isolate
-        FileChange.logChange(datOutput, 'create');
+        FileChange.logChange(datOutput, 'create',
+            isAddition: mainData.isAddition);
         logState.addLog("Folder created: $datOutput");
         mainData.sendPort.send({
           'event': 'file_change',
           'filePath': datOutput,
-          'action': 'create'
+          'action': 'create',
+          'isAddition': mainData.isAddition
         });
       } catch (e, stackTrace) {
         logAndPrint("Failed to process DAT folder");

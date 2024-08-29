@@ -1,5 +1,4 @@
 import 'dart:isolate';
-
 import 'package:NAER/naer_ui/dialog/complete_dialog.dart';
 import 'package:NAER/naer_ui/other/ascii_art.dart';
 import 'package:NAER/naer_utils/change_tracker.dart';
@@ -12,9 +11,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+//TODO: Handle no selection of dialogs
+//TODO: Handle bug if no dlc exist
+//TODO: Create a list of found nier automata paths if there are multiple
+
 Future<void> startModificationProcess(final BuildContext context,
     final List<String> arguments, final WidgetRef ref,
-    {required final bool backUp}) async {
+    {required final bool backUp, final bool isAddition = false}) async {
   final globalState = ref.read(globalStateProvider.notifier);
   final globalStateRiverPod = ref.read(globalStateProvider);
 
@@ -30,7 +33,8 @@ Future<void> startModificationProcess(final BuildContext context,
   globalLog("Starting modification process... 🏃‍➡️");
 
   try {
-    await runProcessInIsolate(arguments, globalStateRiverPod, backUp: backUp);
+    await runProcessInIsolate(arguments, globalStateRiverPod,
+        backUp: backUp, isAddition: isAddition);
     LogState().clearLogs();
   } on Exception catch (e) {
     globalLog("Error occurred: $e");
@@ -54,10 +58,8 @@ void initializeProcess(final GlobalStateNotifier globalState) {
 }
 
 Future<void> runProcessInIsolate(
-  final List<String> arguments,
-  final GlobalState globalState, {
-  required final bool backUp,
-}) async {
+    final List<String> arguments, final GlobalState globalState,
+    {required final bool backUp, required final bool isAddition}) async {
   bool isManagerFile = false;
   final receivePort = ReceivePort();
 
@@ -72,20 +74,18 @@ Future<void> runProcessInIsolate(
     'backUp': backUp,
     'isBalanceMode': globalState.isBalanceMode,
     'hasDLC': globalState.hasDLC,
+    'isAddition': isAddition
   };
 
-  // separate compute
   await compute(runNierCliIsolated, args);
 }
 
 void handleIsolateMessage(final dynamic message) {
   if (message is Map<String, dynamic>) {
     if (message['event'] == 'file_change') {
-      logState.addLog("File created: ${message['filePath']}");
-      FileChange.changes.add(FileChange(
-        message['filePath'],
-        message['action'],
-      ));
+      logState.addLog("File ${message['action']}d: ${message['filePath']}");
+      FileChange.logChange(message['filePath'], message['action'],
+          isAddition: message['isAddition']);
     } else if (message['event'] == 'error') {
       logState.addLog(
           "Error: ${message['details']}\nStack Trace: ${message['stackTrace']}");
@@ -100,6 +100,7 @@ void finalizeProcess(final BuildContext context, final WidgetRef ref,
   globalState.setIsLoading(isLoading: false);
   globalLog(asciiArt2B);
   globalLog("Modification process finished.");
+  FileChange.saveIgnoredFiles();
   if (context.mounted) {
     showCompletionDialog(context, ref, globalState.readInput());
   }

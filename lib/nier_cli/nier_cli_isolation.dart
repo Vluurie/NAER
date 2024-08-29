@@ -11,15 +11,16 @@ Future<void> runNierCliIsolated(final Map<String, dynamic> arguments) async {
   bool? backUp = arguments['backUp'];
   bool? isBalanceMode = arguments['isBalanceMode'];
   bool? hasDLC = arguments['hasDLC'];
+  bool isAddition = arguments['isAddition'];
 
   NierCliArgs cliArgs = NierCliArgs(
-    arguments: processArgs,
-    sendPort: sendPort,
-    isManagerFile: isManagerFile,
-    isBalanceMode: isBalanceMode,
-    backUp: backUp,
-    hasDLC: hasDLC,
-  );
+      arguments: processArgs,
+      sendPort: sendPort,
+      isManagerFile: isManagerFile,
+      isBalanceMode: isBalanceMode,
+      backUp: backUp,
+      hasDLC: hasDLC,
+      isAddition: isAddition);
 
   try {
     await nierCli(cliArgs);

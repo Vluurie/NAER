@@ -25,7 +25,8 @@ class AdditionsUtils {
     if (selectedAddition != null) {
       final arguments = selectedAddition.generateArguments(ref);
       await handleStartModification(
-          context, ref, startModificationProcess, arguments);
+          context, ref, startModificationProcess, arguments,
+          isAddition: true);
       ref.read(additionLoadingProvider.notifier).state = null;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +54,8 @@ class AdditionsUtils {
       if (isNierRunning) {
         showNierIsRunningDialog(context, ref);
       } else {
-        bool confirmUndo = await showUndoConfirmation(context, ref);
+        bool confirmUndo =
+            await showUndoConfirmation(context, ref, isAddition: true);
         if (confirmUndo) {
           _deselectAddition(addition);
         }

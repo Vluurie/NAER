@@ -25,7 +25,8 @@ class SetupUtils {
     if (selectedSetup != null) {
       final arguments = selectedSetup.generateArguments(ref);
       await handleStartModification(
-          context, ref, startModificationProcess, arguments);
+          context, ref, startModificationProcess, arguments,
+          isAddition: false);
       ref.read(setupLoadingProvider.notifier).state = null;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +54,8 @@ class SetupUtils {
       if (isNierRunning) {
         showNierIsRunningDialog(context, ref);
       } else {
-        bool confirmUndo = await showUndoConfirmation(context, ref);
+        bool confirmUndo =
+            await showUndoConfirmation(context, ref, isAddition: false);
         if (confirmUndo) {
           _deselectSetup(setup);
         }

@@ -15,19 +15,20 @@ class MainData {
   final bool? backUp;
   final bool? isBalanceMode;
   final bool? hasDLC;
+  final bool isAddition;
 
-  MainData({
-    required this.argument,
-    required this.sortedEnemyGroupsIdentifierMap,
-    required this.options,
-    this.isManagerFile,
-    required this.output,
-    required this.args,
-    required this.sendPort,
-    this.backUp,
-    this.isBalanceMode,
-    required this.hasDLC,
-  });
+  MainData(
+      {required this.argument,
+      required this.sortedEnemyGroupsIdentifierMap,
+      required this.options,
+      this.isManagerFile,
+      required this.output,
+      required this.args,
+      required this.sendPort,
+      this.backUp,
+      this.isBalanceMode,
+      required this.hasDLC,
+      required this.isAddition});
 
   @override
   String toString() {
@@ -53,6 +54,7 @@ class NierCliArgs {
   final bool? backUp;
   final bool? isBalanceMode;
   final bool? hasDLC;
+  final bool isAddition;
 
   NierCliArgs(
       {required this.arguments,
@@ -60,7 +62,8 @@ class NierCliArgs {
       required this.sendPort,
       this.backUp,
       this.isBalanceMode,
-      this.hasDLC});
+      this.hasDLC,
+      required this.isAddition});
 
   @override
   String toString() {

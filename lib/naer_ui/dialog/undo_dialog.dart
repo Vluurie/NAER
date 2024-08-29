@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<bool> showUndoConfirmation(
-    final BuildContext context, final WidgetRef ref) {
+    final BuildContext context, final WidgetRef ref,
+    {required final bool isAddition}) {
   Completer<bool> completer = Completer<bool>();
 
   AutomatoDialogManager().showYesNoDialog(
@@ -26,7 +27,7 @@ Future<bool> showUndoConfirmation(
       ],
     ),
     onYesPressed: () {
-      undoLastModification(ref);
+      undoLastModification(ref, isAddition: isAddition);
       completer.complete(true);
       Navigator.of(context).pop();
     },
