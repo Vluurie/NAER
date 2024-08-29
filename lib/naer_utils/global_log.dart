@@ -24,7 +24,12 @@ void globalLog(final String message) {
     return;
   }
 
-  final processedLog = LogState.processLog(message);
+  final now = DateTime.now();
+  final formattedDateTime =
+      '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
+      '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+
+  final processedLog = LogState.processLog('[$formattedDateTime] $message');
 
   LogState().addLog(processedLog);
 }

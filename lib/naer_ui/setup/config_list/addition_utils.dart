@@ -9,6 +9,7 @@ import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/addition_state.dart';
+import 'package:NAER/naer_utils/undo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,6 +74,7 @@ class AdditionsUtils {
         await showStartSetupDialog(ref, context, addition);
     if (shouldStartAddition!) {
       ref.read(additionConfigProvider.notifier).selectAddition(addition.id);
+      await undoLastModification(ref, isAddition: true);
       installAddition(addition);
       globalLog('STARTED NEW MODIFICATION ADDITION.');
     } else {

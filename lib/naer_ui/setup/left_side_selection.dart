@@ -132,7 +132,7 @@ class LeftSideSelection extends ConsumerWidget {
 
     if (!tutorialShown && !ref.read(tutorialAttemptedProvider)) {
       ref.read(tutorialAttemptedProvider.notifier).markTutorialAttempted();
-      await Future.delayed(const Duration(milliseconds: 1000));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       if (_addButtonKey.currentContext != null &&
           _toggleButtonKey.currentContext != null) {

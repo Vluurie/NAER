@@ -5,14 +5,12 @@ import 'dart:isolate';
 import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:path/path.dart' as path;
 
@@ -136,10 +134,7 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
             mainData.sendPort,
             isManagerFile: mainData.isManagerFile);
 
-        // Log the file change and send it to the main isolate
-        FileChange.logChange(datOutput, 'create',
-            isAddition: mainData.isAddition);
-        logState.addLog("Folder created: $datOutput");
+        // Send the file change details back to the main isolate
         mainData.sendPort.send({
           'event': 'file_change',
           'filePath': datOutput,
@@ -147,9 +142,6 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
           'isAddition': mainData.isAddition
         });
       } catch (e, stackTrace) {
-        logAndPrint("Failed to process DAT folder");
-        logAndPrint(e.toString());
-
         // Send error message to the main isolate
         mainData.sendPort.send({
           'event': 'error',

@@ -99,7 +99,6 @@ Future<CLIArguments> gatherCLIArguments(
   if (ignoredModFiles.isNotEmpty) {
     String ignoreArgs = '--ignore=${ignoredModFiles.join(',')}';
     processArgs.add(ignoreArgs);
-    globalLog('Ignore arguments added: $ignoreArgs');
   }
 
   String command = '';

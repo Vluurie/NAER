@@ -70,7 +70,6 @@ class DynamicCardState extends ConsumerState<DynamicCard>
 
     final isSelected = widget.configData.isSelected;
 
-    // Determine if interaction should be disabled
     bool isButtonDisabled = isLoading && !isSetupLoading && !isAdditionLoading;
 
     return Opacity(
@@ -320,7 +319,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
         style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
       );
     } else {
-      return Container(); // Return an empty container if neither setup nor addition
+      return Container();
     }
   }
 
@@ -341,7 +340,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
         style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
       );
     } else {
-      return Container(); // Return an empty container if neither setup nor addition
+      return Container();
     }
   }
 }

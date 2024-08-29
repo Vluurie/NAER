@@ -24,6 +24,7 @@ class LogWidgetUtils {
           !lastMessage.contains("NieR:Automata") &&
           !lastMessage.contains("Copied") &&
           !lastMessage.contains("Affected mods") &&
+          !lastMessage.contains("DLC") &&
           !lastMessage.contains("Balance Mode") &&
           !lastMessage.contains("All data") &&
           !lastMessage.contains("You are on") &&

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
 
 class FileChange {
   String filePath;
@@ -33,13 +34,36 @@ class FileChange {
     return settingsDirectory.path;
   }
 
-  static void logChange(final String filePath, final String action,
-      {required final bool isAddition, final String? originalFilePath}) {
-    final change = FileChange(filePath, action, isAddition, originalFilePath);
-    changes.add(change);
-    if (isAddition) {
-      ignoredFiles.add(filePath);
+  static Future<void> logChange(
+    final String filePath,
+    final String action, {
+    required final bool isAddition,
+    final String? originalFilePath,
+  }) async {
+    await loadChanges();
+
+    FileChange? existingChange;
+    try {
+      existingChange =
+          changes.firstWhere((final change) => change.filePath == filePath);
+    } catch (e) {
+      existingChange = null;
     }
+
+    if (existingChange != null) {
+      existingChange.isAddition = isAddition;
+    } else {
+      final change = FileChange(filePath, action, isAddition, originalFilePath);
+      changes.add(change);
+    }
+
+    if (isAddition && !ignoredFiles.contains(path.basename(filePath))) {
+      String ignoredAdditionFiles = path.basename(filePath);
+      ignoredFiles.add(ignoredAdditionFiles);
+    }
+
+    await saveChanges();
+    await saveIgnoredFiles();
   }
 
   static Future<void> saveIgnoredFiles() async {
@@ -71,11 +95,15 @@ class FileChange {
             if (await file.exists()) {
               await file.delete();
             }
+            String ignoredAdditionFile = path.basename(change.filePath);
+            ignoredFiles.remove(ignoredAdditionFile);
           } else if (change.action == 'modify' &&
               change.originalFilePath != null) {
             var originalFile = File(change.originalFilePath!);
             await originalFile.copy(change.filePath);
-          } else if (change.action == 'delete') {}
+          } else if (change.action == 'delete') {
+            //.....
+          }
         }
       } catch (e) {
         if (kDebugMode) {
@@ -86,6 +114,7 @@ class FileChange {
     }
     changes.removeWhere((final change) => change.isAddition == isAddition);
     await saveChanges();
+    await saveIgnoredFiles();
   }
 
   static Future<void> saveChanges() async {
@@ -147,9 +176,6 @@ class FileChange {
     try {
       DateTime parsedTime =
           DateFormat('yyyy-MM-dd HH:mm:ss').parse(formattedTime);
-      if (kDebugMode) {
-        LogState().addLog("Loaded pre-randomization time: $formattedTime");
-      }
       return parsedTime;
     } catch (e) {
       if (kDebugMode) {

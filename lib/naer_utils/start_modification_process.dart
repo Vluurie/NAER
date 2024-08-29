@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-//TODO: Handle no selection of dialogs
 //TODO: Handle bug if no dlc exist
 //TODO: Create a list of found nier automata paths if there are multiple
 
@@ -83,14 +82,22 @@ Future<void> runProcessInIsolate(
 void handleIsolateMessage(final dynamic message) {
   if (message is Map<String, dynamic>) {
     if (message['event'] == 'file_change') {
+      // Log the file change
       logState.addLog("File ${message['action']}d: ${message['filePath']}");
-      FileChange.logChange(message['filePath'], message['action'],
-          isAddition: message['isAddition']);
+
+      // Ensure that the log change is recorded in shared preferences
+      FileChange.logChange(
+        message['filePath'],
+        message['action'],
+        isAddition: message['isAddition'],
+      );
     } else if (message['event'] == 'error') {
+      // Log the error message
       logState.addLog(
           "Error: ${message['details']}\nStack Trace: ${message['stackTrace']}");
     }
   } else if (message is String) {
+    // Log any plain string messages
     logState.addLog(message);
   }
 }
