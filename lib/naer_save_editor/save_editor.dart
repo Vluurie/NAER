@@ -155,7 +155,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
     if (_scaffoldKey.currentContext != null) {
       SnackBarHandler.showSnackBar(
         _scaffoldKey.currentContext!,
-        ref, // Assuming you have access to WidgetRef here
+        ref,
         text,
         type,
       );
