@@ -7,7 +7,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders
 import 'package:NAER/nier_cli/nier_cli_isolation.dart';
 import 'package:flutter/foundation.dart';
 
-void handleCommandLineExecution(List<String> arguments) async {
+void handleTerminal(List<String> arguments) async {
   bool isBalanceMode = false;
   bool hasDLC = false;
   bool backUp = false;

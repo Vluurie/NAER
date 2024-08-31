@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:flutter/material.dart';
 
 void getOutputPath(final BuildContext context, String outputPath) async {
@@ -40,7 +39,7 @@ void getOutputPath(final BuildContext context, String outputPath) async {
 }
 
 void getNaerSettings(final BuildContext context) async {
-  String settingsDirectoryPath = await FileChange.ensureSettingsDirectory();
+  String settingsDirectoryPath = await ensureSettingsDirectory();
 
   if (Platform.isWindows) {
     await Process.run('cmd', ['/c', 'start', '', settingsDirectoryPath]);
@@ -58,4 +57,13 @@ void getNaerSettings(final BuildContext context) async {
       );
     }
   }
+}
+
+Future<String> ensureSettingsDirectory() async {
+  var exeDirectory = File(Platform.resolvedExecutable).parent.path;
+  final settingsDirectory = Directory('$exeDirectory/NAER_Settings');
+  if (!await settingsDirectory.exists()) {
+    await settingsDirectory.create(recursive: true);
+  }
+  return settingsDirectory.path;
 }

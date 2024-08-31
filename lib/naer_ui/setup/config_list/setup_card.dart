@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,19 +98,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
-                    child: widget.configData.imageUrl.startsWith('http')
-                        ? Image.network(
-                            widget.configData.imageUrl,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 90,
-                          )
-                        : Image.asset(
-                            widget.configData.imageUrl,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 90,
-                          ),
+                    child: _buildImage(widget.configData.imageUrl),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -192,7 +182,7 @@ class DynamicCardState extends ConsumerState<DynamicCard>
                         label: _buildButtonLabel(
                             isSelected, isSetupLoading, isAdditionLoading),
                         onPressed: isButtonDisabled
-                            ? () {} // do nothing :)
+                            ? () {}
                             : () => widget.onToggleSelection!(),
                         uniqueId: 'setup',
                       ),
@@ -289,6 +279,31 @@ class DynamicCardState extends ConsumerState<DynamicCard>
       return AutomatoThemeColors.brown25(ref);
     }
     return AutomatoThemeColors.darkBrown(ref);
+  }
+
+  Widget _buildImage(final String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 90,
+      );
+    } else if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 90,
+      );
+    } else {
+      return Image.file(
+        File(imageUrl),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 90,
+      );
+    }
   }
 
   String _buildButtonLabel(final bool isSelected, final bool isSetupLoading,

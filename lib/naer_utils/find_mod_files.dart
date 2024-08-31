@@ -1,12 +1,14 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_database/handle_db_ignored_files.dart';
+import 'package:NAER/naer_database/handle_db_modifcation_time.dart';
 import 'package:path/path.dart' as path;
 
 Future<List<String>> findModFiles(final String outputDirectory) async {
   List<String> modFiles = [];
-  DateTime preRandomizationTime = await FileChange.getPreRandomizationTime();
+  DateTime preRandomizationTime =
+      await DatabaseModificationTimeHandler.getPreModificationTime();
   try {
     var directory = Directory(outputDirectory);
     if (await directory.exists()) {
@@ -15,14 +17,14 @@ Future<List<String>> findModFiles(final String outputDirectory) async {
         if (entity is File && entity.path.endsWith('.dat')) {
           var fileModTime = await entity.lastModified();
           var fileName = path.basename(entity.path);
-          if (fileName.contains("p100") ||
-              fileName.contains("p200") ||
-              fileName.contains("p300") ||
-              fileName.contains("p400") ||
-              fileName.contains("q") ||
-              fileName.contains("r") ||
-              fileName.contains("corehap") ||
-              fileName.contains("em")) {
+          if (fileName.startsWith("p100") ||
+              fileName.startsWith("p200") ||
+              fileName.startsWith("p300") ||
+              fileName.startsWith("p400") ||
+              fileName.startsWith("q") ||
+              fileName.startsWith("r") ||
+              fileName.startsWith("corehap") ||
+              fileName.startsWith("em")) {
             log("Found .dat file: ${entity.path}, last modified: $fileModTime");
 
             if (fileModTime.isBefore(preRandomizationTime)) {
@@ -38,8 +40,8 @@ Future<List<String>> findModFiles(final String outputDirectory) async {
   } catch (e) {
     log('Error while finding mod files: $e');
   }
-  FileChange.ignoredFiles.addAll(modFiles);
-  await FileChange.saveIgnoredFiles();
+  DatabaseIgnoredFilesHandler.ignoredFiles.addAll(modFiles);
+  await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
   log("Mod files found: $modFiles");
   return modFiles;
 }

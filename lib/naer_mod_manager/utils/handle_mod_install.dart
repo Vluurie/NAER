@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:path/path.dart' as path;
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'file_utils.dart';
 import 'shared_preferences_utils.dart';
 
@@ -64,8 +64,7 @@ class ModInstallHandler {
 
   Future<void> copyModToInstallPath(final String modId) async {
     final filePaths = await _extractFilePathsFromMetadata(modId);
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
+    final directoryPath = "${await ensureSettingsDirectory()}/ModPackage";
 
     for (final filePath in filePaths) {
       final sourceFilePath = path.join(directoryPath, filePath);
@@ -138,8 +137,7 @@ class ModInstallHandler {
   }
 
   Future<bool> deleteModMetadata(final String modId) async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
+    final directoryPath = "${await ensureSettingsDirectory()}/ModPackage";
     final metadataPath = path.join(directoryPath, 'mod_metadata.json');
     final metadataFile = File(metadataPath);
 
@@ -160,8 +158,8 @@ class ModInstallHandler {
   }
 
   Future<bool> deleteModDirectory(final String modId) async {
-    final modDirectoryPath = path.join(
-        await FileChange.ensureSettingsDirectory(), "ModPackage", modId);
+    final modDirectoryPath =
+        path.join(await ensureSettingsDirectory(), "ModPackage", modId);
     final modDirectory = Directory(modDirectoryPath);
     if (await modDirectory.exists()) {
       await modDirectory.delete(recursive: true);
@@ -171,8 +169,7 @@ class ModInstallHandler {
   }
 
   Future<List<String>> _extractFilePathsFromMetadata(final String modId) async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
+    final directoryPath = "${await ensureSettingsDirectory()}/ModPackage";
     final metadataPath = path.join(directoryPath, 'mod_metadata.json');
     final metadataFile = File(metadataPath);
 

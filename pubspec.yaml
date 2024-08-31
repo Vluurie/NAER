@@ -45,6 +45,9 @@ dependencies:
   form_builder_validators: ^11.0.0
   lottie: ^3.1.2
   tutorial_coach_mark: ^1.2.11
+  sqflite: ^2.3.3+1
+  sqflite_common_ffi: ^2.3.3
+  sqlite3_flutter_libs: ^0.5.24
 
 
 

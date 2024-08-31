@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:NAER/naer_ui/dialog/modify_confirmation_dialog.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/dialog/undo_dialog.dart';
@@ -28,11 +30,6 @@ class AdditionsUtils {
       await handleStartModification(
           context, ref, startModificationProcess, arguments,
           isAddition: true);
-      ref.read(additionLoadingProvider.notifier).state = null;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No addition is currently selected!')),
-      );
       ref.read(additionLoadingProvider.notifier).state = null;
     }
   }
@@ -74,7 +71,7 @@ class AdditionsUtils {
         await showStartSetupDialog(ref, context, addition);
     if (shouldStartAddition!) {
       ref.read(additionConfigProvider.notifier).selectAddition(addition.id);
-      await undoLastModification(ref, isAddition: true);
+      unawaited(removeModificationsSilently(isAddition: true));
       installAddition(addition);
       globalLog('STARTED NEW MODIFICATION ADDITION.');
     } else {

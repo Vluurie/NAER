@@ -19,17 +19,23 @@ class LogTracker {
   }
 }
 
-void globalLog(final String message) {
+void globalLog(final String message, {final bool useTimeDate = true}) {
   if (message.trim().isEmpty) {
     return;
   }
 
-  final now = DateTime.now();
-  final formattedDateTime =
-      '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
-      '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+  String processedLog;
 
-  final processedLog = LogState.processLog('[$formattedDateTime] $message');
+  if (useTimeDate) {
+    final now = DateTime.now();
+    final formattedDateTime =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+
+    processedLog = LogState.processLog('[$formattedDateTime] $message');
+  } else {
+    processedLog = LogState.processLog(message);
+  }
 
   LogState().addLog(processedLog);
 }

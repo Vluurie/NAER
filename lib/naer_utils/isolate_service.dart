@@ -14,10 +14,15 @@ class IsolateService {
   bool _isInitialized = false;
 
   IsolateService({final bool autoInitialize = false})
-      : numberOfIsolates = Platform.numberOfProcessors {
+      : numberOfIsolates = _determineNumberOfIsolates() {
     if (autoInitialize) {
       _initializeLoadBalancer();
     }
+  }
+
+  static int _determineNumberOfIsolates() {
+    final int cores = Platform.numberOfProcessors;
+    return cores > 8 ? 8 : cores; // flutter only allow isolates to 8
   }
 
   Future<void> _initializeLoadBalancer() async {

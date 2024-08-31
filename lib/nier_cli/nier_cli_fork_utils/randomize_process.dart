@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
-
+import 'package:path/path.dart' as path;
 import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
@@ -12,7 +12,6 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
-import 'package:path/path.dart' as path;
 
 Future<void> repackModifiedGameFiles(
     final Map<String, List<String>> collectedFiles,
@@ -110,6 +109,8 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
     final List<String>? datFolders, final MainData mainData) async {
   if (datFolders == null) return;
 
+  final List<Map<String, dynamic>> fileChanges = [];
+
   final tasks = datFolders.map((final datFolder) async {
     var baseNameWithExtension = path.basename(datFolder);
 
@@ -134,9 +135,8 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
             mainData.sendPort,
             isManagerFile: mainData.isManagerFile);
 
-        // Send the file change details back to the main isolate
-        mainData.sendPort.send({
-          'event': 'file_change',
+        // Collect the file change details
+        fileChanges.add({
           'filePath': datOutput,
           'action': 'create',
           'isAddition': mainData.isAddition
@@ -153,6 +153,12 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
   }).toList();
 
   await Future.wait(tasks);
+
+  // After all tasks are completed, send all collected file changes back to the main isolate
+  mainData.sendPort.send({
+    'event': 'file_changes_batch',
+    'fileChanges': fileChanges,
+  });
 }
 
 /// Determines whether a .dat folder should be processed.
@@ -241,16 +247,15 @@ Future<void> getGameFilesForProcessing(
   List<String> pendingFiles = mainData.argument['pendingFiles'];
   Set<String> processedFiles = mainData.argument['processedFiles'];
 
-  if (mainData.options.recursiveMode) {
-    pendingFiles.addAll(Directory(currentDir)
-        .listSync(recursive: true)
-        .where((final e) => e is File && !processedFiles.contains(e.path))
-        .map((final e) => e.path));
-  } else {
-    pendingFiles.addAll(Directory(currentDir)
-        .listSync()
-        .where((final e) => e is File && !processedFiles.contains(e.path))
-        .map((final e) => e.path));
+  final directory = Directory(currentDir);
+  final stream = mainData.options.recursiveMode
+      ? directory.list(recursive: true)
+      : directory.list();
+
+  await for (final entity in stream) {
+    if (entity is File && !processedFiles.contains(entity.path)) {
+      pendingFiles.add(entity.path);
+    }
   }
 }
 

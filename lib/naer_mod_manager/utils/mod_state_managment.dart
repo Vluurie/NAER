@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'package:NAER/naer_database/handle_db_ignored_files.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:path/path.dart' as p;
 import 'mod_service.dart';
 import 'notification_manager.dart';
@@ -130,7 +130,8 @@ class ModStateManager extends ChangeNotifier {
             .where((final path) => path.isNotEmpty)
             .map((final path) => p.basename(path))
             .toList();
-        await FileChange.removeIgnoreFiles(filenamesToRemove);
+        await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
+            filenamesToRemove);
 
         _installedModsIds.remove(modId);
         changed = true;
@@ -152,7 +153,7 @@ class ModStateManager extends ChangeNotifier {
       globalLog("$notificationMessage: ${affectedModsInfo.join('; ')}");
       NotificationManager.notify(notificationMessage);
     } else {
-      LogState().clearLogs();
+      await LogState().clearLogs();
       globalLog("Re-checked mods, no issues found.");
     }
   }

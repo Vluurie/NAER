@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart' as path;
@@ -66,8 +66,7 @@ void validateIdentifierAndOutput(
 /// directory. The path is logged for reference and returned as a string.
 Future<String> getMetaDataPath() async {
   // Ensure the settings directory exists and get its path
-  final String settingsDirectoryPath =
-      await FileChange.ensureSettingsDirectory();
+  final String settingsDirectoryPath = await ensureSettingsDirectory();
 
   // Construct the path to the mod metadata file
   final String metadataPath =
@@ -82,15 +81,15 @@ Future<String> getMetaDataPath() async {
 
 /// Checks if the three folders (`naer_onlylevel`, `naer_randomized`,
 /// `naer_randomized_and_level`) already exist in the given [baseDir].
-bool checkIfExtractedFoldersExist(final String baseDir) {
+Future<bool> checkIfExtractedFoldersExist(final String baseDir) async {
   final onlyLevelDir = Directory(path.join(baseDir, 'naer_onlylevel'));
   final randomizedDir = Directory(path.join(baseDir, 'naer_randomized'));
   final randomizedAndLevelDir =
       Directory(path.join(baseDir, 'naer_randomized_and_level'));
 
-  return onlyLevelDir.existsSync() &&
-      randomizedDir.existsSync() &&
-      randomizedAndLevelDir.existsSync();
+  return await onlyLevelDir.exists() &&
+      await randomizedDir.exists() &&
+      await randomizedAndLevelDir.exists();
 }
 
 /// Takes the [baseDir] and a [category] and returns the path

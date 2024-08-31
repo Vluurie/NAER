@@ -9,6 +9,7 @@ import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/setup_state.dart';
 import 'package:automato_theme/automato_theme.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -25,9 +26,21 @@ class SetupConfigFormScreen extends ConsumerStatefulWidget {
 class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
 
+  void _pickLocalImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      String filePath = result.files.single.path!;
+      _formKey.currentState?.fields['imageUrl']?.didChange(filePath);
+    }
+  }
+
   @override
   Widget build(final BuildContext context) {
     final globalState = ref.watch(globalStateProvider);
+    final globalStateNotifier = ref.watch(globalStateProvider.notifier);
     Map<String, bool> levelMap = globalState.levelMap;
     return Scaffold(
       appBar: AppBar(
@@ -105,22 +118,60 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          FormBuilderTextField(
-                            name: "imageUrl",
-                            decoration: const InputDecoration(
-                              labelText: "Image URL (jpg, gif, png, jpeg)",
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(),
-                              FormBuilderValidators.url(),
-                              FormBuilderValidators.match(
-                                  RegExp(
-                                      r'(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|jpeg)'),
-                                  errorText:
-                                      'Please provide a valid image URL'),
-                            ]),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: FormBuilderTextField(
+                                  name: "imageUrl",
+                                  decoration: const InputDecoration(
+                                    labelText:
+                                        "Image URL or Path (jpg, gif, png, jpeg)",
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: FormBuilderValidators.compose([
+                                    FormBuilderValidators.required(),
+                                    (final value) {
+                                      if (value != null && value.isNotEmpty) {
+                                        bool isValidUrl = RegExp(
+                                          r'(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|jpeg)',
+                                        ).hasMatch(value);
+
+                                        bool isValidPath =
+                                            value.endsWith('.jpg') ||
+                                                value.endsWith('.jpeg') ||
+                                                value.endsWith('.png') ||
+                                                value.endsWith('.gif');
+
+                                        if (!isValidUrl && !isValidPath) {
+                                          return 'Please provide a valid image URL or a local image path';
+                                        }
+                                      }
+                                      return null;
+                                    },
+                                  ]),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.folder_open,
+                                  size: 30,
+                                ),
+                                onPressed: _pickLocalImage,
+                              ),
+                            ],
                           ),
+                          FormBuilderCheckbox(
+                            name: "dlc",
+                            title: Text(globalStateNotifier.readHasDLC()
+                                ? "DLC: Enabled for this setup"
+                                : "DLC: Disabled for this setup"),
+                            activeColor: AutomatoThemeColors.primaryColor(ref),
+                            initialValue: globalState.hasDLC,
+                            onChanged: (final value) => {
+                              globalStateNotifier.updateDLCOption(
+                                  update: value!)
+                            },
+                          )
                         ],
                       ),
                     ),
@@ -161,7 +212,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
       List<String> command = cliArgs.processArgs;
       List<String> arguments = [];
 
-      // Regex to split on spaces but keep arguments with '=' together ... :)
+      // Regex to split on spaces but keep arguments with '=' together :)
       RegExp exp = RegExp(r'--[^\s=]+(?:=\[[^\]]*\]|=\S+)?|[^\s]+');
       Iterable<RegExpMatch> matches = exp.allMatches(command.join(' '));
 
@@ -169,7 +220,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
         arguments.add(match.group(0)!);
       }
 
-      // check if he got ignored files
+      // check if there are ignored files
       if (globalState.ignoredModFiles.isNotEmpty) {
         arguments.add("--ignore=${globalState.ignoredModFiles.join(',')}");
       }
@@ -181,6 +232,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
         description: formValues['description'],
         level: globalState.enemyLevel.toString(),
         stats: globalState.enemyStats.toString(),
+        doesUseDlc: formValues['dlc']!,
         arguments: arguments,
       );
 

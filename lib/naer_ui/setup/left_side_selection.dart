@@ -76,50 +76,51 @@ class LeftSideSelection extends ConsumerWidget {
               ),
             ],
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ToggleButton(
-                key: _toggleButtonKey,
-                isSelected: globalState.customSelection,
-                onLabel: 'Predefined Setup',
-                offLabel: 'Custom Modify',
-                selectedColor: AutomatoThemeColors.darkBrown(ref),
-                unselectedColor: AutomatoThemeColors.darkBrown(ref),
-                onToggle: () => globalStateNotifier.toggleCustomSelection(),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Tooltip(
-                  message: 'Add new configuration',
-                  child: ElevatedButton(
-                    key: _addButtonKey,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (final context) =>
-                              const SetupConfigFormScreen(),
+          if (!globalState.isLoading)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ToggleButton(
+                  key: _toggleButtonKey,
+                  isSelected: globalState.customSelection,
+                  onLabel: 'Predefined Setup',
+                  offLabel: 'Custom Modify',
+                  selectedColor: AutomatoThemeColors.darkBrown(ref),
+                  unselectedColor: AutomatoThemeColors.darkBrown(ref),
+                  onToggle: () => globalStateNotifier.toggleCustomSelection(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Tooltip(
+                    message: 'Add new configuration',
+                    child: ElevatedButton(
+                      key: _addButtonKey,
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (final context) =>
+                                const SetupConfigFormScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AutomatoThemeColors.darkBrown(ref),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(80.0),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AutomatoThemeColors.darkBrown(ref),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(80.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 12.0),
+                        elevation: 3.0,
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 12.0),
-                      elevation: 3.0,
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: AutomatoThemeColors.primaryColor(ref),
+                      child: Icon(
+                        Icons.add,
+                        color: AutomatoThemeColors.primaryColor(ref),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

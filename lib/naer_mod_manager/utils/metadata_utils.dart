@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:NAER/naer_mod_manager/ui/form_provider.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,8 +82,7 @@ class MetadataUtils {
 
   static Future<void> updateMetadata(final Map<String, dynamic> newMod,
       final ModStateManager modStateManager, final WidgetRef ref) async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
+    final directoryPath = "${await ensureSettingsDirectory()}/ModPackage";
     final metadataPath = p.join(directoryPath, 'mod_metadata.json');
     final File metadataFile = File(metadataPath);
 
@@ -107,7 +106,7 @@ class MetadataUtils {
   static Future<void> copyFilesToModPackage(final WidgetRef ref,
       final String modId, final List<Map<String, String>> files) async {
     final modDirectoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage/$modId";
+        "${await ensureSettingsDirectory()}/ModPackage/$modId";
     final modDirectory = Directory(modDirectoryPath);
     final selectedDirectory = ref.watch(selectedDirectoryProvider);
 

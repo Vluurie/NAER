@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_database/handle_db_ignored_files.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -179,7 +179,8 @@ void showIgnoredFilesDialog(
   final globalStateNotifier = ref.read(globalStateProvider.notifier);
 
   // Load ignored files from SharedPreferences
-  List<String> ignoredFiles = await FileChange.loadIgnoredFiles();
+  List<String> ignoredFiles =
+      await DatabaseIgnoredFilesHandler.queryIgnoredFilesFromDatabase();
 
   // Update the global state with the loaded ignored files
   globalStateNotifier.updateIgnoredModFiles(ignoredFiles);
@@ -244,8 +245,9 @@ void showIgnoredFilesDialog(
                                     globalStateNotifier.updateIgnoredModFiles(
                                         List.from(ignoredFiles));
                                   });
-                                  await FileChange.removeIgnoreFiles(
-                                      [file]); // Update SharedPreferences
+                                  await DatabaseIgnoredFilesHandler
+                                      .queryAndRemoveIgnoredFiles(
+                                          [file]); // Update SharedPreferences
                                 },
                               ),
                             ),
@@ -269,8 +271,9 @@ void showIgnoredFilesDialog(
                         });
 
                         // Update SharedPreferences after clearing the list
-                        await FileChange.removeIgnoreFiles(
-                            filesToRemove); // Update SharedPreferences
+                        await DatabaseIgnoredFilesHandler
+                            .queryAndRemoveIgnoredFiles(
+                                filesToRemove); // Update SharedPreferences
                       },
                       icon: Icon(
                         Icons.delete_sweep,

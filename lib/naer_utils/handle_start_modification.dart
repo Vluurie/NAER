@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:NAER/naer_database/handle_db_modifcation_time.dart';
 import 'package:NAER/naer_ui/dialog/backup_dialog.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -31,21 +31,20 @@ Future<void> handleStartModification(
       globalState.setIsButtonEnabled(isButtonEnabled: false);
 
       try {
-        await FileChange.savePreRandomizationTime();
+        await DatabaseModificationTimeHandler.savePreModificationTime();
         final stopwatch = Stopwatch()..start();
         if (context.mounted) {
           await modifyMethod(context, arguments, ref,
               backUp: backUp, isAddition: isAddition);
         }
-        await FileChange.saveChanges();
         stopwatch.stop();
 
         globalLog('Total modification time: ${stopwatch.elapsed}');
       } catch (e, stackTrace) {
-        unawaited(LogState.logError(
+        LogState.logError(
           'Error during modification: $e',
           Trace.from(stackTrace),
-        ));
+        );
       } finally {
         if (context.mounted) {
           globalState.setIsLoading(isLoading: false);

@@ -12,33 +12,49 @@ Future<bool> showBackupDialog(
   final globalState = ref.watch(globalStateProvider.notifier);
   String outputDir = path.dirname(globalState.readInput());
 
-  bool extractionExist = checkIfExtractedFoldersExist(outputDir);
+  bool extractionExist = await checkIfExtractedFoldersExist(outputDir);
 
   if (!extractionExist) {
     final Completer<bool> completer = Completer<bool>();
 
-    AutomatoDialogManager().showYesNoDialog(
-      context: context,
-      ref: ref,
-      title: "Backup extracted files",
-      content: Text(
-        "Do you want to backup the extracted files, so you don't need to extract them a second time? This will take around 9GB of disk space.",
-        style: TextStyle(
-          color: AutomatoThemeColors.textDialogColor(ref),
-          fontSize: 20,
-        ),
-      ),
-      onYesPressed: () {
-        globalState.setIsExtractCopyEnabled(isExtractCopyEnabled: true);
-        completer.complete(true);
-        Navigator.of(context).pop();
-      },
-      onNoPressed: () {
-        globalState.setIsExtractCopyEnabled(isExtractCopyEnabled: false);
-        completer.complete(false);
-        Navigator.of(context).pop();
-      },
-    );
+    if (context.mounted) {
+      unawaited(showDialog<void>(
+        context: context,
+        builder: (final BuildContext dialogContext) {
+          WidgetsBinding.instance.addPostFrameCallback((final _) {
+            AutomatoDialogManager().showYesNoDialog(
+              context: context,
+              ref: ref,
+              title: "Backup extracted files",
+              content: Text(
+                "Do you want to backup the extracted files, so you don't need to extract them a second time? This will take around 9GB of disk space.",
+                style: TextStyle(
+                  color: AutomatoThemeColors.textDialogColor(ref),
+                  fontSize: 20,
+                ),
+              ),
+              onYesPressed: () {
+                globalState.setIsExtractCopyEnabled(isExtractCopyEnabled: true);
+                completer.complete(true);
+                Navigator.of(dialogContext).pop();
+              },
+              onNoPressed: () {
+                globalState.setIsExtractCopyEnabled(
+                    isExtractCopyEnabled: false);
+                completer.complete(false);
+                Navigator.of(dialogContext).pop();
+              },
+            );
+          });
+
+          return Container();
+        },
+      ).then((final _) {
+        if (!completer.isCompleted) {
+          completer.complete(false);
+        }
+      }));
+    }
 
     return completer.future;
   } else {

@@ -17,7 +17,7 @@ Future<bool> showUndoConfirmation(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Are you sure you want to undo your recent changes?',
+          'Remove this modification?',
           style: TextStyle(
             color: AutomatoThemeColors.textDialogColor(ref),
             fontSize: 24,
@@ -26,10 +26,31 @@ Future<bool> showUndoConfirmation(
         const SizedBox(height: 10),
       ],
     ),
-    onYesPressed: () {
-      undoLastModification(ref, isAddition: isAddition);
+    onYesPressed: () async {
+      unawaited(showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (final BuildContext context) {
+          return Center(
+            child: AutomatoLoading(
+              color: AutomatoThemeColors.bright(ref),
+              translateX: 0,
+              svgString: AutomatoSvgStrings.automatoSvgStrHead,
+            ),
+          );
+        },
+      ));
+
+      await removeModificationWithIndicator(ref, isAddition: isAddition);
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
       completer.complete(true);
-      Navigator.of(context).pop();
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
     },
     onNoPressed: () {
       completer.complete(false);

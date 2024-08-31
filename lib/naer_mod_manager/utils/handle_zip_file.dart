@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
 
@@ -15,7 +15,7 @@ class ModHandler {
     if (!package || !validateModPackageWithKeyFromArchive(archive)) {
       return null;
     }
-    final modsDirectoryPath = await FileChange.ensureSettingsDirectory();
+    final modsDirectoryPath = await ensureSettingsDirectory();
     String modDirectoryName = path.basenameWithoutExtension(zipFilePath);
     final modDirectoryPath = path.join(modsDirectoryPath, modDirectoryName);
     if (await extractZipToDirectory(archive, modDirectoryPath)) {

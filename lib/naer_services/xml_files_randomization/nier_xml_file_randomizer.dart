@@ -102,7 +102,7 @@ Future<void> findEnemiesAndModify(
   var ids = await ImportantIDs.loadIdsFromMetadata(await getMetaDataPath());
 
   final Directory directory = Directory(directoryPath);
-  if (!directory.existsSync()) {
+  if (!await directory.exists()) {
     return;
   }
 

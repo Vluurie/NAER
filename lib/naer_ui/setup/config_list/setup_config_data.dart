@@ -40,6 +40,7 @@ class SetupConfigData implements ConfigDataContainer {
   final bool showCheckbox;
   final bool? isAddition;
   final String? checkboxText;
+  final bool? doesUseDlc;
   final ValueChanged<bool>? onCheckboxChanged;
   final StateNotifierProvider<CheckboxStateNotifier, bool>
       checkboxStateProvider;
@@ -55,6 +56,7 @@ class SetupConfigData implements ConfigDataContainer {
     required this.arguments,
     this.showCheckbox = false,
     this.checkboxText,
+    this.doesUseDlc,
     this.isAddition,
     this.onCheckboxChanged,
   }) : checkboxStateProvider =
@@ -74,22 +76,23 @@ class SetupConfigData implements ConfigDataContainer {
       'isSelected': isSelected,
       'showCheckbox': showCheckbox,
       'checkboxText': checkboxText,
+      'doesUseDlc': doesUseDlc
     };
   }
 
   static SetupConfigData fromJson(final Map<String, dynamic> json) {
     return SetupConfigData(
-      id: json['id'],
-      imageUrl: json['imageUrl'],
-      title: json['title'],
-      description: json['description'],
-      level: json['level'],
-      stats: json['stats'],
-      arguments: List<String>.from(json['arguments']),
-      isSelected: json['isSelected'],
-      showCheckbox: json['showCheckbox'] ?? false,
-      checkboxText: json['checkboxText'],
-    );
+        id: json['id'],
+        imageUrl: json['imageUrl'],
+        title: json['title'],
+        description: json['description'],
+        level: json['level'],
+        stats: json['stats'],
+        arguments: List<String>.from(json['arguments']),
+        isSelected: json['isSelected'],
+        showCheckbox: json['showCheckbox'] ?? false,
+        checkboxText: json['checkboxText'],
+        doesUseDlc: json['doesUseDlc'] ?? false);
   }
 
   @override

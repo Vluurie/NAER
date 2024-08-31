@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:NAER/naer_utils/global_log.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,6 +227,41 @@ class UpdateService {
         Navigator.of(context).pop();
       }
       print('Error checking for updates: $e');
+    }
+  }
+
+  static Future<void> checkForUpdateAndHandleResponse(
+      final BuildContext context, final WidgetRef ref) async {
+    final updateService = UpdateService();
+
+    try {
+      await updateService.showLoadingDialog(context, ref);
+
+      final latestRelease = await updateService.getLatestRelease();
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (context.mounted) {
+        if (latestRelease != null &&
+            updateService.isUpdateAvailable(latestRelease['version']!)) {
+          updateService.showUpdateDialog(
+            context,
+            ref,
+            latestRelease['version']!,
+            latestRelease['description']!,
+            latestRelease['installerUrl']!,
+          );
+        } else {
+          globalLog("You are on the latest Version of NAER!");
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+      globalLog('Failed to check for updates: $e');
     }
   }
 }

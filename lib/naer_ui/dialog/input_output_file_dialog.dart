@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:NAER/naer_database/handle_db_dlc.dart';
 import 'package:NAER/naer_ui/dialog/directory_selection_dialog.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/find_mod_files.dart';
 import 'package:NAER/naer_utils/global_log.dart';
@@ -209,11 +209,11 @@ class InputDirectoryHandler {
         bool dlcExist = await hasDLC(selectedDirectory);
         if (dlcExist) {
           globalState.updateDLCOption(update: true);
-          await FileChange.saveDLCOption(ref, shouldSave: true);
+          await DatabaseDLCHandler.saveDLCOption(ref, shouldSave: true);
           globalLog("DLC was found, enabled Checkbox.");
         } else {
           globalState.updateDLCOption(update: false);
-          await FileChange.saveDLCOption(ref, shouldSave: false);
+          await DatabaseDLCHandler.saveDLCOption(ref, shouldSave: false);
           globalLog("DLC does not exist, disabled Checkbox.");
         }
       } else {

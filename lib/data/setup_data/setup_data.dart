@@ -114,7 +114,8 @@ class SetupData {
           "{ignore}"
         ],
         isSelected: true,
-        isAddition: false),
+        isAddition: false,
+        doesUseDlc: true),
   ];
 
   static List<SetupConfigData> additions = [

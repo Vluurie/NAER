@@ -3,15 +3,16 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:NAER/data/category_data/nier_categories.dart';
+import 'package:NAER/naer_database/handle_db_ignored_files.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_popup.dart';
 import 'package:NAER/naer_mod_manager/utils/file_utils.dart';
 import 'package:NAER/naer_mod_manager/utils/notification_manager.dart';
 import 'package:NAER/naer_mod_manager/utils/shared_preferences_utils.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
+import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -132,7 +133,7 @@ class _ModsListState extends ConsumerState<ModsList>
       context: context,
       builder: (final BuildContext context) {
         return ModPopup(
-          currentlyIgnored: FileChange.ignoredFiles,
+          currentlyIgnored: DatabaseIgnoredFilesHandler.ignoredFiles,
           affectedModsInfo: widget.modStateManager.affectedModsInfo,
           onDismiss: () {
             widget.modStateManager.clearAffectedModsInfo();
@@ -190,7 +191,8 @@ class _ModsListState extends ConsumerState<ModsList>
               .where((final path) => path.isNotEmpty)
               .map((final path) => p.basename(path))
               .toList();
-          await FileChange.removeIgnoreFiles(filenamesToRemove);
+          await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
+              filenamesToRemove);
         } else {
           // Install the mod
           await modInstallHandler.copyModToInstallPath(mod.id);
@@ -199,10 +201,10 @@ class _ModsListState extends ConsumerState<ModsList>
             String filePath = fileMap['path'] ?? '';
             if (filePath.isNotEmpty) {
               String fileName = p.basename(filePath);
-              FileChange.ignoredFiles.add(fileName);
+              DatabaseIgnoredFilesHandler.ignoredFiles.add(fileName);
             }
           }
-          await FileChange.saveIgnoredFiles();
+          await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -244,7 +246,8 @@ class _ModsListState extends ConsumerState<ModsList>
             .where((final path) => path.isNotEmpty)
             .map((final path) => p.basename(path))
             .toList();
-        await FileChange.removeIgnoreFiles(filenamesToRemove);
+        await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
+            filenamesToRemove);
         await modInstallHandler.removeModFiles(mod.id, invalidFiles);
         widget.modStateManager.uninstallMod(mod.id);
         foundInvalidFiles = true;
@@ -585,7 +588,7 @@ class _ModsListState extends ConsumerState<ModsList>
           .where((final path) => path.isNotEmpty)
           .map((final path) => p.basename(path))
           .toList();
-      await FileChange.removeIgnoreFiles(fileNames);
+      await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(fileNames);
 
       bool success =
           await _processModFiles(selectedMod, modInstallHandler, logState);
@@ -598,9 +601,9 @@ class _ModsListState extends ConsumerState<ModsList>
             .map((final path) => p.basename(path))
             .toList();
 
-        await FileChange.removeIgnoreFiles(fileNames);
-        FileChange.ignoredFiles.addAll(filenamesToSave);
-        await FileChange.saveIgnoredFiles();
+        await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(fileNames);
+        DatabaseIgnoredFilesHandler.ignoredFiles.addAll(filenamesToSave);
+        await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
         const snackBar = SnackBar(
           content: Text("Mod installed and randomized successfully!"),
           backgroundColor: Colors.green,
@@ -630,7 +633,7 @@ class _ModsListState extends ConsumerState<ModsList>
     for (var file in selectedMod.files) {
       String filePath = file['path'] ?? '';
       String createdPath =
-          "${await FileChange.ensureSettingsDirectory()}/Modpackage/$filePath";
+          "${await ensureSettingsDirectory()}/Modpackage/$filePath";
       var baseNameWithoutExtension = p.basenameWithoutExtension(createdPath);
 
       bool shouldProcess = _shouldProcessFileBasedOnGameOptions(
@@ -779,7 +782,8 @@ class _ModsListState extends ConsumerState<ModsList>
           .where((final path) => path.isNotEmpty)
           .map((final path) => p.basename(path))
           .toList();
-      await FileChange.removeIgnoreFiles(filenamesToRemove);
+      await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
+          filenamesToRemove);
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Mod uninstalled successfully!")));
     } catch (e) {

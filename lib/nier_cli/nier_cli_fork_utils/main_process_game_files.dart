@@ -24,7 +24,7 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
 
   String inputDir = mainData.argument['input'];
   String outputDir = path.dirname(inputDir);
-  bool extractedFoldersExist = checkIfExtractedFoldersExist(outputDir);
+  bool extractedFoldersExist = await checkIfExtractedFoldersExist(outputDir);
 
   if (mainData.isManagerFile!) {
     await isolateService.initialize();

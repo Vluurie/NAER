@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:NAER/naer_database/handle_db_preferences.dart';
 import 'package:NAER/naer_save_editor/save_editor.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
@@ -8,7 +9,6 @@ import 'package:NAER/naer_ui/button/navigate_button.dart';
 import 'package:NAER/naer_ui/setup/path_checkbox_widget.dart';
 
 import 'package:NAER/naer_utils/change_app_theme.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -171,8 +171,9 @@ class OptionsPanel extends ConsumerWidget {
                                       ),
                                     ),
                                     onYesPressed: () async {
-                                      await FileChange
-                                          .deleteAllSharedPreferences();
+                                      await DatabasePreferenceHandler
+                                          .deleteAllPreferences();
+
                                       await resetGlobalState(ref);
                                       if (context.mounted) {
                                         Navigator.of(context).pop();

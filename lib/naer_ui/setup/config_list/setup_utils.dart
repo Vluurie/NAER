@@ -9,6 +9,7 @@ import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/setup_state.dart';
+import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,12 +66,29 @@ class SetupUtils {
 
   void _selectSetup(final SetupConfigData setup) async {
     final globalState = ref.read(globalStateProvider);
+
+    if ((setup.doesUseDlc ?? false) && !globalState.hasDLC) {
+      globalLog(
+          "Setup ${setup.title} requires DLC which is not available. If DLC is available you can enable it in the options. Only check if you have the DLC otherwise DLC enemies get used that will not render in the game.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'The setup "${setup.title}" requires DLC, which is not available. Please enable the DLC in the options if you have it installed.',
+            style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
+          ),
+          backgroundColor: AutomatoThemeColors.primaryColor(ref),
+        ),
+      );
+      return;
+    }
+
     if (!validateInputOutput(globalState)) {
       globalLog("Error: Please select both input and output directories. 💋 ");
       return;
     }
+
     bool? shouldStartSetup = await showStartSetupDialog(ref, context, setup);
-    if (shouldStartSetup!) {
+    if (shouldStartSetup == true) {
       ref.read(setupConfigProvider.notifier).selectSetup(setup.id);
       globalLog('STARTED NEW MODIFICATION SETUP.');
       await installSetup(setup);

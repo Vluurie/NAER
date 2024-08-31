@@ -35,7 +35,7 @@ class NaerMainPageSetup extends StatelessWidget {
           ),
           if (!globalState.customSelection)
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.8,
+              height: MediaQuery.of(context).size.height * 0.7,
               child: const Padding(
                 padding: EdgeInsets.only(left: 16.0, right: 16.0),
                 child: SetupList(),

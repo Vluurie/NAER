@@ -15,7 +15,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 ///
 Future<void> extractGameFilesProcess(
     final String outputDir, final MainData mainData) async {
-  bool extractedFoldersExist = checkIfExtractedFoldersExist(outputDir);
+  bool extractedFoldersExist = await checkIfExtractedFoldersExist(outputDir);
   if (extractedFoldersExist && (!mainData.isManagerFile!)) {
     mainData.sendPort
         .send('Extracted folders exist. Skipping extraction of game files.');

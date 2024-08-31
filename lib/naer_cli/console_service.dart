@@ -1,13 +1,12 @@
 // ignore_for_file: avoid_print
 
 import 'dart:isolate';
-
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:NAER/naer_database/handle_db_modifications.dart';
 
 /// Handles the logging in only ASCII chars and saves the modified files paths received by the port.
 class ConsoleMessageHandler {
   /// Add the [receivePort] to get the isolate messages.
-  /// [_handleExportedFilesMessage] saves exported files in [FileChange] with [saveChanges()]
+  /// [_handleExportedFilesMessage] saves exported files in [DatabaseFileChangeHandler] with [saveChanges()]
   /// This ensures that [undoChanges()] works in the GUI.
   void listenToReceivePort(final ReceivePort receivePort) {
     receivePort.listen((final message) {
@@ -29,11 +28,15 @@ class ConsoleMessageHandler {
   /// Saves the exported modified files in [SharedPreferences]:
   ///  ['filePath'],
   ///  ['action'],
-  ///  ['isAddition'],
-  void _handleExportedFilesMessage(final Map<String, dynamic> message) {
+  void _handleExportedFilesMessage(final Map<String, dynamic> message) async {
     if (message['event'] == 'file_change') {
-      FileChange.changes.add(FileChange(
-          message['filePath'], message['action'], message['isAddition']));
+      await DatabaseModificationHandler.logModificationForDatabase(
+          message['filePath'], message['action']);
+
+      DatabaseModificationHandler modification =
+          DatabaseModificationHandler(message['filePath'], message['action']);
+
+      DatabaseModificationHandler.modifications.add(modification);
     }
   }
 

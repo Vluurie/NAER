@@ -4,10 +4,10 @@ import 'package:NAER/naer_ui/animations/dotted_line_progress_animation.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_zip_file.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:NAER/naer_utils/change_tracker.dart' as tracker;
 
 class ModLoaderWidget extends StatefulWidget {
   final CLIArguments cliArguments;
@@ -43,8 +43,7 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
   }
 
   void initMetaData() async {
-    final directoryPath =
-        "${await tracker.FileChange.ensureSettingsDirectory()}/ModPackage";
+    final directoryPath = "${await ensureSettingsDirectory()}/ModPackage";
 
     final mods = await ModHandler.parseModMetadata(directoryPath);
     setState(() {

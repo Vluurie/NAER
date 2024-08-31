@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:NAER/naer_database/handle_db_ignored_files.dart';
+import 'package:NAER/naer_database/handle_db_dlc.dart';
 import 'package:NAER/naer_ui/dialog/mod_file_list_dialog.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
+
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +45,7 @@ Future<void> showNoDlcDirectoryDialog(
     ),
     onOkPressed: () {
       globalState.updateDLCOption(update: false);
-      FileChange.saveDLCOption(ref, shouldSave: false);
+      DatabaseDLCHandler.saveDLCOption(ref, shouldSave: false);
       Navigator.of(context).pop();
     },
   ));
@@ -67,7 +69,7 @@ Future<void> showAsyncInfoDialog(
     ),
     onOkPressed: () {
       globalStateNotifier.updateDLCOption(update: true);
-      FileChange.saveDLCOption(ref, shouldSave: true);
+      DatabaseDLCHandler.saveDLCOption(ref, shouldSave: true);
       completer.complete();
       Navigator.of(context).pop();
     },
@@ -135,11 +137,12 @@ void showModsMessage(
       onYesPressed: () async {
         if (index != null) {
           String fileToRemove = modFiles.removeAt(index);
-          await FileChange.removeIgnoreFiles([fileToRemove]);
+          await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
+              [fileToRemove]);
         } else {
           modFiles.clear();
-          FileChange.ignoredFiles.clear();
-          await FileChange.saveIgnoredFiles();
+          DatabaseIgnoredFilesHandler.ignoredFiles.clear();
+          await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
         }
         onModFilesUpdated(modFiles);
 

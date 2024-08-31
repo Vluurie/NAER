@@ -31,6 +31,7 @@ class LogWidgetUtils {
           !lastMessage.contains("Failed") &&
           !lastMessage.contains("Ignore") &&
           !lastMessage.contains("Loaded") &&
+          !lastMessage.contains("DESELECTED") &&
           !lastMessage.contains("Input path") &&
           !lastMessage.contains("Normalized") &&
           !lastMessage.contains("Undo functionality") &&

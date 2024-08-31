@@ -27,7 +27,7 @@ Future<void> runNierCliIsolated(final Map<String, dynamic> arguments) async {
   } catch (e, stackTrace) {
     sendPort.send(
         "An error has occured while processing, check the log.txt for more information.");
-    await LogState.logError(e.toString(), stackTrace);
+    LogState.logError(e.toString(), stackTrace);
     rethrow;
   }
 }

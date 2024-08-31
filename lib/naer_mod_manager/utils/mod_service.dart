@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
+import 'package:NAER/naer_utils/get_paths.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart' as p;
-import 'package:NAER/naer_utils/change_tracker.dart';
 
 class ModService {
   Future<Set<String>> loadInstalledMods() async {
@@ -20,8 +20,7 @@ class ModService {
   }
 
   Future<List<Mod>> fetchMods() async {
-    final directoryPath =
-        "${await FileChange.ensureSettingsDirectory()}/ModPackage";
+    final directoryPath = "${await ensureSettingsDirectory()}/ModPackage";
     final metadataPath = p.join(directoryPath, 'mod_metadata.json');
     final File metadataFile = File(metadataPath);
 

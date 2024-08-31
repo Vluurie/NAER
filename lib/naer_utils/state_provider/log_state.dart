@@ -20,9 +20,11 @@ class LogState with ChangeNotifier {
     notifyListeners();
   }
 
-  void clearLogs() {
-    _logs.clear();
-    notifyListeners();
+  Future<void> clearLogs() async {
+    await Future(() {
+      _logs.clear();
+      notifyListeners();
+    });
   }
 
   static String processLog(final String log) {
@@ -33,8 +35,7 @@ class LogState with ChangeNotifier {
     return _instance._logs;
   }
 
-  static Future<void> logError(
-      final String error, final StackTrace stackTrace) async {
+  static void logError(final String error, final StackTrace stackTrace) async {
     final timestamp = DateTime.now().toIso8601String();
     final logMessage =
         '[$timestamp] Error: $error\nStack trace:\n$stackTrace\n';

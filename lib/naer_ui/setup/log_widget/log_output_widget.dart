@@ -71,16 +71,22 @@ class LogOutputState extends ConsumerState<LogOutput> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            RichText(
-                              text: TextSpan(
+                            SelectableText.rich(
+                              TextSpan(
                                 children: logState.logs.isNotEmpty
                                     ? logUtil.buildLogMessageSpans(context)
-                                    : [
-                                        const TextSpan(
-                                            style: TextStyle(fontSize: 20),
-                                            text:
-                                                "Hey there! It's quiet for now... 🤫\n\n"),
+                                    : const [
+                                        TextSpan(
+                                          style: TextStyle(fontSize: 20),
+                                          text:
+                                              "Hey there! It's quiet for now... 🤫\n\n",
+                                        ),
                                       ],
+                              ),
+                              style: TextStyle(
+                                color: AutomatoThemeColors.bright(ref),
+                                fontSize: 16.0,
+                                height: 1.0,
                               ),
                             ),
                             if (logUtil.isLastMessageProcessing())

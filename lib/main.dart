@@ -1,11 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:developer';
 import 'package:NAER/data/sorted_data/nier_maps.dart';
 import 'package:NAER/data/sorted_data/nier_script_phase.dart';
 import 'package:NAER/data/sorted_data/nier_side_quests.dart';
 import 'package:NAER/naer_cli/handle_cli.dart';
+import 'package:NAER/naer_database/handle_db_additions.dart';
+import 'package:NAER/naer_database/handle_db_ignored_files.dart';
+import 'package:NAER/naer_database/handle_db_dlc.dart';
+import 'package:NAER/naer_database/handle_db_modifications.dart';
 import 'package:NAER/naer_services/error_utils/windows_close_handler.dart';
 import 'package:NAER/naer_ui/appbar/appbar.dart';
 import 'package:NAER/naer_ui/dialog/input_output_file_dialog.dart';
@@ -25,15 +28,17 @@ import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
-import 'package:NAER/naer_utils/change_tracker.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:provider/provider.dart' as provider;
 
 void main(final List<String> arguments) async {
   if (arguments.isNotEmpty) {
-    handleCommandLineExecution(arguments);
+    handleTerminal(arguments);
   } else {
     WidgetsFlutterBinding.ensureInitialized();
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
     await windowManager.ensureInitialized();
     await dotenv.load();
     final themeNotifier = await AutomatoThemeNotifier.loadFromPreferences();
@@ -66,7 +71,6 @@ class EnemyRandomizerApp extends ConsumerWidget {
     final theme = ref.watch(automatoThemeNotifierProvider).theme;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'NieR:Automata Enemy Randomizer Tool',
       theme: theme,
       home: const SplashScreen(),
     );
@@ -103,8 +107,6 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     WidgetsBinding.instance.addPostFrameCallback((final _) {
       _initializeApp();
     });
-
-    log('initState called');
   }
 
   @override
@@ -129,53 +131,12 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     unawaited(updateItemsByType(MapLocation, ref, checkAllItems: true));
     unawaited(updateItemsByType(ScriptingPhase, ref, checkAllItems: true));
 
-    await FileChange.loadChanges();
-    await FileChange.loadDLCOption(ref);
-    await FileChange.loadIgnoredFiles();
+    await DatabaseModificationHandler.queryModificationsFromDatabase();
+    await DatabaseAdditionHandler.queryAdditionsFromDatabase();
+    await DatabaseIgnoredFilesHandler.queryIgnoredFilesFromDatabase();
+    await DatabaseDLCHandler.loadDLCOption(ref);
 
-    await _checkForUpdate();
-  }
-
-  void startBlinkAnimation() {
-    if (!_blinkController.isAnimating) {
-      _blinkController.forward(from: 0).then((final _) {
-        _blinkController.reverse();
-      });
-    }
-  }
-
-  void _togglePanel() {
-    final globalState = ref.read(globalStateProvider.notifier);
-    globalState.setIsPanelVisible(
-        isPanelVisible: !globalState.readIsPanelVisible());
-  }
-
-  Future<void> _checkForUpdate() async {
-    final updateService = UpdateService();
-
-    try {
-      await updateService.showLoadingDialog(context, ref);
-
-      final latestRelease = await updateService.getLatestRelease();
-
-      Navigator.of(context).pop();
-
-      if (latestRelease != null &&
-          updateService.isUpdateAvailable(latestRelease['version']!)) {
-        updateService.showUpdateDialog(
-          context,
-          ref,
-          latestRelease['version']!,
-          latestRelease['description']!,
-          latestRelease['installerUrl']!,
-        );
-      } else {
-        globalLog("You are on the latest Version of NAER!");
-      }
-    } catch (e) {
-      Navigator.of(context).pop();
-      globalLog('Failed to check for updates: $e');
-    }
+    UpdateService.checkForUpdateAndHandleResponse;
   }
 
   @override
@@ -184,7 +145,12 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     _blinkController.dispose();
     windowManager.removeListener(WindowsCloseListener(context, ref));
     super.dispose();
-    log('dispose called');
+  }
+
+  void _togglePanel() {
+    final globalState = ref.read(globalStateProvider.notifier);
+    globalState.setIsPanelVisible(
+        isPanelVisible: !globalState.readIsPanelVisible());
   }
 
   @override
