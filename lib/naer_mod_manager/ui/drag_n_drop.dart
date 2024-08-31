@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:NAER/naer_mod_manager/ui/modify_dragged_file.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
@@ -150,31 +151,20 @@ class DragDropWidgetState extends ConsumerState<DragDropWidget> {
 
         await random.randomizeDraggedFile([path]);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Please drop folders only, not files.',
-              style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-            ),
-            backgroundColor: AutomatoThemeColors.dangerZone(ref),
-          ),
-        );
+        SnackBarHandler.showSnackBar(
+            context, ref, 'Setup deleted successfully!', SnackBarType.info);
+
         return setState(() => _isLoading = false);
       }
     }
 
     setState(() => _isLoading = false);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 5),
-          content: Text(
-            'Dragged folders randomized successfully and send to output path: ${widget.cliArguments.specialDatOutputPath}',
-            style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-          ),
-          backgroundColor: AutomatoThemeColors.darkBrown(ref),
-        ),
-      );
+      SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'Dragged folders randomized successfully and send to output path: ${widget.cliArguments.specialDatOutputPath}',
+          SnackBarType.success);
     }
   }
 }

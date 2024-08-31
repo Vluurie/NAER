@@ -3,13 +3,13 @@ import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/dialog/undo_dialog.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_card.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/handle_start_modification.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/setup_state.dart';
-import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,9 +30,9 @@ class SetupUtils {
           isAddition: false);
       ref.read(setupLoadingProvider.notifier).state = null;
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No setup is currently selected!')),
-      );
+      SnackBarHandler.showSnackBar(
+          context, ref, 'No setup is currently selected!', SnackBarType.info);
+
       ref.read(setupLoadingProvider.notifier).state = null;
     }
   }
@@ -70,15 +70,12 @@ class SetupUtils {
     if ((setup.doesUseDlc ?? false) && !globalState.hasDLC) {
       globalLog(
           "Setup ${setup.title} requires DLC which is not available. If DLC is available you can enable it in the options. Only check if you have the DLC otherwise DLC enemies get used that will not render in the game.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'The setup "${setup.title}" requires DLC, which is not available. Please enable the DLC in the options if you have it installed.',
-            style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
-          ),
-          backgroundColor: AutomatoThemeColors.primaryColor(ref),
-        ),
-      );
+      SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'The setup "${setup.title}" requires DLC, which is not available. Please enable the DLC in the options if you have it installed.',
+          SnackBarType.failure);
+
       return;
     }
 
@@ -108,13 +105,11 @@ class SetupUtils {
       final setupNotifier = ref.read(setupConfigProvider.notifier);
       setupNotifier.removeConfig(setup);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Setup deleted successfully!')),
-      );
+      SnackBarHandler.showSnackBar(
+          context, ref, 'Setup deleted successfully!', SnackBarType.success);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Undo the Setup before deleting.')),
-      );
+      SnackBarHandler.showSnackBar(
+          context, ref, 'Undo the Setup before deleting.', SnackBarType.info);
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/dialog/undo_dialog.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_card.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/handle_start_modification.dart';
 import 'package:NAER/naer_utils/process_service.dart';
@@ -89,14 +90,11 @@ class AdditionsUtils {
     if (!addition.isSelected) {
       final additionNotifier = ref.read(additionConfigProvider.notifier);
       additionNotifier.removeAddition(addition);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Addition deleted successfully!')),
-      );
+      SnackBarHandler.showSnackBar(
+          context, ref, 'Addition deleted successfully!', SnackBarType.success);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Undo the Addition before deleting.')),
-      );
+      SnackBarHandler.showSnackBar(context, ref,
+          'Undo the Addition before deleting.', SnackBarType.info);
     }
   }
 }

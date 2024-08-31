@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:NAER/naer_save_editor/money/money_service.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -72,13 +73,12 @@ class MoneyWidgetState extends ConsumerState<MoneyWidget>
           .then((final _) => _colorController.reverse()));
       await _getMoney();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          'Please enter a valid amount (1 - 9999999)',
-          style: TextStyle(color: AutomatoThemeColors.bright(ref)),
-        ),
-        backgroundColor: AutomatoThemeColors.dangerZone(ref),
-      ));
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        'Please enter a valid amount (1 - 9999999)',
+        SnackBarType.info,
+      );
     }
   }
 

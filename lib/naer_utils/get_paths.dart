@@ -1,12 +1,19 @@
 import 'dart:io';
 
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void getOutputPath(final BuildContext context, String outputPath) async {
+void getOutputPath(
+    final BuildContext context, final WidgetRef ref, String outputPath) async {
   if (outputPath.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Output path is empty')),
+    SnackBarHandler.showSnackBar(
+      context,
+      ref,
+      'Output path is empty',
+      SnackBarType.failure,
     );
+
     return;
   }
 
@@ -14,8 +21,11 @@ void getOutputPath(final BuildContext context, String outputPath) async {
 
   if (!await Directory(outputPath).exists()) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Path does not exist: $outputPath')),
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        'Path does not exist: $outputPath',
+        SnackBarType.info,
       );
     }
     return;
@@ -29,16 +39,17 @@ void getOutputPath(final BuildContext context, String outputPath) async {
     await Process.run('xdg-open', [outputPath]);
   } else {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text('Opening output path is not supported on this platform.')),
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        'Opening output path is not supported on this platform.',
+        SnackBarType.failure,
       );
     }
   }
 }
 
-void getNaerSettings(final BuildContext context) async {
+void getNaerSettings(final BuildContext context, final WidgetRef ref) async {
   String settingsDirectoryPath = await ensureSettingsDirectory();
 
   if (Platform.isWindows) {
@@ -49,11 +60,11 @@ void getNaerSettings(final BuildContext context) async {
     await Process.run('xdg-open', [settingsDirectoryPath]);
   } else {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('Opening output path is not supported on this platform.'),
-        ),
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        'Opening output path is not supported on this platform.',
+        SnackBarType.failure,
       );
     }
   }

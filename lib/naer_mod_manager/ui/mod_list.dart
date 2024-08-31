@@ -11,6 +11,7 @@ import 'package:NAER/naer_mod_manager/utils/shared_preferences_utils.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/global_log.dart';
@@ -94,8 +95,6 @@ class ModsList extends ConsumerStatefulWidget {
 
 class _ModsListState extends ConsumerState<ModsList>
     with TickerProviderStateMixin {
-  final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
   late AnimationController _animationController;
   double modLoaderWidgetOpacity = 0.0;
   bool shouldShowMissingFilesSnackbar = false;
@@ -167,15 +166,12 @@ class _ModsListState extends ConsumerState<ModsList>
         // Stop installation if selectedMod requires DLC but user does not have DLC
         if (mod.dlc!.toBool() && !globalState.hasDLC) {
           globalLog("Mod requires DLC which is not available.");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
-                style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
-              ),
-              backgroundColor: AutomatoThemeColors.primaryColor(ref),
-            ),
-          );
+          SnackBarHandler.showSnackBar(
+              context,
+              ref,
+              'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+              SnackBarType.failure);
+
           setState(() {
             _loadingMap[index] = false;
           });
@@ -206,22 +202,16 @@ class _ModsListState extends ConsumerState<ModsList>
           }
           await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
         }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.modStateManager.isModInstalled(mod.id)
+        SnackBarHandler.showSnackBar(
+            context,
+            ref,
+            widget.modStateManager.isModInstalled(mod.id)
                 ? 'Mod installed.'
-                : 'Mod uninstalled.'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+                : 'Mod uninstalled.',
+            SnackBarType.info);
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $error'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        SnackBarHandler.showSnackBar(
+            context, ref, 'Error: $error', SnackBarType.failure);
       } finally {
         setState(() {
           _loadingMap[index] = false;
@@ -265,13 +255,12 @@ class _ModsListState extends ConsumerState<ModsList>
   Widget build(final BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((final _) {
       if (shouldShowMissingFilesSnackbar) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'One or more mods have missing files and were uninstalled.'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+        SnackBarHandler.showSnackBar(
+            context,
+            ref,
+            'One or more mods have missing files and were uninstalled.',
+            SnackBarType.info);
+
         shouldShowMissingFilesSnackbar = false;
       }
     });
@@ -553,15 +542,14 @@ class _ModsListState extends ConsumerState<ModsList>
       // Stop installation if selectedMod requires DLC but user does not have DLC
       if (selectedMod.dlc!.toBool() && !globalState.hasDLC) {
         globalLog("Mod requires DLC which is not available.");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'The mod "${selectedMod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
-              style: TextStyle(color: AutomatoThemeColors.dangerZone(ref)),
-            ),
-            backgroundColor: AutomatoThemeColors.primaryColor(ref),
-          ),
+
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'The mod "${selectedMod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+          SnackBarType.failure,
         );
+
         setState(() => _installingMods[modId] = false);
         return;
       }
@@ -569,10 +557,15 @@ class _ModsListState extends ConsumerState<ModsList>
       if (!Platform.isWindows ||
           widget.cliArguments.input.isEmpty ||
           widget.cliArguments.specialDatOutputPath.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(!Platform.isWindows
-                ? 'This feature is currently only supported on Windows.'
-                : 'Please select both input and output directory first!')));
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          !Platform.isWindows
+              ? 'This feature is currently only supported on Windows.'
+              : 'Please select both input and output directory first!',
+          SnackBarType.failure,
+        );
+
         setState(() => _installingMods[modId] = false);
         return;
       }
@@ -604,17 +597,20 @@ class _ModsListState extends ConsumerState<ModsList>
         await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(fileNames);
         DatabaseIgnoredFilesHandler.ignoredFiles.addAll(filenamesToSave);
         await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
-        const snackBar = SnackBar(
-          content: Text("Mod installed and randomized successfully!"),
-          backgroundColor: Colors.green,
+
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          "Mod installed and randomized successfully!",
+          SnackBarType.success,
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       } else {
-        const snackBar = SnackBar(
-          content: Text("Error processing mod file"),
-          backgroundColor: Colors.red,
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          "Error processing mod file",
+          SnackBarType.failure,
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
 
       setState(() => _installingMods[modId] = false);
@@ -784,12 +780,21 @@ class _ModsListState extends ConsumerState<ModsList>
           .toList();
       await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
           filenamesToRemove);
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Mod uninstalled successfully!")));
+
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        "Mod uninstalled successfully!",
+        SnackBarType.success,
+      );
     } catch (e) {
       logState.addLog("Exception caught while uninstalling mod: $e");
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Exception caught: $e")));
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        "Exception caught: $e",
+        SnackBarType.failure,
+      );
     }
   }
 }

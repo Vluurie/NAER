@@ -4,12 +4,14 @@ import 'package:NAER/naer_ui/animations/dotted_line_progress_animation.dart';
 import 'package:NAER/naer_mod_manager/ui/mod_list.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_zip_file.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ModLoaderWidget extends StatefulWidget {
+class ModLoaderWidget extends ConsumerStatefulWidget {
   final CLIArguments cliArguments;
   final ModStateManager modStateManager;
 
@@ -24,7 +26,7 @@ class ModLoaderWidget extends StatefulWidget {
   _ModLoaderWidgetState createState() => _ModLoaderWidgetState();
 }
 
-class _ModLoaderWidgetState extends State<ModLoaderWidget>
+class _ModLoaderWidgetState extends ConsumerState<ModLoaderWidget>
     with SingleTickerProviderStateMixin {
   bool _isDragDropEnabled = true;
   bool _isDraggingOver = false;
@@ -94,27 +96,29 @@ class _ModLoaderWidgetState extends State<ModLoaderWidget>
               _isLoadingMods = false;
             });
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text("Mods loaded successfully!"),
-                  duration: Duration(seconds: 3)),
+            SnackBarHandler.showSnackBar(
+              context,
+              ref,
+              "Mods loaded successfully!",
+              SnackBarType.success,
             );
           } else {
             setState(() => _isLoadingMods = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text(
-                      "Failed to load mods from the ZIP file. Probably invalid package/name/file."),
-                  duration: Duration(seconds: 3)),
+
+            SnackBarHandler.showSnackBar(
+              context,
+              ref,
+              "Failed to load mods from the ZIP file. Probably invalid package/name/file.",
+              SnackBarType.failure,
             );
           }
         } else {
           setState(() => _isLoadingMods = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content:
-                    Text("Unsupported file. Only ModPackage.zip is allowed."),
-                duration: Duration(seconds: 3)),
+          SnackBarHandler.showSnackBar(
+            context,
+            ref,
+            "Unsupported file. Only ModPackage.zip is allowed.",
+            SnackBarType.failure,
           );
         }
       },

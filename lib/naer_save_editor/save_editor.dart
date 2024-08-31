@@ -1,6 +1,7 @@
 import 'package:NAER/naer_save_editor/exp/experience_widget.dart';
 import 'package:NAER/naer_save_editor/money/money_widget.dart';
 import 'package:NAER/naer_save_editor/name/name_widget.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,8 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
 
         if (!await backupDir.exists()) {
           await backupDir.create(recursive: true);
-          snackBar("Backup of original SlotData files created.");
+          snackBar("Backup of original SlotData files created.",
+              SnackBarType.success);
         }
 
         // List SlotData_0 to SlotData_2 files and create backup
@@ -59,7 +61,8 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
             final backupFile = File('${backupDir.path}\\SlotData_$i.dat');
             if (!await backupFile.exists()) {
               await file.copy(backupFile.path);
-              snackBar("Backup of original SlotData_$i.dat file created.");
+              snackBar("Backup of original SlotData_$i.dat file created.",
+                  SnackBarType.success);
             }
           }
         }
@@ -84,7 +87,7 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
           directoryPath = file.path;
         });
       } else {
-        snackBar("File size is invalid.");
+        snackBar("File size is invalid.", SnackBarType.failure);
       }
     }
   }
@@ -103,12 +106,13 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
             await backupFile.copy(originalFile.path);
           }
         }
-        snackBar("SlotData files have been reset to their original state.");
+        snackBar("SlotData files have been reset to their original state.",
+            SnackBarType.info);
       } else {
-        snackBar("No backup directory found.");
+        snackBar("No backup directory found.", SnackBarType.info);
       }
     } catch (e) {
-      snackBar("Error resetting SlotData files: $e");
+      snackBar("Error resetting SlotData files: $e", SnackBarType.failure);
     }
   }
 
@@ -142,15 +146,18 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
         }
         await file.copy(backupFile.path);
       } else {
-        snackBar("File size is invalid.");
+        snackBar("File size is invalid.", SnackBarType.failure);
       }
     }
   }
 
-  void snackBar(final String text) {
+  void snackBar(final String text, final SnackBarType type) {
     if (_scaffoldKey.currentContext != null) {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text(text)),
+      SnackBarHandler.showSnackBar(
+        _scaffoldKey.currentContext!,
+        ref, // Assuming you have access to WidgetRef here
+        text,
+        type,
       );
     }
   }

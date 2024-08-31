@@ -1,5 +1,6 @@
 import 'package:NAER/naer_save_editor/exp/experience_service.dart';
 import 'package:NAER/naer_save_editor/exp/experience_values.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,8 +93,11 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
         _persistExperienceChange(newExperience);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid number')),
+      SnackBarHandler.showSnackBar(
+        context,
+        ref,
+        'Please enter a valid number',
+        SnackBarType.info,
       );
     }
   }
@@ -103,26 +107,20 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
     ExperienceService.updateExperienceInFile(widget.filePath, experience)
         .then((final _) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AutomatoThemeColors.darkBrown(ref),
-            content: Text(
-              'Experience updated! New experience: $experience',
-              style: TextStyle(color: AutomatoThemeColors.textColor(ref)),
-            ),
-          ),
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'Experience updated! New experience: $experience',
+          SnackBarType.success,
         );
       }
     }).catchError((final error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red,
-            content: Text(
-              'Error updating experience in file: $error',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'Error updating experience in file: $error',
+          SnackBarType.failure,
         );
       }
     });

@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
     FlutterWindow window(project);
     Win32Window::Point origin(10, 10);
-    Win32Window::Size size(1280, 720);
+    Win32Window::Size size(1536, 864);
     if (!window.Create(L"NAER", origin, size))
     {
         return EXIT_FAILURE;

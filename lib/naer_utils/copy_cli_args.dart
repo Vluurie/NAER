@@ -1,3 +1,4 @@
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -18,17 +19,14 @@ void onCopyArgsPressed(final BuildContext context, final WidgetRef ref) {
             ref.read(setupConfigProvider.notifier).getCurrentSelectedSetup();
         if (selectedSetup != null && selectedSetup.isSelected) {
           final arguments = selectedSetup.generateArguments(ref);
-          copyToClipboard(arguments, context);
+          copyToClipboard(arguments, context, ref);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No setup is currently selected.')),
-          );
+          SnackBarHandler.showSnackBar(context, ref,
+              'No setup is currently selected.', SnackBarType.info);
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Error occurred while copying arguments.')),
-        );
+        SnackBarHandler.showSnackBar(context, ref,
+            'Error occurred while copying arguments.', SnackBarType.failure);
       }
     }
   });
@@ -48,7 +46,7 @@ Future<void> _performCopyCLIArguments(
     CLIArguments cliArgs = await getGlobalArguments(ref);
 
     if (context.mounted) {
-      copyToClipboard(cliArgs.fullCommand, context);
+      copyToClipboard(cliArgs.fullCommand, context, ref);
     }
   } catch (e) {
     if (context.mounted) {
@@ -57,7 +55,8 @@ Future<void> _performCopyCLIArguments(
   }
 }
 
-void copyToClipboard(final List<String> command, final BuildContext context) {
+void copyToClipboard(final List<String> command, final BuildContext context,
+    final WidgetRef ref) {
   String formattedCommand = command.map((final cmd) {
     if (cmd.contains('=') && (cmd.contains('[') && cmd.contains(']'))) {
       return cmd
@@ -70,10 +69,10 @@ void copyToClipboard(final List<String> command, final BuildContext context) {
   }).join(' ');
 
   Clipboard.setData(ClipboardData(text: formattedCommand)).then((final result) {
-    const snackBar = SnackBar(content: Text('Command copied to clipboard'));
     globalLog("Copied Command: $formattedCommand");
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      SnackBarHandler.showSnackBar(
+          context, ref, 'Command copied to clipboard', SnackBarType.info);
     }
   }).catchError((final e) {
     globalLog("Error copying to clipboard: $e");

@@ -141,8 +141,8 @@ class OptionsPanel extends ConsumerWidget {
                           ListTile(
                             title: AutomatoButton(
                               label: "Output",
-                              onPressed: () => getOutputPath(
-                                  context, globalState.specialDatOutputPath),
+                              onPressed: () => getOutputPath(context, ref,
+                                  globalState.specialDatOutputPath),
                               uniqueId: "outputPath",
                               maxScale: 0.9,
                               showPointer: false,

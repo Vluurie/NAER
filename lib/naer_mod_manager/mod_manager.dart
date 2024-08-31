@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:NAER/naer_ui/setup/log_widget/log_output_widget.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
@@ -276,18 +277,19 @@ class SecondPageState extends ConsumerState<SecondPage>
 
   Future<void> openPaths(final String path) async {
     if (path.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Path is empty')),
-      );
+      SnackBarHandler.showSnackBar(
+          context, ref, 'Path is empty', SnackBarType.failure);
+
       return;
     }
     if (Platform.isWindows) {
       await Process.run('explorer', [path]);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Opening paths is not supported on this platform.')),
-      );
+      SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'Opening paths is not supported on this platform.',
+          SnackBarType.failure);
     }
   }
 }

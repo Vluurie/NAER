@@ -5,6 +5,7 @@ import 'package:NAER/naer_ui/setup/category_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
 import 'package:NAER/naer_ui/setup/enemy_level_selection_widget.dart';
 import 'package:NAER/naer_ui/setup/enemy_stats_selection_widget.dart';
+import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/setup_state.dart';
@@ -242,9 +243,8 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
       ref.read(setupConfigProvider.notifier).addConfig(newConfig);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Configuration saved successfully!')),
-        );
+        SnackBarHandler.showSnackBar(context, ref,
+            'Configuration saved successfully!', SnackBarType.success);
       }
       if (context.mounted) {
         Navigator.of(context).pop();
