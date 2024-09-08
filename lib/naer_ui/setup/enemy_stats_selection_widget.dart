@@ -48,15 +48,14 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                !globalState.stats["None"]!
-                    ? Text(
-                        "Enemy Stats Multiplier - ${globalState.enemyStats.toStringAsFixed(1)}",
-                        style: TextStyle(
-                          color: AutomatoThemeColors.textColor(ref),
-                          fontSize: 16,
-                        ),
-                      )
-                    : Container(),
+                if (!globalState.stats["None"]!)
+                  Text(
+                    "Enemy Stats Multiplier - ${globalState.enemyStats.toStringAsFixed(1)}",
+                    style: TextStyle(
+                      color: AutomatoThemeColors.textColor(ref),
+                      fontSize: 16,
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                   child: Container(
@@ -66,26 +65,44 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
                           color: Color.lerp(
                                   const Color.fromARGB(0, 41, 39, 39),
                                   AutomatoThemeColors.dangerZone(ref),
-                                  globalState.enemyStats / 5.0)!
+                                  globalState.enemyStats / 3.0)!
                               .withOpacity(0.1),
                           blurRadius:
-                              10.0 + (globalState.enemyStats / 5.0) * 10.0,
-                          spreadRadius: (globalState.enemyStats / 5.0) * 5.0,
+                              10.0 + (globalState.enemyStats / 3.0) * 10.0,
+                          spreadRadius: (globalState.enemyStats / 3.0) * 3.0,
                         ),
                       ],
                     ),
                     child: !globalState.stats["None"]!
-                        ? Slider(
-                            activeColor: Color.lerp(
-                                AutomatoThemeColors.primaryColor(ref),
-                                AutomatoThemeColors.dangerZone(ref),
-                                globalState.enemyStats / 5.0),
-                            value: globalState.enemyStats,
-                            max: 5.0,
-                            label: globalState.enemyStats.toStringAsFixed(1),
-                            onChanged: (final double newValue) {
-                              globalStateNotifier.updateEnemyStats(newValue);
-                            },
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Slider(
+                                  activeColor: Color.lerp(
+                                      AutomatoThemeColors.primaryColor(ref),
+                                      AutomatoThemeColors.dangerZone(ref),
+                                      globalState.enemyStats / 3.0),
+                                  value: globalState.enemyStats,
+                                  max: 3.0,
+                                  label:
+                                      globalState.enemyStats.toStringAsFixed(1),
+                                  divisions: 29,
+                                  onChanged: (final double newValue) {
+                                    globalStateNotifier
+                                        .updateEnemyStats(newValue);
+                                  }),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10.0),
+                                child: Text(
+                                  _getStatsChangeHint(globalState.enemyStats),
+                                  style: TextStyle(
+                                    color: AutomatoThemeColors.bright(ref),
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
                           )
                         : Container(),
                   ),
@@ -225,5 +242,22 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
         ],
       ),
     );
+  }
+
+  String _getStatsChangeHint(final double multiplier) {
+    String hint = "";
+    if (multiplier < 1.0) {
+      double reductionPercent = (1.0 - multiplier) * 100;
+      if (multiplier == 0.0) {
+        return hint = "No stat changes";
+      } else {
+        return hint =
+            "Stats get reduced by: -${reductionPercent.toStringAsFixed(1)}%";
+      }
+    } else if (multiplier > 1.0) {
+      double increasePercent = (multiplier - 1.0) * 100;
+      return "Stats get increased by: +${increasePercent.toStringAsFixed(1)}%";
+    }
+    return "No stat changes";
   }
 }

@@ -92,14 +92,12 @@ class SetupListState extends ConsumerState<SetupList> {
                   overlayColor: WidgetStateProperty.resolveWith<Color?>(
                     (final Set<WidgetState> states) {
                       if (states.contains(WidgetState.hovered)) {
-                        return AutomatoThemeColors.bright(ref)
-                            .withOpacity(0.5); // Hover color
+                        return AutomatoThemeColors.bright(ref).withOpacity(0.5);
                       }
                       if (states.contains(WidgetState.pressed)) {
-                        return AutomatoThemeColors.bright(ref)
-                            .withOpacity(0.5); // Pressed color
+                        return AutomatoThemeColors.bright(ref).withOpacity(0.5);
                       }
-                      return null; // Default (no overlay)
+                      return null;
                     },
                   ),
                   labelStyle: const TextStyle(

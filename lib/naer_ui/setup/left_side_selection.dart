@@ -50,10 +50,12 @@ class LeftSideSelection extends ConsumerWidget {
                   title: "Input Directory:",
                   path: globalState.input,
                   onBrowse: (final updatePath) async {
-                    await InputDirectoryHandler().openInputFileDialog(
-                      context,
-                      ref,
-                    );
+                    !globalState.isLoading
+                        ? await InputDirectoryHandler().openInputFileDialog(
+                            context,
+                            ref,
+                          )
+                        : null;
                   },
                   icon: Icons.folder_open,
                   uniqueSuffix: '1',
@@ -65,10 +67,12 @@ class LeftSideSelection extends ConsumerWidget {
                   title: "Output Directory:",
                   path: globalState.specialDatOutputPath,
                   onBrowse: (final updatePath) async {
-                    await OutputDirectoryHandler().openOutputFileDialog(
-                      context,
-                      ref,
-                    );
+                    !globalState.isLoading
+                        ? await OutputDirectoryHandler().openOutputFileDialog(
+                            context,
+                            ref,
+                          )
+                        : null;
                   },
                   icon: Icons.folder_open,
                   uniqueSuffix: '2',
@@ -113,7 +117,7 @@ class LeftSideSelection extends ConsumerWidget {
                         elevation: 3.0,
                       ),
                       child: Icon(
-                        Icons.add,
+                        Icons.add_card,
                         color: AutomatoThemeColors.primaryColor(ref),
                       ),
                     ),

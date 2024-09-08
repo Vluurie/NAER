@@ -1,3 +1,4 @@
+import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -13,7 +14,7 @@ Future<void> handleLevel(final xml.XmlElement objIdElement,
   var objIdValue = objIdElement.innerText;
 
   // Check if the enemy belongs to any group
-  var enemyGroup = findGroupForEmNumber(objIdValue, enemyData);
+  var enemyGroup = findGroupForEmNumber(objIdValue, SortedEnemyGroup.enemyData);
   if (enemyGroup == null) {
     // skip all bg ids or item ids from level update,
     //keep delete enemies for level update as would not update the level otherwise

@@ -139,7 +139,7 @@ class GlobalState {
         customSelection = customSelection ?? false,
         enemyLevel = enemyLevel ?? 1,
         selectedIndex = selectedIndex ?? 0,
-        enemyStats = enemyStats ?? 0.0,
+        enemyStats = enemyStats ?? 1.0,
         checkboxValueForPaths = checkboxValueForPaths ?? false,
         stats = stats ?? const {"None": true, "Select All": false},
         categories = categories ?? const {},

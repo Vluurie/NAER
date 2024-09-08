@@ -39,6 +39,18 @@ Future<CLIArguments> gatherCLIArguments(
     required final int enemyLevel,
     required final WidgetRef ref}) async {
   final globalState = ref.watch(globalStateProvider);
+  final globalStateNotifier = ref.watch(globalStateProvider.notifier);
+
+  double updatedEnemyStats = globalState.enemyStats;
+
+  if (globalState.enemyStats == 1.0) {
+    globalStateNotifier.setEnemyStats(0.0);
+    updatedEnemyStats = 0.0;
+    print("Enemy stats updated to 0.0");
+  }
+
+  String enemyStatsStr = updatedEnemyStats.toString();
+
   String sortedEnemyGroupsIdentifierMap;
   Map<String, List<String>> customSelectedEnemies = {
     "Ground": [],
@@ -77,7 +89,7 @@ Future<CLIArguments> gatherCLIArguments(
     '--enemies',
     enemyList.isNotEmpty ? enemyList : 'None',
     '--enemyStats',
-    globalState.enemyStats.toString(),
+    enemyStatsStr, // Use updated enemyStats string here
     '--level=$enemyLevel',
     ...globalState.categories.entries.where((final entry) => entry.value).map(
         (final entry) => "--${entry.key.replaceAll(' ', '').toLowerCase()}"),

@@ -20,6 +20,7 @@ Future<bool> showBackupDialog(
     if (context.mounted) {
       unawaited(showDialog<void>(
         context: context,
+        barrierColor: AutomatoThemeColors.transparentColor(ref),
         builder: (final BuildContext dialogContext) {
           WidgetsBinding.instance.addPostFrameCallback((final _) {
             AutomatoDialogManager().showYesNoDialog(

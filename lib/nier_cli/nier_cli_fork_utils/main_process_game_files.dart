@@ -1,3 +1,4 @@
+import 'package:NAER/naer_services/value_utils/modify_enemy_stats.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_file_randomizer.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
@@ -57,8 +58,12 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
       processEnemies, [mainData, collectedFiles, inputDir]);
 
   // Process enemy stats for the specified enemies from the enemy list.
-  bool reverseStats = false;
-  await processEnemyStats(inputDir, mainData, reverseStats: reverseStats);
+  await ModifyEnemyStats.ensureFilesAreLoaded(inputDir);
+  await ModifyEnemyStats.processEnemyStats(mainData, inputDir);
+
+  if (mainData.isBalanceMode!) {
+    await ModifyEnemyStats.balanceEnemyStats(mainData, inputDir);
+  }
 
   // Check all modified files against the ignore list or enemy list, etc.
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked.
@@ -71,8 +76,7 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
       .runInIsolate(deleteExtractedGameFolders, [mainData.argument['input']]);
 
   // Reverse the modified .csv files to their original state.
-  await isolateService.runInIsolate(
-      processEnemyStats, [inputDir, mainData, reverseStats = true]);
+  await ModifyEnemyStats.restoreEnemyStats();
 
   await isolateService.cleanup();
 }

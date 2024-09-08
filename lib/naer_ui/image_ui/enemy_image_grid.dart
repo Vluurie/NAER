@@ -44,7 +44,7 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
       crossAxisCount = 6;
       gridHeight = 500.0;
     } else {
-      crossAxisCount = 9;
+      crossAxisCount = 8;
       gridHeight = 800.0;
     }
 
@@ -135,36 +135,6 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
     bool isSelected = globalState.readSelectedImages().contains(baseName);
     final ValueNotifier<bool> isHovered = ValueNotifier(false);
 
-    const buggyEnemies = {
-      'em2006.png',
-      'em200d.png',
-      'em2001.png',
-      'em2002.png',
-      'em2007.png',
-      'em8030.png',
-      'em3010.png',
-      'em0112.png',
-      'em0110.png',
-      'em0111.png',
-      'emb110.png'
-    };
-
-    const specialEnemies = {
-      'emb05d.png',
-      'em6400.png',
-      'em5600.png',
-      'emb016.png',
-      'emb060.png',
-      'emb080.png',
-      'em1030.png',
-      'em1040.png',
-      'em1074.png',
-      'emb014.png'
-    };
-
-    bool isBuggyEnemy = buggyEnemies.contains(baseName);
-    bool isSpecialEnemy = specialEnemies.contains(baseName);
-
     return ValueListenableBuilder(
       valueListenable: isHovered,
       builder: (final context, final value, final child) {
@@ -188,19 +158,12 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
                     decoration: BoxDecoration(
                       color: AutomatoThemeColors.transparentColor(ref),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: isHovered.value ||
-                              isBuggyEnemy ||
-                              isSpecialEnemy
+                      // Remove logic for isBuggyEnemy and isSpecialEnemy
+                      boxShadow: isHovered.value
                           ? [
                               BoxShadow(
-                                color: isBuggyEnemy
-                                    ? AutomatoThemeColors.dangerZone(ref)
-                                        .withOpacity(0.5)
-                                    : isSpecialEnemy
-                                        ? AutomatoThemeColors.primaryColor(ref)
-                                            .withOpacity(0.5)
-                                        : AutomatoThemeColors.primaryColor(ref)
-                                            .withOpacity(0.3),
+                                color: AutomatoThemeColors.primaryColor(ref)
+                                    .withOpacity(0.3),
                                 spreadRadius: 1,
                                 blurRadius: 50,
                                 offset: const Offset(0, 10),
@@ -210,12 +173,8 @@ class EnemyImageGridState extends ConsumerState<EnemyImageGrid> {
                       border: Border.all(
                         color: isSelected || isHovered.value
                             ? const Color.fromARGB(255, 255, 255, 255)
-                            : isBuggyEnemy
-                                ? AutomatoThemeColors.dangerZone(ref)
-                                : isSpecialEnemy
-                                    ? AutomatoThemeColors.primaryColor(ref)
-                                    : AutomatoThemeColors.transparentColor(ref),
-                        width: isBuggyEnemy || isSpecialEnemy ? 3 : 3,
+                            : AutomatoThemeColors.transparentColor(ref),
+                        width: 3,
                       ),
                     ),
                     child: Opacity(

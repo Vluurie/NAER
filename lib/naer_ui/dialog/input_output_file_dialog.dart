@@ -28,8 +28,6 @@ class InputDirectoryHandler {
     String currentInputPath = ref.read(globalStateProvider).input;
 
     if (currentInputPath.isEmpty) {
-      await autoSearchInputPath(context, ref);
-    } else {
       String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
 
       if (context.mounted) {
@@ -59,7 +57,7 @@ class InputDirectoryHandler {
 
       String? autoFoundDirectory =
           await _searchAcrossDrives(allDrives, receivePort, activeIsolates)
-              .timeout(const Duration(seconds: 15), onTimeout: () {
+              .timeout(const Duration(seconds: 30), onTimeout: () {
         _killAllIsolates(activeIsolates);
         return null;
       });
@@ -79,7 +77,7 @@ class InputDirectoryHandler {
         }
       } else {
         globalLog(
-            'NieR:Automata data directory not found. Please ensure the game is installed and the directory names are correct. It should be the "NieR:Automata/data" folder. You may need to select it manually.');
+            'NieR:Automata data directory not found. Please ensure the game is installed and the directory names are correct. It should be the "NieRAutomata/data" folder. You may need to select it manually.');
 
         if (context.mounted) {
           Navigator.of(context).pop();

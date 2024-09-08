@@ -5,6 +5,25 @@
 
 #include "flutter_window.h"
 #include "utils.h"
+#include <VersionHelpers.h>
+
+#define SW_HIDE 0
+#define SW_SHOW 5
+
+// check if the application is running on Windows 11 or later
+bool IsWindows11OrLater()
+{
+    OSVERSIONINFOEX osvi = {};
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+    osvi.dwMajorVersion = 10;
+    osvi.dwBuildNumber = 22000; // Windows 11 build number
+
+    DWORDLONG dwlConditionMask = 0;
+    dwlConditionMask = VerSetConditionMask(dwlConditionMask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    dwlConditionMask = VerSetConditionMask(dwlConditionMask, VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    return VerifyVersionInfo(&osvi, VER_MAJORVERSION | VER_BUILDNUMBER, dwlConditionMask);
+}
 
 bool isRunningFromCommandLine()
 {
@@ -59,9 +78,17 @@ int main(int argc, char **argv)
     }
     else
     {
-        // and if we are launched via GUI, i hide the console
-        HWND hWnd = GetConsoleWindow();
-        ShowWindow(hWnd, SW_HIDE);
+        // Check if the OS is Windows 11 or later
+        if (!IsWindows11OrLater())
+        {
+            // Hide the console window on older versions of Windows
+            HWND hWnd = GetConsoleWindow();
+            ShowWindow(hWnd, SW_HIDE);
+        }
+        else
+        {
+            std::cout << "Running on Windows 11 or later. Not hiding console due to terminal changes." << std::endl;
+        }
     }
 
     // I disabled QuickEdit Mode to prevent accidental freezes

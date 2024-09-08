@@ -2,9 +2,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:path/path.dart' as path;
-import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
-import 'package:NAER/naer_services/value_utils/handle_enemy_stats.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
@@ -197,43 +195,6 @@ bool shouldProcessDatFolder(
       path.basenameWithoutExtension(baseNameWithExtension);
 
   return fileManager.shouldProcessFile(baseNameWithoutExtension);
-}
-
-/// Processes enemy stats based on the given enemy list.
-///
-/// This function modifies enemy stats if the enemy list is not empty and
-/// contains enemies.
-Future<void> processEnemyStats(final String currentDir, final MainData mainData,
-    {required final bool reverseStats}) async {
-  List<String> enemyList = mainData.argument['enemyList'];
-  List<String> enemiesToBalance = SpecialEntities.enemiesToBalance;
-  double balanceFactor = 0.1;
-
-  List<File> enemyFiles = await findEnemyStatFiles(currentDir);
-  List<File> filteredFiles =
-      await filterEnemyFiles(enemyFiles, enemiesToBalance);
-
-  if (mainData.isBalanceMode! && reverseStats != true) {
-    mainData.sendPort.send("Balancing enemy stats files.");
-    for (var file in filteredFiles) {
-      await balanceEnemyToBalanceCsvFiles(file, balanceFactor);
-    }
-  }
-
-  if (enemyList.isNotEmpty && !enemyList.contains('None')) {
-    for (var file in enemyFiles) {
-      await processCsvFile(file, mainData.argument['enemyStats'],
-          reverseStats: reverseStats);
-    }
-
-    if (reverseStats && mainData.isBalanceMode == true) {
-      mainData.sendPort.send(
-          "Normalized balanced modified stats files for next modification.");
-      for (var filteredFile in filteredFiles) {
-        await normalizeEnemyToBalanceCsvFiles(filteredFile, balanceFactor);
-      }
-    }
-  }
 }
 
 /// Processes the directory for pending files.

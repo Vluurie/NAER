@@ -241,30 +241,32 @@ class DynamicCardState extends ConsumerState<DynamicCard>
                 },
               ),
             ),
-          Positioned(
-            top: 4,
-            right: 4,
-            child: Visibility(
-              visible: widget.onDelete != null,
-              child: InkResponse(
-                onTap: isButtonDisabled ? null : widget.onDelete,
-                borderRadius: BorderRadius.circular(8.0),
-                radius: 16.0,
-                splashColor:
-                    AutomatoThemeColors.dangerZone(ref).withOpacity(0.3),
-                highlightColor: AutomatoThemeColors.transparentColor(ref),
-                child: Container(
-                  padding: const EdgeInsets.all(4.0),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AutomatoThemeColors.dangerZone(ref).withOpacity(0.1),
+          if (!isSetupLoading)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Visibility(
+                visible: widget.onDelete != null,
+                child: InkResponse(
+                  onTap: isButtonDisabled ? null : widget.onDelete,
+                  borderRadius: BorderRadius.circular(8.0),
+                  radius: 16.0,
+                  splashColor:
+                      AutomatoThemeColors.dangerZone(ref).withOpacity(0.3),
+                  highlightColor: AutomatoThemeColors.transparentColor(ref),
+                  child: Container(
+                    padding: const EdgeInsets.all(4.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          AutomatoThemeColors.dangerZone(ref).withOpacity(0.1),
+                    ),
+                    child: Icon(Icons.close,
+                        color: AutomatoThemeColors.dangerZone(ref), size: 18.0),
                   ),
-                  child: Icon(Icons.close,
-                      color: AutomatoThemeColors.dangerZone(ref), size: 18.0),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
