@@ -136,7 +136,7 @@ class _EnemyRandomizerAppState extends ConsumerState<EnemyRandomizerAppState>
     await DatabaseIgnoredFilesHandler.queryIgnoredFilesFromDatabase();
     await DatabaseDLCHandler.loadDLCOption(ref);
 
-    UpdateService.checkForUpdateAndHandleResponse;
+    await UpdateService.checkForUpdateAndHandleResponse(context, ref);
   }
 
   @override
