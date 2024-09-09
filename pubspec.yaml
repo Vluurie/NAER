@@ -64,7 +64,6 @@ flutter:
     - assets/naer_backgrounds/naer_background.png
     - assets/animations/
     - assets/setups_images/
-    - assets/videos/
     - assets/mods/
     - .env
   uses-material-design: true
