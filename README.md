@@ -1,8 +1,4 @@
-# NAER - N:A Enemy Randomizer Tool
-
-## Overview
-
-NAER, the ultimate enemy randomization tool designed to enhance your gaming experience in the critically acclaimed action RPG. With NAER, you have the power to breathe new life into the game by introducing a variety of randomization options. Whether you seek to intensify the challenge or simply wish to explore the game from a fresh perspective, NAER is here to cater to your desires.
+# NAER - Enemy Randomizer Tool for NieR:Automata - WINDOWS ONLY
 
 ![Screenshot 2024-09-09 222510](https://github.com/user-attachments/assets/cb163537-f0b9-4f44-8824-98934490c6f7)
 
@@ -27,28 +23,75 @@ NAER, the ultimate enemy randomization tool designed to enhance your gaming expe
 
 ## Installation for Users
 
-Download the latest executable, extract the .zip folder and run the .exe in the folder.
+Download the latest installer and install or get the portable zip folder, extract the .zip folder and run the .exe in the folder.
 
-  1. Select your game data directory of Nier as Input directory.
-  2.Select ANY (but recommended for direct play also your game data path) directory of Nier as Output directory.
-     N:A data directory: `?:\SteamLibrary\steamapps\common\NieRAutomata\data`
-  4. Simply select what you want to modify.
-  5. Press 'Modify'.
-  6. Watch out the log output for information and process.
-  7. For undo, simply press 'Undo'.
-  8. Enjoy!
+Full Guide: [NAER GUIDE](https://github.com/Vluurie/NAER/blob/main/guide.md)
 
-## Installation for Developers
 
-To build the NAER tool, follow these steps:
 
-1. **Download Repository**: Clone or download the NAER repository from GitHub.
-2. **Install Flutter Dart CLI**: Download and install the Flutter Dart CLI, which will help manage dependencies and build the project.
-3. **Fetch Dependencies**: Navigate to the project directory and run `flutter pub get` to fetch the latest dependencies.
-4. **Assets**: For the missing assets, feel free to get them from the last release assets folder and copy them into the assets folder.
-5. **Build Executable**: Execute `flutter build windows` to create the Windows executable for the tool.
+# NAER Tool - Developer Installation Guide
 
-After successfully building NAER, simply run the executable
+This guide provides the steps required to build and run the NAER tool for development purposes.
+
+## Prerequisites
+
+- **Flutter and Dart**: Make sure you have Flutter and Dart installed. [Download Flutter and Dart](https://flutter.dev/docs/get-started/install).
+- **Rust**: Required for compiling the DAT extraction library. [Download and Install Rust](https://www.rust-lang.org/tools/install).
+
+## Installation Steps
+
+1. **Clone the Repository**
+   - Clone or download the NAER repository from GitHub:
+     ```bash
+     git clone https://github.com/Vluurie/NAER.git
+     ```
+   - Navigate to the project directory:
+     ```bash
+     cd NAER
+     ```
+
+2. **Install Flutter Dependencies**
+   - Fetch the required Flutter dependencies by running:
+     ```bash
+     flutter pub get
+     ```
+
+3. **Download Assets**
+   - From the latest NAER release on GitHub, download the `assets.zip` file.
+   - Extract the contents and place the missing folders/files `nier_image_folders` into the `assets` folder within the project directory.
+
+6. **Build the NAER Tool**
+   - Return to the NAER project directory and use Flutter to compile the tool:
+       ```bash
+       flutter build windows --release
+       ```
+  
+5. **Compile the DAT Extraction DLL**
+   - NAER requires a custom DLL for extracting DAT files, which is implemented in Rust by me:
+     - Clone the DAT extraction library from GitHub:
+       ```bash
+       git clone https://github.com/Vluurie/nier_extract_dat_rust_dll.git
+       cd nier_extract_dat_rust_dll
+       ```
+     - Fetch dependencies and build the library with:
+       ```bash
+       cargo build --release
+       ```
+     - After building, locate the compiled DLL `extract_dat_files.dll` in the `target/release` directory, navigate to the build directory of NAER and place it in the same folder as the compiled NAER executable.
+
+7. **Run the Executable**
+   - Now run the tool!
+     
+8. **Mod Manager mod files**
+   - Get the mods for the mod manager from: [NAER Mod Package](https://www.nexusmods.com/nierautomata/mods/600)
+   - Drag and drop the .zip file into the Mod Manager field and they will get loaded for usage!.
+
+---
+
+### Notes
+
+- Ensure all DLLs and assets are correctly placed as specified.
+
 
 ## Special thanks to Arthur Heitmann (RaiderB) and all the other Modders who made this possible.
 Nier CLI: https://github.com/ArthurHeitmann/nier_cli
