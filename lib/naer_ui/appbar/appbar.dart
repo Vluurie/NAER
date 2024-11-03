@@ -1,5 +1,4 @@
 import 'package:NAER/naer_ui/appbar/appbar_icon.dart';
-import 'package:NAER/naer_ui/button/donate_button.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
@@ -66,7 +65,6 @@ class NaerAppBar extends ConsumerWidget implements PreferredSizeWidget {
                         AppIcons.copyArguments(context, ref),
                         AppIcons.informationIcon(context, ref),
                         const SizedBox(width: 16.0),
-                        DonateButton(url: dotenv.env['DONATE_URL']!),
                       ],
                     ),
                   ],

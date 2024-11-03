@@ -13,7 +13,6 @@ class UpdateService {
   final String currentVersion = dotenv.env['CURRENT_VERSION']!;
   final String repoOwner = dotenv.env['REPO_OWNER']!;
   final String repoName = dotenv.env['REPO_NAME']!;
-  final String naerNexusMods = dotenv.env['NAER_NEXUS_MOD']!;
 
   Future<Map<String, String>?> getLatestRelease() async {
     final url = Uri.parse(
