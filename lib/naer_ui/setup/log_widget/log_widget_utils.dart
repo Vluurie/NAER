@@ -40,7 +40,8 @@ class LogWidgetUtils {
           !lastMessage.contains("Mod verification") &&
           !lastMessage.contains("Mod requires") &&
           !lastMessage.contains("Deleted") &&
-          !lastMessage.contains("Deleted file");
+          !lastMessage.contains("Deleted file") &&
+          !lastMessage.contains("STARTED NEW");
 
       return isProcessing;
     }

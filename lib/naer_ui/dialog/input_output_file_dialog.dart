@@ -147,7 +147,7 @@ class InputDirectoryHandler {
             String dirPath = entity.path;
 
             // Check if the directory is the target "NieRAutomata\data and got the .exe"
-            if (dirPath.endsWith(r'NieRAutomata\data')) {
+            if (dirPath.endsWith(r'\data')) {
               String parentDir = Directory(dirPath).parent.path;
               File exeFile = File(path.join(parentDir, 'NieRAutomata.exe'));
               if (exeFile.existsSync()) {

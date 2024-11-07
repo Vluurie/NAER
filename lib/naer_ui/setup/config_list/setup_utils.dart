@@ -37,30 +37,38 @@ class SetupUtils {
     }
   }
 
-  void toggleSetupSelection(final SetupConfigData setup) async {
+  Future<bool> canToggleSelection() async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
-    final globalState = ref.read(globalStateProvider);
+    bool doesDllExist = await doesDatExtractionDllExist();
 
-    if (globalState.isLoading) {
-      return;
+    if (isNierRunning) {
+      if (context.mounted) showNierIsRunningDialog(context, ref);
+      return false;
     }
 
-    if (!setup.isSelected) {
-      if (isNierRunning) {
-        showNierIsRunningDialog(context, ref);
-      } else {
-        _selectSetup(setup);
-      }
-    } else {
-      if (isNierRunning) {
-        showNierIsRunningDialog(context, ref);
-      } else {
+    if (!doesDllExist) {
+      if (context.mounted) showDllDoesNotExistDialog(context, ref);
+      return false;
+    }
+
+    return true;
+  }
+
+  void toggleSetupSelection(final SetupConfigData setup) async {
+    final globalState = ref.read(globalStateProvider);
+
+    if (globalState.isLoading) return;
+
+    if (!await canToggleSelection()) return;
+
+    if (setup.isSelected) {
+      if (context.mounted) {
         bool confirmUndo =
             await showUndoConfirmation(context, ref, isAddition: false);
-        if (confirmUndo) {
-          _deselectSetup(setup);
-        }
+        if (confirmUndo) _deselectSetup(setup);
       }
+    } else {
+      _selectSetup(setup);
     }
   }
 

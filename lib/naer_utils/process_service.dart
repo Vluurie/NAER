@@ -53,6 +53,16 @@ Future<bool> startNierAutomataExecutable(
   });
 }
 
+Future<bool> doesDatExtractionDllExist() async {
+  String dllName = "extract_dat_files.dll";
+  var exeDir = File(Platform.resolvedExecutable).parent.path;
+  String dllPath = '$exeDir\\$dllName';
+  if (await File(dllPath).exists()) {
+    return true;
+  }
+  return false;
+}
+
 class ProcessService {
   static bool isProcessRunning(final String processName) {
     final processIds = calloc<Uint32>(1024);
@@ -78,7 +88,7 @@ class ProcessService {
           final szExeFile = wsalloc(MAX_PATH);
           if (GetModuleBaseName(hProcess, NULL, szExeFile, MAX_PATH) > 0) {
             final currentProcessName = szExeFile.toDartString().toLowerCase();
-            if (currentProcessName.contains(lowerCaseProcessName)) {
+            if (currentProcessName.startsWith(lowerCaseProcessName)) {
               CloseHandle(hProcess);
               free(szExeFile);
               return true;

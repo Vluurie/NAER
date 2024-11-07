@@ -1,26 +1,20 @@
 import 'dart:async';
 
 import 'package:NAER/naer_ui/dialog/modify_confirmation_dialog.dart';
-import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/dialog/undo_dialog.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_card.dart';
 import 'package:NAER/naer_ui/setup/config_list/setup_config_data.dart';
+import 'package:NAER/naer_ui/setup/config_list/setup_utils.dart';
 import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/handle_start_modification.dart';
-import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/start_modification_process.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/addition_state.dart';
 import 'package:NAER/naer_utils/undo.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AdditionsUtils {
-  final WidgetRef ref;
-  final BuildContext context;
-
-  const AdditionsUtils(this.ref, this.context);
+class AdditionsUtils extends SetupUtils {
+  const AdditionsUtils(super.ref, super.context);
 
   void installAddition(final SetupConfigData addition) async {
     ref.read(additionLoadingProvider.notifier).state = addition.id;
@@ -36,29 +30,20 @@ class AdditionsUtils {
   }
 
   void toggleAdditionSelection(final SetupConfigData addition) async {
-    bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
     final globalState = ref.read(globalStateProvider);
 
-    if (globalState.isLoading) {
-      return;
-    }
+    if (globalState.isLoading) return;
 
-    if (!addition.isSelected) {
-      if (isNierRunning) {
-        showNierIsRunningDialog(context, ref);
-      } else {
-        _selectAddition(addition);
-      }
-    } else {
-      if (isNierRunning) {
-        showNierIsRunningDialog(context, ref);
-      } else {
+    if (!await canToggleSelection()) return;
+
+    if (addition.isSelected) {
+      if (context.mounted) {
         bool confirmUndo =
             await showUndoConfirmation(context, ref, isAddition: true);
-        if (confirmUndo) {
-          _deselectAddition(addition);
-        }
+        if (confirmUndo) _deselectAddition(addition);
       }
+    } else {
+      _selectAddition(addition);
     }
   }
 

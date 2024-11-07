@@ -19,42 +19,55 @@ Future<void> handleStartModification(
         modifyMethod,
     final List<String> arguments,
     {required final bool isAddition}) async {
+  final globalState = ref.read(globalStateProvider.notifier);
+
   bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
-  if (!isNierRunning) {
-    bool backUp = await showBackupDialog(context, ref);
+  bool doesDllExist = await doesDatExtractionDllExist();
 
-    if (!context.mounted) return;
-
-    final globalState = ref.read(globalStateProvider.notifier);
-    if (!globalState.readIsLoading()) {
-      globalState.setIsLoading(isLoading: true);
-      globalState.setIsButtonEnabled(isButtonEnabled: false);
-
-      try {
-        await DatabaseModificationTimeHandler.savePreModificationTime();
-        final stopwatch = Stopwatch()..start();
-        if (context.mounted) {
-          await modifyMethod(context, arguments, ref,
-              backUp: backUp, isAddition: isAddition);
-        }
-        stopwatch.stop();
-
-        globalLog('Total modification time: ${stopwatch.elapsed}');
-      } catch (e, stackTrace) {
-        LogState.logError(
-          'Error during modification: $e',
-          Trace.from(stackTrace),
-        );
-      } finally {
-        if (context.mounted) {
-          globalState.setIsLoading(isLoading: false);
-          globalState.setIsButtonEnabled(isButtonEnabled: true);
-        }
-      }
+  if (!doesDllExist) {
+    if (context.mounted) {
+      showDllDoesNotExistDialog(context, ref);
     }
-  } else {
+    return;
+  }
+
+  if (isNierRunning) {
     if (context.mounted) {
       showNierIsRunningDialog(context, ref);
+    }
+    return;
+  }
+
+  if (!context.mounted) return;
+
+  bool backUp = await showBackupDialog(context, ref);
+  if (!context.mounted) return;
+
+  if (globalState.readIsLoading()) return;
+
+  globalState.setIsLoading(isLoading: true);
+  globalState.setIsButtonEnabled(isButtonEnabled: false);
+
+  try {
+    await DatabaseModificationTimeHandler.savePreModificationTime();
+    final stopwatch = Stopwatch()..start();
+
+    if (context.mounted) {
+      await modifyMethod(context, arguments, ref,
+          backUp: backUp, isAddition: isAddition);
+    }
+
+    stopwatch.stop();
+    globalLog('Total modification time: ${stopwatch.elapsed}');
+  } catch (e, stackTrace) {
+    LogState.logError(
+      'Error during modification: $e',
+      Trace.from(stackTrace),
+    );
+  } finally {
+    if (context.mounted) {
+      globalState.setIsLoading(isLoading: false);
+      globalState.setIsButtonEnabled(isButtonEnabled: true);
     }
   }
 }

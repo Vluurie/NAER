@@ -151,74 +151,80 @@ class _ModsListState extends ConsumerState<ModsList>
 
   Future<void> toggleInstallUninstallMod(final int index) async {
     bool isNierRunning = ProcessService.isProcessRunning("NieRAutomata.exe");
-    if (!isNierRunning) {
-      setState(() {
-        _loadingMap[index] = true;
-      });
+    bool doesDllExist = await doesDatExtractionDllExist();
 
-      try {
-        Mod mod = widget.mods[index];
+    if (isNierRunning) {
+      showNierIsRunningDialog(context, ref);
+      return;
+    }
 
-        final modInstallHandler = ModInstallHandler(widget.cliArguments);
+    if (!doesDllExist) {
+      showDllDoesNotExistDialog(context, ref);
+      return;
+    }
 
-        final globalState = ref.watch(globalStateProvider);
+    setState(() {
+      _loadingMap[index] = true;
+    });
 
-        // Stop installation if selectedMod requires DLC but user does not have DLC
-        if (mod.dlc!.toBool() && !globalState.hasDLC) {
-          globalLog("Mod requires DLC which is not available.");
-          SnackBarHandler.showSnackBar(
-              context,
-              ref,
-              'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
-              SnackBarType.failure);
+    try {
+      Mod mod = widget.mods[index];
+      final modInstallHandler = ModInstallHandler(widget.cliArguments);
+      final globalState = ref.watch(globalStateProvider);
 
-          setState(() {
-            _loadingMap[index] = false;
-          });
-          return;
-        }
-
-        if (widget.modStateManager.isModInstalled(mod.id)) {
-          // Uninstall the mod
-          await modInstallHandler.uninstallMod(mod.id);
-          widget.modStateManager.uninstallMod(mod.id);
-          List<String> filenamesToRemove = mod.files
-              .map((final fileMap) => fileMap['path'] ?? '')
-              .where((final path) => path.isNotEmpty)
-              .map((final path) => p.basename(path))
-              .toList();
-          await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
-              filenamesToRemove);
-        } else {
-          // Install the mod
-          await modInstallHandler.copyModToInstallPath(mod.id);
-          widget.modStateManager.installMod(mod.id);
-          for (var fileMap in mod.files) {
-            String filePath = fileMap['path'] ?? '';
-            if (filePath.isNotEmpty) {
-              String fileName = p.basename(filePath);
-              DatabaseIgnoredFilesHandler.ignoredFiles.add(fileName);
-            }
-          }
-          await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
-        }
+      if (mod.dlc!.toBool() && !globalState.hasDLC) {
+        globalLog("Mod requires DLC which is not available.");
         SnackBarHandler.showSnackBar(
             context,
             ref,
-            widget.modStateManager.isModInstalled(mod.id)
-                ? 'Mod installed.'
-                : 'Mod uninstalled.',
-            SnackBarType.info);
-      } catch (error) {
-        SnackBarHandler.showSnackBar(
-            context, ref, 'Error: $error', SnackBarType.failure);
-      } finally {
+            'The mod "${mod.name}" requires DLC, which is not available. Please enable the DLC in the Action Panel if it is installed.',
+            SnackBarType.failure);
+
         setState(() {
           _loadingMap[index] = false;
         });
+        return;
       }
-    } else {
-      showNierIsRunningDialog(context, ref);
+
+      if (widget.modStateManager.isModInstalled(mod.id)) {
+        // Uninstall the mod
+        await modInstallHandler.uninstallMod(mod.id);
+        widget.modStateManager.uninstallMod(mod.id);
+        List<String> filenamesToRemove = mod.files
+            .map((final fileMap) => fileMap['path'] ?? '')
+            .where((final path) => path.isNotEmpty)
+            .map((final path) => p.basename(path))
+            .toList();
+        await DatabaseIgnoredFilesHandler.queryAndRemoveIgnoredFiles(
+            filenamesToRemove);
+      } else {
+        // Install the mod
+        await modInstallHandler.copyModToInstallPath(mod.id);
+        widget.modStateManager.installMod(mod.id);
+        for (var fileMap in mod.files) {
+          String filePath = fileMap['path'] ?? '';
+          if (filePath.isNotEmpty) {
+            String fileName = p.basename(filePath);
+            DatabaseIgnoredFilesHandler.ignoredFiles.add(fileName);
+          }
+        }
+        await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
+      }
+
+      SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          widget.modStateManager.isModInstalled(mod.id)
+              ? 'Mod installed.'
+              : 'Mod uninstalled.',
+          SnackBarType.info);
+    } catch (error) {
+      SnackBarHandler.showSnackBar(
+          context, ref, 'Error: $error', SnackBarType.failure);
+    } finally {
+      setState(() {
+        _loadingMap[index] = false;
+      });
     }
   }
 

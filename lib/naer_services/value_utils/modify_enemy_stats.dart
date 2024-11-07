@@ -27,12 +27,16 @@ class ModifyEnemyStats {
     await ensureFilesAreLoaded(currentDir);
 
     List<String> enemyList = mainData.argument['enemyList'];
+    double enemyStats = mainData.argument['enemyStats'];
 
-    if (enemyList.isNotEmpty && !enemyList.contains('None')) {
+    if (enemyList.isNotEmpty &&
+        !enemyList.contains('None') &&
+        enemyStats.sign != 0 &&
+        enemyStats != 1.0) {
       await ExpInfoUtils.processExpInfoFiles(runTimeEnemyFiles,
-          healthMultiplier: mainData.argument['enemyStats'],
-          attackMultiplier: mainData.argument['enemyStats'],
-          defenceMultiplier: mainData.argument['enemyStats']);
+          healthMultiplier: enemyStats,
+          attackMultiplier: enemyStats,
+          defenceMultiplier: enemyStats);
     }
   }
 
