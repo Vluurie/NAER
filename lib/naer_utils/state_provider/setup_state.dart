@@ -33,6 +33,12 @@ class SetupStateNotifier extends StateNotifier<String?> {
     state = null;
     _saveSelectedSetup(null);
   }
+
+  Future<void> resetState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('selectedSetupId');
+    state = null;
+  }
 }
 
 final setupStateProvider =
@@ -99,6 +105,20 @@ class SetupConfigNotifier extends StateNotifier<List<SetupConfigData>> {
       return setup;
     }).toList();
     _saveConfigs();
+  }
+
+  Future<void> resetState() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove('setupConfigs');
+    for (var setup in state) {
+      await prefs.remove('${setup.id}_checkboxState');
+    }
+
+    state = SetupData.setups;
+    await _saveConfigs();
+
+    ref.read(setupStateProvider.notifier).deselectSetup();
   }
 
   SetupConfigData? getCurrentSelectedSetup() {

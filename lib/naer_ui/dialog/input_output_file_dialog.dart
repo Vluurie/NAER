@@ -51,37 +51,44 @@ class InputDirectoryHandler {
 
     final List<Isolate> activeIsolates = [];
     final ReceivePort receivePort = ReceivePort();
+    final Set<String> foundDirectoriesWithData = {};
+    final Set<String> foundDirectoriesWithoutData = {};
 
     try {
       List<String> allDrives = _getAllDrives();
 
-      String? autoFoundDirectory =
-          await _searchAcrossDrives(allDrives, receivePort, activeIsolates)
-              .timeout(const Duration(seconds: 30), onTimeout: () {
+      await _searchAcrossDrives(
+        allDrives,
+        receivePort,
+        activeIsolates,
+        foundDirectoriesWithData,
+        foundDirectoriesWithoutData,
+      ).timeout(const Duration(seconds: 30), onTimeout: () {
         _killAllIsolates(activeIsolates);
-        return null;
       });
 
-      if (autoFoundDirectory != null) {
-        globalLog('Found NieR:Automata input directory: $autoFoundDirectory');
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (foundDirectoriesWithData.isNotEmpty ||
+          foundDirectoriesWithoutData.isNotEmpty) {
+        String? selectedDirectory = await showDirectorySelectionDialog(
+          context,
+          foundDirectoriesWithData,
+          foundDirectoriesWithoutData,
+        );
         if (context.mounted) {
-          Navigator.of(context).pop();
-          await Future.delayed(const Duration(seconds: 1));
-          if (context.mounted) {
-            await _handleSelectedDirectory(context, ref, autoFoundDirectory);
-            if (context.mounted) {
-              await OutputDirectoryHandler.handleSelectedDirectory(
-                  context, ref, autoFoundDirectory);
-            }
+          await _handleSelectedDirectory(context, ref, selectedDirectory);
+          bool containsValidFile = await containsValidFiles(selectedDirectory!);
+          if (context.mounted && containsValidFile) {
+            await OutputDirectoryHandler.handleSelectedDirectory(
+                context, ref, selectedDirectory);
           }
         }
       } else {
         globalLog(
             'NieR:Automata data directory not found. Please ensure the game is installed and the directory names are correct. It should be the "NieRAutomata/data" folder. You may need to select it manually.');
-
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
       }
     } catch (e) {
       globalLog('Error during search: $e');
@@ -94,24 +101,51 @@ class InputDirectoryHandler {
     }
   }
 
-  Future<String?> _searchAcrossDrives(final List<String> drives,
-      final ReceivePort receivePort, final List<Isolate> activeIsolates) async {
-    final completer = Completer<String?>();
+  Future<void> _searchAcrossDrives(
+    final List<String> drives,
+    final ReceivePort receivePort,
+    final List<Isolate> activeIsolates,
+    final Set<String> foundDirectoriesWithData,
+    final Set<String> foundDirectoriesWithoutData,
+  ) async {
+    final completer = Completer<void>();
 
     receivePort.listen((final message) {
-      if (message != null) {
-        completer.complete(message);
-        _killAllIsolates(activeIsolates);
+      if (message is Map<String, Set<String>>) {
+        Set<String> withData = message['withData'] ?? {};
+        Set<String> withoutData = message['withoutData'] ?? {};
+
+        foundDirectoriesWithData.addAll(withData);
+        foundDirectoriesWithoutData.addAll(withoutData);
+
+        if (foundDirectoriesWithData.length +
+                foundDirectoriesWithoutData.length >
+            2) {
+          if (!completer.isCompleted) {
+            completer.complete();
+            _killAllIsolates(activeIsolates);
+          }
+        }
       }
     });
 
     for (String drive in drives) {
       Isolate isolate = await Isolate.spawn(
-          _isolateSearchEntry, [drive, receivePort.sendPort]);
+        _isolateSearchEntry,
+        [drive, receivePort.sendPort],
+      );
       activeIsolates.add(isolate);
     }
 
-    return completer.future;
+    await completer.future.timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+        _killAllIsolates(activeIsolates);
+      },
+    );
   }
 
   static Future<void> _isolateSearchEntry(final List<dynamic> args) async {
@@ -119,22 +153,26 @@ class InputDirectoryHandler {
     final SendPort sendPort = args[1];
 
     try {
-      String? foundDirectory = await _searchForNierAutomataDirectory(drive);
-      sendPort.send(foundDirectory);
+      Map<String, Set<String>> foundDirectories =
+          await _searchForNierAutomataDirectory(drive);
+      sendPort.send(foundDirectories);
     } catch (e) {
       sendPort.send(null);
     }
   }
 
-  static Future<String?> _searchForNierAutomataDirectory(
+  static Future<Map<String, Set<String>>> _searchForNierAutomataDirectory(
       final String drive) async {
     Directory rootDir = Directory(drive);
     return await _bfsSearchDirectory(rootDir);
   }
 
-  static Future<String?> _bfsSearchDirectory(final Directory directory) async {
+  static Future<Map<String, Set<String>>> _bfsSearchDirectory(
+      final Directory directory) async {
     Queue<Directory> queue = Queue<Directory>();
     queue.add(directory);
+    Set<String> foundDirectoriesWithData = {};
+    Set<String> foundDirectoriesWithoutData = {};
 
     while (queue.isNotEmpty) {
       Directory currentDir = queue.removeFirst();
@@ -146,12 +184,18 @@ class InputDirectoryHandler {
           if (entity is Directory) {
             String dirPath = entity.path;
 
-            // Check if the directory is the target "NieRAutomata\data and got the .exe"
-            if (dirPath.endsWith(r'\data')) {
-              String parentDir = Directory(dirPath).parent.path;
-              File exeFile = File(path.join(parentDir, 'NieRAutomata.exe'));
-              if (exeFile.existsSync()) {
-                return dirPath;
+            String parentDir = Directory(dirPath).parent.path;
+            Directory dataFolder = Directory(path.join(parentDir, "data"));
+            File exeFile = File(path.join(parentDir, 'NieRAutomata.exe'));
+
+            if (exeFile.existsSync()) {
+              if (dataFolder.existsSync()) {
+                String normalizedPath =
+                    path.normalize(path.join(parentDir, "data"));
+                foundDirectoriesWithData.add(normalizedPath);
+              } else {
+                String normalizedParentDir = path.normalize(parentDir);
+                foundDirectoriesWithoutData.add(normalizedParentDir);
               }
             }
 
@@ -169,7 +213,10 @@ class InputDirectoryHandler {
       }
     }
 
-    return null;
+    return {
+      'withData': foundDirectoriesWithData,
+      'withoutData': foundDirectoriesWithoutData,
+    };
   }
 
   void _killAllIsolates(final List<Isolate> isolates) {
@@ -195,7 +242,7 @@ class InputDirectoryHandler {
   Future<void> _handleSelectedDirectory(final BuildContext context,
       final WidgetRef ref, final String? selectedDirectory) async {
     if (selectedDirectory != null) {
-      var containsValidFile = await containsValidFiles(selectedDirectory);
+      bool containsValidFile = await containsValidFiles(selectedDirectory);
       bool isInDataDirectory =
           await checkNotAllCpkFilesExist(selectedDirectory);
 
@@ -274,10 +321,10 @@ final countdownProvider =
 });
 
 class CountdownNotifier extends StateNotifier<int> {
-  CountdownNotifier() : super(15);
+  CountdownNotifier() : super(30);
 
   void startCountdown() {
-    state = 15;
+    state = 30;
     Timer.periodic(const Duration(seconds: 1), (final Timer timer) {
       if (state > 0) {
         state = state - 1;
@@ -304,7 +351,7 @@ class _LoadingDialog extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Searching paths... (${countdown}s)',
+            'SEARCHING FOR NIER AUTOMATA DIRECTORIES... (${countdown}s)',
             style: TextStyle(
               color: AutomatoThemeColors.bright(ref),
               fontSize: 16,
@@ -315,4 +362,115 @@ class _LoadingDialog extends ConsumerWidget {
       ),
     );
   }
+}
+
+//TODO: Refactore to Automato Theme
+Future<String?> showDirectorySelectionDialog(
+  final BuildContext context,
+  final Set<String> withData,
+  final Set<String> withoutData,
+) async {
+  return showDialog<String>(
+    context: context,
+    barrierDismissible: false,
+    builder: (final BuildContext context) {
+      return SimpleDialog(
+        title: Text(
+          'Select Directory',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        children: [
+          if (withData.isNotEmpty)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'SAVE - NieR:Automata with "data" folder:',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.green),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ...withData.map((final directory) {
+            return SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, directory);
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.folder, color: Colors.green),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      directory,
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (withoutData.isNotEmpty)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.red),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'WARNING - NieR:Automata without "data" folder:',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ...withoutData.map((final directory) {
+            return SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, directory);
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.folder_open, color: Colors.red),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      directory,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(
+              child: Text(
+                "Not found? Select your NieR:Automata data folder manually .",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  ).then((final value) {
+    return value;
+  });
 }

@@ -32,6 +32,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:provider/provider.dart' as provider;
 
+final appKeyProvider = StateProvider<Key>((final ref) => UniqueKey());
+
 void main(final List<String> arguments) async {
   if (arguments.isNotEmpty) {
     handleTerminal(arguments);
@@ -68,8 +70,10 @@ class EnemyRandomizerApp extends ConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
+    final appKey = ref.watch(appKeyProvider);
     final theme = ref.watch(automatoThemeNotifierProvider).theme;
     return MaterialApp(
+      key: appKey,
       debugShowCheckedModeBanner: false,
       theme: theme,
       home: const SplashScreen(),

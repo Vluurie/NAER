@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'package:NAER/naer_utils/state_provider/addition_state.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
+import 'package:NAER/naer_utils/state_provider/setup_state.dart';
+import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -254,6 +258,12 @@ class GlobalState {
 
 Future<void> resetGlobalState(final WidgetRef ref) async {
   ref.read(globalStateProvider.notifier).resetState();
+  await ref.read(additionConfigProvider.notifier).resetState();
+  await ref.read(additionConfigProvider.notifier).resetState();
+  await ref.read(setupConfigProvider.notifier).resetState();
+  await ref.read(setupStateProvider.notifier).resetState();
+  ref.read(automatoThemeNotifierProvider.notifier).switchToDefaultTheme();
+  await LogState().clearLogs();
 }
 
 class GlobalStateNotifier extends StateNotifier<GlobalState> {

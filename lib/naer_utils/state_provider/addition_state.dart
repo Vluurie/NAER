@@ -32,6 +32,12 @@ class AdditionStateNotifier extends StateNotifier<String?> {
     state = null;
     _saveSelectedAddition(null);
   }
+
+  Future<void> resetState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('selectedAdditionId');
+    state = null;
+  }
 }
 
 final additionStateProvider =
@@ -108,6 +114,19 @@ class AdditionConfigNotifier extends StateNotifier<List<SetupConfigData>> {
       return addition;
     }).toList();
     _saveAdditions();
+  }
+
+  Future<void> resetState() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove('additionConfigs');
+    for (var addition in state) {
+      await prefs.remove('${addition.id}_checkboxState');
+    }
+    state = SetupData.additions;
+    await _saveAdditions();
+
+    ref.read(additionStateProvider.notifier).deselectAddition();
   }
 
   SetupConfigData? getCurrentSelectedAddition() {

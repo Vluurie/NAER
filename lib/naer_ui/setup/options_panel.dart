@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:NAER/main.dart';
 import 'package:NAER/naer_database/handle_db_preferences.dart';
 import 'package:NAER/naer_save_editor/save_editor.dart';
 import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
@@ -183,10 +184,14 @@ class OptionsPanel extends ConsumerWidget {
                                       onYesPressed: () async {
                                         await DatabasePreferenceHandler
                                             .deleteAllPreferences();
+                                        await deleteSharedPreferences();
 
                                         await resetGlobalState(ref);
                                         if (context.mounted) {
                                           Navigator.of(context).pop();
+                                          ref
+                                              .read(appKeyProvider.notifier)
+                                              .state = UniqueKey();
                                         }
                                       },
                                       onNoPressed: () {
