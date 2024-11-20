@@ -2,9 +2,11 @@ import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_level.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_modification.dart';
+import 'package:NAER/naer_ui/setup/log_widget/log_output_widget.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
+import 'package:NAER/naer_utils/state_provider/log_state.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
-import 'package:stack_trace/stack_trace.dart';
+
 import 'package:xml/xml.dart' as xml;
 
 Future<void> modifyEnemyObjId(
@@ -51,7 +53,12 @@ Future<void> modifyEnemyObjId(
         }
     }
   } catch (e, stackTrace) {
-    logAndPrint('Error processing $objIdValue: $e');
-    logAndPrint('Stack trace: ${Trace.from(stackTrace)}');
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage:
+          "Caught while modify enemy objID of xml element: ${objIdElement.toString()} in file: $filePath with mainData arguments: ${mainData.toString()} Check log.json for details.",
+      onHandled: () => {LogState().clearLogs()},
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:NAER/naer_database/handle_db_ignored_files.dart';
 import 'package:NAER/naer_database/handle_db_modifcation_time.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:path/path.dart' as path;
 
 Future<List<String>> findModFiles(final String outputDirectory) async {
@@ -37,9 +38,15 @@ Future<List<String>> findModFiles(final String outputDirectory) async {
     } else {
       log("Directory does not exist: $outputDirectory");
     }
-  } catch (e) {
-    log('Error while finding mod files: $e');
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage:
+          "Caught while finding mod files in: Future<List<String>> findModFiles in $outputDirectory",
+    );
   }
+
   DatabaseIgnoredFilesHandler.ignoredFiles.addAll(modFiles);
   await DatabaseIgnoredFilesHandler.saveIgnoredFilesToDatabase();
   log("Mod files found: $modFiles");

@@ -42,7 +42,8 @@ class LogWidgetUtils {
           !lastMessage.contains("Deleted") &&
           !lastMessage.contains("Deleted file") &&
           !lastMessage.contains("Removed modifications") &&
-          !lastMessage.contains("STARTED NEW");
+          !lastMessage.contains("STARTED NEW") &&
+          !lastMessage.contains("Folder");
 
       return isProcessing;
     }

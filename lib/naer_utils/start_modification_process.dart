@@ -5,6 +5,7 @@ import 'package:NAER/naer_database/handle_db_ignored_files.dart';
 import 'package:NAER/naer_database/handle_db_modifications.dart';
 import 'package:NAER/naer_ui/dialog/complete_dialog.dart';
 import 'package:NAER/naer_ui/other/ascii_art.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
@@ -14,9 +15,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> startModificationProcess(final BuildContext context,
-    final List<String> arguments, final WidgetRef ref,
-    {required final bool backUp, final bool isAddition = false}) async {
+Future<void> startModificationProcess(
+  final BuildContext context,
+  final List<String> arguments,
+  final WidgetRef ref, {
+  required final bool backUp,
+  final bool isAddition = false,
+}) async {
   final globalState = ref.read(globalStateProvider.notifier);
   final globalStateRiverPod = ref.read(globalStateProvider);
 
@@ -33,8 +38,19 @@ Future<void> startModificationProcess(final BuildContext context,
     await runProcessInIsolate(arguments, globalStateRiverPod,
         backUp: backUp, isAddition: isAddition);
     await LogState().clearLogs();
-  } on Exception catch (e) {
-    globalLog("Error occurred: $e");
+  } on Exception catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: '''
+Error occurred during the modification process:
+- Arguments: ${arguments.join(', ')}
+- Backup: $backUp
+- Addition Mode: $isAddition
+- Input Directory: ${globalStateRiverPod.input}
+- Output Directory: ${globalStateRiverPod.specialDatOutputPath}
+''',
+    );
   } finally {
     if (context.mounted) {
       finalizeProcess(context, ref, globalState, isAddition: isAddition);
@@ -125,8 +141,12 @@ void finalizeProcess(final BuildContext context, final WidgetRef ref,
     } else {
       await DatabaseAdditionHandler.batchInsertAdditionsToDatabase();
     }
-  } catch (e) {
-    globalLog('Error during batch insert: $e');
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: 'Error during batch insert into the database',
+    );
   } finally {
     globalLog("Modification process finished.");
   }

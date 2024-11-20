@@ -1,6 +1,7 @@
 import 'package:NAER/naer_save_editor/exp/experience_service.dart';
 import 'package:NAER/naer_save_editor/exp/experience_values.dart';
 import 'package:NAER/naer_ui/setup/snackbars.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,8 +47,9 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
         _experienceToNextLevel =
             ExperienceService.getExperienceToNextLevel(experience);
       });
-    } catch (e) {
-      // print('Error loading experience: $e');
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage: "Caught while loading experience.");
     }
   }
 
@@ -114,15 +116,20 @@ class ExperienceWidgetState extends ConsumerState<ExperienceWidget> {
           SnackBarType.success,
         );
       }
-    }).catchError((final error) {
-      if (mounted) {
-        SnackBarHandler.showSnackBar(
-          context,
-          ref,
-          'Error updating experience in file: $error',
-          SnackBarType.failure,
-        );
-      }
+    }).catchError((final error, final stackTrace) {
+      ExceptionHandler().handle(error, stackTrace,
+          extraMessage: "Caught while updating experience in save file",
+          onHandled: () => {
+                if (mounted)
+                  {
+                    SnackBarHandler.showSnackBar(
+                      context,
+                      ref,
+                      'Error updating experience in save file.',
+                      SnackBarType.failure,
+                    )
+                  }
+              });
     });
   }
 

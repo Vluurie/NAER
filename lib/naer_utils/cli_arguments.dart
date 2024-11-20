@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,8 +68,13 @@ Future<CLIArguments> gatherCLIArguments(
     } else {
       sortedEnemyGroupsIdentifierMap = "ALL";
     }
-  } catch (e, stacktrace) {
-    globalLog(Trace.from(stacktrace).toString());
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: "Error processing selected enemies",
+    );
+
     throw ArgumentError("Error processing selected enemies");
   }
 

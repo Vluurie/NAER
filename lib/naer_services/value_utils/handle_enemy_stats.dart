@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:NAER/naer_utils/exception_handler.dart';
+
 enum OperationType { scale, reset }
 
 class EnemyExpInfoTable {
@@ -173,8 +175,10 @@ class ExpInfoUtils {
       }
 
       await file.writeAsString(modifiedLines.join('\r\n'));
-    } catch (e) {
-      print("Error processing file ${file.path}: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage:
+              "Caught while processing csv file: ${file.toString()} in _processCsvFile from ExpInfoUtils");
     }
   }
 }

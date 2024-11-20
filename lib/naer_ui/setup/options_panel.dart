@@ -7,6 +7,7 @@ import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_ui/directory_ui/balance_mode_checkbox.dart';
 import 'package:NAER/naer_ui/directory_ui/dlc_checkbox.dart';
 import 'package:NAER/naer_ui/button/navigate_button.dart';
+import 'package:NAER/naer_ui/setup/log_widget/error_log_widget.dart';
 import 'package:NAER/naer_ui/setup/path_checkbox_widget.dart';
 
 import 'package:NAER/naer_utils/change_app_theme.dart';
@@ -128,6 +129,35 @@ class OptionsPanel extends ConsumerWidget {
                                     }
                                   },
                                   uniqueId: "exp_money",
+                                  maxScale: 0.9,
+                                  showPointer: false,
+                                  baseColor: AutomatoThemeColors.darkBrown(ref),
+                                  activeFillColor:
+                                      AutomatoThemeColors.primaryColor(ref),
+                                  fillBehavior: FillBehavior.filledRightToLeft,
+                                ),
+                              ),
+                            if (!globalState.isLoading)
+                              ListTile(
+                                title: AutomatoButton(
+                                  label: "Error Log Viewer",
+                                  onPressed: () {
+                                    bool isNierRunning =
+                                        ProcessService.isProcessRunning(
+                                            "NieRAutomata.exe");
+                                    if (!isNierRunning) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (final context) =>
+                                              const ErrorLogViewer(),
+                                        ),
+                                      );
+                                    } else {
+                                      showNierIsRunningDialog(context, ref);
+                                    }
+                                  },
+                                  uniqueId: "error_viewer",
                                   maxScale: 0.9,
                                   showPointer: false,
                                   baseColor: AutomatoThemeColors.darkBrown(ref),

@@ -69,14 +69,14 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked.
   await repackModifiedGameFiles(collectedFiles, mainData);
 
+  // Reverse the modified .csv files to their original state.
+  await ModifyEnemyStats.restoreEnemyStats();
+
   // Start cleaning tasks and let them run in an isolate.
   await isolateService
       .runInIsolate(deleteExtractedGameFolders, [mainData.output]);
   await isolateService
       .runInIsolate(deleteExtractedGameFolders, [mainData.argument['input']]);
-
-  // Reverse the modified .csv files to their original state.
-  await ModifyEnemyStats.restoreEnemyStats();
 
   await isolateService.cleanup();
 }

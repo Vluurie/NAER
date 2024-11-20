@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 import 'package:NAER/data/sorted_data/file_paths_data.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:NAER/data/category_data/nier_categories.dart';
@@ -121,7 +122,18 @@ ArgParser allArguments() {
         negatable: false);
 
     return argParser;
-  } catch (e) {
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: '''
+An error occurred while constructing the argument parser.
+Potential causes:
+- Invalid option or typo in the argument parser code.
+- Unexpected input while parsing arguments.
+''',
+    );
+
     print('''
 +---------------------------------------------------+
 | Oops! An error occurred while parsing arguments.  |
@@ -232,7 +244,16 @@ List<String> _parseJsonArray(final String? arg) {
     }
 
     return elements;
-  } catch (e) {
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: '''
+Failed to parse JSON array:
+- Input Argument: $arg
+Ensure the input is a valid JSON array string format, e.g., "[item1, item2]".
+''',
+    );
     throw ArgumentError("Error parsing JSON array: $arg. ${e.toString()}");
   }
 }

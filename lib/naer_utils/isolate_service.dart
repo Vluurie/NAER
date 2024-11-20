@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:isolate/isolate.dart';
@@ -113,8 +114,12 @@ class IsolateService {
 
     try {
       await Function.apply(function, arguments);
-    } catch (e) {
-      globalLog("Error: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: "Error occurred during isolate entry execution",
+      );
     } finally {
       sendPort.send(null);
     }

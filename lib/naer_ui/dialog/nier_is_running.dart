@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/state_provider/dll_download_state.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -107,13 +108,20 @@ class _DllLinkWithHover extends ConsumerWidget {
                     ),
                   ));
                 }
-              } catch (e) {
+              } catch (e, stackTrace) {
+                ExceptionHandler().handle(
+                  e,
+                  stackTrace,
+                  extraMessage: 'Failed to download DLL',
+                );
+
                 if (context.mounted) {
                   unawaited(showDialog(
                     context: context,
                     builder: (final context) => AlertDialog(
                       title: const Text("Error"),
-                      content: Text("Failed to download DLL: $e"),
+                      content: Text(
+                          "Failed to download DLL. Check log.txt for details."),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),

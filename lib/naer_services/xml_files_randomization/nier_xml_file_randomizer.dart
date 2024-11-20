@@ -82,6 +82,9 @@ Future<Map<String, List<String>>> getSortedEnemyData(
           "Sorted enemy data is empty. Ensure that it has been updated correctly.");
     }
     return sortedEnemyData;
+  } else if (mainData.sortedEnemyGroupsIdentifierMap == 'NONE') {
+    print("Addition setup was used. No enemy data needed for randomization.");
+    return {};
   } else {
     throw ArgumentError(
         "Invalid Sorted Enemy Data Identifier Value: ${mainData.sortedEnemyGroupsIdentifierMap}");

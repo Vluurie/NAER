@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:NAER/naer_database/sql_database.dart';
-
-import 'package:flutter/foundation.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Handles the logging, querying, and deletion of file modifications
@@ -64,7 +63,8 @@ class DatabaseModificationHandler {
         if (await file.exists()) {
           try {
             await file.delete();
-          } catch (deleteError) {
+          } catch (deleteError, stackTrace) {
+            ExceptionHandler().handle(deleteError, stackTrace);
             continue;
           }
 
@@ -75,11 +75,10 @@ class DatabaseModificationHandler {
             whereArgs: [modification.filePath, modification.action],
           );
         }
-      } catch (e) {
-        if (kDebugMode) {
-          print(
-              'Error during undoing modification for ${modification.filePath}: $e');
-        }
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(e, stackTrace,
+            extraMessage:
+                'Error during undoing modification for ${modification.filePath}');
       }
     }
 
@@ -128,8 +127,9 @@ class DatabaseModificationHandler {
       });
 
       modifications.clear();
-    } catch (e) {
-      debugPrint('Batch insert failed: $e');
+    } catch (e, stackTrace) {
+      ExceptionHandler()
+          .handle(e, stackTrace, extraMessage: 'Batch insert failed');
     }
   }
 

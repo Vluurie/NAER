@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/all_arguments.dart';
 import 'package:args/args.dart';
 
@@ -63,7 +64,23 @@ Map<String, dynamic> initializeArgumentVars(
       'activeOptions': activeOptions,
       'customSelectedEnemies': customSelectedEnemies
     };
-  } catch (e) {
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: '''
+An error occurred during the initialization of argument variables.
+Potential causes include:
+- Missing or incorrect options or paths.
+- Invalid values provided (e.g., text instead of a number).
+- Misconfigured or missing input files.
+Helpful tips:
+1. Double-check the paths and values you provided.
+2. Use --help to review available options.
+If the problem persists, consider using the GUI version or seeking assistance.
+''',
+    );
+
     print('''
 +-------------------------------------------+
 | Oops! Something went wrong.               |

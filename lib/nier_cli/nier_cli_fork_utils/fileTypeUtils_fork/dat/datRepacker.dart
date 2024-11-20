@@ -3,20 +3,31 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as path;
-
 import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 import 'datHashGenerator.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 
 Future<void> repackDat(final String datDir, final String exportPath,
     final SendPort sendPort) async {
+  List<String> fileList = [];
+  List<String> fileNames = [];
+  List<int> fileSizes = [];
+  int fileNumber = 0;
+
   try {
-    var fileList = await getDatFileList(datDir, sendPort);
-    var fileNames = fileList.map((final e) => path.basename(e)).toList();
-    var fileSizes =
-        (await Future.wait(fileList.map((final e) => File(e).length())))
-            .toList();
-    var fileNumber = fileList.length;
+    fileList = await getDatFileList(datDir, sendPort);
+
+    if (fileList.isEmpty) {
+      print("No files found in the directory: $datDir. Skipping repack.");
+      return;
+    }
+
+    fileNames = fileList.map((final e) => path.basename(e)).toList();
+    fileSizes = (await Future.wait(fileList.map((final e) => File(e).length())))
+        .toList();
+    fileNumber = fileList.length;
+
     var hashData = HashInfo(fileNames);
 
     var fileExtensionsSize = 0;
@@ -58,8 +69,8 @@ Future<void> repackDat(final String datDir, final String exportPath,
 
     // WRITE
     // Header
-    var datFile = File(exportPath);
     await Directory(path.dirname(exportPath)).create(recursive: true);
+    var datFile = File(exportPath);
     var datSize = fileOffsets.last + fileSizes.last + 1;
     if (datSize % 16 != 0) datSize = (datSize / 16).ceil() * 16;
     var datBytes = ByteDataWrapper.allocate(datSize);
@@ -129,8 +140,17 @@ Future<void> repackDat(final String datDir, final String exportPath,
     await datFile.writeAsBytes(datBytes.buffer.asUint8List());
 
     print("Export path: $exportPath");
-  } catch (e) {
-    print("Error during repacking: $e");
-    print("Failed to write to path: $exportPath");
+  } catch (error, stackTrace) {
+    ExceptionHandler().handle(
+      error,
+      stackTrace,
+      extraMessage: "Error during repacking the DAT file.\n"
+          "DAT Directory: $datDir\n"
+          "Export Path: $exportPath\n"
+          "Processed Files: $fileNumber\n"
+          "File Names (if available): ${fileNames.isNotEmpty ? fileNames.join(", ") : "No files found"}\n"
+          "File Sizes (if available): ${fileSizes.isNotEmpty ? fileSizes.join(", ") : "No sizes available"}",
+    );
+    rethrow;
   }
 }

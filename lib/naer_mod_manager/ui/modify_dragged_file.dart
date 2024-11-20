@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/log_state.dart';
@@ -61,10 +62,14 @@ class ModifyDraggedFile {
               isModManagerPageProcessing: false);
           globalLog(
               "Randomization process finished the dragged file successfully.");
-        } catch (e) {
-          globalState.setIsModManagerPageProcessing(
-              isModManagerPageProcessing: false);
-          logState.addLog("Failed to process folder $folderPath: $e");
+        } catch (e, stackTrace) {
+          ExceptionHandler().handle(e, stackTrace,
+              extraMessage:
+                  "Failed to process folder $folderPath with ${arguments.toString()}",
+              onHandled: () => {
+                    globalState.setIsModManagerPageProcessing(
+                        isModManagerPageProcessing: false)
+                  });
         }
       }
     }

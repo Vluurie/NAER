@@ -7,11 +7,8 @@ import '../../utils/utils_fork.dart';
 import '../utils/ByteDataWrapper.dart';
 
 int _getTagId(final XmlElement tag) {
-  if (tag.name.local == "UNKNOWN") {
-    return int.parse(tag.getAttribute("id")!);
-  } else {
-    return crc32(tag.name.local);
-  }
+  // no need to check since jap to eng not exists in NAER
+  return crc32(tag.name.local);
 }
 
 class _XmlNode {

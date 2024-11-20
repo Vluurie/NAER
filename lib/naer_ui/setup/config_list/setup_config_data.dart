@@ -126,9 +126,11 @@ class SetupConfigData implements ConfigDataContainer {
     return arguments
         .map((final arg) {
           if (arg == '{input}') {
-            return globalState.input;
+            final input = globalState.input;
+            return input.contains(' ') ? '"$input"' : input;
           } else if (arg == '{output}') {
-            return globalState.specialDatOutputPath;
+            final output = globalState.specialDatOutputPath;
+            return output.contains(' ') ? '"$output"' : output;
           } else if (arg == '{ignore}') {
             if (globalState.ignoredModFiles.isNotEmpty) {
               return "--ignore=${globalState.ignoredModFiles.join(',')}";

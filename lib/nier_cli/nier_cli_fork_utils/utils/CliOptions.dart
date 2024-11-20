@@ -21,6 +21,25 @@ class CliOptions {
     required this.isPak,
     required this.isYax,
     required this.specialDatOutputPath,
-  })  : autoExtractChildren = true, // Always set to true
+  })  : autoExtractChildren = true,
         fileTypeIsKnown = isCpk || isDat || isPak || isYax;
+
+  @override
+  String toString() {
+    return '''
+CliOptions:
+  Output: $output
+  Folder Mode: $folderMode
+  Recursive Mode: $recursiveMode
+  Auto Extract Children: $autoExtractChildren
+  Wwise CLI Path: ${wwiseCliPath ?? "Not Set"}
+  File Type Flags:
+    - CPK: $isCpk
+    - DAT: $isDat
+    - PAK: $isPak
+    - YAX: $isYax
+  File Type Is Known: $fileTypeIsKnown
+  Special DAT Output Path: ${specialDatOutputPath ?? "Not Set"}
+''';
+  }
 }

@@ -113,46 +113,47 @@ Future<bool> checkTooSmallSpawnAction(
   return isSpawnActionTooSmall;
 }
 
-/// NOTE that this labels are translated from the [japToEng map] and normally are japanese
-///
 /// Retrieves a collection of XML elements that represent enemy code actions
-/// containing enemy `objId`s used to spawn the enemies.
+/// containing enemy objIds used to spawn the enemies.
 ///
-/// Filters the descendants of the given `action` XML element to
-/// find 'code' elements whose 'str' attribute starts with any of the specified
-/// prefixes. These prefixes are associated with various enemy-related actions
-/// that include enemy `objId`s and are used for spawning enemies or other entities.
+/// Filters the descendants of the given action XML element to
+/// find 'code' elements whose inner text matches any of the specified
+/// hex values. These hex values are associated with various enemy-related actions
+/// that include enemy objIds and are used for spawning enemies or other entities.
 ///
 /// Parameters:
-/// - `action`: The XML element whose descendants are to be searched.
+/// - action: The XML element whose descendants are to be searched.
 ///
 /// Returns:
 /// An iterable collection of XML elements that match the criteria and are used
 /// to spawn enemies or other object entities in the scripting engine.
 Future<Iterable<xml.XmlElement>> getEnemyCodeElements(
     final xml.XmlElement action) async {
-  const prefixes = [
-    'EnemyGenerator',
-    'EnemySetAction',
-    'EnemyLayoutAction',
-    'EnemyLayoutArea',
-    'EnemySetArea',
-    'EntityLayoutAction'
+  const hexValues = [
+    '0x6f0fb5bd', // EnemyGenerator
+    '0xfb085793', // EnemySetAction
+    '0x2ebb61fa', // EnemyLayoutAction
+    '0x4987272c', // EnemyLayoutArea
+    '0xe8fefe4b', // EnemySetAction
+    '0xda948617' // EntityLayoutAction
   ];
 
-  // Filter descendants to find 'code' elements with 'str' attributes so it get's the translated str starting with any of the prefixes
+  // Filter descendants to find 'code' elements with text matching any of the hex values
   return action.descendants.whereType<xml.XmlElement>().where((final e) =>
       e.name.local == 'code' &&
-      prefixes.any((final p) => e.getAttribute('str')?.startsWith(p) ?? false));
+      hexValues.any((final hex) => e.innerText.trim() == hex));
 }
 
 /// Checks if the given `actionElement` represents an 'EnemyGenerator'.
 ///
-/// Returns `true` if the 'code' element has the attribute `str` set to 'EnemyGenerator', `false` otherwise.
+/// Returns `true` if the 'code' element's text is set to the hex value
+/// associated with 'EnemyGenerator', `false` otherwise.
 bool isEnemyGenerator(final xml.XmlElement actionElement) {
+  const enemyGeneratorHex = '0x6f0fb5bd'; // Hex value for EnemyGenerator
+
   var codeElement = actionElement.findElements('code').firstOrNull;
   return codeElement != null &&
-      codeElement.getAttribute('str') == 'EnemyGenerator';
+      codeElement.innerText.trim() == enemyGeneratorHex;
 }
 
 /// Checks if the given XML element contains a ShootingEnemyCurveAction by traversing its child elements.

@@ -1,9 +1,9 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
-import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
@@ -81,17 +81,29 @@ Future<void> processEntities(
 
     try {
       await handleInput(
-          file,
-          null,
-          mainData.options,
-          pendingFilesQueue,
-          processedFiles,
-          mainData.argument['enemyList'] as List<String>,
-          mainData.argument['activeOptions'] as List<String>,
-          mainData.sendPort,
-          isManagerFile: mainData.isManagerFile);
+        file,
+        null,
+        mainData.options,
+        pendingFilesQueue,
+        processedFiles,
+        mainData.argument['enemyList'] as List<String>,
+        mainData.argument['activeOptions'] as List<String>,
+        mainData.sendPort,
+        isManagerFile: mainData.isManagerFile,
+      );
       processedFiles.add(file);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: '''
+Error while processing entity:
+- File: $file
+- Options: ${mainData.options.toString()}
+- Enemy List: ${mainData.argument['enemyList']}}
+''',
+      );
+
       mainData.sendPort.send("Input error: $e");
     }
   }
@@ -140,11 +152,20 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
           'isAddition': mainData.isAddition
         });
       } catch (e, stackTrace) {
-        // Send error message to the main isolate
+        ExceptionHandler().handle(
+          e,
+          stackTrace,
+          extraMessage: '''
+Error while processing the DAT folder:
+- Pending Files: ${mainData.argument['pendingFiles']}
+- Processed Files: ${mainData.argument['processedFiles']}
+''',
+        );
+
         mainData.sendPort.send({
           'event': 'error',
           'details': "Failed to process DAT folder: ${e.toString()}",
-          'stackTrace': stackTrace.toString()
+          'stackTrace': stackTrace.toString(),
         });
       }
     }
@@ -280,7 +301,7 @@ Future<List<String>> _processFileBatch(
   final ListQueue<String> pendingFiles,
   final List<String> enemyList,
   final List<String> activeOptions,
-  final bool? ismanagerFile,
+  final bool? isManagerFile,
   final SendPort sendPort,
 ) async {
   final List<String> errorFiles = [];
@@ -293,15 +314,35 @@ Future<List<String>> _processFileBatch(
     try {
       await handleInput(input, null, options, pendingFiles, processedFiles,
           enemyList, activeOptions, sendPort,
-          isManagerFile: ismanagerFile);
+          isManagerFile: isManagerFile);
       processedFiles.add(input);
     } on FileHandlingException catch (e) {
-      globalLog("Invalid input for file $input (File type: $fileType): $e");
-      errorFiles.add(input);
+      if (fileType != ".cpk") {
+        ExceptionHandler().handle(
+          e,
+          StackTrace.current,
+          extraMessage: '''
+Invalid input for file:
+- File: $input
+- File Type: $fileType
+- Enemy List: $enemyList
+''',
+        );
+        errorFiles.add(input);
+      }
     } catch (e, stackTrace) {
-      globalLog("Failed to process file $input (File type: $fileType)");
-      globalLog(e.toString());
-      globalLog(stackTrace.toString());
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: '''
+Failed to process file:
+- File: $input
+- File Type: $fileType
+- Options: $options
+- Active Options: $activeOptions
+- Enemy List: $enemyList
+''',
+      );
       errorFiles.add(input);
     }
   }

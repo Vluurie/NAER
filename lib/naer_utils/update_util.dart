@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:flutter/material.dart';
@@ -221,11 +222,15 @@ class UpdateService {
           print('No update available.');
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-      print('Error checking for updates: $e');
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: "Error occurred while checking for updates.",
+      );
     }
   }
 
@@ -256,11 +261,15 @@ class UpdateService {
           globalLog("You are on the latest Version of NAER!");
         }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (context.mounted) {
         Navigator.of(context).pop();
       }
-      globalLog('Failed to check for updates: $e');
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: "Failed to check for updates.",
+      );
     }
   }
 }

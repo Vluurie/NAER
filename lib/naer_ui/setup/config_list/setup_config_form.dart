@@ -213,17 +213,39 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
       List<String> command = cliArgs.processArgs;
       List<String> arguments = [];
 
-      // Regex to split on spaces but keep arguments with '=' together :)
       RegExp exp = RegExp(r'--[^\s=]+(?:=\[[^\]]*\]|=\S+)?|[^\s]+');
-      Iterable<RegExpMatch> matches = exp.allMatches(command.join(' '));
 
-      for (var match in matches) {
-        arguments.add(match.group(0)!);
+// fix: in and output where splitted into single arguments if they had spaces
+      arguments.add(command[0]);
+      for (int i = 1; i < command.length; i++) {
+        if (i == 2) {
+          arguments.add(command[i]);
+        } else {
+          Iterable<RegExpMatch> matches = exp.allMatches(command[i]);
+          for (var match in matches) {
+            arguments.add(match.group(0)!);
+          }
+        }
       }
 
       // check if there are ignored files
       if (globalState.ignoredModFiles.isNotEmpty) {
         arguments.add("--ignore=${globalState.ignoredModFiles.join(',')}");
+      }
+
+      // fix: in and output argument had 4x qutation marks
+      arguments = arguments.map((final arg) {
+        if (arg.contains(' ') && !arg.startsWith('"') && !arg.endsWith('"')) {
+          return '"$arg"';
+        }
+        return arg;
+      }).toList();
+
+      if (arguments.isNotEmpty) {
+        arguments[0] = arguments[0].replaceAll('"', '');
+        if (arguments.length > 2) {
+          arguments[2] = arguments[2].replaceAll('"', '');
+        }
       }
 
       final newConfig = SetupConfigData(

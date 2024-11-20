@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:NAER/naer_utils/exception_handler.dart';
+
 /// Handles Important Ids that should not be randomized to not get into an soft lock in the game or if they where used by mods to be ignored.
 class ImportantIDs {
   Map<String, List<String>> ids;
@@ -104,8 +106,9 @@ class ImportantIDs {
       } else {
         print("Metadata file does not exist.");
       }
-    } catch (e) {
-      print("Failed to load IDs from metadata: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler()
+          .handle(e, stackTrace, extraMessage: "Caught in loadIdsFromMetadata");
     }
     return ImportantIDs({...ImportantIDMap.importantIds});
   }

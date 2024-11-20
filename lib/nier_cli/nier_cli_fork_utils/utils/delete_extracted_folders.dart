@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart';
@@ -74,12 +75,21 @@ Future<void> deleteExtractedGameFolders(final String directoryPath) async {
           globalLog('Deleted folder: $folderName');
           deletionSuccess = true;
           break;
-        } catch (e) {
-          globalLog(
-              'Error deleting folder $folderName on attempt ${attempt + 1}: $e');
+        } catch (e, stackTrace) {
+          ExceptionHandler().handle(
+            e,
+            stackTrace,
+            extraMessage: '''
+Error occurred while attempting to delete folder:
+- Folder Name: $folderName
+- Attempt: ${attempt + 1} of $maxRetries
+- Directory Path: $directoryPath
+''',
+          );
+
           if (attempt < maxRetries - 1) {
             await Future.delayed(retryDelay);
-            logAndPrint('Retrying deletion of folder $folderName...');
+            globalLog('Retrying deletion of folder $folderName...');
           }
         }
       }
@@ -89,7 +99,6 @@ Future<void> deleteExtractedGameFolders(final String directoryPath) async {
             'Failed to delete folder $folderName after $maxRetries attempts.');
       }
 
-      // Verify if the folder still exists after deletion attempts
       if (await folderPath.exists()) {
         globalLog(
             'Warning: Folder $folderName still exists after deletion attempts.');
@@ -102,15 +111,26 @@ Future<void> deleteExtractedGameFolders(final String directoryPath) async {
 
 Future<void> deleteBackupGameFolders(final String directoryPath) async {
   var parentDirectory = Directory(directoryPath).parent.path;
+
   for (var folderName in backupNames) {
     var folderPath = Directory(join(parentDirectory, folderName));
     if (await folderPath.exists()) {
       try {
         await folderPath.delete(recursive: true);
         globalLog('Deleted folder: $folderName');
-      } catch (e) {
-        logAndPrint('Error deleting folder $folderName: $e');
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(
+          e,
+          stackTrace,
+          extraMessage: '''
+Error occurred while deleting backup folder:
+- Folder Name: $folderName
+- Parent Directory: $parentDirectory
+''',
+        );
       }
+    } else {
+      globalLog('Folder $folderName does not exist, skipping deletion.');
     }
   }
 }

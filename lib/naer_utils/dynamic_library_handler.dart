@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'dart:convert';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:ffi/ffi.dart';
 
 /// Loads the dynamic library for the platform.
@@ -43,9 +44,19 @@ Future<List<String>> extractDatFiles(
     }
 
     final String resultStr = resultPtr.toDartString();
-
     final List<dynamic> files = jsonDecode(resultStr);
     return files.cast<String>();
+  } catch (error, stackTrace) {
+    // Handle and log the exception
+    ExceptionHandler().handle(
+      error,
+      stackTrace,
+      extraMessage: 'Error occurred while extracting DAT files.\n'
+          'DAT File Path: $datFilePath\n'
+          'Extract Directory Path: $extractDirPath\n'
+          'Should Extract PAK Files: $shouldExtractPakFiles',
+    );
+    rethrow;
   } finally {
     malloc.free(datFilePathPtr);
     malloc.free(extractDirPathPtr);

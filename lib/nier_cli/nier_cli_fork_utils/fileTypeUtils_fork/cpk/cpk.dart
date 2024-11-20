@@ -3,6 +3,8 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:NAER/naer_utils/exception_handler.dart';
+
 import '../utils/ByteDataWrapper.dart';
 
 class CpkSection {
@@ -467,8 +469,17 @@ class Cpk {
         } else {
           files.add(CpkFile.read(dirName, fileName, bytes, extractedSize));
         }
-      } catch (e) {
-        print("Failed to read file $dirName/$fileName");
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(
+          e,
+          stackTrace,
+          extraMessage: '''
+Failed to read the file:
+- Directory: $dirName
+- File: $fileName
+''',
+        );
+
         rethrow;
       }
     }

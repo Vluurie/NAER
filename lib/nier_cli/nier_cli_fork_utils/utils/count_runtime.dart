@@ -1,5 +1,6 @@
 import 'dart:isolate';
 
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 
 /// Util class for counting runtime of single methods or full processing time.
@@ -52,9 +53,19 @@ class CountRuntime {
 
     try {
       await Function.apply(function, arguments);
-    } catch (e) {
+    } catch (e, stackTrace) {
       final errorMsg = 'Error in function $functionName: $e';
-      globalLog(errorMsg);
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: '''
+Error occurred while executing function:
+- Function Name: $functionName
+- Arguments: $arguments
+- Elapsed Time Before Failure: ${stopwatch.elapsed}
+''',
+      );
+
       if (sendPort != null) {
         sendPort.send(errorMsg);
       }

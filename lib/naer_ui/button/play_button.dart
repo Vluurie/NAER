@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/process_service.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:automato_theme/automato_theme.dart';
@@ -115,9 +115,10 @@ class PlayButton extends ConsumerWidget {
         } else {
           playButtonNotifier.stopLoading();
         }
-      } catch (e) {
-        globalLog("$e");
-        playButtonNotifier.stopLoading();
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(e, stackTrace,
+            extraMessage: 'Caught in _handleProcessButtonState',
+            onHandled: () => {playButtonNotifier.stopLoading()});
       }
     } else if (buttonState == PlayButtonState.running) {
       playButtonNotifier.startLoading();

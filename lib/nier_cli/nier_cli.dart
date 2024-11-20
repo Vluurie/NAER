@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 import 'package:NAER/naer_cli/handle_help_argument.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/initialize_variables.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_process_game_files.dart';
@@ -75,7 +76,19 @@ Future<void> nierCli(final NierCliArgs cliArgs) async {
     CountRuntime()
         .processTime(t1, argument['processedFiles'], [], mainData.sendPort);
     logAndPrint("Mofification complete");
-  } catch (e) {
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: '''
+An error occurred while running the Nier CLI tool.
+Helpful details:
+- The process may have failed due to an invalid argument or option.
+- A required file or path might be missing or incorrectly specified.
+- An internal issue with the tool may have occurred.
+''',
+    );
+
     print('''
 +---------------------------------------------------------------+
 | Oops! An error occurred while running the Nier CLI tool.       |
@@ -94,6 +107,7 @@ Future<void> nierCli(final NierCliArgs cliArgs) async {
 | $e                                                             |
 +---------------------------------------------------------------+
 ''');
+
     rethrow;
   }
 }

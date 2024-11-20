@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:NAER/data/sorted_data/special_enemy_entities.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:path/path.dart' as path;
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
@@ -62,8 +63,13 @@ class BalanceModeCheckBoxState extends ConsumerState<BalanceModeCheckBox> {
             try {
               await file.delete();
               globalLog("Deleted file: ${file.path}");
-            } catch (e) {
-              globalLog("Error deleting file ${file.path}: $e");
+            } catch (e, stackTrace) {
+              ExceptionHandler().handle(
+                e,
+                stackTrace,
+                extraMessage:
+                    "Error deleting file: ${file.path}. Caught from: deleteEnemyFilesIfBalanceModeUnchecked",
+              );
             }
           }
         }

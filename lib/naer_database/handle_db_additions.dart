@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:NAER/naer_database/sql_database.dart';
 import 'package:NAER/naer_database/handle_db_ignored_files.dart';
-import 'package:flutter/foundation.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 
@@ -74,7 +74,8 @@ class DatabaseAdditionHandler {
           if (await file.exists()) {
             try {
               await file.delete();
-            } catch (deleteError) {
+            } catch (deleteError, stackTrace) {
+              ExceptionHandler().handle(deleteError, stackTrace);
               continue;
             }
 
@@ -91,10 +92,8 @@ class DatabaseAdditionHandler {
             whereArgs: [addition.filePath, addition.action],
           );
         }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error during undoing addition for ${addition.filePath}: $e');
-        }
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(e, stackTrace);
       }
     }
 
@@ -141,8 +140,8 @@ class DatabaseAdditionHandler {
       });
 
       additions.clear();
-    } catch (e) {
-      debugPrint('Batch insert failed: $e');
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace);
     }
   }
 
@@ -182,14 +181,16 @@ class DatabaseAdditionHandler {
               ],
             );
           }
-        } catch (e) {
-          debugPrint(
-              'Error deleting modification for filePath: ${addition['filePath']} and action: ${addition['action']}. Error: $e');
+        } catch (e, stackTrace) {
+          ExceptionHandler().handle(e, stackTrace,
+              extraMessage:
+                  'Error deleting modification for filePath: ${addition['filePath']} and action: ${addition['action']}.');
         }
       }
-    } catch (e) {
-      debugPrint(
-          'Error querying file_additions or file_modifications table. Error: $e');
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage:
+              'Error querying file_additions or file_modifications table.');
     }
   }
 

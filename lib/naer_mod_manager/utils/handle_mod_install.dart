@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:path/path.dart' as path;
 import 'package:NAER/naer_utils/cli_arguments.dart';
@@ -110,8 +111,9 @@ class ModInstallHandler {
           try {
             await file.delete();
             deletedFiles = true;
-          } catch (e) {
-            print("Error deleting file $installPath: $e");
+          } catch (e, stackTrace) {
+            ExceptionHandler().handle(e, stackTrace,
+                extraMessage: "Error deleting file $installPath");
           }
         }
       }

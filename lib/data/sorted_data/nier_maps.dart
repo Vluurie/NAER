@@ -43,7 +43,6 @@ class MapLocation {
     try {
       return mapLocations.firstWhere((final location) => location.id == id);
     } catch (e) {
-      // If no resource location is found with the given id, return null or handle it as you see fit
       return null;
     }
   }

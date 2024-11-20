@@ -1,5 +1,6 @@
 import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// Update level
@@ -184,9 +185,28 @@ void updateLevelValueIfExists(final xml.XmlElement paramElement,
 xml.XmlElement? findLevelValueElementWithName(
     final xml.XmlElement paramElement, final String levelName) {
   try {
-    return paramElement.findElements('value').firstWhere((final element) =>
-        element.findElements('name').firstOrNull?.innerText == levelName);
-  } catch (e) {
+    // Get all 'value' elements
+    final valueElements = paramElement.findElements('value');
+
+    // Iterate through value elements to find the matching one
+    for (final element in valueElements) {
+      if (element.findElements('name').firstOrNull?.innerText == levelName) {
+        return element;
+      }
+    }
+
+    // No matching element found, return null
+    return null;
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: '''
+Caught an exception while searching for level value names:
+- Parameter Element: ${paramElement.name}
+- Expected Level Name: $levelName
+''',
+    );
     return null;
   }
 }
@@ -233,7 +253,7 @@ xml.XmlElement createLevelValueElement(
     xml.XmlElement(xml.XmlName('name'), [], [xml.XmlText(levelName)]),
     xml.XmlElement(
         xml.XmlName('code'),
-        [xml.XmlAttribute(xml.XmlName('str'), 'int')],
+        [], //no need without jap to eng
         [xml.XmlText('0x1451dab1')]),
     xml.XmlElement(xml.XmlName('body'), [], [xml.XmlText(enemyLevel)])
   ]);

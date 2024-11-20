@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:NAER/naer_database/handle_db_dlc.dart';
 import 'package:NAER/naer_ui/dialog/directory_selection_dialog.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/find_mod_files.dart';
 import 'package:NAER/naer_utils/global_log.dart';
@@ -63,7 +64,7 @@ class InputDirectoryHandler {
         activeIsolates,
         foundDirectoriesWithData,
         foundDirectoriesWithoutData,
-      ).timeout(const Duration(seconds: 30), onTimeout: () {
+      ).timeout(const Duration(seconds: 15), onTimeout: () {
         _killAllIsolates(activeIsolates);
       });
 
@@ -90,12 +91,13 @@ class InputDirectoryHandler {
         globalLog(
             'NieR:Automata data directory not found. Please ensure the game is installed and the directory names are correct. It should be the "NieRAutomata/data" folder. You may need to select it manually.');
       }
-    } catch (e) {
-      globalLog('Error during search: $e');
-      _killAllIsolates(activeIsolates);
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage: "Caught during searching of input path.",
+          onHandled: () => {
+                _killAllIsolates(activeIsolates),
+                if (context.mounted) {Navigator.of(context).pop()}
+              });
     } finally {
       receivePort.close();
     }
@@ -138,7 +140,7 @@ class InputDirectoryHandler {
     }
 
     await completer.future.timeout(
-      const Duration(seconds: 30),
+      const Duration(seconds: 15),
       onTimeout: () {
         if (!completer.isCompleted) {
           completer.complete();
@@ -156,8 +158,10 @@ class InputDirectoryHandler {
       Map<String, Set<String>> foundDirectories =
           await _searchForNierAutomataDirectory(drive);
       sendPort.send(foundDirectories);
-    } catch (e) {
-      sendPort.send(null);
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage: "Caught in _isolateSearchEntry.",
+          onHandled: () => {sendPort.send(null)});
     }
   }
 
@@ -202,13 +206,16 @@ class InputDirectoryHandler {
             queue.add(entity);
           }
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         if (e is FileSystemException) {
-          globalLog(
-              'Skipped directory due to access issues: ${currentDir.path}');
           continue;
         } else {
-          globalLog('Error while searching directory: $e');
+          ExceptionHandler().handle(
+            e,
+            stackTrace,
+            extraMessage:
+                'Caught while searching directory: ${currentDir.path} in _searchForNierAutomataDirectory',
+          );
         }
       }
     }
@@ -321,10 +328,10 @@ final countdownProvider =
 });
 
 class CountdownNotifier extends StateNotifier<int> {
-  CountdownNotifier() : super(30);
+  CountdownNotifier() : super(15);
 
   void startCountdown() {
-    state = 30;
+    state = 15;
     Timer.periodic(const Duration(seconds: 1), (final Timer timer) {
       if (state > 0) {
         state = state - 1;

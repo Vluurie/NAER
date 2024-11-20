@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart' as path;
 
@@ -76,8 +77,19 @@ Future<void> copyCollectedGameFiles(
       await copyDirectory(Directory(folderPath), Directory(randomizedDest));
       await copyDirectory(
           Directory(folderPath), Directory(randomizedAndLevelDest));
-    } catch (e) {
-      logAndPrint('Error copying $folderPath: $e');
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: '''
+Error occurred while copying collected game files:
+- Source Folder: $folderPath
+- Destination Folders:
+  - Only Level: $onlyLevelDest
+  - Randomized: $randomizedDest
+  - Randomized and Level: $randomizedAndLevelDest
+''',
+      );
     }
   }
 }

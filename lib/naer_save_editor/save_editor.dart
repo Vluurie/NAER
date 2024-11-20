@@ -2,6 +2,7 @@ import 'package:NAER/naer_save_editor/exp/experience_widget.dart';
 import 'package:NAER/naer_save_editor/money/money_widget.dart';
 import 'package:NAER/naer_save_editor/name/name_widget.dart';
 import 'package:NAER/naer_ui/setup/snackbars.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:automato_theme/automato_theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -71,10 +72,17 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
           directoryPath = "Directory does not exist";
         });
       }
-    } catch (e) {
-      setState(() {
-        directoryPath = "Error accessing directory: $e";
-      });
+    } catch (error, stackTrace) {
+      ExceptionHandler().handle(
+        error,
+        stackTrace,
+        extraMessage: "Error getting the Save File directory",
+        onHandled: () {
+          setState(() {
+            directoryPath = "Error accessing directory.";
+          });
+        },
+      );
     }
   }
 
@@ -111,8 +119,13 @@ class SaveEditorState extends ConsumerState<SaveEditor> {
       } else {
         snackBar("No backup directory found.", SnackBarType.info);
       }
-    } catch (e) {
-      snackBar("Error resetting SlotData files: $e", SnackBarType.failure);
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage: "Error resetting SlotData files.",
+          onHandled: () => {
+                snackBar(
+                    "Error resetting SlotData files.", SnackBarType.failure)
+              });
     }
   }
 

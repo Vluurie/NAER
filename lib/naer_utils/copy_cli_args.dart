@@ -1,5 +1,6 @@
 import 'package:NAER/naer_ui/setup/snackbars.dart';
 import 'package:NAER/naer_utils/cli_arguments.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:NAER/naer_utils/state_provider/setup_state.dart';
@@ -24,9 +25,19 @@ void onCopyArgsPressed(final BuildContext context, final WidgetRef ref) {
           SnackBarHandler.showSnackBar(context, ref,
               'No setup is currently selected.', SnackBarType.info);
         }
-      } catch (e) {
-        SnackBarHandler.showSnackBar(context, ref,
-            'Error occurred while copying arguments.', SnackBarType.failure);
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(
+          e,
+          stackTrace,
+          extraMessage: "Error occurred while copying arguments",
+        );
+
+        SnackBarHandler.showSnackBar(
+          context,
+          ref,
+          'Error occurred while copying arguments.',
+          SnackBarType.failure,
+        );
       }
     }
   });
@@ -48,10 +59,12 @@ Future<void> _performCopyCLIArguments(
     if (context.mounted) {
       copyToClipboard(cliArgs.fullCommand, context, ref);
     }
-  } catch (e) {
-    if (context.mounted) {
-      globalLog("Error gathering CLI arguments: $e");
-    }
+  } catch (e, stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: "Error gathering CLI arguments",
+    );
   }
 }
 
@@ -74,7 +87,11 @@ void copyToClipboard(final List<String> command, final BuildContext context,
       SnackBarHandler.showSnackBar(
           context, ref, 'Command copied to clipboard', SnackBarType.info);
     }
-  }).catchError((final e) {
-    globalLog("Error copying to clipboard: $e");
+  }).catchError((final e, final stackTrace) {
+    ExceptionHandler().handle(
+      e,
+      stackTrace,
+      extraMessage: "Error copying to clipboard",
+    );
   });
 }

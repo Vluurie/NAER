@@ -12,6 +12,7 @@ import 'package:NAER/naer_ui/dialog/nier_is_running.dart';
 import 'package:NAER/naer_mod_manager/utils/handle_mod_install.dart';
 import 'package:NAER/naer_mod_manager/utils/mod_state_managment.dart';
 import 'package:NAER/naer_ui/setup/snackbars.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/get_paths.dart';
 import 'package:NAER/naer_utils/global_log.dart';
@@ -218,9 +219,9 @@ class _ModsListState extends ConsumerState<ModsList>
               ? 'Mod installed.'
               : 'Mod uninstalled.',
           SnackBarType.info);
-    } catch (error) {
-      SnackBarHandler.showSnackBar(
-          context, ref, 'Error: $error', SnackBarType.failure);
+    } catch (error, stackTrace) {
+      ExceptionHandler().handle(error, stackTrace,
+          extraMessage: "Caught in toggleInstallUninstallMod");
     } finally {
       setState(() {
         _loadingMap[index] = false;
@@ -743,11 +744,15 @@ class _ModsListState extends ConsumerState<ModsList>
       globalState.setIsModManagerPageProcessing(
           isModManagerPageProcessing: false);
       return true;
-    } catch (e, stacktrace) {
-      logState.addLog("Error executing CLI command: $e");
-      globalState.setIsModManagerPageProcessing(
-          isModManagerPageProcessing: false);
-      globalLog(Trace.from(stacktrace).toString());
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage:
+              "Caught in: _executeCLICommand with ${arguments.toString()}",
+          onHandled: () => {
+                globalState.setIsModManagerPageProcessing(
+                    isModManagerPageProcessing: false)
+              });
+
       return false;
     }
   }
@@ -767,8 +772,9 @@ class _ModsListState extends ConsumerState<ModsList>
       await SharedPreferencesUtils.storeFileHash(modId, targetPath, fileHash);
       logState.addLog("Copied file: $filePath to $targetPath");
       return true;
-    } catch (e) {
-      logState.addLog("Failed to copy file: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage: "Failed to copy file: $filePath");
       return false;
     }
   }
@@ -793,14 +799,10 @@ class _ModsListState extends ConsumerState<ModsList>
         "Mod uninstalled successfully!",
         SnackBarType.success,
       );
-    } catch (e) {
-      logState.addLog("Exception caught while uninstalling mod: $e");
-      SnackBarHandler.showSnackBar(
-        context,
-        ref,
-        "Exception caught: $e",
-        SnackBarType.failure,
-      );
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage:
+              "Exception caught while uninstalling mod: ${selectedMod.toString()}");
     }
   }
 }

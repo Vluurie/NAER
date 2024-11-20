@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,8 +14,9 @@ class FileUtils {
       var contents = await file.readAsBytes();
       var digest = await compute(sha256.convert, contents);
       return digest.toString();
-    } catch (e) {
-      print("Error computing file hash: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(e, stackTrace,
+          extraMessage: "Error computing file hash: File: ${file.toString()}");
       return "ERROR_COMPUTING_HASH";
     }
   }

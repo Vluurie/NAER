@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +10,24 @@ import 'package:win32/win32.dart';
 Future<T> runProcessServiceInZone<T>(final Future<T> Function() body) {
   final completer = Completer<T>();
   runZonedGuarded(() async {
-    completer.complete(await body());
+    try {
+      completer.complete(await body());
+    } catch (e, stackTrace) {
+      if (!completer.isCompleted) {
+        completer.completeError(e, stackTrace);
+      }
+    }
   }, (final error, final stackTrace) {
-    globalLog("Unhandled error: $error\n$stackTrace");
-    completer.completeError(error, stackTrace);
+    ExceptionHandler().handle(
+      error,
+      stackTrace,
+      extraMessage: "Caught from runZonedGuarded in runProcessServiceInZone",
+      onHandled: () {
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+    );
   });
   return completer.future;
 }
@@ -41,9 +56,14 @@ Future<bool> startNierAutomataExecutable(
               "Nier Automata did not start within the expected time frame.");
           return false; // Process failed to start within the time limit
         }
-      } catch (e) {
-        globalLog("Error while starting Nier Automata: $e");
-        return false; // Failed to start the process
+      } catch (e, stackTrace) {
+        ExceptionHandler().handle(
+          e,
+          stackTrace,
+          extraMessage: "Error while starting Nier Automata",
+        );
+
+        return false;
       }
     } else {
       globalLog(
@@ -98,8 +118,12 @@ class ProcessService {
           free(szExeFile);
         }
       }
-    } catch (e) {
-      globalLog("Error during process enumeration: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: "Error during process enumeration",
+      );
     } finally {
       free(processIds);
       free(cbNeeded);
@@ -152,8 +176,12 @@ class ProcessService {
     try {
       Process process = await Process.start(processPath, []);
       return process;
-    } catch (e) {
-      globalLog("Failed to start process $processPath: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: "Failed to start process $processPath",
+      );
       rethrow;
     }
   }
@@ -194,8 +222,12 @@ class ProcessService {
           free(szExeFile);
         }
       }
-    } catch (e) {
-      globalLog("Error during process termination: $e");
+    } catch (e, stackTrace) {
+      ExceptionHandler().handle(
+        e,
+        stackTrace,
+        extraMessage: "Error during process termination",
+      );
     } finally {
       free(processIds);
       free(cbNeeded);

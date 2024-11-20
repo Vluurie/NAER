@@ -245,6 +245,7 @@ class EnemyStatsSelectionState extends ConsumerState<EnemyStatsSelection> {
   }
 
   String _getStatsChangeHint(final double multiplier) {
+    // ignore: unused_local_variable
     String hint = "";
     if (multiplier < 1.0) {
       double reductionPercent = (1.0 - multiplier) * 100;
