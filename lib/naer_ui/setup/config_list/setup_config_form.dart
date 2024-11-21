@@ -236,7 +236,7 @@ class SetupConfigFormScreenState extends ConsumerState<SetupConfigFormScreen> {
       // fix: in and output argument had 4x qutation marks
       arguments = arguments.map((final arg) {
         if (arg.contains(' ') && !arg.startsWith('"') && !arg.endsWith('"')) {
-          return '"$arg"';
+          return arg;
         }
         return arg;
       }).toList();

@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:NAER/naer_utils/exception_handler.dart';
-import 'package:NAER/naer_utils/global_log.dart';
 import 'package:NAER/naer_utils/state_provider/global_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:NAER/naer_utils/sort_selected_enemies.dart';
 import 'package:path/path.dart' as p;
 
