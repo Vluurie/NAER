@@ -3,14 +3,26 @@
 import 'dart:io';
 
 import 'package:NAER/naer_utils/get_paths.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart' as path;
 
 /// Retrieves the sorted enemies path from the list of arguments.
-String? getSortedEnemyGroupsIdentifierMap(final List<String> arguments) {
-  if (arguments.length >= 4) {
-    return arguments[3];
+OptionIdentifier? getSortedEnemyGroupsIdentifierMap(final List<String> arguments) {
+  if (arguments.length > 3) {
+    final String value = arguments[3];
+
+    switch (value) {
+      case 'ALL':
+        return OptionIdentifier.all;
+      case 'CUSTOM_SELECTED':
+        return OptionIdentifier.customSelected;
+      case 'STATS_ONLY':
+        return OptionIdentifier.statsOnly;
+      default:
+        return null;
+    }
   }
   return null;
 }
@@ -20,10 +32,10 @@ String? getSortedEnemyGroupsIdentifierMap(final List<String> arguments) {
 /// This function checks if the `sortedEnemyGroupsIdentifierMap` and `output` paths are valid.
 /// If either path is null or invalid, it throws a [FileHandlingException] message.
 void validateIdentifierAndOutput(
-    final String? sortedEnemyGroupsIdentifierMap, final String? output) {
+    final OptionIdentifier? sortedEnemyGroupsIdentifierMap, final String? output) {
   try {
     if (sortedEnemyGroupsIdentifierMap == null ||
-        sortedEnemyGroupsIdentifierMap.isEmpty) {
+        sortedEnemyGroupsIdentifierMap.value.isEmpty) {
       throw const FileHandlingException(
           "The sorted enemies identifier is not specified. Please make sure the third argument is either 'CUSTOM_SELECTED' or 'ALL' to include all enemies.");
     }

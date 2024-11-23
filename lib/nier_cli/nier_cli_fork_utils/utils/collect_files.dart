@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:NAER/naer_utils/exception_handler.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart' as path;
 
 /// Searches the [currentDir] for files and directories
@@ -116,3 +115,24 @@ Future<void> copyDirectory(
     }
   }
 }
+
+Future<void> filterFilesToProcess(
+    final Map<String, List<String>> collectedFiles,
+    final List<String> activeOptions) async {
+  List<String>? datFiles = collectedFiles['datFolders'];
+  
+  if (datFiles != null && datFiles.isNotEmpty) {
+    final activeOptionBasenames = activeOptions.map((final option) => path.basename(option)).toSet();
+
+    datFiles.retainWhere((final dat) {
+      final datBasename = path.basename(dat); 
+      return activeOptionBasenames.contains(datBasename);
+    });
+
+    collectedFiles['datFolders'] = datFiles;
+  }
+
+  return;
+}
+
+

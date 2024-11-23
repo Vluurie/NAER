@@ -37,10 +37,9 @@ Future<void> extractGameFilesProcess(
   List<String> errorFiles = await extractGameFiles(
       mainData.argument['pendingFiles'],
       mainData.argument['processedFiles'],
-      mainData.options,
       mainData.argument['enemyList'],
       List.from(mainData.argument['activeOptions'])
-        ..addAll(getAllPossibleOptions(mainData.argument[
+        ..addAll(getAllPossibleOptionsExtract(mainData.argument[
             'input'])), // <--- Sneaky workaround to get all extracted, no matter what was selected as the active option. ;)
       mainData.sendPort,
       isManagerFile: mainData.isManagerFile);

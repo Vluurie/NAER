@@ -1,13 +1,13 @@
 import 'package:NAER/naer_services/value_utils/modify_enemy_stats.dart';
-import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_file_randomizer.dart';
+import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_extract_game_files.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/randomize_process.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/collect_files.dart';
-import 'package:path/path.dart' as path;
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/delete_extracted_folders.dart';
+import 'package:path/path.dart' as path;
 
 /// Performs several tasks to modify and process game files, including:
 /// 1. Retrieving the game files to be processed.
@@ -24,6 +24,7 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
   final isolateService = IsolateService();
 
   String inputDir = mainData.argument['input'];
+  List<String> activeOptions =  mainData.argument['activeOptions'];
   String outputDir = path.dirname(inputDir);
   bool extractedFoldersExist = await checkIfExtractedFoldersExist(outputDir);
 
@@ -52,6 +53,10 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
 
   // Collect the extracted game files from the input directory.
   var collectedFiles = collectExtractedGameFiles(inputDir);
+
+  if(activeOptions != collectedFiles["datFiles"]) {
+  await filterFilesToProcess(collectedFiles, activeOptions);
+  }
 
   // Modify or randomize enemies within the input .xml files based on the arguments.
   await isolateService.runInAwaitedIsolate(

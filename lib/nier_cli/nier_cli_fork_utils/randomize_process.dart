@@ -6,7 +6,6 @@ import 'package:path/path.dart' as path;
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
@@ -83,7 +82,6 @@ Future<void> processEntities(
       await handleInput(
         file,
         null,
-        mainData.options,
         pendingFilesQueue,
         processedFiles,
         mainData.argument['enemyList'] as List<String>,
@@ -99,7 +97,6 @@ Future<void> processEntities(
         extraMessage: '''
 Error while processing entity:
 - File: $file
-- Options: ${mainData.options.toString()}
 - Enemy List: ${mainData.argument['enemyList']}}
 ''',
       );
@@ -137,7 +134,6 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
         await handleInput(
             datFolder,
             datOutput,
-            mainData.options,
             ListQueue<String>(),
             mainData.argument['processedFiles'] as Set<String>,
             mainData.argument['enemyList'] as List<String>,
@@ -220,7 +216,7 @@ bool shouldProcessDatFolder(
 
 /// Processes the directory for pending files.
 ///
-/// This function scans the current directory (recursively if specified)
+/// This function scans the current directory recursively
 /// and adds files to the pending files list.
 ///
 Future<void> getGameFilesForProcessing(
@@ -230,9 +226,8 @@ Future<void> getGameFilesForProcessing(
   Set<String> processedFiles = mainData.argument['processedFiles'];
 
   final directory = Directory(currentDir);
-  final stream = mainData.options.recursiveMode
-      ? directory.list(recursive: true)
-      : directory.list();
+
+  final stream = directory.list(recursive: true);
 
   await for (final entity in stream) {
     if (entity is File && !processedFiles.contains(entity.path)) {
@@ -251,7 +246,6 @@ Future<void> getGameFilesForProcessing(
 Future<List<String>> extractGameFiles(
     final List<String> pendingFiles,
     final Set<String> processedFiles,
-    final CliOptions options,
     final List<String> enemyList,
     final List<String> activeOptions,
     final SendPort sendPort,
@@ -272,7 +266,6 @@ Future<List<String>> extractGameFiles(
       final batchErrors = await _processFileBatch(
         batch,
         processedFiles,
-        options,
         ListQueue<String>.from(batch),
         enemyList,
         activeOptions,
@@ -297,7 +290,6 @@ Future<List<String>> extractGameFiles(
 Future<List<String>> _processFileBatch(
   final List<String> batch,
   final Set<String> processedFiles,
-  final CliOptions options,
   final ListQueue<String> pendingFiles,
   final List<String> enemyList,
   final List<String> activeOptions,
@@ -312,7 +304,7 @@ Future<List<String>> _processFileBatch(
     final fileType = path.extension(input).toLowerCase();
 
     try {
-      await handleInput(input, null, options, pendingFiles, processedFiles,
+      await handleInput(input, null, pendingFiles, processedFiles,
           enemyList, activeOptions, sendPort,
           isManagerFile: isManagerFile);
       processedFiles.add(input);
@@ -338,7 +330,6 @@ Invalid input for file:
 Failed to process file:
 - File: $input
 - File Type: $fileType
-- Options: $options
 - Active Options: $activeOptions
 - Enemy List: $enemyList
 ''',

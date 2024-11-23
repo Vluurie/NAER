@@ -5,7 +5,6 @@ import 'dart:isolate';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datRepacker.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/pak/pakRepacker.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/yax/xmlToYax.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
@@ -15,7 +14,6 @@ int conversionCounter = 0;
 Future<bool> handleXmlToYax(
     final String input,
     String? output,
-    final CliOptions args,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
     final List<String> activeOptions,
@@ -23,7 +21,6 @@ Future<bool> handleXmlToYax(
     {required final bool isFile,
     required final bool isDirectory,
     required final bool? isManagerFile}) async {
-  if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".xml")) return false;
   if (!isFile) return false;
   if (!dirname(input).endsWith(".pak")) return false;
@@ -41,7 +38,6 @@ Future<bool> handleXmlToYax(
 Future<bool> handlePakRepack(
     final String input,
     final String? output,
-    final CliOptions args,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
     final List<String> activeOptions,
@@ -49,7 +45,6 @@ Future<bool> handlePakRepack(
     {required final bool isFile,
     required final bool isDirectory,
     required final bool? isManagerFile}) async {
-  if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isDirectory) return false;
 
@@ -60,7 +55,6 @@ Future<bool> handlePakRepack(
 Future<bool> handleDatRepack(
     final String input,
     String? output,
-    final CliOptions args,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
     final List<String> activeOptions,
@@ -68,7 +62,6 @@ Future<bool> handleDatRepack(
     {required final bool isFile,
     required final bool isDirectory,
     required final bool? isManagerFile}) async {
-  if (args.fileTypeIsKnown && !args.isDat) return false;
   if (!strEndsWithDat(input)) return false;
   if (!isDirectory) return false;
 

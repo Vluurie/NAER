@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print
+import 'package:NAER/data/category_data/nier_categories.dart';
 import 'package:NAER/data/sorted_data/file_paths_data.dart';
 import 'package:NAER/naer_utils/exception_handler.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
-import 'package:NAER/data/category_data/nier_categories.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:args/args.dart';
+import 'package:path/path.dart' as path;
 
 /// Constructs and returns an [ArgParser] with all the expected command-line arguments.
 ArgParser allArguments() {
@@ -16,21 +16,6 @@ ArgParser allArguments() {
             'Start the guided mode where you will be prompted to input options step-by-step',
         negatable: false);
 
-    // Folder extraction flag: extracts all files in a folder
-    argParser.addFlag("folder", negatable: false);
-
-    // Recursive extraction flag: extracts all files in a folder and all subfolders
-    argParser.addFlag("recursive", abbr: "r", negatable: false);
-
-    // File type extraction flags
-    argParser.addFlag("CPK", help: "Only extract CPK files", negatable: false);
-    argParser.addFlag("DAT", help: "Only extract DAT files", negatable: false);
-    argParser.addFlag("PAK", help: "Only extract PAK files", negatable: false);
-    argParser.addFlag("YAX", help: "Only extract YAX files", negatable: false);
-
-    // Auto-extract children flag: automatically processes all extracted files when unpacking DAT, CPK, PAK, etc. files
-    argParser.addFlag("autoExtractChildren",
-        negatable: false, defaultsTo: true);
 
     argParser.addSeparator(
         "Game Category options - For more Info see: https://github.com/ArthurHeitmann/NierDocs/blob/master/docs/cpkAndDttContents/cpkAndDttContents.md");
@@ -155,48 +140,102 @@ Potential causes:
 }
 
 /// Retrieves active option paths based on the provided [ArgResults] and output directory.
-///
-/// Combines quest options, map options, and phase options, and generates a list of paths
-/// for options that are active. Additionally, processes any specified enemies and their paths.
+/// Combines quest options, map options, phase options to generate
+/// a list of active paths. Additionally processes any specified enemies and their paths.
 List<String> getActiveGameOptionPaths(
-    final ArgResults argResults, final String output) {
-  List<String> allOptions = [
+  final ArgResults argResults,
+  final String output,
+  final OptionIdentifier? sortedEnemyGroupsIdentifierMap,
+) {
+  // Step 1: Gather all game file options
+  final List<String> allOptions = [
     ...GameFileOptions.questOptions,
     ...GameFileOptions.mapOptions,
     ...GameFileOptions.phaseOptions,
-    ...GameFileOptions.enemyOptions
+    ...GameFileOptions.enemyOptions,
   ];
 
-  var activePaths = allOptions
-      .where((final option) =>
-          argResults[option] == true && FilePaths.paths.containsKey(option))
-      .map((final option) => FilePaths.paths[option]!)
-      .map((final path) => '$output\\$path')
+  // Step 2: Parse enemies argument
+  final String? enemiesArgument = argResults['enemies'] as String?;
+  final List<String> enemyList = parseEnemyList(enemiesArgument);
+
+  // Step 3: Determine active paths from args
+  final List<String> activePathsFromArgs = allOptions
+      .where((final option) => argResults.wasParsed(option) && FilePaths.paths.containsKey(option))
+      .map((final option) => path.join(output, FilePaths.paths[option]!))
       .toList();
 
-  String? enemiesArgument = argResults["enemies"] as String?;
-  List<String> enemyList = [];
-  if (enemiesArgument != null) {
-    RegExp exp = RegExp(r'\[(.*?)\]');
-    var matches = exp.allMatches(enemiesArgument);
-    for (var match in matches) {
-      enemyList.addAll(match.group(1)!.split(',').map((final s) => s.trim()));
-    }
+  // Step 4: Handle cases based on the sortedEnemyGroupsIdentifierMap
+  switch (sortedEnemyGroupsIdentifierMap) {
+    case OptionIdentifier.all:
+      // Use all map, phase, and quest options, with optional enemy paths
+      return _mapAllOptions(output, enemyList);
+
+    case OptionIdentifier.statsOnly:
+      // Return only enemy paths for stats-only mode
+      return _mapEnemyPaths(enemyList, output);
+
+    case OptionIdentifier.customSelected:
+      // Return parsed active paths or fallback to all options if none are active
+      final List<String> enemyPaths = _mapEnemyPaths(enemyList, output);
+      return (activePathsFromArgs.isNotEmpty
+          ? (activePathsFromArgs + enemyPaths)
+          : _mapAllOptions(output, enemyList))
+          .toSet()
+          .toList();
+
+    case null:
+      // Default behavior if identifier is null
+      return _mapAllOptions(output, enemyList);
+
+    default:
+      // Handle unexpected cases gracefully
+      throw ArgumentError('Unsupported OptionIdentifier: $sortedEnemyGroupsIdentifierMap');
   }
-
-  var enemyPaths = enemyList
-      .where((final enemy) => FilePaths.paths.containsKey(enemy))
-      .map((final enemy) => FilePaths.paths[enemy]!)
-      .map((final path) => '$output\\$path')
-      .toList();
-
-  var fullPaths = (activePaths + enemyPaths).toSet().toList();
-  return fullPaths;
 }
 
-/// Get all possible options of the GameFileOptions with the [input] + [GameFileOptions] + [FilePaths.paths] combined path toList.
-/// Can be used to extract everything from the data input directory that can be modified (Stats or Randomization).
-List<String> getAllPossibleOptions(final String input) {
+/// Parses the enemy list from the given argument string.
+List<String> parseEnemyList(final String? enemiesArgument) {
+  if (enemiesArgument == null) return [];
+
+  final RegExp exp = RegExp(r'\[(.*?)\]');
+  return exp
+      .allMatches(enemiesArgument)
+      .expand((final match) => match.group(1)!.split(',').map((final s) => s.trim()))
+      .toList();
+}
+
+/// Maps the enemy list to their corresponding paths in the output directory.
+List<String> _mapEnemyPaths(final List<String> enemyList, final String output) {
+  return enemyList
+      .where((final enemy) => FilePaths.paths.containsKey(enemy))
+      .map((final enemy) => path.join(output, FilePaths.paths[enemy]!))
+      .toList();
+}
+
+/// Maps all available options to their corresponding paths in the output directory,
+/// optionally including enemy paths if `enemyList` is not empty.
+List<String> _mapAllOptions(final String output, final List<String> enemyList) {
+  final List<String> allPaths = [
+    ...GameFileOptions.mapOptions,
+    ...GameFileOptions.phaseOptions,
+    ...GameFileOptions.questOptions,
+  ]
+      .where((final option) => FilePaths.paths.containsKey(option))
+      .map((final option) => path.join(output, FilePaths.paths[option]!))
+      .toList();
+
+  if (enemyList.isNotEmpty) {
+    final List<String> enemyPaths = _mapEnemyPaths(enemyList, output);
+    return (allPaths + enemyPaths).toSet().toList();
+  }
+
+  return allPaths;
+}
+
+/// Get all possible options of the GameFileOptions with the combined paths.
+/// Can be used to extract everything from the data input directory that can be modified.
+List<String> getAllPossibleOptionsExtract(final String input) {
   return [
     ...GameFileOptions.questOptions,
     ...GameFileOptions.mapOptions,
@@ -204,7 +243,7 @@ List<String> getAllPossibleOptions(final String input) {
     ...GameFileOptions.enemyOptions,
   ]
       .where((final option) => FilePaths.paths.containsKey(option))
-      .map((final option) => '$input/${FilePaths.paths[option]!}')
+      .map((final option) => path.join(input, FilePaths.paths[option]!))
       .toList();
 }
 
@@ -258,30 +297,3 @@ Ensure the input is a valid JSON array string format, e.g., "[item1, item2]".
   }
 }
 
-/// Parses command-line arguments into a [CliOptions] object.
-CliOptions parseArguments(final ArgResults args) {
-  return CliOptions(
-    output: null,
-    folderMode: args["folder"],
-    recursiveMode: args["recursive"],
-    isCpk: args["CPK"],
-    isDat: args["DAT"],
-    isPak: args["PAK"],
-    isYax: args["YAX"],
-    specialDatOutputPath: args["specialDatOutput"],
-  );
-}
-
-void checkOptionsCompatibility(final CliOptions options) {
-  var fileModeOptionsCount =
-      [options.recursiveMode, options.folderMode].where((final b) => b).length;
-  if (fileModeOptionsCount > 1) {
-    logState
-        .addLog("Only one of --folder, or --recursive can be used at a time");
-    return;
-  }
-  if (fileModeOptionsCount > 0 && options.specialDatOutputPath != null) {
-    logAndPrint("Cannot use --folder or --recursive with --output");
-    return;
-  }
-}

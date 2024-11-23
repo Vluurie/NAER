@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
+import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:NAER/naer_services/XmlElementHandler/handle_xml_elements.dart';
 import 'package:NAER/naer_services/value_utils/handle_enemy_values.dart';
 import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils/handle_enemy_groups.dart';
@@ -8,8 +10,6 @@ import 'package:NAER/naer_services/xml_files_randomization/nier_xml_modify_utils
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
-import 'package:NAER/data/sorted_data/nier_sorted_enemies.dart';
-import 'package:NAER/data/values_data/nier_important_ids.dart';
 import 'package:xml/xml.dart';
 
 int processedFileCount = 0;
@@ -72,17 +72,17 @@ Future<void> processEnemies(
 /// Returns a map where the keys are enemy IDs and the values are lists of enemy attributes.
 Future<Map<String, List<String>>> getSortedEnemyData(
     final MainData mainData) async {
-  if (mainData.sortedEnemyGroupsIdentifierMap == 'ALL') {
+  if (mainData.sortedEnemyGroupsIdentifierMap! == OptionIdentifier.all) {
     // If "ALL", return the entire enemy data map, possibly filtered by DLC
     return SortedEnemyGroup.getDLCFilteredEnemyData(hasDLC: mainData.hasDLC);
-  } else if (mainData.sortedEnemyGroupsIdentifierMap == 'CUSTOM_SELECTED') {
+  } else if (mainData.sortedEnemyGroupsIdentifierMap! == OptionIdentifier.customSelected) {
     final sortedEnemyData = mainData.argument['customSelectedEnemies'];
     if (sortedEnemyData.isEmpty) {
       throw ArgumentError(
           "Sorted enemy data is empty. Ensure that it has been updated correctly.");
     }
     return sortedEnemyData;
-  } else if (mainData.sortedEnemyGroupsIdentifierMap == 'NONE') {
+  } else if (mainData.sortedEnemyGroupsIdentifierMap! == OptionIdentifier.statsOnly) {
     print("Addition setup was used. No enemy data needed for randomization.");
     return {};
   } else {

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:NAER/naer_utils/exception_handler.dart';
-import 'package:NAER/naer_utils/global_log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:isolate/isolate.dart';
 

@@ -1,12 +1,10 @@
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
 import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
 
 bool isCpkExtractionValid(
-    final String input, final CliOptions args, final List<String> enemyList,
+    final String input, final List<String> enemyList,
     {required final bool isFile}) {
-  if (args.fileTypeIsKnown && !args.isCpk) return false;
   if (!input.endsWith(".cpk")) return false;
   if (!isFile) return false;
 
@@ -22,18 +20,16 @@ bool isCpkExtractionValid(
   return true;
 }
 
-bool isYaxToXmlValid(final String input, final CliOptions args,
+bool isYaxToXmlValid(final String input,
     {required final bool isFile}) {
-  if (args.fileTypeIsKnown && !args.isYax) return false;
   if (!input.endsWith(".yax")) return false;
   if (!isFile) return false;
 
   return true;
 }
 
-bool isPakExtractionValid(final String input, final CliOptions args,
+bool isPakExtractionValid(final String input,
     {required final bool isFile}) {
-  if (args.fileTypeIsKnown && !args.isPak) return false;
   if (!input.endsWith(".pak")) return false;
   if (!isFile) return false;
 
@@ -41,7 +37,7 @@ bool isPakExtractionValid(final String input, final CliOptions args,
 }
 
 bool isDatExtractionValid(
-    final String input, final CliOptions args, final List<String> activeOptions,
+    final String input, final List<String> activeOptions,
     {required final bool isFile, required final bool? isManagerFile}) {
   String normalizePath(final String filePath) {
     return path.normalize(filePath).toLowerCase();
@@ -54,9 +50,6 @@ bool isDatExtractionValid(
     }
   }
 
-  if (args.fileTypeIsKnown && !args.isDat) {
-    return false;
-  }
 
   if (!strEndsWithDat(input)) {
     return false;

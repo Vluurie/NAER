@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:NAER/naer_utils/exception_handler.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/all_arguments.dart';
 import 'package:args/args.dart';
 
@@ -10,7 +11,7 @@ import 'package:args/args.dart';
 /// [args] are the parsed command-line arguments.
 /// [output] is the output path for the processed files.
 Map<String, dynamic> initializeArgumentVars(
-    final ArgResults args, final String output) {
+    final ArgResults args, final String output, final OptionIdentifier? sortedEnemyGroupsIdentifierMap) {
   try {
     /// Input path argument gotten from the very first arg
     /// Example path: ?:\SteamLibrary\steamapps\common\NieRAutomata\data
@@ -46,7 +47,7 @@ Map<String, dynamic> initializeArgumentVars(
 
     /// List of active options, determined by getActiveOptionPaths()
     /// See the method for more information
-    List<String> activeOptions = getActiveGameOptionPaths(args, output);
+    List<String> activeOptions = getActiveGameOptionPaths(args, output, sortedEnemyGroupsIdentifierMap);
 
     /// Builds the map out of the group args
     Map<String, List<String>> customSelectedEnemies =

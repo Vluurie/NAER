@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/global_log.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/log_print.dart';
 import 'package:path/path.dart';
 
 /// List of specific folder names to be deleted.
@@ -144,4 +143,30 @@ Future<bool> validateExtractedFolderDeletion(final String directoryPath) async {
     }
   }
   return true;
+}
+
+/// Helper function to remove empty directories recursively
+Future<void> deleteEmptyDirectories(final Directory directory) async {
+  final List<FileSystemEntity> entities = directory.listSync();
+
+  for (final entity in entities) {
+    if (entity is Directory) {
+      await deleteEmptyDirectories(entity);
+
+      if (entity.listSync().isEmpty) {
+        try {
+          await entity.delete();
+        } catch (e, stackTrace) {
+         ExceptionHandler().handle(
+          e,
+          stackTrace,
+          extraMessage: '''
+Error occurred while deleting empty folders:
+- Folder Name: $entity
+''',
+        );
+        }
+      }
+    }
+  }
 }

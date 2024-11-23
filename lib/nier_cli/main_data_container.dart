@@ -1,13 +1,12 @@
 import 'dart:isolate';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
+
 import 'package:args/args.dart';
 import 'package:xml/xml.dart' as xml;
 
 /// MainData contains the main configuration and arguments required for processing the game files.
 class MainData {
   final Map<String, dynamic> argument;
-  final String? sortedEnemyGroupsIdentifierMap;
-  final CliOptions options;
+  final OptionIdentifier? sortedEnemyGroupsIdentifierMap;
   final bool? isManagerFile;
   final String output;
   final ArgResults args;
@@ -20,7 +19,6 @@ class MainData {
   MainData(
       {required this.argument,
       required this.sortedEnemyGroupsIdentifierMap,
-      required this.options,
       this.isManagerFile,
       required this.output,
       required this.args,
@@ -35,7 +33,6 @@ class MainData {
     return 'MainData {\n'
         '  argument: $argument,\n'
         '  sortedEnemiesPath: $sortedEnemyGroupsIdentifierMap,\n'
-        '  options: $options,\n'
         '  isManagerFile: $isManagerFile,\n'
         '  output: $output,\n'
         '  args: ${args.arguments},\n'
@@ -105,6 +102,27 @@ class EnemyEntityObjectAction {
         '  isSpawnActionTooSmall: $isSpawnActionTooSmall,\n'
         '  handleLevels: $handleLevels,\n'
         '  randomizeAndSetValues: $randomizeAndSetValues\n'
-        '}';
+        '}'; 
   }
+}
+
+///Identifiers (`ALL`, `CUSTOM_SELECTED`, `STATS_ONLY`...).
+class OptionIdentifier {
+
+  final String value;
+
+  const OptionIdentifier._(this.value);
+
+  /// Case when no enemies or categories where selected
+  static const OptionIdentifier all = OptionIdentifier._('ALL');
+
+  /// Case when custom setup's where made
+  static const OptionIdentifier customSelected = OptionIdentifier._('CUSTOM_SELECTED');
+
+  /// Case when only stats are selected without any active options
+  static const OptionIdentifier statsOnly = OptionIdentifier._('STATS_ONLY');
+
+
+  @override
+  String toString() => value;
 }

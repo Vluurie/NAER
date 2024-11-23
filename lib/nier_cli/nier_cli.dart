@@ -4,7 +4,6 @@ import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/initialize_variables.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/main_process_game_files.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/CliOptions.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/all_arguments.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_paths.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/count_runtime.dart';
@@ -32,13 +31,10 @@ Future<void> nierCli(final NierCliArgs cliArgs) async {
       return;
     }
 
-    String? sortedEnemyGroupsIdentifierMap =
+    OptionIdentifier? sortedEnemyGroupsIdentifierMap =
         getSortedEnemyGroupsIdentifierMap(clonedArguments);
     String? output = args["output"];
     validateIdentifierAndOutput(sortedEnemyGroupsIdentifierMap, output);
-
-    CliOptions options = parseArguments(args);
-    checkOptionsCompatibility(options);
 
     if (args.rest.isEmpty) {
       logAndPrint("No input files specified");
@@ -50,7 +46,7 @@ Future<void> nierCli(final NierCliArgs cliArgs) async {
       modifiableArguments.modifyArgumentsForForcedEnemyList();
       args = argParser.parse(modifiableArguments);
     }
-    var argument = initializeArgumentVars(args, output!);
+    var argument = initializeArgumentVars(args, output!, sortedEnemyGroupsIdentifierMap);
 
     ///#######################################[_FOR THE GLORY OF MANKIND_]#######################################################################
     ///#######[_START_NEW_SEED_PROCCESS]#########################################################################################################
@@ -58,7 +54,6 @@ Future<void> nierCli(final NierCliArgs cliArgs) async {
     MainData mainData = MainData(
         argument: argument,
         sortedEnemyGroupsIdentifierMap: sortedEnemyGroupsIdentifierMap,
-        options: options,
         isManagerFile: cliArgs.isManagerFile,
         output: output,
         args: args,
