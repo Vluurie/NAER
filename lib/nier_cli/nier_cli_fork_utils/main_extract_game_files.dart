@@ -67,13 +67,20 @@ Future<void> extractGameFilesProcess(
       mainData.sendPort.send(
           'Creating three backup extracted game folders for modifications in upper directory (9GB disk space)...');
 
+      ExtractedFiles extractedFiles = ExtractedFiles(
+          yaxFiles: [],
+          xmlFiles: [],
+          pakFolders: [],
+          datFolders: [],
+          cpkExtractedFolders: []);
+
       // Collects the files for modification out of the extracted files to be processed
       var collectedFiles =
-          collectExtractedGameFiles(mainData.argument['input']);
+          collectExtractedGameFiles(mainData.argument['input'], extractedFiles);
 
       // Helper method to copy the collected files to the upper directory
       await CountRuntime().runWithTimer(
-          copyCollectedGameFiles, [collectedFiles, mainData.argument['input']],
+          copyCollectedGameFiles, [collectedFiles.cpkExtractedFolders, mainData.argument['input']],
           sendPort: mainData.sendPort);
       mainData.sendPort.send('Copying finished.');
     }

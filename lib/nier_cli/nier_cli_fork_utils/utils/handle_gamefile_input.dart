@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
+
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_extract.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_repack.dart';
@@ -8,7 +10,7 @@ import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_repack.d
 
 const List<
     Future<bool> Function(String, String?, ListQueue<String>,
-        Set<String>, List<String>, SendPort sendPort,
+        Set<String>, List<DatFolder>, SendPort sendPort,
         {required bool isFile,
         required bool isDirectory,
         required bool? isManagerFile})> _handlers = [
@@ -24,7 +26,7 @@ Future<void> handleInput(
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
     final List<String> enemyList,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool? isManagerFile}) async {
   bool isFile = await FileSystemEntity.isFile(input);

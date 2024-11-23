@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/dat/datRepacker.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/pak/pakRepacker.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/yax/xmlToYax.dart';
@@ -16,7 +17,7 @@ Future<bool> handleXmlToYax(
     String? output,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool isFile,
     required final bool isDirectory,
@@ -40,7 +41,7 @@ Future<bool> handlePakRepack(
     final String? output,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool isFile,
     required final bool isDirectory,
@@ -57,7 +58,7 @@ Future<bool> handleDatRepack(
     String? output,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool isFile,
     required final bool isDirectory,

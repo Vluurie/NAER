@@ -1,128 +1,101 @@
 import 'dart:isolate';
 
 import 'package:args/args.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:xml/xml.dart' as xml;
 
-/// MainData contains the main configuration and arguments required for processing the game files.
-class MainData {
-  final Map<String, dynamic> argument;
-  final OptionIdentifier? sortedEnemyGroupsIdentifierMap;
-  final bool? isManagerFile;
-  final String output;
-  final ArgResults args;
-  final SendPort sendPort;
-  final bool? backUp;
-  final bool? isBalanceMode;
-  final bool? hasDLC;
-  final bool isAddition;
+part 'main_data_container.freezed.dart';
 
-  MainData(
-      {required this.argument,
-      required this.sortedEnemyGroupsIdentifierMap,
-      this.isManagerFile,
-      required this.output,
-      required this.args,
-      required this.sendPort,
-      this.backUp,
-      this.isBalanceMode,
-      required this.hasDLC,
-      required this.isAddition});
-
-  @override
-  String toString() {
-    return 'MainData {\n'
-        '  argument: $argument,\n'
-        '  sortedEnemiesPath: $sortedEnemyGroupsIdentifierMap,\n'
-        '  isManagerFile: $isManagerFile,\n'
-        '  output: $output,\n'
-        '  args: ${args.arguments},\n'
-        '  sendPort: $sendPort,\n'
-        '  backUp: $backUp\n'
-        '  isBalanceMode: $isBalanceMode\n'
-        '  hasDLC: $hasDLC\n'
-        '}';
-  }
+@freezed
+class MainData with _$MainData {
+  const factory MainData({
+    required final Map<String, dynamic> argument,
+    final OptionIdentifier? sortedEnemyGroupsIdentifierMap,
+    final bool? isManagerFile,
+    required final String output,
+    required final ArgResults args,
+    required final SendPort sendPort,
+    final bool? backUp,
+    final bool? isBalanceMode,
+    final bool? hasDLC,
+    required final bool isAddition,
+  }) = _MainData;
 }
 
-class NierCliArgs {
-  final List<String> arguments;
-  final bool? isManagerFile;
-  final SendPort sendPort;
-  final bool? backUp;
-  final bool? isBalanceMode;
-  final bool? hasDLC;
-  final bool isAddition;
-
-  NierCliArgs(
-      {required this.arguments,
-      this.isManagerFile,
-      required this.sendPort,
-      this.backUp,
-      this.isBalanceMode,
-      this.hasDLC,
-      required this.isAddition});
-
-  @override
-  String toString() {
-    return 'NierCliArgs {\n'
-        '  argument: $arguments,\n'
-        '  isManagerFile: $isManagerFile,\n'
-        '  sendPort: $sendPort,\n'
-        '  backUp: $backUp\n'
-        '  isBalanceMode: $isBalanceMode\n'
-        '  hasDLC: $hasDLC\n'
-        '}';
-  }
+@freezed
+class NierCliArgs with _$NierCliArgs {
+  const factory NierCliArgs({
+    required final List<String> arguments,
+    final bool? isManagerFile,
+    required final SendPort sendPort,
+    final bool? backUp,
+    final bool? isBalanceMode,
+    final bool? hasDLC,
+    required final bool isAddition,
+  }) = _NierCliArgs;
 }
 
-/// Data class for handling enemy entity object parameters
-class EnemyEntityObjectAction {
-  final xml.XmlElement objIdElement;
-  final Map<String, List<String>> userSelectedEnemyData;
-  final String enemyLevel;
-  final bool isSpawnActionTooSmall;
-  final bool handleLevels;
-  final bool randomizeAndSetValues;
-
-  EnemyEntityObjectAction({
-    required this.objIdElement,
-    required this.userSelectedEnemyData,
-    required this.enemyLevel,
-    required this.isSpawnActionTooSmall,
-    this.handleLevels = false,
-    this.randomizeAndSetValues = false,
-  });
-
-  @override
-  String toString() {
-    return 'EnemyEntityObjectAction {\n'
-        '  objIdElement: ${objIdElement.toXmlString(pretty: true)},\n'
-        '  userSelectedEnemyData: $userSelectedEnemyData,\n'
-        '  enemyLevel: $enemyLevel,\n'
-        '  isSpawnActionTooSmall: $isSpawnActionTooSmall,\n'
-        '  handleLevels: $handleLevels,\n'
-        '  randomizeAndSetValues: $randomizeAndSetValues\n'
-        '}'; 
-  }
+@freezed
+class EnemyEntityObjectAction with _$EnemyEntityObjectAction {
+  const factory EnemyEntityObjectAction({
+    required final xml.XmlElement objIdElement,
+    required final Map<String, List<String>> userSelectedEnemyData,
+    required final String enemyLevel,
+    required final bool isSpawnActionTooSmall,
+    @Default(false) final bool handleLevels,
+    @Default(false) final bool randomizeAndSetValues,
+  }) = _EnemyEntityObjectAction;
 }
 
-///Identifiers (`ALL`, `CUSTOM_SELECTED`, `STATS_ONLY`...).
-class OptionIdentifier {
+@freezed
+class OptionIdentifier with _$OptionIdentifier {
+  const factory OptionIdentifier({
+    required final String value,
+  }) = _OptionIdentifier;
 
-  final String value;
+  /// Case when no enemies or categories were selected
+  static const OptionIdentifier all = OptionIdentifier(value: 'ALL');
 
-  const OptionIdentifier._(this.value);
-
-  /// Case when no enemies or categories where selected
-  static const OptionIdentifier all = OptionIdentifier._('ALL');
-
-  /// Case when custom setup's where made
-  static const OptionIdentifier customSelected = OptionIdentifier._('CUSTOM_SELECTED');
+  /// Case when custom setups were made
+  static const OptionIdentifier customSelected = OptionIdentifier(value: 'CUSTOM_SELECTED');
 
   /// Case when only stats are selected without any active options
-  static const OptionIdentifier statsOnly = OptionIdentifier._('STATS_ONLY');
-
-
-  @override
-  String toString() => value;
+  static const OptionIdentifier statsOnly = OptionIdentifier(value: 'STATS_ONLY');
 }
+
+@freezed
+class ExtractedFiles with _$ExtractedFiles {
+  const factory ExtractedFiles({
+    required final List<YaxFile> yaxFiles,
+    required final List<XmlFile> xmlFiles,
+    required final List<PakFolder> pakFolders,
+    required final List<DatFolder> datFolders,
+    required final List<CpkExtractedFolder> cpkExtractedFolders,
+  }) = _ExtractedFiles;
+}
+
+@freezed
+class YaxFile with _$YaxFile {
+  const factory YaxFile({required final String path}) = _YaxFile;
+}
+
+@freezed
+class XmlFile with _$XmlFile {
+  const factory XmlFile({required final String path}) = _XmlFile;
+}
+
+@freezed
+class PakFolder with _$PakFolder {
+  const factory PakFolder({required final String path}) = _PakFolder;
+}
+
+@freezed
+class DatFolder with _$DatFolder {
+  const factory DatFolder({required final String path}) = _DatFolder;
+}
+
+@freezed
+class CpkExtractedFolder with _$CpkExtractedFolder {
+  const factory CpkExtractedFolder({required final String path}) = _CpkExtractedFolder;
+}
+

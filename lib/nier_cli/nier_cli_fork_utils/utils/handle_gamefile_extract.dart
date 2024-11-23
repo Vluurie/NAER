@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:NAER/naer_utils/global_log.dart';
-import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_valid_gamefiles.dart';
+
 import 'package:NAER/naer_utils/dynamic_library_handler.dart';
-import 'package:path/path.dart';
+import 'package:NAER/naer_utils/global_log.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/fileTypeUtils_fork/cpk/cpk_extractor.dart';
+import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/check_valid_gamefiles.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
+import 'package:path/path.dart';
 
 int conversionCounter = 0;
 
@@ -17,7 +19,7 @@ Future<bool> handleSingleCpkExtract(
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
     final List<String> enemyList,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool isFile,
     required final bool isDirectory,
@@ -40,7 +42,7 @@ Future<bool> handleSingleDatExtract(
     String? output,
     final ListQueue<String> pendingFiles,
     final Set<String> processedFiles,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool isFile,
     required final bool isDirectory,

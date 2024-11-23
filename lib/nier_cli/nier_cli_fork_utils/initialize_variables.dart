@@ -47,7 +47,7 @@ Map<String, dynamic> initializeArgumentVars(
 
     /// List of active options, determined by getActiveOptionPaths()
     /// See the method for more information
-    List<String> activeOptions = getActiveGameOptionPaths(args, output, sortedEnemyGroupsIdentifierMap);
+    List<DatFolder> activeOptions = getActiveGameOptionPaths(args, output, sortedEnemyGroupsIdentifierMap);
 
     /// Builds the map out of the group args
     Map<String, List<String>> customSelectedEnemies =

@@ -1,43 +1,112 @@
 import 'dart:io';
+
 import 'package:NAER/naer_utils/exception_handler.dart';
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:path/path.dart' as path;
 
 /// Searches the [currentDir] for files and directories
 /// with extensions (.yax, .pak, .dat) and categorizes them into lists.
 /// Additionally, it searches for data%%%.cpk_extracted and categorizes them.
-Map<String, List<String>> collectExtractedGameFiles(final String currentDir) {
-  List<String> yaxFiles = [];
-  List<String> xmlFiles = [];
-  List<String> pakFolders = [];
-  List<String> datFolders = [];
-  List<String> cpkExtractedFolders = [];
+ExtractedFiles collectExtractedGameFiles(
+    final String currentDir, final ExtractedFiles extractedFiles) {
+  ExtractedFiles yax = collectYaxFiles(currentDir, extractedFiles);
+  ExtractedFiles xml = collectXmlFiles(currentDir, extractedFiles);
+  ExtractedFiles pak = collectPakFolders(currentDir, extractedFiles);
+  ExtractedFiles dat = collectDatFolders(currentDir, extractedFiles);
+  ExtractedFiles cpk = collectCpkExtractedFolders(currentDir, extractedFiles);
 
+  return extractedFiles.copyWith(
+      cpkExtractedFolders: cpk.cpkExtractedFolders,
+      datFolders: dat.datFolders,
+      pakFolders: pak.pakFolders,
+      yaxFiles: yax.yaxFiles,
+      xmlFiles: xml.xmlFiles);
+}
+
+ExtractedFiles collectYaxFiles(
+    final String currentDir, final ExtractedFiles extractedFiles) {
+  List<YaxFile> yaxFiles = [];
   for (var entity in Directory(currentDir).listSync(recursive: true)) {
-    if (entity is File) {
-      if (entity.path.endsWith('.yax')) {
-        yaxFiles.add(entity.path);
-      }
-      if (entity.path.endsWith('.xml')) {
-        xmlFiles.add(entity.path);
-      }
-    } else if (entity is Directory) {
-      if (entity.path.endsWith('.pak')) {
-        pakFolders.add(entity.path);
-      } else if (entity.path.endsWith('.dat')) {
-        datFolders.add(entity.path);
-      } else if (RegExp(r'data\d{3}\.cpk_extracted$').hasMatch(entity.path)) {
-        cpkExtractedFolders.add(entity.path);
-      }
+    if (entity is File && entity.path.endsWith('.yax')) {
+      yaxFiles.add(YaxFile(path: entity.path));
     }
   }
+  return extractedFiles.copyWith(yaxFiles: yaxFiles);
+}
 
-  return {
-    'yaxFiles': yaxFiles,
-    'xmlFiles': xmlFiles,
-    'pakFolders': pakFolders,
-    'datFolders': datFolders,
-    'cpkExtractedFolders': cpkExtractedFolders,
-  };
+ExtractedFiles collectXmlFiles(
+    final String currentDir, final ExtractedFiles extractedFiles) {
+  List<XmlFile> xmlFiles = [];
+  for (var entity in Directory(currentDir).listSync(recursive: true)) {
+    if (entity is File && entity.path.endsWith('.xml')) {
+      xmlFiles.add(XmlFile(path: entity.path));
+    }
+  }
+  return extractedFiles.copyWith(xmlFiles: xmlFiles);
+}
+
+ExtractedFiles collectPakFolders(
+    final String currentDir, final ExtractedFiles extractedFiles) {
+  List<PakFolder> pakFolders = [];
+  for (var entity in Directory(currentDir).listSync(recursive: true)) {
+    if (entity is Directory && entity.path.endsWith('.pak')) {
+      pakFolders.add(PakFolder(path: entity.path));
+    }
+  }
+  return extractedFiles.copyWith(pakFolders: pakFolders);
+}
+
+Future<ExtractedFiles> copyWithFilesToBeProcessed(
+    final String currentDir, final ExtractedFiles extractedFiles) async {
+  // Helper function to filter any file type based on `datFolder` paths
+  List<T> filterByDatFolder<T>(final List<T> files, final String Function(T) getPath) {
+    return files.where((final file) {
+      final filePath = getPath(file);
+      return extractedFiles.datFolders.any((final datFolder) =>
+          filePath.startsWith(datFolder.path));
+    }).toList();
+  }
+
+  // Filter all file types
+  final filteredPakFolders =
+      filterByDatFolder<PakFolder>(extractedFiles.pakFolders, (final pak) => pak.path);
+
+  final filteredYaxFiles =
+      filterByDatFolder<YaxFile>(extractedFiles.yaxFiles, (final yax) => yax.path);
+
+  final filteredXmlFiles =
+      filterByDatFolder<XmlFile>(extractedFiles.xmlFiles, (final xml) => xml.path);
+
+  return extractedFiles.copyWith(
+    pakFolders: filteredPakFolders,
+    yaxFiles: filteredYaxFiles,
+    xmlFiles: filteredXmlFiles,
+  );
+}
+
+
+
+ExtractedFiles collectDatFolders(
+    final String currentDir, final ExtractedFiles extractedFiles) {
+  List<DatFolder> datFolders = [];
+  for (var entity in Directory(currentDir).listSync(recursive: true)) {
+    if (entity is Directory && entity.path.endsWith('.dat')) {
+      datFolders.add((DatFolder(path: entity.path)));
+    }
+  }
+  return extractedFiles.copyWith(datFolders: datFolders);
+}
+
+ExtractedFiles collectCpkExtractedFolders(
+    final String currentDir, final ExtractedFiles extractedFiles) {
+  List<CpkExtractedFolder> cpkExtractedFolders = [];
+  for (var entity in Directory(currentDir).listSync(recursive: true)) {
+    if (entity is Directory &&
+        RegExp(r'data\d{3}\.cpk_extracted$').hasMatch(entity.path)) {
+      cpkExtractedFolders.add(CpkExtractedFolder(path: (entity.path)));
+    }
+  }
+  return extractedFiles.copyWith(cpkExtractedFolders: cpkExtractedFolders);
 }
 
 /// Takes the map of collected game files and an input directory,
@@ -49,7 +118,7 @@ Map<String, List<String>> collectExtractedGameFiles(final String currentDir) {
 /// randomized = Extracted Files that only get modified for the default randomization without level change.
 /// randomized and level = Extracted Files that only get modified for the default randomization and level change.
 Future<void> copyCollectedGameFiles(
-    final Map<String, List<String>> collectedFiles,
+    final List<CpkExtractedFolder> collectedFiles,
     final String inputDir) async {
   final outputDir = path.dirname(inputDir);
 
@@ -62,27 +131,25 @@ Future<void> copyCollectedGameFiles(
   await randomizedDir.create(recursive: true);
   await randomizedAndLevelDir.create(recursive: true);
 
-  final cpkExtractedFolders = collectedFiles['cpkExtractedFolders'] ?? [];
-
-  for (var folderPath in cpkExtractedFolders) {
-    final folderName = path.basename(folderPath);
+  for (var folder in collectedFiles) {
+    final folderName = path.basename(folder.path);
     final onlyLevelDest = path.join(onlyLevelDir.path, folderName);
     final randomizedDest = path.join(randomizedDir.path, folderName);
     final randomizedAndLevelDest =
         path.join(randomizedAndLevelDir.path, folderName);
 
     try {
-      await copyDirectory(Directory(folderPath), Directory(onlyLevelDest));
-      await copyDirectory(Directory(folderPath), Directory(randomizedDest));
+      await copyDirectory(Directory(folder.path), Directory(onlyLevelDest));
+      await copyDirectory(Directory(folder.path), Directory(randomizedDest));
       await copyDirectory(
-          Directory(folderPath), Directory(randomizedAndLevelDest));
+          Directory(folder.path), Directory(randomizedAndLevelDest));
     } catch (e, stackTrace) {
       ExceptionHandler().handle(
         e,
         stackTrace,
         extraMessage: '''
 Error occurred while copying collected game files:
-- Source Folder: $folderPath
+- Source Folder: ${folder.path}
 - Destination Folders:
   - Only Level: $onlyLevelDest
   - Randomized: $randomizedDest
@@ -116,23 +183,17 @@ Future<void> copyDirectory(
   }
 }
 
-Future<void> filterFilesToProcess(
-    final Map<String, List<String>> collectedFiles,
-    final List<String> activeOptions) async {
-  List<String>? datFiles = collectedFiles['datFolders'];
-  
-  if (datFiles != null && datFiles.isNotEmpty) {
-    final activeOptionBasenames = activeOptions.map((final option) => path.basename(option)).toSet();
+Future<ExtractedFiles> copyWithFilteredDatFiles(
+    final ExtractedFiles datFilesToFilter,
+    final List<DatFolder> activeOptions) async {
+  final activeOptionBasenames =
+      activeOptions.map((final option) => path.basename(option.path)).toSet();
 
-    datFiles.retainWhere((final dat) {
-      final datBasename = path.basename(dat); 
-      return activeOptionBasenames.contains(datBasename);
-    });
+  final filteredDatFiles = datFilesToFilter.datFolders.where((final dat) {
+    final datBasename = path.basename(dat.path);
+    return activeOptionBasenames.contains(datBasename);
+  }).toList();
 
-    collectedFiles['datFolders'] = datFiles;
-  }
-
-  return;
+  return datFilesToFilter.copyWith(datFolders: filteredDatFiles);
 }
-
 

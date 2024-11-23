@@ -1,6 +1,7 @@
+import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
-import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
+import 'package:path/path.dart';
 
 bool isCpkExtractionValid(
     final String input, final List<String> enemyList,
@@ -37,15 +38,16 @@ bool isPakExtractionValid(final String input,
 }
 
 bool isDatExtractionValid(
-    final String input, final List<String> activeOptions,
+    final String input, final List<DatFolder> activeOptions,
     {required final bool isFile, required final bool? isManagerFile}) {
-  String normalizePath(final String filePath) {
-    return path.normalize(filePath).toLowerCase();
+  String normalizePath(final String file) {
+    return path.normalize(file).toLowerCase();
   }
 
   String normalizedInput = normalizePath(input);
   if (isManagerFile != true) {
-    if (!activeOptions.map(normalizePath).contains(normalizedInput)) {
+    if (!activeOptions.map((final datFolder) => normalizePath(datFolder.path))
+    .contains(normalizedInput)) {
       return false;
     }
   }

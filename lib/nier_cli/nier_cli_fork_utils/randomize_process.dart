@@ -1,31 +1,31 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:NAER/naer_utils/exception_handler.dart';
-import 'package:path/path.dart' as path;
+
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
+import 'package:NAER/naer_utils/exception_handler.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/handle_gamefile_input.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/utils_fork.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> repackModifiedGameFiles(
-    final Map<String, List<String>> collectedFiles,
+    final ExtractedFiles collectedFiles,
     final MainData mainData) async {
   mainData.sendPort.send("Started repacking process of modified game files...");
 
   // Prepare XML files by replacing .yax extension with .xml
-  var xmlFiles = collectedFiles['yaxFiles']
-          ?.map((final e) => e.replaceAll('.yax', '.xml'))
-          .toList() ??
-      <String>[];
+  var xmlFiles = collectedFiles.yaxFiles
+          .map((final e) => e.path.replaceAll('.yax', '.xml'))
+          .toList();
 
-  // Combine XML files and folders to process
-  var entitiesToProcess = <String>[
-    ...xmlFiles,
-    ...?collectedFiles['pakFolders']
-  ];
+// Combine XML files and folders to process
+var entitiesToProcess = <String>[
+  ...xmlFiles,
+  ...collectedFiles.pakFolders.map((final pakFolder) => pakFolder.path),
+];
 
   if (entitiesToProcess.isNotEmpty) {
     await processEntitiesInParallel(entitiesToProcess, mainData);
@@ -35,7 +35,7 @@ Future<void> repackModifiedGameFiles(
 
   // Process DAT folders if they exist
   mainData.sendPort.send('Isolates created, repacking...');
-  await processDatFolders(fileManager, collectedFiles['datFolders'], mainData);
+  await processDatFolders(fileManager, collectedFiles.datFolders, mainData);
 }
 
 /// This method processes all given entities in parallel,
@@ -85,7 +85,7 @@ Future<void> processEntities(
         pendingFilesQueue,
         processedFiles,
         mainData.argument['enemyList'] as List<String>,
-        mainData.argument['activeOptions'] as List<String>,
+        mainData.argument['activeOptions'] as List<DatFolder>,
         mainData.sendPort,
         isManagerFile: mainData.isManagerFile,
       );
@@ -113,13 +113,13 @@ Error while processing entity:
 ///
 /// logState adds all created files to the last randomized shared preference list that can be undone with the undo button.
 Future<void> processDatFolders(final FileCategoryManager fileManager,
-    final List<String>? datFolders, final MainData mainData) async {
+    final List<DatFolder>? datFolders, final MainData mainData) async {
   if (datFolders == null) return;
 
   final List<Map<String, dynamic>> fileChanges = [];
 
   final tasks = datFolders.map((final datFolder) async {
-    var baseNameWithExtension = path.basename(datFolder);
+    var baseNameWithExtension = path.basename(datFolder.path);
 
     // Check if the DAT folder should be processed
     if (shouldProcessDatFolder(
@@ -132,12 +132,12 @@ Future<void> processDatFolders(final FileCategoryManager fileManager,
         var datOutput =
             path.join(mainData.output, datSubFolder, baseNameWithExtension);
         await handleInput(
-            datFolder,
+            datFolder.path,
             datOutput,
             ListQueue<String>(),
             mainData.argument['processedFiles'] as Set<String>,
             mainData.argument['enemyList'] as List<String>,
-            mainData.argument['activeOptions'] as List<String>,
+            mainData.argument['activeOptions'] as List<DatFolder>,
             mainData.sendPort,
             isManagerFile: mainData.isManagerFile);
 
@@ -247,7 +247,7 @@ Future<List<String>> extractGameFiles(
     final List<String> pendingFiles,
     final Set<String> processedFiles,
     final List<String> enemyList,
-    final List<String> activeOptions,
+    final List<DatFolder> activeOptions,
     final SendPort sendPort,
     {required final bool? isManagerFile}) async {
   // Instantiate IsolateService without auto-initialization.
@@ -292,7 +292,7 @@ Future<List<String>> _processFileBatch(
   final Set<String> processedFiles,
   final ListQueue<String> pendingFiles,
   final List<String> enemyList,
-  final List<String> activeOptions,
+  final List<DatFolder> activeOptions,
   final bool? isManagerFile,
   final SendPort sendPort,
 ) async {

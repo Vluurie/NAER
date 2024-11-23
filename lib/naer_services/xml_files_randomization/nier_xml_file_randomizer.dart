@@ -56,7 +56,7 @@ Future<void> randomizeEnemyNumber(
 /// main enemy modify method
 Future<void> processEnemies(
     final MainData mainData,
-    final Map<String, List<String>> collectedFiles,
+    final ExtractedFiles collectedFiles,
     final String currentDir) async {
   Map<String, List<String>> sortedEnemyData =
       await getSortedEnemyData(mainData);
@@ -94,7 +94,7 @@ Future<Map<String, List<String>>> getSortedEnemyData(
 /// Searches the given directory for enemy files, loads important IDs,
 /// and modifies the enemies based on the sorted enemy data, level, and category.
 Future<void> findEnemiesAndModify(
-    final Map<String, List<String>> collectedFiles,
+    final ExtractedFiles collectedFiles,
     final String directoryPath,
     final Map<String, List<String>> sortedEnemyData,
     final MainData mainData) async {
@@ -124,7 +124,7 @@ Future<void> findEnemiesAndModify(
 /// according to the provided sorted enemy data, level, and category, and counts the processed files.
 
 Future<int> traverseDirectory(
-  final Map<String, List<String>> collectedFiles,
+  final ExtractedFiles collectedFiles,
   final Directory directory,
   final Map<String, List<String>> sortedEnemyData,
   final ImportantIDs ids,
@@ -133,10 +133,12 @@ Future<int> traverseDirectory(
   // Instantiate IsolateService without auto-initialization.
   final isolateService = IsolateService();
 
-  final List<String> xmlFiles = collectedFiles['xmlFiles']
-          ?.where((final file) => file.endsWith('.xml'))
-          .toList() ??
-      [];
+final List<String> xmlFiles = collectedFiles.xmlFiles
+    .map((final xmlFile) => xmlFile.path)
+    .where((final filePath) => filePath.endsWith('.xml')) 
+    .toList();
+
+
 
   // Distribute the XML files across the available cores for parallel processing
   final distributedFiles = await isolateService.distributeFilesAsync(xmlFiles);

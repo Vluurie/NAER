@@ -24,7 +24,7 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
   final isolateService = IsolateService();
 
   String inputDir = mainData.argument['input'];
-  List<String> activeOptions =  mainData.argument['activeOptions'];
+  List<DatFolder> activeOptions = mainData.argument['activeOptions'];
   String outputDir = path.dirname(inputDir);
   bool extractedFoldersExist = await checkIfExtractedFoldersExist(outputDir);
 
@@ -51,16 +51,28 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
     await getGameFilesForProcessing(inputDir, mainData);
   }
 
-  // Collect the extracted game files from the input directory.
-  var collectedFiles = collectExtractedGameFiles(inputDir);
+  ExtractedFiles extractedFiles = ExtractedFiles(
+      yaxFiles: [],
+      xmlFiles: [],
+      pakFolders: [],
+      datFolders: [],
+      cpkExtractedFolders: []);
 
-  if(activeOptions != collectedFiles["datFiles"]) {
-  await filterFilesToProcess(collectedFiles, activeOptions);
+  extractedFiles = collectExtractedGameFiles(inputDir, extractedFiles);
+
+  if (extractedFiles.datFolders != activeOptions) {
+    extractedFiles =
+        await copyWithFilteredDatFiles(extractedFiles, activeOptions);
+  }
+
+  if (extractedFiles.datFolders.isNotEmpty) {
+    extractedFiles =
+        await copyWithFilesToBeProcessed(inputDir, extractedFiles);
   }
 
   // Modify or randomize enemies within the input .xml files based on the arguments.
   await isolateService.runInAwaitedIsolate(
-      processEnemies, [mainData, collectedFiles, inputDir]);
+      processEnemies, [mainData, extractedFiles, inputDir]);
 
   // Process enemy stats for the specified enemies from the enemy list.
   await ModifyEnemyStats.ensureFilesAreLoaded(inputDir);
@@ -72,7 +84,7 @@ Future<void> mainFuncProcessGameFiles(final MainData mainData) async {
 
   // Check all modified files against the ignore list or enemy list, etc.
   // If the inner shouldProcessDatFolder method returns true, dat files will get repacked.
-  await repackModifiedGameFiles(collectedFiles, mainData);
+  await repackModifiedGameFiles(extractedFiles, mainData);
 
   // Reverse the modified .csv files to their original state.
   await ModifyEnemyStats.restoreEnemyStats();

@@ -142,7 +142,7 @@ Potential causes:
 /// Retrieves active option paths based on the provided [ArgResults] and output directory.
 /// Combines quest options, map options, phase options to generate
 /// a list of active paths. Additionally processes any specified enemies and their paths.
-List<String> getActiveGameOptionPaths(
+List<DatFolder> getActiveGameOptionPaths(
   final ArgResults argResults,
   final String output,
   final OptionIdentifier? sortedEnemyGroupsIdentifierMap,
@@ -157,12 +157,13 @@ List<String> getActiveGameOptionPaths(
 
   // Step 2: Parse enemies argument
   final String? enemiesArgument = argResults['enemies'] as String?;
-  final List<String> enemyList = parseEnemyList(enemiesArgument);
+  final List<DatFolder> enemyList = parseEnemyList(enemiesArgument);
 
   // Step 3: Determine active paths from args
-  final List<String> activePathsFromArgs = allOptions
+  final List<DatFolder> activePathsFromArgs = allOptions
       .where((final option) => argResults.wasParsed(option) && FilePaths.paths.containsKey(option))
       .map((final option) => path.join(output, FilePaths.paths[option]!))
+      .map((final path) => DatFolder(path: path))
       .toList();
 
   // Step 4: Handle cases based on the sortedEnemyGroupsIdentifierMap
@@ -177,7 +178,7 @@ List<String> getActiveGameOptionPaths(
 
     case OptionIdentifier.customSelected:
       // Return parsed active paths or fallback to all options if none are active
-      final List<String> enemyPaths = _mapEnemyPaths(enemyList, output);
+      final List<DatFolder> enemyPaths = _mapEnemyPaths(enemyList, output);
       return (activePathsFromArgs.isNotEmpty
           ? (activePathsFromArgs + enemyPaths)
           : _mapAllOptions(output, enemyList))
@@ -189,44 +190,46 @@ List<String> getActiveGameOptionPaths(
       return _mapAllOptions(output, enemyList);
 
     default:
-      // Handle unexpected cases gracefully
-      throw ArgumentError('Unsupported OptionIdentifier: $sortedEnemyGroupsIdentifierMap');
+      throw ArgumentError('Error: Unsupported OptionIdentifier: $sortedEnemyGroupsIdentifierMap');
   }
 }
 
 /// Parses the enemy list from the given argument string.
-List<String> parseEnemyList(final String? enemiesArgument) {
+List<DatFolder> parseEnemyList(final String? enemiesArgument) {
   if (enemiesArgument == null) return [];
 
   final RegExp exp = RegExp(r'\[(.*?)\]');
   return exp
       .allMatches(enemiesArgument)
       .expand((final match) => match.group(1)!.split(',').map((final s) => s.trim()))
+      .map((final path) => DatFolder(path: path))
       .toList();
 }
 
 /// Maps the enemy list to their corresponding paths in the output directory.
-List<String> _mapEnemyPaths(final List<String> enemyList, final String output) {
+List<DatFolder> _mapEnemyPaths(final List<DatFolder> enemyList, final String output) {
   return enemyList
-      .where((final enemy) => FilePaths.paths.containsKey(enemy))
-      .map((final enemy) => path.join(output, FilePaths.paths[enemy]!))
+      .where((final enemy) => FilePaths.paths.containsKey(enemy.path))
+      .map((final enemy) => path.join(output, FilePaths.paths[enemy.path]!))
+       .map((final path) => DatFolder(path: path))
       .toList();
 }
 
 /// Maps all available options to their corresponding paths in the output directory,
 /// optionally including enemy paths if `enemyList` is not empty.
-List<String> _mapAllOptions(final String output, final List<String> enemyList) {
-  final List<String> allPaths = [
+List<DatFolder> _mapAllOptions(final String output, final List<DatFolder> enemyList) {
+  final List<DatFolder> allPaths = [
     ...GameFileOptions.mapOptions,
     ...GameFileOptions.phaseOptions,
     ...GameFileOptions.questOptions,
   ]
       .where((final option) => FilePaths.paths.containsKey(option))
       .map((final option) => path.join(output, FilePaths.paths[option]!))
+      .map((final path) => DatFolder(path: path))
       .toList();
 
   if (enemyList.isNotEmpty) {
-    final List<String> enemyPaths = _mapEnemyPaths(enemyList, output);
+    final List<DatFolder> enemyPaths = _mapEnemyPaths(enemyList, output);
     return (allPaths + enemyPaths).toSet().toList();
   }
 
@@ -235,7 +238,7 @@ List<String> _mapAllOptions(final String output, final List<String> enemyList) {
 
 /// Get all possible options of the GameFileOptions with the combined paths.
 /// Can be used to extract everything from the data input directory that can be modified.
-List<String> getAllPossibleOptionsExtract(final String input) {
+List<DatFolder> getAllPossibleOptionsExtract(final String input) {
   return [
     ...GameFileOptions.questOptions,
     ...GameFileOptions.mapOptions,
@@ -244,6 +247,7 @@ List<String> getAllPossibleOptionsExtract(final String input) {
   ]
       .where((final option) => FilePaths.paths.containsKey(option))
       .map((final option) => path.join(input, FilePaths.paths[option]!))
+      .map((final path) => DatFolder(path: path))
       .toList();
 }
 
