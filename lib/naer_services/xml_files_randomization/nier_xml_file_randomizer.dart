@@ -143,8 +143,6 @@ final List<String> xmlFiles = collectedFiles.xmlFiles
   // Distribute the XML files across the available cores for parallel processing
   final distributedFiles = await isolateService.distributeFilesAsync(xmlFiles);
 
-  mainData.sendPort.send('Creating Isolates for parallel computing...');
-
   // Initialize isolates explicitly for parallel processing
   await isolateService.initialize();
 

@@ -1,5 +1,13 @@
 import 'dart:io';
 
+extension EmStringList on List<String> {
+  List<String> cleanEmStrings() {
+    return map((final criteria) => criteria.replaceAll('[', '').replaceAll(']', '').trim())
+        .toList();
+  }
+}
+
+
 extension StringExtensions on String {
   String? validateId(final String? value) {
     final RegExp idRegExp = RegExp(r'^[a-z0-9_]+$');

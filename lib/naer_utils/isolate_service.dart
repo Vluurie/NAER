@@ -22,7 +22,7 @@ class IsolateService {
 
   static int _determineNumberOfIsolates() {
     final int cores = Platform.numberOfProcessors;
-    return cores > 8 ? 8 : cores; // flutter only allow isolates to 8
+    return cores;
   }
 
   Future<void> _initializeLoadBalancer() async {

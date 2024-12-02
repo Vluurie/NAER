@@ -22,12 +22,6 @@ Future<void> extractGameFilesProcess(
     return;
   }
 
-  if (!mainData.isManagerFile!) {
-    mainData.sendPort.send('DO NOT CLOSE TILL FINISHED!');
-    mainData.sendPort.send(
-        'Extracting game files, this can take some time so prepair your coffee....');
-  }
-
   // Processing the input directory to identify files to be processed and then adds them to the pending or processed files list
   await getGameFilesForProcessing(mainData.argument['input'], mainData);
 
@@ -47,25 +41,17 @@ Future<void> extractGameFilesProcess(
   final endTime = DateTime.now();
   final duration = endTime.difference(startTime);
   mainData.sendPort.send(
-      '''Time for extracting the game files with the Rust DLL: ${duration.inSeconds} seconds. 
-      
-█ █         █ █  RUST RUST RUST 
-▀█  ▄█████▄  █▀
- ▀▄███▀█▀███▄▀   
- ▄▀███▀▀▀███▀▄ 
- █ ▄▀▀▀▀▀▀▀▄ █ 
-
- ''');
+      '''Time for extracting: ${duration.inSeconds} seconds.''');
 
   handleExtractErrors(errorFiles);
 
   mainData.sendPort
-      .send('Extraction of game files in parallel finished successfully!');
+      .send('Extraction of game files finished!');
 
   if (!mainData.isManagerFile!) {
     if (mainData.backUp!) {
       mainData.sendPort.send(
-          'Creating three backup extracted game folders for modifications in upper directory (9GB disk space)...');
+          'Creating backup...');
 
       ExtractedFiles extractedFiles = ExtractedFiles(
           yaxFiles: [],

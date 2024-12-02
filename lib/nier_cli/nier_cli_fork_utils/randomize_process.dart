@@ -4,6 +4,7 @@ import 'dart:isolate';
 
 import 'package:NAER/naer_services/file_utils/nier_category_manager.dart';
 import 'package:NAER/naer_utils/exception_handler.dart';
+import 'package:NAER/naer_utils/extension_string.dart';
 import 'package:NAER/naer_utils/isolate_service.dart';
 import 'package:NAER/nier_cli/main_data_container.dart';
 import 'package:NAER/nier_cli/nier_cli_fork_utils/utils/exception.dart';
@@ -17,13 +18,13 @@ Future<void> repackModifiedGameFiles(
   mainData.sendPort.send("Started repacking process of modified game files...");
 
   // Prepare XML files by replacing .yax extension with .xml
-  var xmlFiles = collectedFiles.yaxFiles
-          .map((final e) => e.path.replaceAll('.yax', '.xml'))
+  List<XmlFile> xmlFiles = collectedFiles.yaxFiles
+          .map((final e) => XmlFile(path: e.path.replaceAll('.yax', '.xml')))
           .toList();
 
 // Combine XML files and folders to process
-var entitiesToProcess = <String>[
-  ...xmlFiles,
+List<String> entitiesToProcess = <String>[
+  ...xmlFiles.map((final xmlFiles) => xmlFiles.path),
   ...collectedFiles.pakFolders.map((final pakFolder) => pakFolder.path),
 ];
 
@@ -31,10 +32,8 @@ var entitiesToProcess = <String>[
     await processEntitiesInParallel(entitiesToProcess, mainData);
   }
 
-  var fileManager = FileCategoryManager(mainData.args);
+  FileCategoryManager fileManager = FileCategoryManager(mainData.args);
 
-  // Process DAT folders if they exist
-  mainData.sendPort.send('Isolates created, repacking...');
   await processDatFolders(fileManager, collectedFiles.datFolders, mainData);
 }
 
@@ -45,7 +44,6 @@ Future<void> processEntitiesInParallel(
     final Iterable<String> entities, final MainData mainData) async {
   // Instantiate IsolateService without auto-initialization.
   final service = IsolateService();
-  mainData.sendPort.send('Creating Isolates for parallel repacking...');
 
   // Initialize isolates explicitly for this task
   await service.initialize();
@@ -191,10 +189,7 @@ bool shouldProcessDatFolder(
   // If the file is an enemy file, check if it should be processed
   if (baseNameWithExtension.startsWith('em')) {
     if (enemyList.isNotEmpty && !enemyList.contains('None')) {
-      var cleanedEnemyList = enemyList
-          .map((final criteria) =>
-              criteria.replaceAll('[', '').replaceAll(']', '').trim())
-          .toList();
+      var cleanedEnemyList = enemyList.cleanEmStrings();
       for (var criteria in cleanedEnemyList) {
         if (baseNameWithExtension.contains(criteria)) {
           return true;
